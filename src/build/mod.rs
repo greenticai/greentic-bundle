@@ -50,12 +50,9 @@ pub struct InspectReport {
 
 pub fn build_workspace(root: &Path, output: Option<&Path>, dry_run: bool) -> Result<BuildResult> {
     let state = plan::build_state(root)?;
-    let artifact = output.map(|path| path.to_path_buf()).unwrap_or_else(|| {
-        root.join(format!(
-            "{}{}",
-            state.manifest.bundle_id, FUTURE_ARTIFACT_EXTENSION
-        ))
-    });
+    let artifact = output
+        .map(|path| path.to_path_buf())
+        .unwrap_or_else(|| default_artifact_path(root, &state.manifest.bundle_id));
     let export_plan = export::export_plan(&state, &artifact);
     if dry_run {
         return Ok(BuildResult {
@@ -201,7 +198,8 @@ fn inspect_artifact(artifact: &Path) -> Result<InspectReport> {
 }
 
 pub fn default_artifact_path(root: &Path, bundle_id: &str) -> PathBuf {
-    root.join(format!("{bundle_id}{FUTURE_ARTIFACT_EXTENSION}"))
+    root.join("dist")
+        .join(format!("{bundle_id}{FUTURE_ARTIFACT_EXTENSION}"))
 }
 
 fn open_workspace_build_dir(root: &Path) -> Result<OpenedBundle> {

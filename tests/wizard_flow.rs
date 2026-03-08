@@ -47,6 +47,7 @@ fn bare_wizard_executes_create_flow_by_default() {
     assert!(bundle_root.join("bundle.yaml").exists());
     assert!(bundle_root.join("bundle.lock.json").exists());
     assert!(bundle_root.join("tenants/default/tenant.gmap").exists());
+    assert!(bundle_root.join("dist/demo-bundle.gtbundle").exists());
 }
 
 #[test]
@@ -116,13 +117,22 @@ fn create_flow_requires_app_pack_before_continue() {
 #[test]
 fn bare_wizard_create_flow_skips_provider_setup_prompts() {
     let temp = TempDir::new().expect("tempdir");
+    let provider_source = temp
+        .path()
+        .join("provider-source")
+        .join("providers")
+        .join("deployer")
+        .join("provider-a.gtpack");
+    fs::create_dir_all(provider_source.parent().expect("provider parent")).expect("provider dir");
+    fs::write(&provider_source, "provider-pack-bytes").expect("write provider pack");
     let bundle_root = temp.path().join("bundle");
 
     let output = run_with_stdin(
         &["wizard"],
         &format!(
-            "1\nDemo Bundle\ndemo-bundle\n{}\n1\npack-a\n1\n1\n4\n2\nrepo://providers/provider-a@latest\n4\n1\n",
+            "1\nDemo Bundle\ndemo-bundle\n{}\n1\npack-a\n1\n1\n4\n2\n{}\n4\n1\n",
             bundle_root.display(),
+            provider_source.display(),
         ),
     );
     assert!(
@@ -137,6 +147,105 @@ fn bare_wizard_create_flow_skips_provider_setup_prompts() {
     assert!(!stdout.contains("Rule path"));
     assert!(stdout.contains("Scope: global"));
     assert!(!bundle_root.join("state/setup/provider-a.json").exists());
+}
+
+#[test]
+fn create_flow_uses_pack_id_for_access_rules_and_resolved_policy() {
+    let temp = TempDir::new().expect("tempdir");
+    let pack_path = temp.path().join("Cisco Bundle.gtpack");
+    fs::write(&pack_path, "fixture").expect("write pack");
+    let bundle_root = temp.path().join("bundle");
+
+    let output = run_with_stdin(
+        &["wizard"],
+        &format!(
+            "1\nDemo Bundle\ndemo-bundle\n{}\n1\n{}\n1\n1\n4\n4\n1\n",
+            bundle_root.display(),
+            pack_path.display(),
+        ),
+    );
+    assert!(
+        output.status.success(),
+        "stdout={} stderr={}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+
+    let tenant_gmap =
+        fs::read_to_string(bundle_root.join("tenants/default/tenant.gmap")).expect("tenant gmap");
+    assert!(tenant_gmap.contains("cisco-bundle = public"));
+
+    let resolved =
+        fs::read_to_string(bundle_root.join("resolved/default.yaml")).expect("resolved output");
+    assert!(resolved.contains(&format!("reference: {}", pack_path.display())));
+    assert!(resolved.contains("policy: public"));
+}
+
+#[test]
+fn create_flow_materializes_pack_and_provider_gtpacks_into_bundle_layout() {
+    let temp = TempDir::new().expect("tempdir");
+    let pack_path = temp.path().join("Cisco Bundle.gtpack");
+    fs::write(&pack_path, "app-pack-bytes").expect("write app pack");
+    let provider_source = temp
+        .path()
+        .join("provider-source")
+        .join("providers")
+        .join("deployer")
+        .join("custom-provider.gtpack");
+    fs::create_dir_all(provider_source.parent().expect("provider parent")).expect("provider dir");
+    fs::write(&provider_source, "provider-pack-bytes").expect("write provider pack");
+    let bundle_root = temp.path().join("bundle");
+
+    let output = run_with_stdin(
+        &["wizard"],
+        &format!(
+            "1\nDemo Bundle\ndemo-bundle\n{}\n1\n{}\n1\n1\n4\n2\n{}\n4\n1\n",
+            bundle_root.display(),
+            pack_path.display(),
+            provider_source.display(),
+        ),
+    );
+    assert!(
+        output.status.success(),
+        "stdout={} stderr={}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+
+    assert_eq!(
+        fs::read(bundle_root.join("packs/cisco-bundle.gtpack")).expect("materialized app pack"),
+        b"app-pack-bytes"
+    );
+    assert_eq!(
+        fs::read(bundle_root.join("providers/deployer/custom-provider.gtpack"))
+            .expect("materialized provider pack"),
+        b"provider-pack-bytes"
+    );
+}
+
+#[test]
+fn create_flow_fails_when_remote_provider_cannot_be_materialized() {
+    let temp = TempDir::new().expect("tempdir");
+    let pack_path = temp.path().join("Cisco Bundle.gtpack");
+    fs::write(&pack_path, "app-pack-bytes").expect("write app pack");
+    let bundle_root = temp.path().join("bundle");
+
+    let output = run_with_stdin(
+        &["wizard", "--offline"],
+        &format!(
+            "1\nDemo Bundle\ndemo-bundle\n{}\n1\n{}\n1\n1\n4\n2\noci://ghcr.io/greenticai/packs/deployer/greentic.fixture.k8s.raw.gtpack:latest\n4\n1\n",
+            bundle_root.display(),
+            pack_path.display(),
+        ),
+    );
+    assert!(
+        !output.status.success(),
+        "stdout={} stderr={}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let stderr = String::from_utf8(output.stderr).expect("stderr");
+    assert!(stderr.contains("resolve OCI pack ref"));
 }
 
 #[test]

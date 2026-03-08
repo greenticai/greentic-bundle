@@ -65,7 +65,7 @@ The codebase is still intentionally early-stage. Remote catalog fetching now has
 - **Path:** `src/cli/build.rs`, `src/cli/export.rs`, and `src/cli/doctor.rs`
   - **Role:** Artifact build/export/validation CLI entrypoints.
   - **Key functionality:**
-    - `build` computes normalized build state and materializes a deterministic `.gtbundle`.
+    - `build` computes normalized build state and materializes a deterministic `.gtbundle`, defaulting to `dist/<bundle>.gtbundle` inside the bundle root.
     - `export` rematerializes a `.gtbundle` from a normalized build directory.
     - `doctor` validates either a workspace or a built artifact and emits structured JSON.
   - **Key dependencies / integration points:**
@@ -91,7 +91,10 @@ The codebase is still intentionally early-stage. Remote catalog fetching now has
     - Requires at least one app pack before the create flow can continue.
     - Auto-detects app-pack and custom extension-provider references as local path, `file://`, `oci://`, `repo://`, or `store://` without prompting for source type first.
     - Persists app-pack mapping decisions as `app_pack_mappings` in `bundle.yaml` and turns them into gmap mutations during apply, while hiding raw gmap rule-path mechanics from the normal wizard flow.
+    - Derives internal app-pack access rules from stable pack ids rather than raw source paths, so local absolute-path app packs still render the correct resolved public policy after mapping.
+    - Materializes app-pack `.gtpack` files into the bundle-local on-disk layout on execute/apply: `packs/*.gtpack` for global scope, `tenants/<tenant>/packs/*.gtpack` for tenant scope, and `tenants/<tenant>/teams/<team>/packs/*.gtpack` for team scope.
     - Treats extension providers as composition-only in the interactive create/update wizard; provider setup is not prompted there.
+    - Materializes extension-provider `.gtpack` files into `providers/<domain>/*.gtpack` on execute/apply when the reference can be resolved locally or through the distributor client.
     - `update` mode now asks for the current bundle root first, loads the existing workspace definition, and re-prompts the editable bundle fields with the current values as defaults before re-entering the staged composition flow.
     - Loads `AnswerDocument` JSON, supports migration of legacy metadata-light payloads when `--migrate` is supplied, and normalizes replayed input into a stable internal request.
     - Resolves `remote_catalogs` through the bundle-local catalog seam, using workspace-local cache writes on execute and cache/offline replay during dry-run or validation when available.
@@ -102,6 +105,7 @@ The codebase is still intentionally early-stage. Remote catalog fetching now has
       - `apply` replays answers and writes a starter workspace
     - Emits deterministic JSON plan output to stdout and writes normalized `AnswerDocument` files when `--emit-answers` is used.
     - On execute/apply, initializes the workspace through `src/project/mod.rs`, applies default-tenant access grants for selected app packs, writes `bundle.lock.json`, rerenders generated resolved files, and persists any required workspace-local catalog cache files plus setup state JSON under `state/setup/`.
+    - When the interactive review action is `Build bundle`, the wizard now immediately runs the build pipeline and writes the final SquashFS artifact to `dist/<bundle>.gtbundle` inside the bundle root.
   - **Key dependencies / integration points:**
     - Uses `src/answers/document.rs` and `src/answers/migrate.rs`.
     - Uses `src/project/mod.rs` for lock writing and workspace sync.
@@ -191,17 +195,17 @@ The codebase is still intentionally early-stage. Remote catalog fetching now has
     - Computes canonical gmap paths and generated resolved-output paths for tenant/team targets.
     - Rerenders richer resolved manifest YAML files for tenants and teams after access mutations, including bundle metadata, catalog refs, extension providers, hooks/subscriptions/capabilities, and per-target app-pack policy summaries.
     - Defines and reads/writes the deterministic `bundle.lock.json` structure used by wizard execution and inspect output, including setup-state file references.
-    - Initializes new workspaces and keeps authored dependency refs synchronized into the lock file.
+    - Initializes new workspaces, keeps authored dependency refs synchronized into the lock file, and materializes supported app-pack/provider references into the operator-compatible bundle filesystem layout.
   - **Key dependencies / integration points:**
     - Called by `src/access/mod.rs` and the wizard apply path.
 
 - **Path:** `src/build/mod.rs`, `src/build/manifest.rs`, `src/build/lock.rs`, `src/build/plan.rs`, `src/build/export.rs`, `src/build/squashfs.rs`
   - **Role:** PR-BUNDLE-06 canonical build model and artifact pipeline.
   - **Key functionality:**
-    - Defines the build-state model that collects `bundle.yaml`, `bundle.lock.json`, resolved files, and setup-state files into a normalized staging directory.
+    - Defines the build-state model that collects `bundle.yaml`, `bundle.lock.json`, resolved files, setup-state files, and materialized `packs/` / `providers/` assets into a normalized staging directory.
     - Defines the artifact manifest embedded into the built bundle, including authored refs plus `hooks`, `subscriptions`, `capabilities`, and structured resolved-target summaries.
     - Writes normalized build state under `state/build/<bundle>/normalized`.
-    - Builds deterministic SquashFS `.gtbundle` artifacts using `mksquashfs`.
+    - Builds deterministic SquashFS `.gtbundle` artifacts using `mksquashfs`, with the default artifact target at `dist/<bundle>.gtbundle`.
     - Can write a normalized build directory without producing an artifact, allowing workspace-side inspect/doctor to exercise the same reader path as unpacked builds.
     - Uses the same reader validation rules for workspace-side doctor/inspect paths and reports concrete reader contract failures in doctor output.
     - Implements lock-drift checks between current workspace inputs and `bundle.lock.json`.

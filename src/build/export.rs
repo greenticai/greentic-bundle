@@ -70,5 +70,12 @@ pub fn write_normalized_build_dir(
         }
         fs::write(path, contents)?;
     }
+    for (name, contents) in &state.asset_files {
+        let path = build_dir.join(name);
+        if let Some(parent) = path.parent() {
+            fs::create_dir_all(parent)?;
+        }
+        fs::write(path, contents)?;
+    }
     Ok(())
 }

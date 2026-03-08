@@ -14,6 +14,7 @@ pub struct BuildState {
     pub bundle_yaml: String,
     pub resolved_files: Vec<(String, String)>,
     pub setup_files: Vec<(String, String)>,
+    pub asset_files: Vec<(String, Vec<u8>)>,
 }
 
 pub fn build_state(root: &Path) -> Result<BuildState> {
@@ -42,6 +43,7 @@ pub fn build_state(root: &Path) -> Result<BuildState> {
     let capabilities = find_yaml_list(&bundle_yaml, "capabilities");
     let resolved_files = collect_files(root, &root.join("resolved"))?;
     let setup_files = collect_named_files(root, &lock.setup_state_files)?;
+    let asset_files = collect_asset_files(root)?;
     let resolved_targets = resolved_files
         .iter()
         .filter_map(|(name, contents)| parse_resolved_target(name, contents))
@@ -80,6 +82,7 @@ pub fn build_state(root: &Path) -> Result<BuildState> {
         bundle_yaml,
         resolved_files,
         setup_files,
+        asset_files,
     })
 }
 
@@ -91,6 +94,7 @@ pub fn load_build_state(build_dir: &Path) -> Result<BuildState> {
     let lock = serde_json::from_str::<crate::project::BundleLock>(&lock_raw)?;
     let resolved_files = collect_files(build_dir, &build_dir.join("resolved"))?;
     let setup_files = collect_files(build_dir, &build_dir.join("state").join("setup"))?;
+    let asset_files = collect_asset_files(build_dir)?;
     Ok(BuildState {
         root: build_dir.to_path_buf(),
         build_dir: build_dir.to_path_buf(),
@@ -99,7 +103,32 @@ pub fn load_build_state(build_dir: &Path) -> Result<BuildState> {
         bundle_yaml,
         resolved_files,
         setup_files,
+        asset_files,
     })
+}
+
+fn collect_asset_files(root: &Path) -> Result<Vec<(String, Vec<u8>)>> {
+    let mut files = Vec::new();
+    for relative_root in ["packs", "providers", "tenants"] {
+        let dir = root.join(relative_root);
+        if !dir.exists() {
+            continue;
+        }
+        for entry in walk(&dir)? {
+            if entry.extension().and_then(|value| value.to_str()) != Some("gtpack") {
+                continue;
+            }
+            let rel = entry
+                .strip_prefix(root)
+                .unwrap_or(&entry)
+                .display()
+                .to_string();
+            files.push((rel, fs::read(&entry)?));
+        }
+    }
+    files.sort_by(|a, b| a.0.cmp(&b.0));
+    files.dedup_by(|left, right| left.0 == right.0);
+    Ok(files)
 }
 
 fn collect_files(root: &Path, dir: &Path) -> Result<Vec<(String, String)>> {

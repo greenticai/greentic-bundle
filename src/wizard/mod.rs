@@ -172,6 +172,7 @@ pub fn run_command(args: WizardRunArgs) -> Result<()> {
         execute_request(
             loaded.request,
             execution_for_run(args.dry_run),
+            false,
             args.schema_version.as_deref(),
             args.emit_answers.as_ref(),
             Some(loaded.locks),
@@ -200,6 +201,7 @@ pub fn validate_command(args: WizardValidateArgs) -> Result<()> {
     let result = execute_request(
         loaded.request,
         ExecutionMode::DryRun,
+        false,
         args.schema_version.as_deref(),
         args.emit_answers.as_ref(),
         Some(loaded.locks),
@@ -225,6 +227,7 @@ pub fn apply_command(args: WizardApplyArgs) -> Result<()> {
     let result = execute_request(
         loaded.request,
         execution,
+        false,
         args.schema_version.as_deref(),
         args.emit_answers.as_ref(),
         Some(loaded.locks),
@@ -254,6 +257,8 @@ pub fn run_interactive(
     execute_request(
         interactive.request,
         resolved_execution,
+        matches!(interactive.review_action, ReviewAction::BuildNow)
+            && resolved_execution == ExecutionMode::Execute,
         schema_version,
         emit_answers,
         None,
@@ -423,6 +428,7 @@ fn execution_for_run(dry_run: bool) -> ExecutionMode {
 fn execute_request(
     request: NormalizedRequest,
     execution: ExecutionMode,
+    build_bundle_now: bool,
     schema_version: Option<&str>,
     emit_answers: Option<&PathBuf>,
     source_locks: Option<BTreeMap<String, Value>>,
@@ -442,6 +448,7 @@ fn execute_request(
     let plan = build_plan(
         &request,
         execution,
+        build_bundle_now,
         &target_version,
         &catalog_resolution.cache_writes,
         &setup_writes,
@@ -451,7 +458,14 @@ fn execute_request(
     locks.extend(bundle_lock_to_answer_locks(&bundle_lock));
     document.locks = locks;
     let applied_files = if execution == ExecutionMode::Execute {
-        apply_plan(&request, &bundle_lock)?
+        let mut applied_files = apply_plan(&request, &bundle_lock)?;
+        if build_bundle_now {
+            let build_result = crate::build::build_workspace(&request.output_dir, None, false)?;
+            applied_files.push(PathBuf::from(build_result.artifact_path));
+        }
+        applied_files.sort();
+        applied_files.dedup();
+        applied_files
     } else {
         Vec::new()
     };
@@ -1551,7 +1565,7 @@ fn derive_access_rules_from_entries(entries: &[AppPackEntry]) -> Vec<AccessRuleI
             .iter()
             .map(|entry| match entry.mapping.scope.as_str() {
                 "tenant" => AccessRuleInput {
-                    rule_path: entry.reference.clone(),
+                    rule_path: entry.pack_id.clone(),
                     policy: "public".to_string(),
                     tenant: entry
                         .mapping
@@ -1561,7 +1575,7 @@ fn derive_access_rules_from_entries(entries: &[AppPackEntry]) -> Vec<AccessRuleI
                     team: None,
                 },
                 "tenant_team" => AccessRuleInput {
-                    rule_path: entry.reference.clone(),
+                    rule_path: entry.pack_id.clone(),
                     policy: "public".to_string(),
                     tenant: entry
                         .mapping
@@ -1571,7 +1585,7 @@ fn derive_access_rules_from_entries(entries: &[AppPackEntry]) -> Vec<AccessRuleI
                     team: entry.mapping.team.clone(),
                 },
                 _ => AccessRuleInput {
-                    rule_path: entry.reference.clone(),
+                    rule_path: entry.pack_id.clone(),
                     policy: "public".to_string(),
                     tenant: "default".to_string(),
                     team: None,
@@ -2586,6 +2600,7 @@ fn answer_document_from_request(
 pub fn build_plan(
     request: &NormalizedRequest,
     execution: ExecutionMode,
+    build_bundle_now: bool,
     schema_version: &Version,
     cache_writes: &[String],
     setup_writes: &[String],
@@ -2617,6 +2632,13 @@ pub fn build_plan(
             .iter()
             .map(|path| request.output_dir.join(path).display().to_string()),
     );
+    if build_bundle_now && execution == ExecutionMode::Execute {
+        expected_file_writes.push(
+            crate::build::default_artifact_path(&request.output_dir, &request.bundle_id)
+                .display()
+                .to_string(),
+        );
+    }
     expected_file_writes.sort();
     expected_file_writes.dedup();
     let mut warnings = Vec::new();
@@ -2638,7 +2660,7 @@ pub fn build_plan(
         target_root: request.output_dir.display().to_string(),
         requested_action: mode_name(request.mode).to_string(),
         normalized_input_summary: normalized_summary(request),
-        ordered_step_list: plan_steps(request),
+        ordered_step_list: plan_steps(request, build_bundle_now),
         expected_file_writes,
         warnings,
     }
@@ -2733,7 +2755,7 @@ fn normalized_summary(request: &NormalizedRequest) -> BTreeMap<String, Value> {
     ])
 }
 
-fn plan_steps(request: &NormalizedRequest) -> Vec<WizardPlanStep> {
+fn plan_steps(request: &NormalizedRequest, build_bundle_now: bool) -> Vec<WizardPlanStep> {
     let mut steps = vec![
         WizardPlanStep {
             kind: StepKind::EnsureWorkspace,
@@ -2756,7 +2778,7 @@ fn plan_steps(request: &NormalizedRequest) -> Vec<WizardPlanStep> {
             description: crate::i18n::tr("wizard.plan.write_lock"),
         },
     ];
-    if matches!(request.mode, WizardMode::Doctor) {
+    if build_bundle_now || matches!(request.mode, WizardMode::Doctor) {
         steps.push(WizardPlanStep {
             kind: StepKind::BuildBundle,
             description: crate::i18n::tr("wizard.plan.build_bundle"),

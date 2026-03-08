@@ -1,13 +1,19 @@
 use std::path::{Path, PathBuf};
 
-use anyhow::Result;
+use anyhow::{Context, Result};
+use greentic_distributor_client::{
+    DistClient, DistOptions, OciPackFetcher, PackFetchOptions, oci_packs::DefaultRegistryClient,
+};
 use serde::{Deserialize, Serialize};
+use tokio::runtime::Runtime;
 
 pub const WORKSPACE_ROOT_FILE: &str = "bundle.yaml";
 pub const LOCK_FILE: &str = "bundle.lock.json";
 pub const LOCK_SCHEMA_VERSION: u32 = 1;
 
 const DEFAULT_GMAP: &str = "_ = forbidden\n";
+const GREENTIC_GTPACK_TAR_MEDIA_TYPE: &str = "application/vnd.greentic.gtpack.layer.v1+tar";
+const GREENTIC_GTPACK_TAR_GZIP_MEDIA_TYPE: &str = "application/vnd.greentic.gtpack.layer.v1.tar+gzip";
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct BundleWorkspaceDefinition {
@@ -308,6 +314,9 @@ pub fn resolved_output_paths(root: &Path, tenant: &str, team: Option<&str>) -> V
 
 pub fn sync_project(root: &Path) -> Result<()> {
     ensure_layout(root)?;
+    if let Ok(workspace) = read_bundle_workspace(root) {
+        materialize_workspace_dependencies(root, &workspace)?;
+    }
     for tenant in list_tenants(root)? {
         let teams = list_teams(root, &tenant)?;
         if teams.is_empty() {
@@ -323,6 +332,181 @@ pub fn sync_project(root: &Path) -> Result<()> {
         }
     }
     Ok(())
+}
+
+fn materialize_workspace_dependencies(
+    root: &Path,
+    workspace: &BundleWorkspaceDefinition,
+) -> Result<()> {
+    for mapping in app_pack_copy_targets(workspace) {
+        materialize_reference_into(root, &mapping.reference, &mapping.destination)?;
+    }
+    for provider in &workspace.extension_providers {
+        let destination = provider_destination_path(provider);
+        materialize_reference_into(root, provider, &destination)?;
+    }
+    Ok(())
+}
+
+struct MaterializedCopyTarget {
+    reference: String,
+    destination: PathBuf,
+}
+
+fn app_pack_copy_targets(workspace: &BundleWorkspaceDefinition) -> Vec<MaterializedCopyTarget> {
+    if workspace.app_pack_mappings.is_empty() {
+        return workspace
+            .app_packs
+            .iter()
+            .map(|reference| MaterializedCopyTarget {
+                reference: reference.clone(),
+                destination: PathBuf::from("packs")
+                    .join(format!("{}.gtpack", inferred_access_pack_id(reference))),
+            })
+            .collect();
+    }
+
+    workspace
+        .app_pack_mappings
+        .iter()
+        .map(|mapping| {
+            let filename = format!("{}.gtpack", inferred_access_pack_id(&mapping.reference));
+            let destination = match mapping.scope {
+                MappingScope::Global => PathBuf::from("packs").join(filename),
+                MappingScope::Tenant => PathBuf::from("tenants")
+                    .join(mapping.tenant.as_deref().unwrap_or("default"))
+                    .join("packs")
+                    .join(filename),
+                MappingScope::Team => PathBuf::from("tenants")
+                    .join(mapping.tenant.as_deref().unwrap_or("default"))
+                    .join("teams")
+                    .join(mapping.team.as_deref().unwrap_or("default"))
+                    .join("packs")
+                    .join(filename),
+            };
+            MaterializedCopyTarget {
+                reference: mapping.reference.clone(),
+                destination,
+            }
+        })
+        .collect()
+}
+
+fn provider_destination_path(reference: &str) -> PathBuf {
+    let provider_type = inferred_provider_type(reference);
+    let provider_name = inferred_provider_filename(reference);
+    PathBuf::from("providers")
+        .join(provider_type)
+        .join(format!("{provider_name}.gtpack"))
+}
+
+fn materialize_reference_into(
+    root: &Path,
+    reference: &str,
+    relative_destination: &Path,
+) -> Result<()> {
+    let destination = root.join(relative_destination);
+    if let Some(parent) = destination.parent() {
+        ensure_dir(parent)?;
+    }
+
+    if let Some(local_path) = parse_local_pack_reference(root, reference) {
+        if local_path.is_dir() {
+            return Ok(());
+        }
+        std::fs::copy(&local_path, &destination).with_context(|| {
+            format!("copy {} to {}", local_path.display(), destination.display())
+        })?;
+        return Ok(());
+    }
+
+    if !(reference.starts_with("oci://")
+        || reference.starts_with("repo://")
+        || reference.starts_with("store://"))
+    {
+        return Ok(());
+    }
+
+    let path = resolve_remote_pack_path(root, reference)?;
+    std::fs::copy(&path, &destination)
+        .with_context(|| format!("copy {} to {}", path.display(), destination.display()))?;
+
+    Ok(())
+}
+
+fn parse_local_pack_reference(root: &Path, reference: &str) -> Option<PathBuf> {
+    if let Some(path) = reference.strip_prefix("file://") {
+        let path = PathBuf::from(path.trim());
+        return path.exists().then_some(path);
+    }
+    if reference.contains("://") {
+        return None;
+    }
+    let candidate = PathBuf::from(reference);
+    if candidate.is_absolute() {
+        return candidate.exists().then_some(candidate);
+    }
+    let joined = root.join(&candidate);
+    joined.exists().then_some(joined)
+}
+
+fn resolve_remote_pack_path(root: &Path, reference: &str) -> Result<PathBuf> {
+    if let Some(oci_reference) = reference.strip_prefix("oci://") {
+        let mut options = PackFetchOptions {
+            allow_tags: true,
+            offline: crate::runtime::offline(),
+            cache_dir: root.join(crate::catalog::CACHE_ROOT_DIR).join("artifacts"),
+            ..PackFetchOptions::default()
+        };
+        options
+            .accepted_layer_media_types
+            .extend([
+                GREENTIC_GTPACK_TAR_MEDIA_TYPE.to_string(),
+                GREENTIC_GTPACK_TAR_GZIP_MEDIA_TYPE.to_string(),
+            ]);
+        options
+            .preferred_layer_media_types
+            .splice(0..0, [
+                GREENTIC_GTPACK_TAR_MEDIA_TYPE.to_string(),
+                GREENTIC_GTPACK_TAR_GZIP_MEDIA_TYPE.to_string(),
+            ]);
+        let fetcher: OciPackFetcher<DefaultRegistryClient> = OciPackFetcher::new(options);
+        let runtime = Runtime::new().context("create OCI pack resolver runtime")?;
+        let resolved = runtime
+            .block_on(fetcher.fetch_pack_to_cache(oci_reference))
+            .with_context(|| format!("resolve OCI pack ref {reference}"))?;
+        return Ok(resolved.path);
+    }
+
+    let options = DistOptions {
+        allow_tags: true,
+        offline: crate::runtime::offline(),
+        cache_dir: root.join(crate::catalog::CACHE_ROOT_DIR).join("artifacts"),
+        ..DistOptions::default()
+    };
+    let client = DistClient::new(options);
+    let runtime = Runtime::new().context("create artifact resolver runtime")?;
+    let resolved = runtime
+        .block_on(client.resolve_ref(reference))
+        .with_context(|| format!("resolve artifact ref {reference}"))?;
+    if let Some(path) = resolved.wasm_path {
+        return Ok(path);
+    }
+    if let Some(bytes) = resolved.wasm_bytes {
+        let digest = resolved.resolved_digest.trim_start_matches("sha256:");
+        let temp_path = root
+            .join(crate::catalog::CACHE_ROOT_DIR)
+            .join("artifacts")
+            .join("inline")
+            .join(format!("{digest}.gtpack"));
+        if let Some(parent) = temp_path.parent() {
+            ensure_dir(parent)?;
+        }
+        std::fs::write(&temp_path, bytes)
+            .with_context(|| format!("write cached inline artifact {}", temp_path.display()))?;
+        return Ok(temp_path);
+    }
+    anyhow::bail!("artifact ref {reference} resolved without file payload");
 }
 
 pub fn list_tenants(root: &Path) -> Result<Vec<String>> {
@@ -695,7 +879,7 @@ fn evaluate_app_pack_policies(
         .iter()
         .map(|reference| {
             let target = crate::access::GmapPath {
-                pack: Some(reference.clone()),
+                pack: Some(inferred_access_pack_id(reference)),
                 flow: None,
                 node: None,
             };
@@ -714,6 +898,80 @@ fn evaluate_app_pack_policies(
         .collect::<Vec<_>>();
     entries.sort_by(|left, right| left.reference.cmp(&right.reference));
     entries
+}
+
+fn inferred_access_pack_id(reference: &str) -> String {
+    let cleaned = reference
+        .trim_end_matches('/')
+        .rsplit('/')
+        .next()
+        .unwrap_or(reference)
+        .split('@')
+        .next()
+        .unwrap_or(reference)
+        .split(':')
+        .next()
+        .unwrap_or(reference)
+        .trim_end_matches(".json")
+        .trim_end_matches(".gtpack")
+        .trim_end_matches(".yaml")
+        .trim_end_matches(".yml");
+    let mut normalized = String::with_capacity(cleaned.len());
+    let mut last_dash = false;
+    for ch in cleaned.chars() {
+        let out = if ch.is_ascii_alphanumeric() {
+            last_dash = false;
+            ch.to_ascii_lowercase()
+        } else if last_dash {
+            continue;
+        } else {
+            last_dash = true;
+            '-'
+        };
+        normalized.push(out);
+    }
+    normalized.trim_matches('-').to_string()
+}
+
+fn inferred_provider_type(reference: &str) -> String {
+    let raw = reference.trim();
+    for marker in ["/providers/", "/packs/"] {
+        if let Some((_, rest)) = raw.split_once(marker)
+            && let Some(segment) = rest.split('/').next()
+            && !segment.is_empty()
+        {
+            return segment.to_string();
+        }
+    }
+
+    let inferred = inferred_access_pack_id(reference);
+    let mut parts = inferred.split('-');
+    match (parts.next(), parts.next()) {
+        (Some("greentic"), Some(domain)) if !domain.is_empty() => domain.to_string(),
+        (Some(domain), Some(_)) if !domain.is_empty() => domain.to_string(),
+        (Some(_domain), None) => "other".to_string(),
+        _ => "other".to_string(),
+    }
+}
+
+fn inferred_provider_filename(reference: &str) -> String {
+    let cleaned = reference
+        .trim_end_matches('/')
+        .rsplit('/')
+        .next()
+        .unwrap_or(reference)
+        .split('@')
+        .next()
+        .unwrap_or(reference)
+        .split(':')
+        .next()
+        .unwrap_or(reference)
+        .trim_end_matches(".gtpack");
+    if cleaned.is_empty() {
+        inferred_access_pack_id(reference)
+    } else {
+        cleaned.to_string()
+    }
 }
 
 fn render_yaml_list(indent: &str, values: &[String]) -> Vec<String> {

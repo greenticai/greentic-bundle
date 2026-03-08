@@ -53,7 +53,9 @@ Implemented baseline decisions:
 - `wizard run --mode update` asks for the existing bundle root first, then re-prompts the editable bundle fields with the current workspace values as defaults before re-entering the staged composition flow.
 - The create/update wizard requires at least one app pack, adds packs one at a time, maps each pack immediately to `global`, `tenant`, or `tenant/team`, and turns those mappings into gmap mutations plus `app_pack_mappings` in `bundle.yaml`.
 - The normal access step is now expressed as pack scope editing (`change scope`, `add tenant access`, `add tenant/team access`, `remove scope`) instead of raw rule editing.
+- Executed wizard flows now materialize app packs into `packs/`, `tenants/<tenant>/packs/`, or `tenants/<tenant>/teams/<team>/packs/` based on the selected mapping.
 - Extension providers are added through a guided loop and are treated as composition-only in this wizard; provider setup is intentionally absent from the interactive create/update flow.
+- Executed wizard flows also materialize extension providers into `providers/<domain>/`.
 - `wizard apply` initializes the workspace through the authored workspace model, writes `bundle.lock.json`, and applies the mapped access grants for selected app packs.
 - `access` mutations use `bundle.yaml`-rooted workspace layout and sync generated `resolved/...` plus `state/resolved/...` manifests.
 - Wizard execution resolves `remote_catalogs` through one catalog/cache seam and writes a real `bundle.lock.json`.
@@ -67,7 +69,8 @@ Implemented baseline decisions:
 - Replay/apply execution can still normalize setup specs/answers and persist composition-time setup state under `state/setup/`.
 - The interactive create/update flow is now a staged composition UX rather than the old flat root form.
 - Locale selection precedence is now `--locale`, then `LC_ALL` / `LC_MESSAGES` / `LANG`, then OS locale via `sys-locale`, then `en`.
-- `build` writes normalized metadata under `state/build/<bundle>/normalized` before materializing the final `.gtbundle`.
+- `build` writes normalized metadata under `state/build/<bundle>/normalized` before materializing the final `.gtbundle` into `dist/<bundle>.gtbundle` by default.
+- The normalized build directory now carries the materialized `packs/` and `providers/` trees forward into the final `.gtbundle`.
 - `init` writes a starter workspace scaffold and lock.
 - `add` / `remove` mutate authored app-pack and extension-provider refs in `bundle.yaml` and keep `bundle.lock.json` aligned.
 

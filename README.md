@@ -72,8 +72,10 @@ Current wizard behavior:
 - The create/update wizard is now staged around real composition steps instead of a flat form.
 - App packs are mandatory and are added one at a time with immediate `global` / `tenant` / `tenant/team` mapping.
 - Mapping decisions are turned into gmap mutations and stored in `bundle.yaml` as `app_pack_mappings`.
+- Executed create/apply flows materialize app-pack `.gtpack` files into the bundle layout: `packs/` for global scope, `tenants/<tenant>/packs/` for tenant scope, and `tenants/<tenant>/teams/<team>/packs/` for team scope.
 - Pack scope is handled inside the app-pack flow instead of a separate raw access stage; users choose scopes and the wizard generates gmap rules internally.
 - Extension providers are added through a loop and are composition-only in this wizard; provider setup is not prompted here.
+- Executed create/apply flows materialize extension-provider `.gtpack` files into `providers/<domain>/`.
 - `greentic-bundle wizard run --mode update` asks for the current bundle root, loads the existing `bundle.yaml`, shows the current bundle values as editable defaults, and then re-enters the staged composition flow for packs and providers.
 - `greentic-bundle wizard run` collects a guided bundle composition interactively unless `--answers` is supplied.
 - `--dry-run` computes a deterministic plan and emits answers without writing workspace files.
@@ -128,7 +130,7 @@ Current build/export behavior:
 
 - `build` computes a canonical build state from `bundle.yaml`, `bundle.lock.json`, resolved files, and setup state.
 - The normalized build state is written under `state/build/<bundle>/normalized`.
-- `build` materializes a deterministic SquashFS `.gtbundle` artifact using `mksquashfs`.
+- `build` materializes a deterministic SquashFS `.gtbundle` artifact using `mksquashfs`, defaulting to `dist/<bundle>.gtbundle` inside the bundle root.
 - `export` can rematerialize a `.gtbundle` from a normalized build directory, with `--dry-run` support.
 - `inspect` and `doctor` accept either a workspace root or a built artifact and emit stable JSON.
 - Artifact-side inspection and validation now flow through `crates/greentic-bundle-reader` rather than duplicating `unsquashfs` parsing in the main crate.

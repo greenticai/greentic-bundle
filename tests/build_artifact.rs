@@ -8,6 +8,8 @@ fn seed_workspace(root: &Path) {
     fs::create_dir_all(root.join("resolved")).expect("resolved dir");
     fs::create_dir_all(root.join("state/setup")).expect("setup dir");
     fs::create_dir_all(root.join("tenants/default")).expect("tenant dir");
+    fs::create_dir_all(root.join("packs")).expect("packs dir");
+    fs::create_dir_all(root.join("providers/messaging")).expect("provider dir");
     fs::write(
         root.join("bundle.yaml"),
         "\
@@ -69,6 +71,12 @@ capabilities:
 ",
     )
     .expect("resolved");
+    fs::write(root.join("packs/pack-a.gtpack"), "pack-a-bytes").expect("pack file");
+    fs::write(
+        root.join("providers/messaging/provider-a.gtpack"),
+        "provider-a-bytes",
+    )
+    .expect("provider file");
     fs::write(
         root.join("state/setup/provider-a.json"),
         r#"{"schema_version":1,"provider_id":"provider-a","source_kind":"legacy","form":{"id":"provider-a-setup","title":"Provider A Setup","version":"1.0.0","description":"Provider A provider configuration","questions":[]},"normalized_answers":{},"non_secret_config":{},"secret_values":{}}"#,
@@ -138,6 +146,42 @@ fn inspect_output_is_stable() {
     )
     .expect("serialize two");
     assert_eq!(report_one, report_two);
+}
+
+#[test]
+fn build_normalized_dir_includes_materialized_pack_and_provider_files() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    seed_workspace(&root);
+
+    let build_dir = root.join("state/build/demo-bundle/normalized");
+    greentic_bundle::build::build_workspace(&root, None, false).expect("build workspace");
+
+    assert_eq!(
+        fs::read(build_dir.join("packs/pack-a.gtpack")).expect("built pack"),
+        b"pack-a-bytes"
+    );
+    assert_eq!(
+        fs::read(build_dir.join("providers/messaging/provider-a.gtpack")).expect("built provider"),
+        b"provider-a-bytes"
+    );
+}
+
+#[test]
+fn build_defaults_artifact_path_to_dist_directory() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    seed_workspace(&root);
+
+    let result = greentic_bundle::build::build_workspace(&root, None, false).expect("build");
+    let expected = root.join("dist/demo-bundle.gtbundle");
+
+    assert_eq!(result.artifact_path, expected.display().to_string());
+    assert!(
+        expected.exists(),
+        "expected artifact at {}",
+        expected.display()
+    );
 }
 
 #[test]
