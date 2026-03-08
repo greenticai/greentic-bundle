@@ -1,0 +1,53 @@
+{
+  "items": [
+    {
+      "id": "greentic.deployer.serverless",
+      "label": {
+        "fallback": "Greentic Deployer Serverless"
+      },
+      "reference": "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.serverless.gtpack:latest"
+    },
+    {
+      "id": "greentic.deployer.juju.machine",
+      "label": {
+        "fallback": "Greentic Deployer Juju Machine"
+      },
+      "reference": "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.juju.machine.gtpack:latest"
+    },
+    {
+      "id": "greentic.deployer.juju.k8s",
+      "label": {
+        "fallback": "Greentic Deployer Juju K8s"
+      },
+      "reference": "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.juju.k8s.gtpack:latest"
+    },
+    {
+      "id": "greentic.deployer.snap",
+      "label": {
+        "fallback": "Greentic Deployer Snap"
+      },
+      "reference": "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.snap.gtpack:latest"
+    },
+    {
+      "id": "greentic.deployer.k8s.raw",
+      "label": {
+        "fallback": "Greentic  Deployer K8s Raw"
+      },
+      "reference": "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.k8s.raw.gtpack:latest"
+    },
+    {
+      "id": "greentic.deployer.helm",
+      "label": {
+        "fallback": "Greentic  Deployer Helm"
+      },
+      "reference": "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.helm.gtpack:latest"
+    },
+    {
+      "id": "greentic.deployer.terraform",
+      "label": {
+        "fallback": "Greentic  Deployer Terraform"
+      },
+      "reference": "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.terraform.gtpack:latest"
+    }
+  ]
+}

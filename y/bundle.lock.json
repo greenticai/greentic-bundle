@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "bundle_id": "updated-bundle",
+  "requested_mode": "update",
+  "execution": "execute",
+  "cache_policy": "workspace-local",
+  "tool_version": "0.4.0",
+  "build_format_version": "bundle-lock-v1",
+  "workspace_root": "bundle.yaml",
+  "lock_file": "bundle.lock.json",
+  "catalogs": [],
+  "app_packs": [],
+  "extension_providers": [],
+  "setup_state_files": []
+}

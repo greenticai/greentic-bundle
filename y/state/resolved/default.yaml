@@ -1,0 +1,27 @@
+version: 1
+tenant: default
+project_root: y
+bundle:
+  bundle_id: updated-bundle
+  bundle_name: Updated Bundle
+  locale: c
+  mode: update
+  advanced_setup: false
+  setup_execution_intent: false
+  export_intent: false
+policy:
+  source:
+    tenant_gmap: tenants/default/tenant.gmap
+  default: forbidden
+catalogs:
+  []
+app_packs:
+  []
+extension_providers:
+  []
+hooks:
+  []
+subscriptions:
+  []
+capabilities:
+  []

@@ -1,0 +1,14 @@
+schema_version: 1
+bundle_id: updated-bundle
+bundle_name: Updated Bundle
+locale: c
+mode: update
+advanced_setup: false
+app_packs: []
+extension_providers: []
+remote_catalogs: []
+hooks: []
+subscriptions: []
+capabilities: []
+setup_execution_intent: false
+export_intent: false
