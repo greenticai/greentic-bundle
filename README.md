@@ -48,14 +48,14 @@ For crates with workspace-internal publishable dependencies, local packaging ver
 GitHub Actions:
 
 - `.github/workflows/ci.yml` runs lint, tests, and package dry-runs on pushes and pull requests.
-- `.github/workflows/publish.yml` validates the requested release tag against the primary crate version, reruns the full local check on Linux, publishes crates to crates.io, builds six `cargo-binstall` archives, attaches them to the GitHub release, and pushes the archives to GHCR as OCI artifacts.
+- `.github/workflows/publish.yml` runs on pushes to `main` / `master` (and manual dispatch), derives `vX.Y.Z` from the primary crate version, skips itself when that version tag already exists, reruns the full local check on Linux, publishes crates to crates.io, builds six `cargo-binstall` archives, creates the GitHub release/tag, and pushes the archives to GHCR as OCI artifacts.
 - The publish workflow uses workspace dependency order and performs the real `cargo publish --dry-run` for dependent crates immediately before publish, after earlier workspace crates have already been released.
 
 Release flow:
 
 1. Bump the version in `Cargo.toml`.
-2. Commit and tag the release as `vX.Y.Z`.
-3. Push the tag to trigger `publish.yml`.
+2. Commit the change and push it to `main` or `master`.
+3. `publish.yml` derives `vX.Y.Z` from `Cargo.toml`, creates that tag/release for the pushed commit, and skips publication if that version already exists.
 
 Required secrets:
 
@@ -99,6 +99,7 @@ Current catalog and lock behavior:
 - Remote GHCR/OCI catalogs now fetch through `greentic-distributor-client` and are cached back into the bundle workspace cache after resolution.
 - The checked-in source for the default public catalog is `packs/well-known-packs.json`.
 - Pushing a change to `packs/well-known-packs.json` on `main` or `master` now runs `.github/workflows/catalog.yml`, which publishes both `ghcr.io/greenticai/packs/well-known-packs.json:sha-<commit>` and `:latest`.
+- The catalog workflow now publishes with `GITHUB_TOKEN` and OCI source metadata so GHCR links the package back to this repository on first publish; package visibility still needs to be set to `Public` once in the GitHub Packages UI if anonymous pulls are required.
 - The repo now declares Rust 1.91 as its required toolchain, which aligns it with newer Greentic crate releases and supports the live distributor-client integration.
 
 Current i18n behavior:

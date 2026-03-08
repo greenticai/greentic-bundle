@@ -62,6 +62,8 @@ Implemented baseline decisions:
 - The repo now targets Rust 1.91, and uncached remote GHCR/OCI catalogs fetch through `greentic-distributor-client` before being written into the workspace-local cache.
 - The checked-in source for the default public catalog is `packs/well-known-packs.json`.
 - `.github/workflows/catalog.yml` publishes that file to `ghcr.io/greenticai/packs/well-known-packs.json` on pushes to `main` or `master`.
+- The catalog workflow uses `GITHUB_TOKEN` plus OCI source annotations so the GHCR package is linked to this repository; package visibility still must be switched to `Public` once in GitHub if anonymous pulls are expected.
+- `.github/workflows/publish.yml` now triggers from pushes to `main` or `master`, derives `vX.Y.Z` from the primary crate version, creates the release tag itself, and skips publication when that version tag already exists.
 - Replay/apply execution can still normalize setup specs/answers and persist composition-time setup state under `state/setup/`.
 - The interactive create/update flow is now a staged composition UX rather than the old flat root form.
 - Locale selection precedence is now `--locale`, then `LC_ALL` / `LC_MESSAGES` / `LANG`, then OS locale via `sys-locale`, then `en`.

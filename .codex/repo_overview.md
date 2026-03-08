@@ -178,6 +178,7 @@ The codebase is still intentionally early-stage. Remote catalog fetching now has
     - Stores the checked-in JSON catalog that backs the wizard's default `ghcr://packs/well-known-packs.json` reference.
     - Currently seeds seven fixture-oriented deployer OCI entries under `ghcr.io/greenticai/packs/deployer/`: `greentic.fixture.serverless`, `greentic.fixture.juju.machine`, `greentic.fixture.juju.k8s`, `greentic.fixture.snap`, `greentic.fixture.k8s.raw`, `greentic.fixture.helm`, and `greentic.fixture.terraform`.
     - Publishes the catalog to GHCR on pushes to `main` or `master`, tagging both `sha-<commit>` and `latest`.
+    - Uses `GITHUB_TOKEN` and OCI source metadata so the GHCR package links back to `greenticai/greentic-bundle`; anonymous pulls still depend on the package being made public once in GitHub Packages settings.
   - **Key dependencies / integration points:**
     - Fetched by `src/catalog/client.rs` through the GHCR shorthand mapping used by the wizard's common-extension-provider flow.
 
@@ -268,6 +269,7 @@ The codebase is still intentionally early-stage. Remote catalog fetching now has
     - Continue to validate the expanded workspace and test suite with lint, tests, docs, and crates.io dry-run packaging.
     - Now package and publish both the root CLI crate and the reader crate in workspace dependency order.
     - Run full `cargo package` / `cargo publish --dry-run` locally for independent crates, but only verify the source-tree packaging contract for crates with unpublished workspace-internal dependencies and defer their final `cargo package` / `cargo publish --dry-run` to the release workflow after earlier workspace crates have been published.
+    - Trigger the release workflow from pushes to `main` / `master`, derive `vX.Y.Z` from the primary crate version, skip publication when that tag already exists, and create the tag/release automatically before attaching release assets.
   - **Key dependencies / integration points:**
     - Use `ci/workspace_publish.py` to determine publishable packages.
 
