@@ -1,6 +1,6 @@
 [package]
 name = "greentic-bundle-reader"
-version = "0.1.0"
+version.workspace = true
 edition = "2024"
 rust-version = "1.91"
 license = "MIT"
@@ -12,5 +12,5 @@ repository = "https://github.com/greentic-ng/greentic-bundle"
 path = "src/lib.rs"
 
 [dependencies]
-serde = { version = "1.0.228", features = ["derive"] }
-serde_json = "1.0.145"
+serde.workspace = true
+serde_json.workspace = true
