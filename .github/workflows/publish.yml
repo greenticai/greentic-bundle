@@ -125,6 +125,9 @@ jobs:
             done
           }
 
+          plan_file="$(mktemp)"
+          python3 ci/workspace_publish.py plan > "$plan_file"
+
           while IFS="$(printf '\t')" read -r crate_name _ internal_deps; do
             [ -n "$crate_name" ] || continue
             if [ -n "${internal_deps:-}" ]; then
@@ -133,9 +136,7 @@ jobs:
             dry_run_publish "$crate_name"
             publish_crate "$crate_name"
             sleep 30
-          done <<EOF
-$(python3 ci/workspace_publish.py plan)
-EOF
+          done < "$plan_file"
 
   binstall-build:
     name: binstall-${{ matrix.target }}

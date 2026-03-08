@@ -132,7 +132,7 @@ mod tests {
         )
         .expect("catalog fixture");
         assert_eq!(entries.len(), 7);
-        assert_eq!(entries[0].id, "greentic.fixture.serverless");
+        assert_eq!(entries[0].id, "greentic.deployer.serverless");
         assert_eq!(
             entries[0].reference,
             "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.serverless.gtpack:latest"
