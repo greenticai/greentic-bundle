@@ -113,21 +113,21 @@ mod tests {
 
     #[test]
     fn maps_ghcr_shortcut_to_greenticai_namespace() {
-        let mapped = map_remote_catalog_reference("ghcr://packs/well-known.json").expect("mapped");
+        let mapped = map_remote_catalog_reference("ghcr://catalogs/well-known").expect("mapped");
         assert_eq!(
             mapped.oci_reference,
-            "ghcr.io/greenticai/packs/well-known.json:latest"
+            "ghcr.io/greenticai/catalogs/well-known:latest"
         );
         assert_eq!(mapped.source_kind, RemoteCatalogSourceKind::GhcrWellKnown);
     }
 
     #[test]
     fn preserves_explicit_digest_for_ghcr_shortcut() {
-        let mapped = map_remote_catalog_reference("ghcr://packs/well-known.json@sha256:abc123")
+        let mapped = map_remote_catalog_reference("ghcr://catalogs/well-known@sha256:abc123")
             .expect("mapped");
         assert_eq!(
             mapped.oci_reference,
-            "ghcr.io/greenticai/packs/well-known.json@sha256:abc123"
+            "ghcr.io/greenticai/catalogs/well-known@sha256:abc123"
         );
     }
 

@@ -165,7 +165,7 @@ The codebase is still intentionally early-stage. Remote catalog fetching now has
     - Parses catalog JSON either as a simple listing array or as a provider-registry-style object with `items`.
     - Computes SHA-256 digests for catalog content, writes workspace-local cache entries under `state/cache/catalogs`, and maintains a digest/ref index.
     - Resolves catalogs from local files or from the workspace-local cache in offline mode.
-    - Defines the bundle-side remote catalog reference contract: `ghcr://<path>[:tag|@sha256:...]` maps into `ghcr.io/greenticai/<path>...`, while `oci://...` keeps the explicit OCI form.
+    - Defines the bundle-side remote catalog reference contract: `ghcr://<path>[:tag|@sha256:...]` maps into `ghcr.io/greenticai/<path>...`, while `oci://...` keeps the explicit OCI form. The default wizard catalog now uses `ghcr://catalogs/well-known`.
     - Centralizes remote-catalog fetching behind a client trait and now uses `greentic-distributor-client`'s `OciPackFetcher` for uncached GHCR/OCI refs before writing the results back into the workspace-local cache.
     - Validates the checked-in default public catalog fixture at `packs/well-known.json`.
   - **Key dependencies / integration points:**
@@ -175,7 +175,7 @@ The codebase is still intentionally early-stage. Remote catalog fetching now has
 - **Path:** `packs/well-known.json` and `.github/workflows/catalog.yml`
   - **Role:** Source-of-truth default public extension-provider catalog and its publication workflow.
   - **Key functionality:**
-    - Stores the checked-in JSON catalog that backs the wizard's default `ghcr://packs/well-known.json` reference.
+    - Stores the checked-in JSON catalog that backs the wizard's default `ghcr://catalogs/well-known` reference.
     - Currently seeds seven fixture-oriented deployer OCI entries under `ghcr.io/greenticai/packs/deployer/`: `greentic.fixture.serverless`, `greentic.fixture.juju.machine`, `greentic.fixture.juju.k8s`, `greentic.fixture.snap`, `greentic.fixture.k8s.raw`, `greentic.fixture.helm`, and `greentic.fixture.terraform`.
     - Publishes the catalog to GHCR on pushes to `main` or `master`, tagging both `sha-<commit>` and `latest`.
     - Uses `GITHUB_TOKEN` and OCI source metadata so the GHCR package links back to `greenticai/greentic-bundle`; anonymous pulls still depend on the package being made public once in GitHub Packages settings.

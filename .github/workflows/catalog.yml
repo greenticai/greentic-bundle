@@ -29,7 +29,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          base_ref="ghcr.io/greenticai/packs/well-known.json"
+          base_ref="ghcr.io/greenticai/catalogs/well-known"
           sha_ref="${base_ref}:sha-${GITHUB_SHA}"
           latest_ref="${base_ref}:latest"
 

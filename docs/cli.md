@@ -58,10 +58,10 @@ Implemented baseline decisions:
 - `access` mutations use `bundle.yaml`-rooted workspace layout and sync generated `resolved/...` plus `state/resolved/...` manifests.
 - Wizard execution resolves `remote_catalogs` through one catalog/cache seam and writes a real `bundle.lock.json`.
 - Remote catalog refs now have a defined bundle-side contract:
-  `ghcr://packs/well-known.json[:tag|@sha256:...]` maps to `ghcr.io/greenticai/packs/well-known.json[:tag|@sha256:...]`, and `oci://...` keeps the raw OCI form.
+  `ghcr://catalogs/well-known[:tag|@sha256:...]` maps to `ghcr.io/greenticai/catalogs/well-known[:tag|@sha256:...]`, and `oci://...` keeps the raw OCI form.
 - The repo now targets Rust 1.91, and uncached remote GHCR/OCI catalogs fetch through `greentic-distributor-client` before being written into the workspace-local cache.
 - The checked-in source for the default public catalog is `packs/well-known.json`.
-- `.github/workflows/catalog.yml` publishes that file to `ghcr.io/greenticai/packs/well-known.json` on pushes to `main` or `master`.
+- `.github/workflows/catalog.yml` publishes that file to `ghcr.io/greenticai/catalogs/well-known` on pushes to `main` or `master`.
 - The catalog workflow uses `GITHUB_TOKEN` plus OCI source annotations so the GHCR package is linked to this repository; package visibility still must be switched to `Public` once in GitHub if anonymous pulls are expected.
 - `.github/workflows/publish.yml` now triggers from pushes to `main` or `master`, derives `vX.Y.Z` from the primary crate version, creates the release tag itself, and skips publication when that version tag already exists.
 - Replay/apply execution can still normalize setup specs/answers and persist composition-time setup state under `state/setup/`.
