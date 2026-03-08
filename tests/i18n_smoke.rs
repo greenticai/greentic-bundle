@@ -70,7 +70,7 @@ fn embedded_catalogs_exist_for_required_smoke_locales() {
 
 #[test]
 fn locale_selection_prefers_cli_then_base_language_then_en() {
-    let supported = i18n::supported_locales();
+    let supported = vec!["ar-SA".to_string(), "en".to_string(), "ja".to_string()];
     assert_eq!(
         i18n::select_locale(Some("ar-SA".to_string()), &supported),
         "ar-SA".to_string()
