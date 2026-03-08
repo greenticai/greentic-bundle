@@ -2012,7 +2012,7 @@ fn add_common_extension_provider<R: BufRead, W: Write>(
         .remote_catalogs
         .first()
         .cloned()
-        .unwrap_or_else(|| "ghcr://packs/well-known-packs.json".to_string());
+        .unwrap_or_else(|| "ghcr://packs/well-known.json".to_string());
     let resolution = crate::catalog::resolve::resolve_catalogs(
         &state.output_dir,
         std::slice::from_ref(&catalog_ref),

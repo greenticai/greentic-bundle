@@ -127,8 +127,8 @@ mod tests {
     #[test]
     fn parses_checked_in_well_known_catalog_fixture() {
         let entries = load_catalog_entries(
-            include_bytes!("../../packs/well-known-packs.json"),
-            "packs/well-known-packs.json",
+            include_bytes!("../../packs/well-known.json"),
+            "packs/well-known.json",
         )
         .expect("catalog fixture");
         assert_eq!(entries.len(), 7);

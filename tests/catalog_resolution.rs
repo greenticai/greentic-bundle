@@ -182,7 +182,7 @@ fn ghcr_shortcut_remote_ref_uses_catalog_client_seam() {
     let root = temp.path().join("bundle");
     let resolution = greentic_bundle::catalog::resolve::resolve_catalogs_with_client(
         &root,
-        &["ghcr://packs/well-known-packs.json".to_string()],
+        &["ghcr://packs/well-known.json".to_string()],
         &greentic_bundle::catalog::resolve::CatalogResolveOptions {
             offline: false,
             write_cache: true,
@@ -194,7 +194,7 @@ fn ghcr_shortcut_remote_ref_uses_catalog_client_seam() {
     assert_eq!(resolution.entries.len(), 1);
     assert_eq!(
         resolution.entries[0].resolved_ref,
-        "ghcr.io/greenticai/packs/well-known-packs.json:latest"
+        "ghcr.io/greenticai/packs/well-known.json:latest"
     );
     assert_eq!(resolution.entries[0].source, "remote");
     assert_eq!(
