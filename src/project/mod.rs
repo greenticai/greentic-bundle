@@ -13,7 +13,8 @@ pub const LOCK_SCHEMA_VERSION: u32 = 1;
 
 const DEFAULT_GMAP: &str = "_ = forbidden\n";
 const GREENTIC_GTPACK_TAR_MEDIA_TYPE: &str = "application/vnd.greentic.gtpack.layer.v1+tar";
-const GREENTIC_GTPACK_TAR_GZIP_MEDIA_TYPE: &str = "application/vnd.greentic.gtpack.layer.v1.tar+gzip";
+const GREENTIC_GTPACK_TAR_GZIP_MEDIA_TYPE: &str =
+    "application/vnd.greentic.gtpack.layer.v1.tar+gzip";
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct BundleWorkspaceDefinition {
@@ -458,18 +459,17 @@ fn resolve_remote_pack_path(root: &Path, reference: &str) -> Result<PathBuf> {
             cache_dir: root.join(crate::catalog::CACHE_ROOT_DIR).join("artifacts"),
             ..PackFetchOptions::default()
         };
-        options
-            .accepted_layer_media_types
-            .extend([
+        options.accepted_layer_media_types.extend([
+            GREENTIC_GTPACK_TAR_MEDIA_TYPE.to_string(),
+            GREENTIC_GTPACK_TAR_GZIP_MEDIA_TYPE.to_string(),
+        ]);
+        options.preferred_layer_media_types.splice(
+            0..0,
+            [
                 GREENTIC_GTPACK_TAR_MEDIA_TYPE.to_string(),
                 GREENTIC_GTPACK_TAR_GZIP_MEDIA_TYPE.to_string(),
-            ]);
-        options
-            .preferred_layer_media_types
-            .splice(0..0, [
-                GREENTIC_GTPACK_TAR_MEDIA_TYPE.to_string(),
-                GREENTIC_GTPACK_TAR_GZIP_MEDIA_TYPE.to_string(),
-            ]);
+            ],
+        );
         let fetcher: OciPackFetcher<DefaultRegistryClient> = OciPackFetcher::new(options);
         let runtime = Runtime::new().context("create OCI pack resolver runtime")?;
         let resolved = runtime
