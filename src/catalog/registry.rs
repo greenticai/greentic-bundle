@@ -27,6 +27,19 @@ struct ProviderRegistryFile {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+struct CategorizedProviderRegistryFile {
+    #[serde(default)]
+    categories: Vec<ProviderRegistryCategory>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct ProviderRegistryCategory {
+    category: String,
+    #[serde(default)]
+    items: Vec<ProviderRegistryItem>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 struct ProviderRegistryItem {
     id: String,
     label: ProviderRegistryLabel,
@@ -51,23 +64,48 @@ pub fn load_catalog_entries(bytes: &[u8], source: &str) -> Result<Vec<CatalogEnt
     let raw = std::str::from_utf8(bytes)
         .with_context(|| format!("catalog {source} must be valid UTF-8 JSON"))?;
 
-    if let Ok(entries) = serde_json::from_str::<Vec<CatalogEntry>>(raw) {
-        return Ok(entries);
+    let value: serde_json::Value = serde_json::from_str(raw)
+        .with_context(|| format!("parse catalog/provider registry file {source}"))?;
+
+    if let Some(values) = value.as_array() {
+        let looks_categorized = values.iter().all(|entry| {
+            entry
+                .as_object()
+                .map(|object| object.contains_key("category") && object.contains_key("items"))
+                .unwrap_or(false)
+        });
+        if looks_categorized {
+            let categories: Vec<ProviderRegistryCategory> = serde_json::from_value(value)
+                .with_context(|| format!("parse categorized catalog array {source}"))?;
+            return Ok(categories
+                .into_iter()
+                .flat_map(|category| category.items.into_iter())
+                .map(CatalogEntry::from)
+                .collect());
+        }
+
+        return serde_json::from_value::<Vec<CatalogEntry>>(serde_json::Value::Array(
+            values.to_vec(),
+        ))
+        .with_context(|| format!("parse catalog array {source}"));
     }
 
-    let registry: ProviderRegistryFile = serde_json::from_str(raw)
-        .with_context(|| format!("parse catalog/provider registry file {source}"))?;
-    let entries = registry
-        .items
-        .into_iter()
-        .map(|item| CatalogEntry {
-            id: item.id,
-            label: (!item.label.fallback.is_empty()).then_some(item.label.fallback),
-            reference: item.reference,
-            setup: item.setup,
-        })
-        .collect();
-    Ok(entries)
+    if value.get("categories").is_some() {
+        let registry: CategorizedProviderRegistryFile = serde_json::from_value(value)
+            .with_context(|| {
+                format!("parse categorized catalog/provider registry file {source}")
+            })?;
+        return Ok(registry
+            .categories
+            .into_iter()
+            .flat_map(|category| category.items.into_iter())
+            .map(CatalogEntry::from)
+            .collect());
+    }
+
+    let registry: ProviderRegistryFile = serde_json::from_value(value)
+        .with_context(|| format!("parse flat catalog/provider registry file {source}"))?;
+    Ok(registry.items.into_iter().map(CatalogEntry::from).collect())
 }
 
 fn summary_from_entries(entries: Vec<CatalogEntry>) -> CatalogSummary {
@@ -81,6 +119,17 @@ fn summary_from_entries(entries: Vec<CatalogEntry>) -> CatalogSummary {
     CatalogSummary {
         item_count,
         item_ids,
+    }
+}
+
+impl From<ProviderRegistryItem> for CatalogEntry {
+    fn from(item: ProviderRegistryItem) -> Self {
+        Self {
+            id: item.id,
+            label: (!item.label.fallback.is_empty()).then_some(item.label.fallback),
+            reference: item.reference,
+            setup: item.setup,
+        }
     }
 }
 
@@ -125,13 +174,47 @@ mod tests {
     }
 
     #[test]
+    fn parses_categorized_registry_file() {
+        let entries = load_catalog_entries(
+            br#"[
+    {
+      "category": "deployer",
+      "items": [
+        {
+          "id":"provider-a",
+          "label":{"fallback":"Provider A"},
+          "reference":"repo://providers/provider-a@1"
+        }
+      ]
+    },
+    {
+      "category": "oauth",
+      "items": [
+        {
+          "id":"provider-b",
+          "label":{"fallback":"Provider B"},
+          "reference":"repo://providers/provider-b@1"
+        }
+      ]
+    }
+]"#,
+            "inline",
+        )
+        .expect("entries");
+
+        assert_eq!(entries.len(), 2);
+        assert_eq!(entries[0].id, "provider-a");
+        assert_eq!(entries[1].id, "provider-b");
+    }
+
+    #[test]
     fn parses_checked_in_well_known_catalog_fixture() {
         let entries = load_catalog_entries(
             include_bytes!("../../packs/well-known.json"),
             "packs/well-known.json",
         )
         .expect("catalog fixture");
-        assert_eq!(entries.len(), 7);
+        assert_eq!(entries.len(), 12);
         assert_eq!(entries[0].id, "greentic.deployer.serverless");
         assert_eq!(
             entries[0].reference,

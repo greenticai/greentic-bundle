@@ -1,88 +1,96 @@
-{
-  "items": [
-    {
-      "id": "greentic.deployer.serverless",
-      "label": {
-        "fallback": "Greentic Deployer Serverless"
+[
+  {
+    "category": "deployer",
+    "items": [
+      {
+        "id": "greentic.deployer.serverless",
+        "label": {
+          "fallback": "Greentic Deployer Serverless"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.serverless.gtpack:latest"
       },
-      "reference": "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.serverless.gtpack:latest"
-    },
-    {
-      "id": "greentic.deployer.juju.machine",
-      "label": {
-        "fallback": "Greentic Deployer Juju Machine"
+      {
+        "id": "greentic.deployer.juju.machine",
+        "label": {
+          "fallback": "Greentic Deployer Juju Machine"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.juju.machine.gtpack:latest"
       },
-      "reference": "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.juju.machine.gtpack:latest"
-    },
-    {
-      "id": "greentic.deployer.juju.k8s",
-      "label": {
-        "fallback": "Greentic Deployer Juju K8s"
+      {
+        "id": "greentic.deployer.juju.k8s",
+        "label": {
+          "fallback": "Greentic Deployer Juju K8s"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.juju.k8s.gtpack:latest"
       },
-      "reference": "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.juju.k8s.gtpack:latest"
-    },
-    {
-      "id": "greentic.deployer.snap",
-      "label": {
-        "fallback": "Greentic Deployer Snap"
+      {
+        "id": "greentic.deployer.snap",
+        "label": {
+          "fallback": "Greentic Deployer Snap"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.snap.gtpack:latest"
       },
-      "reference": "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.snap.gtpack:latest"
-    },
-    {
-      "id": "greentic.deployer.k8s.raw",
-      "label": {
-        "fallback": "Greentic  Deployer K8s Raw"
+      {
+        "id": "greentic.deployer.k8s.raw",
+        "label": {
+          "fallback": "Greentic  Deployer K8s Raw"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.k8s.raw.gtpack:latest"
       },
-      "reference": "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.k8s.raw.gtpack:latest"
-    },
-    {
-      "id": "greentic.deployer.helm",
-      "label": {
-        "fallback": "Greentic  Deployer Helm"
+      {
+        "id": "greentic.deployer.helm",
+        "label": {
+          "fallback": "Greentic  Deployer Helm"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.helm.gtpack:latest"
       },
-      "reference": "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.helm.gtpack:latest"
-    },
-    {
-      "id": "greentic.deployer.terraform",
-      "label": {
-        "fallback": "Greentic  Deployer Terraform"
+      {
+        "id": "greentic.deployer.terraform",
+        "label": {
+          "fallback": "Greentic  Deployer Terraform"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.terraform.gtpack:latest"
+      }
+    ]
+  },
+  {
+    "category": "oauth",
+    "items": [
+      {
+        "id": "greentic.oauth.github",
+        "label": {
+          "fallback": "Greentic OAuth GitHub"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/oauth/oauth-github:latest"
       },
-      "reference": "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.terraform.gtpack:latest"
-    },
-    {
-      "id": "greentic.oauth.github",
-      "label": {
-        "fallback": "Greentic OAuth GitHub"
+      {
+        "id": "greentic.oauth.google",
+        "label": {
+          "fallback": "Greentic OAuth Google"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/oauth/oauth-google:latest"
       },
-      "reference": "oci://ghcr.io/greenticai/packs/oauth/oauth-github:latest"
-    },
-    {
-      "id": "greentic.oauth.google",
-      "label": {
-        "fallback": "Greentic OAuth Google"
+      {
+        "id": "greentic.oauth.microsoft-graph",
+        "label": {
+          "fallback": "Greentic OAuth Microsoft Graph"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/oauth/oauth-microsoft-graph:latest"
       },
-      "reference": "oci://ghcr.io/greenticai/packs/oauth/oauth-google:latest"
-    },
-    {
-      "id": "greentic.oauth.microsoft-graph",
-      "label": {
-        "fallback": "Greentic OAuth Microsoft Graph"
+      {
+        "id": "greentic.oauth.oidc-generic",
+        "label": {
+          "fallback": "Greentic OAuth Generic OIDC"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/oauth/oauth-oidc-generic:latest"
       },
-      "reference": "oci://ghcr.io/greenticai/packs/oauth/oauth-microsoft-graph:latest"
-    },
-    {
-      "id": "greentic.oauth.oidc-generic",
-      "label": {
-        "fallback": "Greentic OAuth Generic OIDC"
-      },
-      "reference": "oci://ghcr.io/greenticai/packs/oauth/oauth-oidc-generic:latest"
-    },
-    {
-      "id": "greentic.oauth.slack",
-      "label": {
-        "fallback": "Greentic OAuth Slack"
-      },
-      "reference": "oci://ghcr.io/greenticai/packs/oauth/oauth-slack:latest"
-    }
-  ]
-}
+      {
+        "id": "greentic.oauth.slack",
+        "label": {
+          "fallback": "Greentic OAuth Slack"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/oauth/oauth-slack:latest"
+      }
+    ]
+  }
+]
