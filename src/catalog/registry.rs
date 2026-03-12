@@ -97,16 +97,13 @@ pub fn load_catalog_entries(bytes: &[u8], source: &str) -> Result<Vec<CatalogEnt
                 .flat_map(|category| {
                     let category_name = category.category;
                     let category_description = category.description;
-                    category
-                        .items
-                        .into_iter()
-                        .map(move |item| {
-                            CatalogEntry::from_categorized_item(
-                                item,
-                                &category_name,
-                                category_description.as_deref(),
-                            )
-                        })
+                    category.items.into_iter().map(move |item| {
+                        CatalogEntry::from_categorized_item(
+                            item,
+                            &category_name,
+                            category_description.as_deref(),
+                        )
+                    })
                 })
                 .collect());
         }
@@ -128,16 +125,13 @@ pub fn load_catalog_entries(bytes: &[u8], source: &str) -> Result<Vec<CatalogEnt
             .flat_map(|category| {
                 let category_name = category.category;
                 let category_description = category.description;
-                category
-                    .items
-                    .into_iter()
-                    .map(move |item| {
-                        CatalogEntry::from_categorized_item(
-                            item,
-                            &category_name,
-                            category_description.as_deref(),
-                        )
-                    })
+                category.items.into_iter().map(move |item| {
+                    CatalogEntry::from_categorized_item(
+                        item,
+                        &category_name,
+                        category_description.as_deref(),
+                    )
+                })
             })
             .collect());
     }
