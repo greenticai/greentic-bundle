@@ -1,6 +1,7 @@
 [
   {
     "category": "deployer",
+    "description": "deployment helpers for rollout targets",
     "items": [
       {
         "id": "greentic.deployer.serverless",
@@ -55,6 +56,7 @@
   },
   {
     "category": "oauth",
+    "description": "OAuth provider helpers and identity integrations",
     "items": [
       {
         "id": "greentic.oauth.github",
@@ -90,6 +92,61 @@
           "fallback": "Greentic OAuth Slack"
         },
         "reference": "oci://ghcr.io/greenticai/packs/oauth/oauth-slack:latest"
+      }
+    ]
+  },
+  {
+    "category": "events",
+    "description": "event sources and delivery helpers",
+    "items": [
+      {
+        "id": "greentic.events.email",
+        "label": {
+          "fallback": "Greentic Events Email"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/events/events-email:latest"
+      },
+      {
+        "id": "greentic.events.provider.dummy",
+        "label": {
+          "fallback": "Greentic Events Dummy"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/events/events-dummy:latest"
+      },
+      {
+        "id": "greentic.events.email.sendgrid",
+        "label": {
+          "fallback": "Greentic Events Email SendGrid"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/events/events-email-sendgrid:latest"
+      },
+      {
+        "id": "greentic.events.sms",
+        "label": {
+          "fallback": "Greentic Events SMS"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/events/events-sms:latest"
+      },
+      {
+        "id": "greentic.events.sms.twilio",
+        "label": {
+          "fallback": "Greentic Events SMS Twilio"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/events/events-sms-twilio:latest"
+      },
+      {
+        "id": "greentic.events.timer",
+        "label": {
+          "fallback": "Greentic Events Timer"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/events/events-timer:latest"
+      },
+      {
+        "id": "greentic.events.webhook",
+        "label": {
+          "fallback": "Greentic Events Webhook"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/events/events-webhook:latest"
       }
     ]
   }
