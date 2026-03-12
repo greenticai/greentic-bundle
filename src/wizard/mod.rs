@@ -2056,12 +2056,7 @@ fn add_common_extension_provider<R: BufRead, W: Write>(
                 format_extension_category_label(category, description.as_deref())
             })
             .collect::<Vec<_>>();
-        let Some(index) = choose_named_index(
-            input,
-            output,
-            "Choose extension category",
-            &labels,
-        )?
+        let Some(index) = choose_named_index(input, output, "Choose extension category", &labels)?
         else {
             return Ok(None);
         };
@@ -2117,7 +2112,10 @@ fn group_catalog_entries_by_category(
 ) -> Vec<(String, Option<String>, Vec<usize>)> {
     let mut grouped = Vec::<(String, Option<String>, Vec<usize>)>::new();
     for (index, entry) in entries.iter().enumerate() {
-        let category = entry.category.clone().unwrap_or_else(|| "other".to_string());
+        let category = entry
+            .category
+            .clone()
+            .unwrap_or_else(|| "other".to_string());
         let description = entry.category_description.clone();
         if let Some((_, existing_description, indices)) =
             grouped.iter_mut().find(|(name, _, _)| name == &category)
@@ -2134,7 +2132,10 @@ fn group_catalog_entries_by_category(
 }
 
 fn format_extension_category_label(category: &str, description: Option<&str>) -> String {
-    match description.map(str::trim).filter(|description| !description.is_empty()) {
+    match description
+        .map(str::trim)
+        .filter(|description| !description.is_empty())
+    {
         Some(description) => format!("{category} -> {description}"),
         None => category.to_string(),
     }

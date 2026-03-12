@@ -193,7 +193,9 @@ fn bundled_common_extension_provider_is_not_persisted_to_remote_catalogs() {
     );
 
     let bundle_yaml = fs::read_to_string(bundle_root.join("bundle.yaml")).expect("bundle yaml");
-    assert!(bundle_yaml.contains("extension_providers:\n  - oci://ghcr.io/greenticai/packs/oauth/oauth-slack:latest"));
+    assert!(bundle_yaml.contains(
+        "extension_providers:\n  - oci://ghcr.io/greenticai/packs/oauth/oauth-slack:latest"
+    ));
     assert!(bundle_yaml.contains("remote_catalogs: []"));
     assert!(!bundle_yaml.contains("packs/well-known.json"));
 }
