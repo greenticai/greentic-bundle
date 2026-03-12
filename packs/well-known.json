@@ -270,7 +270,7 @@
   },
   {
     "category": "secrets",
-    "description": "embedded runtime (secrets-core) for direct Rust secret access with optional cache/backends, plus optional HTTP/NATS broker (secrets-broker) for operators and cross-language clients",
+    "description": "Secrets runtime and broker access",
     "items": [
       {
         "id": "greentic.secrets.aws-sm.v0-4-25",
