@@ -150,6 +150,57 @@ fn bare_wizard_create_flow_skips_provider_setup_prompts() {
 }
 
 #[test]
+fn common_extension_provider_menu_uses_bundled_well_known_catalog() {
+    let temp = TempDir::new().expect("tempdir");
+    let bundle_root = temp.path().join("bundle");
+
+    let output = run_with_stdin(
+        &["wizard", "run", "--dry-run"],
+        &format!(
+            "1\nDemo Bundle\ndemo-bundle\n{}\n1\npack-a\n1\n1\n4\n1\n2\n0\n4\n2\n",
+            bundle_root.display()
+        ),
+    );
+    assert!(output.status.success());
+
+    let stdout = String::from_utf8(output.stdout).expect("stdout");
+    assert!(stdout.contains("Choose extension category:"));
+    assert!(stdout.contains("oauth -> OAuth provider helpers and identity integrations"));
+    assert!(stdout.contains("deployer -> deployment helpers for rollout targets"));
+    assert!(stdout.contains("Choose extension provider:"));
+    assert!(stdout.contains(
+        "Greentic OAuth Slack [oci://ghcr.io/greenticai/packs/oauth/oauth-slack:latest]"
+    ));
+}
+
+#[test]
+fn bundled_common_extension_provider_is_not_persisted_to_remote_catalogs() {
+    let temp = TempDir::new().expect("tempdir");
+    let bundle_root = temp.path().join("bundle");
+
+    let output = run_with_stdin(
+        &["wizard"],
+        &format!(
+            "1\nDemo Bundle\ndemo-bundle\n{}\n1\npack-a\n1\n1\n4\n1\n2\n5\n4\n1\n",
+            bundle_root.display()
+        ),
+    );
+    assert!(
+        output.status.success(),
+        "stdout={} stderr={}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+
+    let bundle_yaml = fs::read_to_string(bundle_root.join("bundle.yaml")).expect("bundle yaml");
+    assert!(bundle_yaml.contains(
+        "extension_providers:\n  - oci://ghcr.io/greenticai/packs/oauth/oauth-slack:latest"
+    ));
+    assert!(bundle_yaml.contains("remote_catalogs: []"));
+    assert!(!bundle_yaml.contains("packs/well-known.json"));
+}
+
+#[test]
 fn create_flow_uses_pack_id_for_access_rules_and_resolved_policy() {
     let temp = TempDir::new().expect("tempdir");
     let pack_path = temp.path().join("Cisco Bundle.gtpack");

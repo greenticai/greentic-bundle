@@ -2022,25 +2022,58 @@ fn add_common_extension_provider<R: BufRead, W: Write>(
     output: &mut W,
     state: &NormalizedRequest,
 ) -> Result<Option<ExtensionProviderEntry>> {
-    let catalog_ref = state
-        .remote_catalogs
-        .first()
-        .cloned()
-        .unwrap_or_else(|| "ghcr://catalogs/well-known".to_string());
-    let resolution = crate::catalog::resolve::resolve_catalogs(
-        &state.output_dir,
-        std::slice::from_ref(&catalog_ref),
-        &crate::catalog::resolve::CatalogResolveOptions {
-            offline: crate::runtime::offline(),
-            write_cache: false,
-        },
-    )?;
-    let entries = resolution.discovered_items.into_iter().collect::<Vec<_>>();
+    let (catalog_ref, persist_catalog_ref, entries) = match state.remote_catalogs.first().cloned() {
+        Some(catalog_ref) => {
+            let resolution = crate::catalog::resolve::resolve_catalogs(
+                &state.output_dir,
+                std::slice::from_ref(&catalog_ref),
+                &crate::catalog::resolve::CatalogResolveOptions {
+                    offline: crate::runtime::offline(),
+                    write_cache: false,
+                },
+            )?;
+            (
+                catalog_ref,
+                true,
+                resolution.discovered_items.into_iter().collect::<Vec<_>>(),
+            )
+        }
+        None => (
+            crate::catalog::registry::BUNDLED_WELL_KNOWN_SOURCE.to_string(),
+            false,
+            crate::catalog::registry::bundled_well_known_catalog_entries()?,
+        ),
+    };
     if entries.is_empty() {
         writeln!(output, "{}", crate::i18n::tr("wizard.error.empty_catalog"))?;
         return Ok(None);
     }
-    let labels = entries
+    let grouped_entries = group_catalog_entries_by_category(&entries);
+    let category_key = if grouped_entries.len() > 1 {
+        let labels = grouped_entries
+            .iter()
+            .map(|(category, description, _)| {
+                format_extension_category_label(category, description.as_deref())
+            })
+            .collect::<Vec<_>>();
+        let Some(index) = choose_named_index(input, output, "Choose extension category", &labels)?
+        else {
+            return Ok(None);
+        };
+        Some(grouped_entries[index].0.clone())
+    } else {
+        None
+    };
+    let selected_entries = category_key
+        .as_deref()
+        .map(|category| {
+            entries
+                .iter()
+                .filter(|entry| entry.category.as_deref().unwrap_or("other") == category)
+                .collect::<Vec<_>>()
+        })
+        .unwrap_or_else(|| entries.iter().collect::<Vec<_>>());
+    let labels = selected_entries
         .iter()
         .map(|entry| {
             let group = entry
@@ -2059,7 +2092,7 @@ fn add_common_extension_provider<R: BufRead, W: Write>(
     else {
         return Ok(None);
     };
-    let entry = &entries[index];
+    let entry = selected_entries[index];
     Ok(Some(ExtensionProviderEntry {
         reference: entry.reference.clone(),
         detected_kind: detected_reference_kind(&state.output_dir, &entry.reference).to_string(),
@@ -2069,9 +2102,43 @@ fn add_common_extension_provider<R: BufRead, W: Write>(
             .clone()
             .unwrap_or_else(|| inferred_display_name(&entry.reference)),
         version: inferred_reference_version(&entry.reference),
-        source_catalog: Some(catalog_ref),
+        source_catalog: persist_catalog_ref.then_some(catalog_ref),
         group: None,
     }))
+}
+
+fn group_catalog_entries_by_category(
+    entries: &[crate::catalog::registry::CatalogEntry],
+) -> Vec<(String, Option<String>, Vec<usize>)> {
+    let mut grouped = Vec::<(String, Option<String>, Vec<usize>)>::new();
+    for (index, entry) in entries.iter().enumerate() {
+        let category = entry
+            .category
+            .clone()
+            .unwrap_or_else(|| "other".to_string());
+        let description = entry.category_description.clone();
+        if let Some((_, existing_description, indices)) =
+            grouped.iter_mut().find(|(name, _, _)| name == &category)
+        {
+            if existing_description.is_none() {
+                *existing_description = description.clone();
+            }
+            indices.push(index);
+        } else {
+            grouped.push((category, description, vec![index]));
+        }
+    }
+    grouped
+}
+
+fn format_extension_category_label(category: &str, description: Option<&str>) -> String {
+    match description
+        .map(str::trim)
+        .filter(|description| !description.is_empty())
+    {
+        Some(description) => format!("{category} -> {description}"),
+        None => category.to_string(),
+    }
 }
 
 fn add_custom_extension_provider<R: BufRead, W: Write>(

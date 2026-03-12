@@ -1,5 +1,6 @@
 use std::fmt;
 use std::fs;
+use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
@@ -443,7 +444,10 @@ fn read_artifact_file(path: &Path, inner_path: &str) -> Result<String, BundleRea
             BundleReadError::tool(
                 BundleSourceKind::Artifact,
                 path,
-                format!("spawn unsquashfs: {error}"),
+                match error.kind() {
+                    ErrorKind::NotFound => "required tool `unsquashfs` was not found on PATH; install SquashFS tools to read `.gtbundle` artifacts".to_string(),
+                    _ => format!("spawn unsquashfs: {error}"),
+                },
             )
         })?;
     if !output.status.success() {
