@@ -43,6 +43,7 @@ include = [
     "build.rs",
     "docs/**",
     "i18n/**",
+    "packs/**",
     "src/**",
     "tests/**",
     "ci/**",
