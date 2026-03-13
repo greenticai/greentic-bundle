@@ -271,7 +271,7 @@ mod tests {
     #[test]
     fn parses_checked_in_well_known_catalog_fixture() {
         let entries = bundled_well_known_catalog_entries().expect("catalog fixture");
-        assert_eq!(entries.len(), 19);
+        assert_eq!(entries.len(), 47);
         assert_eq!(entries[0].id, "greentic.deployer.serverless");
         assert_eq!(
             entries[0].reference,
