@@ -10,8 +10,17 @@ fn bundle_bin() -> &'static str {
 }
 
 fn run_with_stdin(args: &[&str], stdin_payload: &str) -> std::process::Output {
+    run_with_stdin_and_env(args, stdin_payload, &[])
+}
+
+fn run_with_stdin_and_env(
+    args: &[&str],
+    stdin_payload: &str,
+    envs: &[(&str, &str)],
+) -> std::process::Output {
     let mut command = Command::new(bundle_bin());
     command.args(args);
+    command.envs(envs.iter().copied());
     command.stdin(Stdio::piped());
     command.stdout(Stdio::piped());
     command.stderr(Stdio::piped());
@@ -24,6 +33,20 @@ fn run_with_stdin(args: &[&str], stdin_payload: &str) -> std::process::Output {
         .write_all(stdin_payload.as_bytes())
         .expect("write stdin");
     child.wait_with_output().expect("wait output")
+}
+
+#[test]
+fn bare_wizard_uses_back_for_embedded_root_menu() {
+    let output = run_with_stdin_and_env(
+        &["wizard"],
+        "0\n",
+        &[("GREENTIC_WIZARD_ROOT_ZERO_ACTION", "back")],
+    );
+    assert!(output.status.success());
+    let stdout = String::from_utf8(output.stdout).expect("stdout");
+    assert!(stdout.contains("0. Back"));
+    assert!(!stdout.contains("0. Exit"));
+    assert!(!stdout.contains("Wizard exited without collecting answers."));
 }
 
 #[test]

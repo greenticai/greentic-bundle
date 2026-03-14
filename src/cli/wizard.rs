@@ -99,16 +99,31 @@ pub struct WizardApplyArgs {
 pub fn run(args: WizardArgs) -> Result<()> {
     match args.command {
         None => {
-            let result = crate::wizard::run_interactive(
+            let zero_action = embedded_root_zero_action();
+            let Some(result) = crate::wizard::run_interactive_with_zero_action(
                 None,
                 None,
                 None,
                 crate::wizard::ExecutionMode::Execute,
-            )?;
+                zero_action,
+            )?
+            else {
+                return Ok(());
+            };
             crate::wizard::print_plan(&result.plan)
         }
         Some(WizardCommand::Run(args)) => crate::wizard::run_command(args),
         Some(WizardCommand::Validate(args)) => crate::wizard::validate_command(args),
         Some(WizardCommand::Apply(args)) => crate::wizard::apply_command(args),
+    }
+}
+
+fn embedded_root_zero_action() -> crate::wizard::RootMenuZeroAction {
+    match std::env::var("GREENTIC_WIZARD_ROOT_ZERO_ACTION")
+        .ok()
+        .as_deref()
+    {
+        Some("back") => crate::wizard::RootMenuZeroAction::Back,
+        _ => crate::wizard::RootMenuZeroAction::Exit,
     }
 }
