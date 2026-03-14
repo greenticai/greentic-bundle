@@ -103,6 +103,12 @@ enum InteractiveChoice {
     Doctor,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RootMenuZeroAction {
+    Exit,
+    Back,
+}
+
 #[derive(Debug)]
 struct InteractiveRequest {
     request: NormalizedRequest,
@@ -242,11 +248,34 @@ pub fn run_interactive(
     schema_version: Option<&str>,
     execution: ExecutionMode,
 ) -> Result<WizardRunResult> {
+    match run_interactive_with_zero_action(
+        initial_mode,
+        emit_answers,
+        schema_version,
+        execution,
+        RootMenuZeroAction::Exit,
+    )? {
+        Some(result) => Ok(result),
+        None => bail!("{}", crate::i18n::tr("wizard.exit.message")),
+    }
+}
+
+pub fn run_interactive_with_zero_action(
+    initial_mode: Option<WizardMode>,
+    emit_answers: Option<&PathBuf>,
+    schema_version: Option<&str>,
+    execution: ExecutionMode,
+    zero_action: RootMenuZeroAction,
+) -> Result<Option<WizardRunResult>> {
     let stdin = io::stdin();
     let stdout = io::stdout();
     let mut input = stdin.lock();
     let mut output = stdout.lock();
-    let interactive = collect_guided_interactive_request(&mut input, &mut output, initial_mode)?;
+    let Some(interactive) =
+        collect_guided_interactive_request(&mut input, &mut output, initial_mode, zero_action)?
+    else {
+        return Ok(None);
+    };
     let resolved_execution = match execution {
         ExecutionMode::DryRun => ExecutionMode::DryRun,
         ExecutionMode::Execute => match interactive.review_action {
@@ -254,7 +283,7 @@ pub fn run_interactive(
             ReviewAction::DryRunOnly | ReviewAction::SaveAnswersOnly => ExecutionMode::DryRun,
         },
     };
-    execute_request(
+    Ok(Some(execute_request(
         interactive.request,
         resolved_execution,
         matches!(interactive.review_action, ReviewAction::BuildNow)
@@ -262,49 +291,65 @@ pub fn run_interactive(
         schema_version,
         emit_answers,
         None,
-    )
+    )?))
 }
 
 fn collect_guided_interactive_request<R: BufRead, W: Write>(
     input: &mut R,
     output: &mut W,
     initial_mode: Option<WizardMode>,
-) -> Result<InteractiveRequest> {
+    zero_action: RootMenuZeroAction,
+) -> Result<Option<InteractiveRequest>> {
     let choice = match initial_mode {
         Some(WizardMode::Create) => InteractiveChoice::Create,
         Some(WizardMode::Update) => InteractiveChoice::Update,
         Some(WizardMode::Doctor) => InteractiveChoice::Doctor,
-        None => choose_interactive_menu(input, output)?,
+        None => {
+            let Some(choice) = choose_interactive_menu(input, output, zero_action)? else {
+                return Ok(None);
+            };
+            choice
+        }
     };
 
-    match choice {
+    let request = match choice {
         InteractiveChoice::Create => collect_create_flow(input, output),
         InteractiveChoice::Update => collect_update_flow(input, output, false),
         InteractiveChoice::Validate => collect_update_flow(input, output, true),
         InteractiveChoice::Doctor => collect_doctor_flow(input, output),
-    }
+    }?;
+    Ok(Some(request))
 }
 
 fn choose_interactive_menu<R: BufRead, W: Write>(
     input: &mut R,
     output: &mut W,
-) -> Result<InteractiveChoice> {
+    zero_action: RootMenuZeroAction,
+) -> Result<Option<InteractiveChoice>> {
     writeln!(output, "{}", crate::i18n::tr("wizard.menu.title"))?;
     writeln!(output, "1. {}", crate::i18n::tr("wizard.mode.create"))?;
     writeln!(output, "2. {}", crate::i18n::tr("wizard.mode.update"))?;
     writeln!(output, "3. {}", crate::i18n::tr("wizard.mode.validate"))?;
     writeln!(output, "4. {}", crate::i18n::tr("wizard.mode.doctor"))?;
+    let zero_label = match zero_action {
+        RootMenuZeroAction::Exit => crate::i18n::tr("wizard.menu.exit"),
+        RootMenuZeroAction::Back => crate::i18n::tr("wizard.action.back"),
+    };
+    writeln!(output, "0. {zero_label}")?;
     loop {
         write!(output, "{} ", crate::i18n::tr("wizard.setup.enum_prompt"))?;
         output.flush()?;
         let mut line = String::new();
         input.read_line(&mut line)?;
         match line.trim() {
-            "0" => bail!("{}", crate::i18n::tr("wizard.exit.message")),
-            "1" | "create" => return Ok(InteractiveChoice::Create),
-            "2" | "update" | "open" => return Ok(InteractiveChoice::Update),
-            "3" | "validate" => return Ok(InteractiveChoice::Validate),
-            "4" | "doctor" => return Ok(InteractiveChoice::Doctor),
+            "0" => match zero_action {
+                RootMenuZeroAction::Exit => bail!("{}", crate::i18n::tr("wizard.exit.message")),
+                RootMenuZeroAction::Back => return Ok(None),
+            },
+            "1" | "create" => return Ok(Some(InteractiveChoice::Create)),
+            "2" | "update" | "open" => return Ok(Some(InteractiveChoice::Update)),
+            "3" | "validate" => return Ok(Some(InteractiveChoice::Validate)),
+            "4" | "doctor" => return Ok(Some(InteractiveChoice::Doctor)),
             _ => writeln!(output, "{}", crate::i18n::tr("wizard.error.invalid_choice"))?,
         }
     }
@@ -3682,4 +3727,26 @@ fn discover_setup_specs(
     }
 
     request
+}
+
+#[cfg(test)]
+mod tests {
+    use std::io::Cursor;
+
+    use super::{RootMenuZeroAction, choose_interactive_menu};
+
+    #[test]
+    fn root_menu_shows_back_and_returns_none_for_embedded_wizards() {
+        crate::i18n::init(Some("en".to_string()));
+        let mut input = Cursor::new(b"0\n");
+        let mut output = Vec::new();
+
+        let choice = choose_interactive_menu(&mut input, &mut output, RootMenuZeroAction::Back)
+            .expect("menu should render");
+
+        assert_eq!(choice, None);
+        let rendered = String::from_utf8(output).expect("utf8");
+        assert!(rendered.contains("0. Back"));
+        assert!(!rendered.contains("0. Exit"));
+    }
 }

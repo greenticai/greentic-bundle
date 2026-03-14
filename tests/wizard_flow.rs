@@ -66,7 +66,7 @@ fn bare_wizard_renders_compact_mode_menu() {
     let stdout = String::from_utf8(output.stdout).expect("stdout");
     assert!(
         stdout.starts_with(
-            "Bundle Wizard\n1. create\n2. open existing bundle\n3. validate bundle\n4. doctor\nSelect number or value: "
+            "Bundle Wizard\n1. create\n2. open existing bundle\n3. validate bundle\n4. doctor\n0. Exit\nSelect number or value: "
         )
     );
 }
