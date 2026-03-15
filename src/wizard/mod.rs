@@ -1827,7 +1827,13 @@ fn add_app_pack<R: BufRead, W: Write>(
             &crate::i18n::tr("wizard.prompt.app_pack_reference"),
             None,
         )?;
-        let resolved = resolve_reference_metadata(&state.output_dir, &raw)?;
+        let resolved = match resolve_reference_metadata(&state.output_dir, &raw) {
+            Ok(resolved) => resolved,
+            Err(error) => {
+                writeln!(output, "{error}")?;
+                continue;
+            }
+        };
         writeln!(output, "{}", crate::i18n::tr("wizard.confirm.app_pack"))?;
         writeln!(
             output,
@@ -2138,9 +2144,10 @@ fn add_common_extension_provider<R: BufRead, W: Write>(
         return Ok(None);
     };
     let entry = selected_entries[index];
+    let reference = resolve_catalog_entry_reference(input, output, &entry.reference)?;
     Ok(Some(ExtensionProviderEntry {
-        reference: entry.reference.clone(),
-        detected_kind: detected_reference_kind(&state.output_dir, &entry.reference).to_string(),
+        detected_kind: detected_reference_kind(&state.output_dir, &reference).to_string(),
+        reference,
         provider_id: entry.id.clone(),
         display_name: entry
             .label
@@ -2191,22 +2198,30 @@ fn add_custom_extension_provider<R: BufRead, W: Write>(
     output: &mut W,
     state: &NormalizedRequest,
 ) -> Result<Option<ExtensionProviderEntry>> {
-    let raw = prompt_required_string(
-        input,
-        output,
-        &crate::i18n::tr("wizard.prompt.extension_provider_reference"),
-        None,
-    )?;
-    let resolved = resolve_reference_metadata(&state.output_dir, &raw)?;
-    Ok(Some(ExtensionProviderEntry {
-        reference: resolved.reference,
-        detected_kind: resolved.detected_kind,
-        provider_id: resolved.id.clone(),
-        display_name: resolved.display_name,
-        version: resolved.version,
-        source_catalog: None,
-        group: None,
-    }))
+    loop {
+        let raw = prompt_required_string(
+            input,
+            output,
+            &crate::i18n::tr("wizard.prompt.extension_provider_reference"),
+            None,
+        )?;
+        let resolved = match resolve_reference_metadata(&state.output_dir, &raw) {
+            Ok(resolved) => resolved,
+            Err(error) => {
+                writeln!(output, "{error}")?;
+                continue;
+            }
+        };
+        return Ok(Some(ExtensionProviderEntry {
+            reference: resolved.reference,
+            detected_kind: resolved.detected_kind,
+            provider_id: resolved.id.clone(),
+            display_name: resolved.display_name,
+            version: resolved.version,
+            source_catalog: None,
+            group: None,
+        }));
+    }
 }
 
 fn remove_extension_provider<R: BufRead, W: Write>(
@@ -2273,6 +2288,7 @@ fn resolve_reference_metadata(root: &Path, raw: &str) -> Result<ResolvedReferenc
     if raw.is_empty() {
         bail!("{}", crate::i18n::tr("wizard.error.empty_answer"));
     }
+    validate_reference_input(root, raw)?;
     let detected_kind = detected_reference_kind(root, raw).to_string();
     Ok(ResolvedReferenceMetadata {
         id: inferred_reference_id(raw),
@@ -2280,6 +2296,51 @@ fn resolve_reference_metadata(root: &Path, raw: &str) -> Result<ResolvedReferenc
         version: inferred_reference_version(raw),
         reference: raw.to_string(),
         detected_kind,
+    })
+}
+
+fn resolve_catalog_entry_reference<R: BufRead, W: Write>(
+    input: &mut R,
+    output: &mut W,
+    raw: &str,
+) -> Result<String> {
+    if !raw.contains("<pr-version>") {
+        return Ok(raw.to_string());
+    }
+    let version = prompt_required_string(input, output, "PR version or tag", None)?;
+    Ok(raw.replace("<pr-version>", version.trim()))
+}
+
+fn validate_reference_input(root: &Path, raw: &str) -> Result<()> {
+    if raw.contains("<pr-version>") {
+        bail!("Reference contains an unresolved <pr-version> placeholder.");
+    }
+    if let Some(path) = parse_local_gtpack_reference(root, raw) {
+        let metadata = fs::metadata(&path)
+            .with_context(|| format!("read local .gtpack {}", path.display()))?;
+        if !metadata.is_file() {
+            bail!(
+                "Local .gtpack reference must point to a file: {}",
+                path.display()
+            );
+        }
+    }
+    Ok(())
+}
+
+fn parse_local_gtpack_reference(root: &Path, raw: &str) -> Option<PathBuf> {
+    if let Some(path) = raw.strip_prefix("file://") {
+        let path = PathBuf::from(path.trim());
+        return Some(path);
+    }
+    if raw.contains("://") || !raw.ends_with(".gtpack") {
+        return None;
+    }
+    let candidate = PathBuf::from(raw);
+    Some(if candidate.is_absolute() {
+        candidate
+    } else {
+        root.join(candidate)
     })
 }
 

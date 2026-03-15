@@ -256,6 +256,35 @@ fn create_flow_uses_pack_id_for_access_rules_and_resolved_policy() {
 }
 
 #[test]
+fn create_flow_reprompts_for_missing_local_app_pack_gtpack() {
+    let temp = TempDir::new().expect("tempdir");
+    let pack_path = temp.path().join("real-pack.gtpack");
+    fs::write(&pack_path, "fixture").expect("write pack");
+    let bundle_root = temp.path().join("bundle");
+
+    let output = run_with_stdin(
+        &["wizard", "run", "--dry-run"],
+        &format!(
+            "1\nDemo Bundle\ndemo-bundle\n{}\n1\nfake.gtpack\n{}\n1\n1\n4\n4\n2\n",
+            bundle_root.display(),
+            pack_path.display(),
+        ),
+    );
+    assert!(
+        output.status.success(),
+        "stdout={} stderr={}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+
+    let stdout = String::from_utf8(output.stdout).expect("stdout");
+    assert!(stdout.contains("read local .gtpack"));
+    assert!(stdout.contains(&pack_path.display().to_string()));
+    assert!(stdout.contains("Resolved app pack:"));
+    assert!(stdout.contains("\"execution\": \"dry_run\""));
+}
+
+#[test]
 fn create_flow_materializes_pack_and_provider_gtpacks_into_bundle_layout() {
     let temp = TempDir::new().expect("tempdir");
     let pack_path = temp.path().join("Cisco Bundle.gtpack");
@@ -295,6 +324,34 @@ fn create_flow_materializes_pack_and_provider_gtpacks_into_bundle_layout() {
             .expect("materialized provider pack"),
         b"provider-pack-bytes"
     );
+}
+
+#[test]
+fn common_extension_provider_pr_entry_prompts_for_version_before_build() {
+    let temp = TempDir::new().expect("tempdir");
+    let pack_path = temp.path().join("Cisco Bundle.gtpack");
+    fs::write(&pack_path, "app-pack-bytes").expect("write app pack");
+    let bundle_root = temp.path().join("bundle");
+
+    let output = run_with_stdin(
+        &["wizard", "run", "--dry-run"],
+        &format!(
+            "1\nDemo Bundle\ndemo-bundle\n{}\n1\n{}\n1\n1\n4\n1\n4\n10\n12345\n4\n2\n",
+            bundle_root.display(),
+            pack_path.display(),
+        ),
+    );
+    assert!(
+        output.status.success(),
+        "stdout={} stderr={}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+
+    let stdout = String::from_utf8(output.stdout).expect("stdout");
+    assert!(stdout.contains("PR version or tag"));
+    assert!(stdout.contains("oci://ghcr.io/greenticai/packs/messaging/messaging-telegram:12345"));
+    assert!(stdout.contains("\"execution\": \"dry_run\""));
 }
 
 #[test]
