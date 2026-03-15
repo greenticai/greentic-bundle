@@ -163,6 +163,7 @@ pub struct WizardRunResult {
 struct LoadedRequest {
     request: NormalizedRequest,
     locks: BTreeMap<String, Value>,
+    build_bundle_now: bool,
 }
 
 pub fn run_command(args: WizardRunArgs) -> Result<()> {
@@ -178,7 +179,7 @@ pub fn run_command(args: WizardRunArgs) -> Result<()> {
         execute_request(
             loaded.request,
             execution_for_run(args.dry_run),
-            false,
+            loaded.build_bundle_now && !args.dry_run,
             args.schema_version.as_deref(),
             args.emit_answers.as_ref(),
             Some(loaded.locks),
@@ -233,7 +234,7 @@ pub fn apply_command(args: WizardApplyArgs) -> Result<()> {
     let result = execute_request(
         loaded.request,
         execution,
-        false,
+        loaded.build_bundle_now && execution == ExecutionMode::Execute,
         args.schema_version.as_deref(),
         args.emit_answers.as_ref(),
         Some(loaded.locks),
@@ -2427,8 +2428,20 @@ fn load_and_normalize_answers(
         .with_context(|| format!("answers file {} must be valid JSON", path.display()))?;
     let document = parse_answer_document(value, schema_version, migrate, locale)?;
     let locks = document.locks.clone();
+    let build_bundle_now = answer_document_requests_bundle_build(&document);
     let request = normalized_request_from_document(document, mode_override)?;
-    Ok(LoadedRequest { request, locks })
+    Ok(LoadedRequest {
+        request,
+        locks,
+        build_bundle_now,
+    })
+}
+
+fn answer_document_requests_bundle_build(document: &AnswerDocument) -> bool {
+    matches!(
+        document.locks.get("execution").and_then(Value::as_str),
+        Some("execute")
+    )
 }
 
 fn parse_answer_document(

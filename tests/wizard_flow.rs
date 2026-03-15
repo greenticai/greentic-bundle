@@ -628,6 +628,75 @@ fn wizard_apply_replays_from_answers() {
 }
 
 #[test]
+fn wizard_apply_replays_build_bundle_artifact_when_answers_capture_execute_lock() {
+    let temp = TempDir::new().expect("tempdir");
+    let bundle_root = temp.path().join("bundle");
+    let answers_path = temp.path().join("answers.json");
+    fs::write(
+        &answers_path,
+        format!(
+            r#"{{
+  "wizard_id":"greentic-bundle.wizard.run",
+  "schema_id":"greentic-bundle.wizard.answers",
+  "schema_version":"1.0.0",
+  "locale":"en",
+  "answers":{{
+    "mode":"create",
+    "bundle_name":"Demo Bundle",
+    "bundle_id":"demo-bundle",
+    "output_dir":"{}",
+    "advanced_setup":false,
+    "app_packs":[],
+    "extension_providers":[],
+    "remote_catalogs":[],
+    "setup_execution_intent":false,
+    "export_intent":false
+  }},
+  "locks":{{"execution":"execute"}}
+}}"#,
+            bundle_root.display()
+        ),
+    )
+    .expect("write answers");
+
+    let output = Command::new(bundle_bin())
+        .args(["wizard", "apply", "--answers"])
+        .arg(&answers_path)
+        .output()
+        .expect("run apply");
+    assert!(
+        output.status.success(),
+        "stdout={} stderr={}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+
+    let artifact = bundle_root.join("dist/demo-bundle.gtbundle");
+    assert!(
+        artifact.exists(),
+        "missing artifact at {}",
+        artifact.display()
+    );
+
+    let plan: Value = serde_json::from_slice(&output.stdout).expect("parse plan stdout");
+    assert_eq!(
+        plan.pointer("/ordered_step_list/5/kind")
+            .and_then(Value::as_str),
+        Some("build_bundle")
+    );
+    assert!(
+        plan.get("expected_file_writes")
+            .and_then(Value::as_array)
+            .is_some_and(|writes| writes
+                .iter()
+                .filter_map(Value::as_str)
+                .any(|path| path == artifact.to_str().unwrap())),
+        "expected_file_writes missing {}",
+        artifact.display()
+    );
+}
+
+#[test]
 fn wizard_apply_discovers_setup_specs_from_catalog_entries() {
     let temp = TempDir::new().expect("tempdir");
     let bundle_root = temp.path().join("bundle");
