@@ -11,6 +11,8 @@ pub struct CatalogEntry {
     #[serde(default)]
     pub category: Option<String>,
     #[serde(default)]
+    pub category_label: Option<String>,
+    #[serde(default)]
     pub category_description: Option<String>,
     #[serde(default)]
     pub label: Option<String>,
@@ -57,10 +59,43 @@ struct ProviderRegistryItem {
     setup: Option<SetupSpecInput>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 struct ProviderRegistryLabel {
     #[serde(default)]
     fallback: String,
+}
+
+/// OCI registry format with separate categories and items arrays at root level.
+/// Format: `{ "categories": [...], "items": [...] }`
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct OciProviderRegistryFile {
+    #[serde(default)]
+    registry_version: Option<String>,
+    #[serde(default)]
+    categories: Vec<OciProviderRegistryCategory>,
+    #[serde(default)]
+    items: Vec<OciProviderRegistryItem>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct OciProviderRegistryCategory {
+    id: String,
+    #[serde(default)]
+    label: ProviderRegistryLabel,
+    #[serde(default)]
+    description: Option<ProviderRegistryLabel>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct OciProviderRegistryItem {
+    id: String,
+    #[serde(default)]
+    category: Option<String>,
+    label: ProviderRegistryLabel,
+    #[serde(alias = "ref")]
+    reference: String,
+    #[serde(default)]
+    setup: Option<SetupSpecInput>,
 }
 
 pub fn parse_catalog_bytes(bytes: &[u8], source: &str) -> Result<CatalogSummary> {
@@ -101,6 +136,7 @@ pub fn load_catalog_entries(bytes: &[u8], source: &str) -> Result<Vec<CatalogEnt
                         CatalogEntry::from_categorized_item(
                             item,
                             &category_name,
+                            None, // Legacy format uses category name as label
                             category_description.as_deref(),
                         )
                     })
@@ -114,6 +150,41 @@ pub fn load_catalog_entries(bytes: &[u8], source: &str) -> Result<Vec<CatalogEnt
         .with_context(|| format!("parse catalog array {source}"));
     }
 
+    // OCI registry format: categories and items at root level (items reference category by id)
+    if value.get("categories").is_some() && value.get("items").is_some() {
+        let registry: OciProviderRegistryFile = serde_json::from_value(value)
+            .with_context(|| format!("parse OCI provider registry file {source}"))?;
+        // Build category lookup for labels and descriptions
+        let category_map: std::collections::HashMap<String, &OciProviderRegistryCategory> =
+            registry.categories.iter().map(|c| (c.id.clone(), c)).collect();
+        return Ok(registry
+            .items
+            .into_iter()
+            .map(|item| {
+                let category_meta = item
+                    .category
+                    .as_ref()
+                    .and_then(|cat_id| category_map.get(cat_id));
+                let category_label = category_meta
+                    .filter(|c| !c.label.fallback.is_empty())
+                    .map(|c| c.label.fallback.clone());
+                let category_description = category_meta
+                    .and_then(|c| c.description.as_ref())
+                    .map(|d| d.fallback.clone());
+                CatalogEntry {
+                    id: item.id,
+                    category: item.category,
+                    category_label,
+                    category_description,
+                    label: (!item.label.fallback.is_empty()).then_some(item.label.fallback),
+                    reference: item.reference,
+                    setup: item.setup,
+                }
+            })
+            .collect());
+    }
+
+    // Legacy categorized format: items nested inside category objects
     if value.get("categories").is_some() {
         let registry: CategorizedProviderRegistryFile = serde_json::from_value(value)
             .with_context(|| {
@@ -129,6 +200,7 @@ pub fn load_catalog_entries(bytes: &[u8], source: &str) -> Result<Vec<CatalogEnt
                     CatalogEntry::from_categorized_item(
                         item,
                         &category_name,
+                        None, // Legacy format uses category name as label
                         category_description.as_deref(),
                     )
                 })
@@ -160,6 +232,7 @@ impl From<ProviderRegistryItem> for CatalogEntry {
         Self {
             id: item.id,
             category: None,
+            category_label: None,
             category_description: None,
             label: (!item.label.fallback.is_empty()).then_some(item.label.fallback),
             reference: item.reference,
@@ -172,10 +245,17 @@ impl CatalogEntry {
     fn from_categorized_item(
         item: ProviderRegistryItem,
         category: &str,
+        category_label: Option<&str>,
         category_description: Option<&str>,
     ) -> Self {
         Self {
             category: Some(category.to_string()),
+            // For legacy format, use category name as label if no explicit label provided
+            category_label: Some(
+                category_label
+                    .unwrap_or(category)
+                    .to_string(),
+            ),
             category_description: category_description.map(ToString::to_string),
             ..Self::from(item)
         }
@@ -265,6 +345,77 @@ mod tests {
         assert_eq!(
             entries[1].category_description.as_deref(),
             Some("OAuth provider helpers and identity integrations")
+        );
+    }
+
+    #[test]
+    fn parses_oci_registry_format_with_root_items() {
+        let entries = load_catalog_entries(
+            br#"{
+  "registry_version": "providers@1",
+  "categories": [
+    {
+      "id": "messaging",
+      "label": { "fallback": "Messaging" },
+      "description": { "fallback": "Bridges to external messaging services" }
+    },
+    {
+      "id": "events",
+      "label": { "fallback": "Events" },
+      "description": { "fallback": "Event sources and delivery helpers" }
+    }
+  ],
+  "items": [
+    {
+      "id": "messaging-teams",
+      "category": "messaging",
+      "label": { "fallback": "MS-Teams" },
+      "ref": "oci://ghcr.io/greenticai/packs/messaging/messaging-teams:latest"
+    },
+    {
+      "id": "messaging-telegram",
+      "category": "messaging",
+      "label": { "fallback": "Telegram" },
+      "ref": "oci://ghcr.io/greenticai/packs/messaging/messaging-telegram:latest"
+    },
+    {
+      "id": "events-webhook",
+      "category": "events",
+      "label": { "fallback": "Webhook" },
+      "ref": "oci://ghcr.io/greenticai/packs/events/events-webhook:latest"
+    }
+  ]
+}"#,
+            "oci-registry",
+        )
+        .expect("entries");
+
+        assert_eq!(entries.len(), 3);
+        // Check first item
+        assert_eq!(entries[0].id, "messaging-teams");
+        assert_eq!(entries[0].category.as_deref(), Some("messaging"));
+        assert_eq!(entries[0].category_label.as_deref(), Some("Messaging"));
+        assert_eq!(entries[0].label.as_deref(), Some("MS-Teams"));
+        assert_eq!(
+            entries[0].reference,
+            "oci://ghcr.io/greenticai/packs/messaging/messaging-teams:latest"
+        );
+        assert_eq!(
+            entries[0].category_description.as_deref(),
+            Some("Bridges to external messaging services")
+        );
+        // Check second item
+        assert_eq!(entries[1].id, "messaging-telegram");
+        assert_eq!(entries[1].category_label.as_deref(), Some("Messaging"));
+        assert_eq!(entries[1].label.as_deref(), Some("Telegram"));
+        // Check third item (different category)
+        assert_eq!(entries[2].id, "events-webhook");
+        assert_eq!(entries[2].category.as_deref(), Some("events"));
+        assert_eq!(entries[2].category_label.as_deref(), Some("Events"));
+        assert_eq!(entries[2].label.as_deref(), Some("Webhook"));
+        assert_eq!(
+            entries[2].category_description.as_deref(),
+            Some("Event sources and delivery helpers")
         );
     }
 
