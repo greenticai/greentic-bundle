@@ -2070,30 +2070,71 @@ fn prompt_access_target<R: BufRead, W: Write>(
     }
 }
 
-fn add_common_extension_provider<R: BufRead, W: Write>(
-    input: &mut R,
-    output: &mut W,
-    state: &NormalizedRequest,
-) -> Result<Option<ExtensionProviderEntry>> {
-    let catalog_ref = state
-        .remote_catalogs
-        .first()
-        .cloned()
-        .unwrap_or_else(|| DEFAULT_PROVIDER_REGISTRY.to_string());
-    let (persist_catalog_ref, entries) = {
+/// Resolves extension provider catalog entries.
+///
+/// If `remote_catalogs` contains explicit references, they are used.
+/// Otherwise, tries to fetch from OCI registry, falling back to bundled
+/// well-known catalog if the fetch fails (network error, timeout, etc.).
+///
+/// Returns (should_persist_catalog_ref, catalog_ref, entries).
+fn resolve_extension_provider_catalog(
+    output_dir: &Path,
+    remote_catalogs: &[String],
+) -> Result<(
+    bool,
+    Option<String>,
+    Vec<crate::catalog::registry::CatalogEntry>,
+)> {
+    // If explicit catalogs are provided, use them
+    if let Some(catalog_ref) = remote_catalogs.first() {
         let resolution = crate::catalog::resolve::resolve_catalogs(
-            &state.output_dir,
-            std::slice::from_ref(&catalog_ref),
+            output_dir,
+            std::slice::from_ref(catalog_ref),
             &crate::catalog::resolve::CatalogResolveOptions {
                 offline: crate::runtime::offline(),
                 write_cache: false,
             },
         )?;
-        (
-            true,
-            resolution.discovered_items.into_iter().collect::<Vec<_>>(),
-        )
-    };
+        return Ok((true, Some(catalog_ref.clone()), resolution.discovered_items));
+    }
+
+    // Check for bundled-only mode (used in tests and CI)
+    let use_bundled_only = std::env::var("GREENTIC_BUNDLE_USE_BUNDLED_CATALOG")
+        .map(|v| v == "1" || v.eq_ignore_ascii_case("true"))
+        .unwrap_or(false);
+
+    // No explicit catalogs - try OCI registry first, fall back to bundled
+    if !crate::runtime::offline() && !use_bundled_only {
+        let catalog_ref = DEFAULT_PROVIDER_REGISTRY.to_string();
+        match crate::catalog::resolve::resolve_catalogs(
+            output_dir,
+            std::slice::from_ref(&catalog_ref),
+            &crate::catalog::resolve::CatalogResolveOptions {
+                offline: false,
+                write_cache: false,
+            },
+        ) {
+            Ok(resolution) if !resolution.discovered_items.is_empty() => {
+                return Ok((true, Some(catalog_ref), resolution.discovered_items));
+            }
+            _ => {
+                // OCI fetch failed or returned empty, fall back to bundled
+            }
+        }
+    }
+
+    // Fall back to bundled well-known catalog
+    let entries = crate::catalog::registry::bundled_well_known_catalog_entries()?;
+    Ok((false, None, entries))
+}
+
+fn add_common_extension_provider<R: BufRead, W: Write>(
+    input: &mut R,
+    output: &mut W,
+    state: &NormalizedRequest,
+) -> Result<Option<ExtensionProviderEntry>> {
+    let (persist_catalog_ref, catalog_ref, entries) =
+        resolve_extension_provider_catalog(&state.output_dir, &state.remote_catalogs)?;
     if entries.is_empty() {
         writeln!(output, "{}", crate::i18n::tr("wizard.error.empty_catalog"))?;
         return Ok(None);
@@ -2148,7 +2189,11 @@ fn add_common_extension_provider<R: BufRead, W: Write>(
         provider_id: entry.id.clone(),
         display_name: selected.display_name.clone(),
         version: inferred_reference_version(&entry.reference),
-        source_catalog: persist_catalog_ref.then_some(catalog_ref),
+        source_catalog: if persist_catalog_ref {
+            catalog_ref
+        } else {
+            None
+        },
         group: None,
     }))
 }
