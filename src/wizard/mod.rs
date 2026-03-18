@@ -17,7 +17,7 @@ pub mod i18n;
 
 pub const WIZARD_ID: &str = "greentic-bundle.wizard.run";
 pub const ANSWER_SCHEMA_ID: &str = "greentic-bundle.wizard.answers";
-pub const DEFAULT_PROVIDER_REGISTRY: &str = "oci://ghcr.io/greenticai/registries/providers:latest";
+pub const DEFAULT_PROVIDER_REGISTRY: &str = "oci://ghcr.io/greenticai/greentic-bundle/providers:latest";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "snake_case")]
