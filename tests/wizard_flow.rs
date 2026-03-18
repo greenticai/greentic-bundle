@@ -212,10 +212,7 @@ fn common_extension_provider_menu_uses_bundled_well_known_catalog() {
     }
     stdin.push_str("1\n4\n2\n");
 
-    let output = run_with_stdin(
-        &["wizard", "run", "--dry-run"],
-        &stdin,
-    );
+    let output = run_with_stdin(&["wizard", "run", "--dry-run"], &stdin);
     assert!(output.status.success());
 
     let stdout = String::from_utf8(output.stdout).expect("stdout");
@@ -238,7 +235,9 @@ struct TestResolvedProviderOption {
     reference: String,
 }
 
-fn build_extension_provider_options_for_test(entries: &[&CatalogEntry]) -> Vec<TestResolvedProviderOption> {
+fn build_extension_provider_options_for_test(
+    entries: &[&CatalogEntry],
+) -> Vec<TestResolvedProviderOption> {
     let mut options = Vec::<TestResolvedProviderOption>::new();
     for entry in entries {
         let display_name = clean_extension_provider_label_for_test(entry);
@@ -333,7 +332,10 @@ fn reference_points_to_latest_for_test(reference: &str) -> bool {
 fn group_catalog_entries_for_test(entries: &[CatalogEntry]) -> Vec<(String, Option<String>)> {
     let mut grouped = Vec::<(String, Option<String>)>::new();
     for entry in entries {
-        let category = entry.category.clone().unwrap_or_else(|| "other".to_string());
+        let category = entry
+            .category
+            .clone()
+            .unwrap_or_else(|| "other".to_string());
         let description = entry.category_description.clone();
         if let Some((_, existing_description)) =
             grouped.iter_mut().find(|(name, _)| name == &category)
