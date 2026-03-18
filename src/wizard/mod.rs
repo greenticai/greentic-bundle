@@ -2229,11 +2229,13 @@ fn reference_points_to_latest(reference: &str) -> bool {
     reference.ends_with(":latest") || reference.ends_with("@latest")
 }
 
-/// Returns Vec of (category_id, category_label, category_description, entry_indices)
+/// (category_id, category_label, category_description, entry_indices)
+type CategoryGroup = (String, Option<String>, Option<String>, Vec<usize>);
+
 fn group_catalog_entries_by_category(
     entries: &[crate::catalog::registry::CatalogEntry],
-) -> Vec<(String, Option<String>, Option<String>, Vec<usize>)> {
-    let mut grouped = Vec::<(String, Option<String>, Option<String>, Vec<usize>)>::new();
+) -> Vec<CategoryGroup> {
+    let mut grouped = Vec::<CategoryGroup>::new();
     for (index, entry) in entries.iter().enumerate() {
         let category = entry
             .category
