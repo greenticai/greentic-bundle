@@ -11,6 +11,9 @@ permissions:
   contents: read
   packages: write
 
+env:
+  REGISTRY: ghcr.io
+
 jobs:
   publish-registry:
     name: Publish provider registry
@@ -24,8 +27,10 @@ jobs:
             | tar -xzf - -C /usr/local/bin oras
 
       - name: Login to GHCR
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | oras login ghcr.io -u "${{ github.actor }}" --password-stdin
+          echo "${GITHUB_TOKEN}" | oras login ghcr.io -u ${{ github.repository_owner }} --password-stdin
 
       - name: Validate JSON
         run: |
@@ -35,11 +40,11 @@ jobs:
       - name: Push provider registry to GHCR
         run: |
           cd registries
-          oras push ghcr.io/greenticai/registries/providers:latest \
+          oras push ghcr.io/${{ github.repository_owner }}/registries/providers:latest \
             --artifact-type application/vnd.greentic.registry.v1+json \
             providers.json:application/json
-          echo "✓ Published to ghcr.io/greenticai/registries/providers:latest"
+          echo "✓ Published to ghcr.io/${{ github.repository_owner }}/registries/providers:latest"
 
       - name: Verify push
         run: |
-          oras manifest fetch ghcr.io/greenticai/registries/providers:latest --pretty
+          oras manifest fetch ghcr.io/${{ github.repository_owner }}/registries/providers:latest --pretty
