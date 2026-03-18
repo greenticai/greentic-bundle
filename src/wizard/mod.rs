@@ -17,6 +17,7 @@ pub mod i18n;
 
 pub const WIZARD_ID: &str = "greentic-bundle.wizard.run";
 pub const ANSWER_SCHEMA_ID: &str = "greentic-bundle.wizard.answers";
+pub const DEFAULT_PROVIDER_REGISTRY: &str = "oci://ghcr.io/greenticai/registries/providers:latest";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "snake_case")]
@@ -2069,33 +2070,71 @@ fn prompt_access_target<R: BufRead, W: Write>(
     }
 }
 
+/// Resolves extension provider catalog entries.
+///
+/// If `remote_catalogs` contains explicit references, they are used.
+/// Otherwise, tries to fetch from OCI registry, falling back to bundled
+/// well-known catalog if the fetch fails (network error, timeout, etc.).
+///
+/// Returns (should_persist_catalog_ref, catalog_ref, entries).
+fn resolve_extension_provider_catalog(
+    output_dir: &Path,
+    remote_catalogs: &[String],
+) -> Result<(
+    bool,
+    Option<String>,
+    Vec<crate::catalog::registry::CatalogEntry>,
+)> {
+    // If explicit catalogs are provided, use them
+    if let Some(catalog_ref) = remote_catalogs.first() {
+        let resolution = crate::catalog::resolve::resolve_catalogs(
+            output_dir,
+            std::slice::from_ref(catalog_ref),
+            &crate::catalog::resolve::CatalogResolveOptions {
+                offline: crate::runtime::offline(),
+                write_cache: false,
+            },
+        )?;
+        return Ok((true, Some(catalog_ref.clone()), resolution.discovered_items));
+    }
+
+    // Check for bundled-only mode (used in tests and CI)
+    let use_bundled_only = std::env::var("GREENTIC_BUNDLE_USE_BUNDLED_CATALOG")
+        .map(|v| v == "1" || v.eq_ignore_ascii_case("true"))
+        .unwrap_or(false);
+
+    // No explicit catalogs - try OCI registry first, fall back to bundled
+    if !crate::runtime::offline() && !use_bundled_only {
+        let catalog_ref = DEFAULT_PROVIDER_REGISTRY.to_string();
+        match crate::catalog::resolve::resolve_catalogs(
+            output_dir,
+            std::slice::from_ref(&catalog_ref),
+            &crate::catalog::resolve::CatalogResolveOptions {
+                offline: false,
+                write_cache: false,
+            },
+        ) {
+            Ok(resolution) if !resolution.discovered_items.is_empty() => {
+                return Ok((true, Some(catalog_ref), resolution.discovered_items));
+            }
+            _ => {
+                // OCI fetch failed or returned empty, fall back to bundled
+            }
+        }
+    }
+
+    // Fall back to bundled well-known catalog
+    let entries = crate::catalog::registry::bundled_well_known_catalog_entries()?;
+    Ok((false, None, entries))
+}
+
 fn add_common_extension_provider<R: BufRead, W: Write>(
     input: &mut R,
     output: &mut W,
     state: &NormalizedRequest,
 ) -> Result<Option<ExtensionProviderEntry>> {
-    let (catalog_ref, persist_catalog_ref, entries) = match state.remote_catalogs.first().cloned() {
-        Some(catalog_ref) => {
-            let resolution = crate::catalog::resolve::resolve_catalogs(
-                &state.output_dir,
-                std::slice::from_ref(&catalog_ref),
-                &crate::catalog::resolve::CatalogResolveOptions {
-                    offline: crate::runtime::offline(),
-                    write_cache: false,
-                },
-            )?;
-            (
-                catalog_ref,
-                true,
-                resolution.discovered_items.into_iter().collect::<Vec<_>>(),
-            )
-        }
-        None => (
-            crate::catalog::registry::BUNDLED_WELL_KNOWN_SOURCE.to_string(),
-            false,
-            crate::catalog::registry::bundled_well_known_catalog_entries()?,
-        ),
-    };
+    let (persist_catalog_ref, catalog_ref, entries) =
+        resolve_extension_provider_catalog(&state.output_dir, &state.remote_catalogs)?;
     if entries.is_empty() {
         writeln!(output, "{}", crate::i18n::tr("wizard.error.empty_catalog"))?;
         return Ok(None);
@@ -2104,8 +2143,10 @@ fn add_common_extension_provider<R: BufRead, W: Write>(
     let category_key = if grouped_entries.len() > 1 {
         let labels = grouped_entries
             .iter()
-            .map(|(category, description, _)| {
-                format_extension_category_label(category, description.as_deref())
+            .map(|(category_id, category_label, description, _)| {
+                // Use category_label if available, otherwise fall back to category_id
+                let display_name = category_label.as_deref().unwrap_or(category_id);
+                format_extension_category_label(display_name, description.as_deref())
             })
             .collect::<Vec<_>>();
         let Some(index) = choose_named_index(input, output, "Choose extension category", &labels)?
@@ -2148,7 +2189,11 @@ fn add_common_extension_provider<R: BufRead, W: Write>(
         provider_id: entry.id.clone(),
         display_name: selected.display_name.clone(),
         version: inferred_reference_version(&entry.reference),
-        source_catalog: persist_catalog_ref.then_some(catalog_ref),
+        source_catalog: if persist_catalog_ref {
+            catalog_ref
+        } else {
+            None
+        },
         group: None,
     }))
 }
@@ -2229,25 +2274,32 @@ fn reference_points_to_latest(reference: &str) -> bool {
     reference.ends_with(":latest") || reference.ends_with("@latest")
 }
 
+/// (category_id, category_label, category_description, entry_indices)
+type CategoryGroup = (String, Option<String>, Option<String>, Vec<usize>);
+
 fn group_catalog_entries_by_category(
     entries: &[crate::catalog::registry::CatalogEntry],
-) -> Vec<(String, Option<String>, Vec<usize>)> {
-    let mut grouped = Vec::<(String, Option<String>, Vec<usize>)>::new();
+) -> Vec<CategoryGroup> {
+    let mut grouped = Vec::<CategoryGroup>::new();
     for (index, entry) in entries.iter().enumerate() {
         let category = entry
             .category
             .clone()
             .unwrap_or_else(|| "other".to_string());
+        let label = entry.category_label.clone();
         let description = entry.category_description.clone();
-        if let Some((_, existing_description, indices)) =
-            grouped.iter_mut().find(|(name, _, _)| name == &category)
+        if let Some((_, existing_label, existing_description, indices)) =
+            grouped.iter_mut().find(|(name, _, _, _)| name == &category)
         {
+            if existing_label.is_none() {
+                *existing_label = label.clone();
+            }
             if existing_description.is_none() {
                 *existing_description = description.clone();
             }
             indices.push(index);
         } else {
-            grouped.push((category, description, vec![index]));
+            grouped.push((category, label, description, vec![index]));
         }
     }
     grouped
@@ -3903,6 +3955,7 @@ mod tests {
         let pinned = CatalogEntry {
             id: "greentic.secrets.aws-sm.v0-4-25".to_string(),
             category: Some("secrets".to_string()),
+            category_label: None,
             category_description: None,
             label: Some("Greentic Secrets AWS SM (0.4.25)".to_string()),
             reference:
@@ -3913,6 +3966,7 @@ mod tests {
         let latest = CatalogEntry {
             id: "greentic.secrets.aws-sm.latest".to_string(),
             category: Some("secrets".to_string()),
+            category_label: None,
             category_description: None,
             label: Some("Greentic Secrets AWS SM (latest)".to_string()),
             reference:
@@ -3937,6 +3991,7 @@ mod tests {
         let latest = CatalogEntry {
             id: "x.latest".to_string(),
             category: None,
+            category_label: None,
             category_description: None,
             label: Some("Greentic Secrets AWS SM (latest)".to_string()),
             reference: "oci://ghcr.io/example/secrets:latest".to_string(),
@@ -3945,6 +4000,7 @@ mod tests {
         let semver = CatalogEntry {
             id: "x.0.4.25".to_string(),
             category: None,
+            category_label: None,
             category_description: None,
             label: Some("Greentic Secrets AWS SM (0.4.25)".to_string()),
             reference: "oci://ghcr.io/example/secrets:0.4.25".to_string(),
@@ -3953,6 +4009,7 @@ mod tests {
         let pr = CatalogEntry {
             id: "x.pr".to_string(),
             category: None,
+            category_label: None,
             category_description: None,
             label: Some("Greentic Messaging Dummy (PR version)".to_string()),
             reference: "oci://ghcr.io/example/messaging:<pr-version>".to_string(),
