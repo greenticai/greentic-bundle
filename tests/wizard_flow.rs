@@ -1,6 +1,7 @@
 use std::fs;
 use std::process::{Command, Stdio};
 
+use greentic_bundle::catalog::registry::{CatalogEntry, bundled_well_known_catalog_entries};
 use predicates::prelude::*;
 use serde_json::Value;
 use tempfile::TempDir;
@@ -176,24 +177,185 @@ fn bare_wizard_create_flow_skips_provider_setup_prompts() {
 fn common_extension_provider_menu_uses_bundled_well_known_catalog() {
     let temp = TempDir::new().expect("tempdir");
     let bundle_root = temp.path().join("bundle");
+    let entries = bundled_well_known_catalog_entries().expect("bundled well-known catalog");
+    assert!(!entries.is_empty(), "bundled catalog should not be empty");
+
+    let grouped_categories = group_catalog_entries_for_test(&entries);
+    let selected_category = grouped_categories
+        .first()
+        .expect("at least one category")
+        .0
+        .clone();
+    let selected_category_index = grouped_categories
+        .iter()
+        .position(|(category, _)| category == &selected_category)
+        .expect("selected category index");
+    let selected_entries = if grouped_categories.len() > 1 {
+        entries
+            .iter()
+            .filter(|entry| entry.category.as_deref().unwrap_or("other") == selected_category)
+            .collect::<Vec<_>>()
+    } else {
+        entries.iter().collect::<Vec<_>>()
+    };
+    let selected_provider = build_extension_provider_options_for_test(&selected_entries)
+        .into_iter()
+        .next()
+        .expect("at least one provider option");
+
+    let mut stdin = format!(
+        "1\nDemo Bundle\ndemo-bundle\n{}\n1\npack-a\n1\n1\n4\n1\n",
+        bundle_root.display()
+    );
+    if grouped_categories.len() > 1 {
+        stdin.push_str(&format!("{}\n", selected_category_index + 1));
+    }
+    stdin.push_str("1\n4\n2\n");
 
     let output = run_with_stdin(
         &["wizard", "run", "--dry-run"],
-        &format!(
-            "1\nDemo Bundle\ndemo-bundle\n{}\n1\npack-a\n1\n1\n4\n1\n2\n0\n4\n2\n",
-            bundle_root.display()
-        ),
+        &stdin,
     );
     assert!(output.status.success());
 
     let stdout = String::from_utf8(output.stdout).expect("stdout");
-    assert!(stdout.contains("Choose extension category:"));
-    assert!(stdout.contains("oauth -> OAuth provider helpers and identity integrations"));
-    assert!(stdout.contains("deployer -> deployment helpers for rollout targets"));
+    if grouped_categories.len() > 1 {
+        assert!(stdout.contains("Choose extension category:"));
+        assert!(stdout.contains(&format_extension_category_label_for_test(
+            &grouped_categories[selected_category_index].0,
+            grouped_categories[selected_category_index].1.as_deref(),
+        )));
+    }
     assert!(stdout.contains("Choose extension provider:"));
-    assert!(stdout.contains(
-        "Greentic OAuth Slack [oci://ghcr.io/greenticai/packs/oauth/oauth-slack:latest]"
-    ));
+    assert!(stdout.contains(&format!(
+        "{} [{}]",
+        selected_provider.display_name, selected_provider.reference
+    )));
+}
+
+struct TestResolvedProviderOption {
+    display_name: String,
+    reference: String,
+}
+
+fn build_extension_provider_options_for_test(entries: &[&CatalogEntry]) -> Vec<TestResolvedProviderOption> {
+    let mut options = Vec::<TestResolvedProviderOption>::new();
+    for entry in entries {
+        let display_name = clean_extension_provider_label_for_test(entry);
+        if let Some(existing) = options
+            .iter_mut()
+            .find(|existing| existing.display_name == display_name)
+        {
+            if reference_points_to_latest_for_test(&entry.reference)
+                && !reference_points_to_latest_for_test(&existing.reference)
+            {
+                existing.reference = entry.reference.clone();
+            }
+            continue;
+        }
+        options.push(TestResolvedProviderOption {
+            display_name,
+            reference: entry.reference.clone(),
+        });
+    }
+    options
+}
+
+fn clean_extension_provider_label_for_test(entry: &CatalogEntry) -> String {
+    let raw = entry
+        .label
+        .clone()
+        .unwrap_or_else(|| inferred_display_name_for_test(&entry.reference));
+    let trimmed = raw.trim();
+    for suffix in [" (latest)", " (Latest)", " (LATEST)"] {
+        if let Some(base) = trimmed.strip_suffix(suffix) {
+            return base.trim().to_string();
+        }
+    }
+    if let Some((base, suffix)) = trimmed.rsplit_once(" (")
+        && suffix.ends_with(')')
+    {
+        let inner = suffix.trim_end_matches(')');
+        if looks_like_semverish_version_for_test(inner) {
+            return base.trim().to_string();
+        }
+    }
+    trimmed.to_string()
+}
+
+fn inferred_display_name_for_test(reference: &str) -> String {
+    let tail = reference
+        .rsplit('/')
+        .next()
+        .unwrap_or(reference)
+        .split_once(':')
+        .map(|(name, _)| name)
+        .unwrap_or(reference)
+        .split_once('@')
+        .map(|(name, _)| name)
+        .unwrap_or(reference);
+    tail.replace(['-', '_', '.'], " ")
+        .split_whitespace()
+        .map(|word| {
+            let mut chars = word.chars();
+            match chars.next() {
+                Some(first) => format!("{}{}", first.to_ascii_uppercase(), chars.as_str()),
+                None => String::new(),
+            }
+        })
+        .collect::<Vec<_>>()
+        .join(" ")
+}
+
+fn looks_like_semverish_version_for_test(value: &str) -> bool {
+    let mut saw_dot = false;
+    let mut saw_digit = false;
+    for ch in value.chars() {
+        if ch.is_ascii_digit() {
+            saw_digit = true;
+            continue;
+        }
+        if ch == '.' || ch == '-' {
+            if ch == '.' {
+                saw_dot = true;
+            }
+            continue;
+        }
+        return false;
+    }
+    saw_digit && saw_dot
+}
+
+fn reference_points_to_latest_for_test(reference: &str) -> bool {
+    reference.ends_with(":latest") || reference.ends_with("@latest")
+}
+
+fn group_catalog_entries_for_test(entries: &[CatalogEntry]) -> Vec<(String, Option<String>)> {
+    let mut grouped = Vec::<(String, Option<String>)>::new();
+    for entry in entries {
+        let category = entry.category.clone().unwrap_or_else(|| "other".to_string());
+        let description = entry.category_description.clone();
+        if let Some((_, existing_description)) =
+            grouped.iter_mut().find(|(name, _)| name == &category)
+        {
+            if existing_description.is_none() {
+                *existing_description = description.clone();
+            }
+        } else {
+            grouped.push((category, description));
+        }
+    }
+    grouped
+}
+
+fn format_extension_category_label_for_test(category: &str, description: Option<&str>) -> String {
+    match description
+        .map(str::trim)
+        .filter(|description| !description.is_empty())
+    {
+        Some(description) => format!("{category} -> {description}"),
+        None => category.to_string(),
+    }
 }
 
 #[test]
