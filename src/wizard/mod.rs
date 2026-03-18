@@ -2089,7 +2089,10 @@ fn add_common_extension_provider<R: BufRead, W: Write>(
                 write_cache: false,
             },
         )?;
-        (true, resolution.discovered_items.into_iter().collect::<Vec<_>>())
+        (
+            true,
+            resolution.discovered_items.into_iter().collect::<Vec<_>>(),
+        )
     };
     if entries.is_empty() {
         writeln!(output, "{}", crate::i18n::tr("wizard.error.empty_catalog"))?;

@@ -156,7 +156,11 @@ pub fn load_catalog_entries(bytes: &[u8], source: &str) -> Result<Vec<CatalogEnt
             .with_context(|| format!("parse OCI provider registry file {source}"))?;
         // Build category lookup for labels and descriptions
         let category_map: std::collections::HashMap<String, &OciProviderRegistryCategory> =
-            registry.categories.iter().map(|c| (c.id.clone(), c)).collect();
+            registry
+                .categories
+                .iter()
+                .map(|c| (c.id.clone(), c))
+                .collect();
         return Ok(registry
             .items
             .into_iter()
@@ -251,11 +255,7 @@ impl CatalogEntry {
         Self {
             category: Some(category.to_string()),
             // For legacy format, use category name as label if no explicit label provided
-            category_label: Some(
-                category_label
-                    .unwrap_or(category)
-                    .to_string(),
-            ),
+            category_label: Some(category_label.unwrap_or(category).to_string()),
             category_description: category_description.map(ToString::to_string),
             ..Self::from(item)
         }
