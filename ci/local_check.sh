@@ -129,7 +129,7 @@ if [ "$PACKAGE_ONLY" -eq 0 ]; then
   cargo clippy --all-targets --all-features -- -D warnings
 
   header "cargo test"
-  cargo test --all-features
+  GREENTIC_BUNDLE_USE_BUNDLED_CATALOG=1 cargo test --all-features
 
   header "cargo build"
   cargo build --all-features
