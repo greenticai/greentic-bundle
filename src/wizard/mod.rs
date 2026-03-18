@@ -2125,15 +2125,10 @@ fn add_common_extension_provider<R: BufRead, W: Write>(
                 .collect::<Vec<_>>()
         })
         .unwrap_or_else(|| entries.iter().collect::<Vec<_>>());
-    let labels = selected_entries
+    let options = build_extension_provider_options(&selected_entries);
+    let labels = options
         .iter()
-        .map(|entry| {
-            let group = entry
-                .label
-                .clone()
-                .unwrap_or_else(|| inferred_display_name(&entry.reference));
-            format!("{} [{}]", group, entry.reference)
-        })
+        .map(|option| option.display_name.clone())
         .collect::<Vec<_>>();
     let Some(index) = choose_named_index(
         input,
@@ -2144,20 +2139,94 @@ fn add_common_extension_provider<R: BufRead, W: Write>(
     else {
         return Ok(None);
     };
-    let entry = selected_entries[index];
+    let selected = &options[index];
+    let entry = selected.entry;
     let reference = resolve_catalog_entry_reference(input, output, &entry.reference)?;
     Ok(Some(ExtensionProviderEntry {
         detected_kind: detected_reference_kind(&state.output_dir, &reference).to_string(),
         reference,
         provider_id: entry.id.clone(),
-        display_name: entry
-            .label
-            .clone()
-            .unwrap_or_else(|| inferred_display_name(&entry.reference)),
+        display_name: selected.display_name.clone(),
         version: inferred_reference_version(&entry.reference),
         source_catalog: persist_catalog_ref.then_some(catalog_ref),
         group: None,
     }))
+}
+
+fn build_extension_provider_options<'a>(
+    entries: &'a [&'a crate::catalog::registry::CatalogEntry],
+) -> Vec<ResolvedExtensionProviderOption<'a>> {
+    let mut options = Vec::<ResolvedExtensionProviderOption<'a>>::new();
+    for entry in entries {
+        let display_name = clean_extension_provider_label(entry);
+        if let Some(existing) = options
+            .iter_mut()
+            .find(|existing| existing.display_name == display_name)
+        {
+            if reference_points_to_latest(&entry.reference)
+                && !reference_points_to_latest(&existing.entry.reference)
+            {
+                existing.entry = entry;
+            }
+            continue;
+        }
+        options.push(ResolvedExtensionProviderOption {
+            entry,
+            display_name,
+        });
+    }
+    options
+}
+
+#[derive(Clone)]
+struct ResolvedExtensionProviderOption<'a> {
+    entry: &'a crate::catalog::registry::CatalogEntry,
+    display_name: String,
+}
+
+fn clean_extension_provider_label(entry: &crate::catalog::registry::CatalogEntry) -> String {
+    let raw = entry
+        .label
+        .clone()
+        .unwrap_or_else(|| inferred_display_name(&entry.reference));
+    let trimmed = raw.trim();
+    for suffix in [" (latest)", " (Latest)", " (LATEST)"] {
+        if let Some(base) = trimmed.strip_suffix(suffix) {
+            return base.trim().to_string();
+        }
+    }
+    if let Some((base, suffix)) = trimmed.rsplit_once(" (")
+        && suffix.ends_with(')')
+    {
+        let inner = suffix.trim_end_matches(')');
+        if looks_like_semverish_version(inner) {
+            return base.trim().to_string();
+        }
+    }
+    trimmed.to_string()
+}
+
+fn looks_like_semverish_version(value: &str) -> bool {
+    let mut saw_dot = false;
+    let mut saw_digit = false;
+    for ch in value.chars() {
+        if ch.is_ascii_digit() {
+            saw_digit = true;
+            continue;
+        }
+        if ch == '.' || ch == '-' {
+            if ch == '.' {
+                saw_dot = true;
+            }
+            continue;
+        }
+        return false;
+    }
+    saw_digit && saw_dot
+}
+
+fn reference_points_to_latest(reference: &str) -> bool {
+    reference.ends_with(":latest") || reference.ends_with("@latest")
 }
 
 fn group_catalog_entries_by_category(
@@ -3807,7 +3876,12 @@ fn discover_setup_specs(
 mod tests {
     use std::io::Cursor;
 
-    use super::{RootMenuZeroAction, choose_interactive_menu};
+    use crate::catalog::registry::CatalogEntry;
+
+    use super::{
+        RootMenuZeroAction, build_extension_provider_options, choose_interactive_menu,
+        clean_extension_provider_label,
+    };
 
     #[test]
     fn root_menu_shows_back_and_returns_none_for_embedded_wizards() {
@@ -3822,5 +3896,80 @@ mod tests {
         let rendered = String::from_utf8(output).expect("utf8");
         assert!(rendered.contains("0. Back"));
         assert!(!rendered.contains("0. Exit"));
+    }
+
+    #[test]
+    fn extension_provider_options_dedupe_and_prefer_latest_reference() {
+        let pinned = CatalogEntry {
+            id: "greentic.secrets.aws-sm.v0-4-25".to_string(),
+            category: Some("secrets".to_string()),
+            category_description: None,
+            label: Some("Greentic Secrets AWS SM (0.4.25)".to_string()),
+            reference:
+                "oci://ghcr.io/greenticai/packs/secrets/greentic.secrets.aws-sm.gtpack:0.4.25"
+                    .to_string(),
+            setup: None,
+        };
+        let latest = CatalogEntry {
+            id: "greentic.secrets.aws-sm.latest".to_string(),
+            category: Some("secrets".to_string()),
+            category_description: None,
+            label: Some("Greentic Secrets AWS SM (latest)".to_string()),
+            reference:
+                "oci://ghcr.io/greenticai/packs/secrets/greentic.secrets.aws-sm.gtpack:latest"
+                    .to_string(),
+            setup: None,
+        };
+        let entries = vec![&pinned, &latest];
+        let options = build_extension_provider_options(&entries);
+
+        assert_eq!(options.len(), 1);
+        assert_eq!(options[0].display_name, "Greentic Secrets AWS SM");
+        assert_eq!(options[0].entry.id, "greentic.secrets.aws-sm.latest");
+        assert_eq!(
+            options[0].entry.reference,
+            "oci://ghcr.io/greenticai/packs/secrets/greentic.secrets.aws-sm.gtpack:latest"
+        );
+    }
+
+    #[test]
+    fn clean_extension_provider_label_removes_latest_and_semver_suffixes() {
+        let latest = CatalogEntry {
+            id: "x.latest".to_string(),
+            category: None,
+            category_description: None,
+            label: Some("Greentic Secrets AWS SM (latest)".to_string()),
+            reference: "oci://ghcr.io/example/secrets:latest".to_string(),
+            setup: None,
+        };
+        let semver = CatalogEntry {
+            id: "x.0.4.25".to_string(),
+            category: None,
+            category_description: None,
+            label: Some("Greentic Secrets AWS SM (0.4.25)".to_string()),
+            reference: "oci://ghcr.io/example/secrets:0.4.25".to_string(),
+            setup: None,
+        };
+        let pr = CatalogEntry {
+            id: "x.pr".to_string(),
+            category: None,
+            category_description: None,
+            label: Some("Greentic Messaging Dummy (PR version)".to_string()),
+            reference: "oci://ghcr.io/example/messaging:<pr-version>".to_string(),
+            setup: None,
+        };
+
+        assert_eq!(
+            clean_extension_provider_label(&latest),
+            "Greentic Secrets AWS SM"
+        );
+        assert_eq!(
+            clean_extension_provider_label(&semver),
+            "Greentic Secrets AWS SM"
+        );
+        assert_eq!(
+            clean_extension_provider_label(&pr),
+            "Greentic Messaging Dummy (PR version)"
+        );
     }
 }
