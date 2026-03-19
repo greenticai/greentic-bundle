@@ -50,4 +50,7 @@ jobs:
         with:
           components: rustfmt, clippy
       - uses: Swatinem/rust-cache@v2
+      - name: Validate crate packaging includes bundled assets
+        if: github.event_name == 'pull_request'
+        run: cargo package --allow-dirty --no-verify
       - run: bash ci/local_check.sh --package-only
