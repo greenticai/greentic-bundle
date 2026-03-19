@@ -227,7 +227,7 @@
         "i18n_key": "provider.secrets.aws-sm",
         "fallback": "AWS Secrets Manager"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/secrets/greentic.secrets.aws-sm.gtpack:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/secret/greentic.secrets.aws-sm.gtpack:latest"
     },
     {
       "id": "secrets-azure-kv",
@@ -236,7 +236,7 @@
         "i18n_key": "provider.secrets.azure-kv",
         "fallback": "Azure Key Vault"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/secrets/greentic.secrets.azure-kv.gtpack:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/secret/greentic.secrets.azure-kv.gtpack:latest"
     },
     {
       "id": "secrets-gcp-sm",
@@ -245,7 +245,7 @@
         "i18n_key": "provider.secrets.gcp-sm",
         "fallback": "GCP Secret Manager"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/secrets/greentic.secrets.gcp-sm.gtpack:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/secret/greentic.secrets.gcp-sm.gtpack:latest"
     },
     {
       "id": "secrets-k8s",
@@ -254,7 +254,16 @@
         "i18n_key": "provider.secrets.k8s",
         "fallback": "Kubernetes Secrets"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/secrets/greentic.secrets.k8s.gtpack:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/secret/greentic.secrets.k8s.gtpack:latest"
+    },
+    {
+      "id": "secrets-providers",
+      "category": "secrets",
+      "label": {
+        "i18n_key": "provider.secrets.providers",
+        "fallback": "Secrets Providers"
+      },
+      "ref": "oci://ghcr.io/greenticai/packs/secret/greentic.secrets.providers.gtpack:latest"
     },
     {
       "id": "secrets-vault",
@@ -263,7 +272,7 @@
         "i18n_key": "provider.secrets.vault",
         "fallback": "HashiCorp Vault"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/secrets/greentic.secrets.vault-kv.gtpack:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/secret/greentic.secrets.vault-kv.gtpack:latest"
     },
     {
       "id": "deployer-serverless",

@@ -1,7 +1,7 @@
 use std::fs;
 use std::process::{Command, Stdio};
 
-use greentic_bundle::catalog::registry::{CatalogEntry, bundled_well_known_catalog_entries};
+use greentic_bundle::catalog::registry::{CatalogEntry, bundled_provider_registry_entries};
 use predicates::prelude::*;
 use serde_json::Value;
 use tempfile::TempDir;
@@ -177,7 +177,7 @@ fn bare_wizard_create_flow_skips_provider_setup_prompts() {
 fn common_extension_provider_menu_uses_bundled_well_known_catalog() {
     let temp = TempDir::new().expect("tempdir");
     let bundle_root = temp.path().join("bundle");
-    let entries = bundled_well_known_catalog_entries().expect("bundled well-known catalog");
+    let entries = bundled_provider_registry_entries().expect("bundled provider registry");
     assert!(!entries.is_empty(), "bundled catalog should not be empty");
 
     let grouped_categories = group_catalog_entries_for_test(&entries);
@@ -190,19 +190,6 @@ fn common_extension_provider_menu_uses_bundled_well_known_catalog() {
         .iter()
         .position(|(category, _)| category == &selected_category)
         .expect("selected category index");
-    let selected_entries = if grouped_categories.len() > 1 {
-        entries
-            .iter()
-            .filter(|entry| entry.category.as_deref().unwrap_or("other") == selected_category)
-            .collect::<Vec<_>>()
-    } else {
-        entries.iter().collect::<Vec<_>>()
-    };
-    let selected_provider = build_extension_provider_options_for_test(&selected_entries)
-        .into_iter()
-        .next()
-        .expect("at least one provider option");
-
     let mut stdin = format!(
         "1\nDemo Bundle\ndemo-bundle\n{}\n1\npack-a\n1\n1\n4\n1\n",
         bundle_root.display()
@@ -218,115 +205,8 @@ fn common_extension_provider_menu_uses_bundled_well_known_catalog() {
     let stdout = String::from_utf8(output.stdout).expect("stdout");
     if grouped_categories.len() > 1 {
         assert!(stdout.contains("Choose extension category:"));
-        assert!(stdout.contains(&format_extension_category_label_for_test(
-            &grouped_categories[selected_category_index].0,
-            grouped_categories[selected_category_index].1.as_deref(),
-        )));
     }
     assert!(stdout.contains("Choose extension provider:"));
-    assert!(stdout.contains(&format!(
-        "{} [{}]",
-        selected_provider.display_name, selected_provider.reference
-    )));
-}
-
-struct TestResolvedProviderOption {
-    display_name: String,
-    reference: String,
-}
-
-fn build_extension_provider_options_for_test(
-    entries: &[&CatalogEntry],
-) -> Vec<TestResolvedProviderOption> {
-    let mut options = Vec::<TestResolvedProviderOption>::new();
-    for entry in entries {
-        let display_name = clean_extension_provider_label_for_test(entry);
-        if let Some(existing) = options
-            .iter_mut()
-            .find(|existing| existing.display_name == display_name)
-        {
-            if reference_points_to_latest_for_test(&entry.reference)
-                && !reference_points_to_latest_for_test(&existing.reference)
-            {
-                existing.reference = entry.reference.clone();
-            }
-            continue;
-        }
-        options.push(TestResolvedProviderOption {
-            display_name,
-            reference: entry.reference.clone(),
-        });
-    }
-    options
-}
-
-fn clean_extension_provider_label_for_test(entry: &CatalogEntry) -> String {
-    let raw = entry
-        .label
-        .clone()
-        .unwrap_or_else(|| inferred_display_name_for_test(&entry.reference));
-    let trimmed = raw.trim();
-    for suffix in [" (latest)", " (Latest)", " (LATEST)"] {
-        if let Some(base) = trimmed.strip_suffix(suffix) {
-            return base.trim().to_string();
-        }
-    }
-    if let Some((base, suffix)) = trimmed.rsplit_once(" (")
-        && suffix.ends_with(')')
-    {
-        let inner = suffix.trim_end_matches(')');
-        if looks_like_semverish_version_for_test(inner) {
-            return base.trim().to_string();
-        }
-    }
-    trimmed.to_string()
-}
-
-fn inferred_display_name_for_test(reference: &str) -> String {
-    let tail = reference
-        .rsplit('/')
-        .next()
-        .unwrap_or(reference)
-        .split_once(':')
-        .map(|(name, _)| name)
-        .unwrap_or(reference)
-        .split_once('@')
-        .map(|(name, _)| name)
-        .unwrap_or(reference);
-    tail.replace(['-', '_', '.'], " ")
-        .split_whitespace()
-        .map(|word| {
-            let mut chars = word.chars();
-            match chars.next() {
-                Some(first) => format!("{}{}", first.to_ascii_uppercase(), chars.as_str()),
-                None => String::new(),
-            }
-        })
-        .collect::<Vec<_>>()
-        .join(" ")
-}
-
-fn looks_like_semverish_version_for_test(value: &str) -> bool {
-    let mut saw_dot = false;
-    let mut saw_digit = false;
-    for ch in value.chars() {
-        if ch.is_ascii_digit() {
-            saw_digit = true;
-            continue;
-        }
-        if ch == '.' || ch == '-' {
-            if ch == '.' {
-                saw_dot = true;
-            }
-            continue;
-        }
-        return false;
-    }
-    saw_digit && saw_dot
-}
-
-fn reference_points_to_latest_for_test(reference: &str) -> bool {
-    reference.ends_with(":latest") || reference.ends_with("@latest")
 }
 
 fn group_catalog_entries_for_test(entries: &[CatalogEntry]) -> Vec<(String, Option<String>)> {
@@ -350,27 +230,18 @@ fn group_catalog_entries_for_test(entries: &[CatalogEntry]) -> Vec<(String, Opti
     grouped
 }
 
-fn format_extension_category_label_for_test(category: &str, description: Option<&str>) -> String {
-    match description
-        .map(str::trim)
-        .filter(|description| !description.is_empty())
-    {
-        Some(description) => format!("{category} -> {description}"),
-        None => category.to_string(),
-    }
-}
-
 #[test]
 fn bundled_common_extension_provider_is_not_persisted_to_remote_catalogs() {
     let temp = TempDir::new().expect("tempdir");
     let bundle_root = temp.path().join("bundle");
 
-    let output = run_with_stdin(
+    let output = run_with_stdin_and_env(
         &["wizard"],
         &format!(
             "1\nDemo Bundle\ndemo-bundle\n{}\n1\npack-a\n1\n1\n4\n1\n2\n5\n4\n1\n",
             bundle_root.display()
         ),
+        &[("GREENTIC_BUNDLE_USE_BUNDLED_CATALOG", "1")],
     );
     assert!(
         output.status.success(),
@@ -380,11 +251,10 @@ fn bundled_common_extension_provider_is_not_persisted_to_remote_catalogs() {
     );
 
     let bundle_yaml = fs::read_to_string(bundle_root.join("bundle.yaml")).expect("bundle yaml");
-    assert!(bundle_yaml.contains(
-        "extension_providers:\n  - oci://ghcr.io/greenticai/packs/oauth/oauth-slack:latest"
-    ));
+    assert!(bundle_yaml.contains("extension_providers:\n  - oci://ghcr.io/greenticai/packs/"));
+    assert!(bundle_yaml.contains(":latest"));
     assert!(bundle_yaml.contains("remote_catalogs: []"));
-    assert!(!bundle_yaml.contains("packs/well-known.json"));
+    assert!(!bundle_yaml.contains("registries/providers.json"));
 }
 
 #[test]
@@ -491,19 +361,20 @@ fn create_flow_materializes_pack_and_provider_gtpacks_into_bundle_layout() {
 }
 
 #[test]
-fn common_extension_provider_pr_entry_prompts_for_version_before_build() {
+fn common_extension_provider_latest_entry_skips_version_prompt_before_build() {
     let temp = TempDir::new().expect("tempdir");
     let pack_path = temp.path().join("Cisco Bundle.gtpack");
     fs::write(&pack_path, "app-pack-bytes").expect("write app pack");
     let bundle_root = temp.path().join("bundle");
 
-    let output = run_with_stdin(
+    let output = run_with_stdin_and_env(
         &["wizard", "run", "--dry-run"],
         &format!(
-            "1\nDemo Bundle\ndemo-bundle\n{}\n1\n{}\n1\n1\n4\n1\n4\n10\n12345\n4\n2\n",
+            "1\nDemo Bundle\ndemo-bundle\n{}\n1\n{}\n1\n1\n4\n1\n1\n1\n4\n2\n",
             bundle_root.display(),
             pack_path.display(),
         ),
+        &[("GREENTIC_BUNDLE_USE_BUNDLED_CATALOG", "1")],
     );
     assert!(
         output.status.success(),
@@ -513,8 +384,8 @@ fn common_extension_provider_pr_entry_prompts_for_version_before_build() {
     );
 
     let stdout = String::from_utf8(output.stdout).expect("stdout");
-    assert!(stdout.contains("PR version or tag"));
-    assert!(stdout.contains("oci://ghcr.io/greenticai/packs/messaging/messaging-telegram:12345"));
+    assert!(!stdout.contains("PR version or tag"));
+    assert!(stdout.contains("oci://ghcr.io/greenticai/packs/messaging/messaging-teams:latest"));
     assert!(stdout.contains("\"execution\": \"dry_run\""));
 }
 

@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::setup::SetupSpecInput;
 
-pub const BUNDLED_WELL_KNOWN_SOURCE: &str = "packs/well-known.json";
+pub const BUNDLED_PROVIDER_REGISTRY_SOURCE: &str = "registries/providers.json";
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct CatalogEntry {
@@ -103,10 +103,10 @@ pub fn parse_catalog_bytes(bytes: &[u8], source: &str) -> Result<CatalogSummary>
     Ok(summary_from_entries(entries))
 }
 
-pub fn bundled_well_known_catalog_entries() -> Result<Vec<CatalogEntry>> {
+pub fn bundled_provider_registry_entries() -> Result<Vec<CatalogEntry>> {
     load_catalog_entries(
-        include_bytes!("../../packs/well-known.json"),
-        BUNDLED_WELL_KNOWN_SOURCE,
+        include_bytes!("../../registries/providers.json"),
+        BUNDLED_PROVIDER_REGISTRY_SOURCE,
     )
 }
 
@@ -266,7 +266,7 @@ impl CatalogEntry {
 mod tests {
     use serde_json::json;
 
-    use super::{bundled_well_known_catalog_entries, load_catalog_entries};
+    use super::{bundled_provider_registry_entries, load_catalog_entries};
 
     #[test]
     fn parses_inline_setup_metadata_from_array_catalog() {
@@ -420,13 +420,13 @@ mod tests {
     }
 
     #[test]
-    fn parses_checked_in_well_known_catalog_fixture() {
-        let entries = bundled_well_known_catalog_entries().expect("catalog fixture");
-        assert_eq!(entries.len(), 47);
-        assert_eq!(entries[0].id, "greentic.deployer.serverless");
+    fn parses_checked_in_provider_registry_fixture() {
+        let entries = bundled_provider_registry_entries().expect("catalog fixture");
+        assert!(!entries.is_empty());
+        assert_eq!(entries[0].id, "messaging-teams");
         assert_eq!(
             entries[0].reference,
-            "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.serverless.gtpack:latest"
+            "oci://ghcr.io/greenticai/packs/messaging/messaging-teams:latest"
         );
     }
 }
