@@ -55,6 +55,17 @@
         "i18n_key": "category.deployer.description",
         "fallback": "Deployment helpers for rollout targets"
       }
+    },
+    {
+      "id": "state",
+      "label": {
+        "i18n_key": "category.state",
+        "fallback": "State"
+      },
+      "description": {
+        "i18n_key": "category.state.description",
+        "fallback": "Session state storage providers"
+      }
     }
   ],
   "items": [
@@ -93,6 +104,15 @@
         "fallback": "WebChat"
       },
       "ref": "oci://ghcr.io/greenticai/packs/messaging/messaging-webchat:latest"
+    },
+    {
+      "id": "messaging-webchat-gui",
+      "category": "messaging",
+      "label": {
+        "i18n_key": "provider.messaging.webchat-gui",
+        "fallback": "WebChat (GUI)"
+      },
+      "ref": "oci://ghcr.io/greenticai/packs/messaging/messaging-webchat-gui:latest"
     },
     {
       "id": "messaging-whatsapp",
@@ -336,6 +356,24 @@
         "fallback": "Terraform"
       },
       "ref": "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.terraform.gtpack:latest"
+    },
+    {
+      "id": "state-memory",
+      "category": "state",
+      "label": {
+        "i18n_key": "provider.state.memory",
+        "fallback": "In-Memory State"
+      },
+      "ref": "oci://ghcr.io/greenticai/packs/state/state-memory:latest"
+    },
+    {
+      "id": "state-redis",
+      "category": "state",
+      "label": {
+        "i18n_key": "provider.state.redis",
+        "fallback": "Redis State"
+      },
+      "ref": "oci://ghcr.io/greenticai/packs/state/state-redis:latest"
     }
   ]
 }
