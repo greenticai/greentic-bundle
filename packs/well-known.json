@@ -1,0 +1,361 @@
+[
+  {
+    "category": "deployer",
+    "description": "deployment helpers for rollout targets",
+    "items": [
+      {
+        "id": "greentic.deployer.serverless",
+        "label": {
+          "fallback": "Greentic Deployer Serverless"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.serverless.gtpack:latest"
+      },
+      {
+        "id": "greentic.deployer.juju.machine",
+        "label": {
+          "fallback": "Greentic Deployer Juju Machine"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.juju.machine.gtpack:latest"
+      },
+      {
+        "id": "greentic.deployer.juju.k8s",
+        "label": {
+          "fallback": "Greentic Deployer Juju K8s"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.juju.k8s.gtpack:latest"
+      },
+      {
+        "id": "greentic.deployer.snap",
+        "label": {
+          "fallback": "Greentic Deployer Snap"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.snap.gtpack:latest"
+      },
+      {
+        "id": "greentic.deployer.k8s.raw",
+        "label": {
+          "fallback": "Greentic  Deployer K8s Raw"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.k8s.raw.gtpack:latest"
+      },
+      {
+        "id": "greentic.deployer.helm",
+        "label": {
+          "fallback": "Greentic  Deployer Helm"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.helm.gtpack:latest"
+      },
+      {
+        "id": "greentic.deployer.terraform",
+        "label": {
+          "fallback": "Greentic  Deployer Terraform"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.terraform.gtpack:latest"
+      }
+    ]
+  },
+  {
+    "category": "oauth",
+    "description": "OAuth provider helpers and identity integrations",
+    "items": [
+      {
+        "id": "greentic.oauth.github",
+        "label": {
+          "fallback": "Greentic OAuth GitHub"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/oauth/oauth-github:latest"
+      },
+      {
+        "id": "greentic.oauth.google",
+        "label": {
+          "fallback": "Greentic OAuth Google"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/oauth/oauth-google:latest"
+      },
+      {
+        "id": "greentic.oauth.microsoft-graph",
+        "label": {
+          "fallback": "Greentic OAuth Microsoft Graph"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/oauth/oauth-microsoft-graph:latest"
+      },
+      {
+        "id": "greentic.oauth.oidc-generic",
+        "label": {
+          "fallback": "Greentic OAuth Generic OIDC"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/oauth/oauth-oidc-generic:latest"
+      },
+      {
+        "id": "greentic.oauth.slack",
+        "label": {
+          "fallback": "Greentic OAuth Slack"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/oauth/oauth-slack:latest"
+      }
+    ]
+  },
+  {
+    "category": "events",
+    "description": "event sources and delivery helpers",
+    "items": [
+      {
+        "id": "greentic.events.email",
+        "label": {
+          "fallback": "Greentic Events Email"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/events/events-email:latest"
+      },
+      {
+        "id": "greentic.events.provider.dummy",
+        "label": {
+          "fallback": "Greentic Events Dummy"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/events/events-dummy:latest"
+      },
+      {
+        "id": "greentic.events.email.sendgrid",
+        "label": {
+          "fallback": "Greentic Events Email SendGrid"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/events/events-email-sendgrid:latest"
+      },
+      {
+        "id": "greentic.events.sms",
+        "label": {
+          "fallback": "Greentic Events SMS"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/events/events-sms:latest"
+      },
+      {
+        "id": "greentic.events.sms.twilio",
+        "label": {
+          "fallback": "Greentic Events SMS Twilio"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/events/events-sms-twilio:latest"
+      },
+      {
+        "id": "greentic.events.timer",
+        "label": {
+          "fallback": "Greentic Events Timer"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/events/events-timer:latest"
+      },
+      {
+        "id": "greentic.events.webhook",
+        "label": {
+          "fallback": "Greentic Events Webhook"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/events/events-webhook:latest"
+      }
+    ]
+  },
+  {
+    "category": "messaging",
+    "description": "bridges the Greentic operator to an external messaging service",
+    "items": [
+      {
+        "id": "greentic.messaging.dummy.latest",
+        "label": {
+          "fallback": "Greentic Messaging Dummy (latest)"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/messaging/messaging-dummy:latest"
+      },
+      {
+        "id": "greentic.messaging.dummy.pr-version",
+        "label": {
+          "fallback": "Greentic Messaging Dummy (PR version)"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/messaging/messaging-dummy:0.4.36-local.1"
+      },
+      {
+        "id": "greentic.messaging.email.latest",
+        "label": {
+          "fallback": "Greentic Messaging Email (latest)"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/messaging/messaging-email:latest"
+      },
+      {
+        "id": "greentic.messaging.email.pr-version",
+        "label": {
+          "fallback": "Greentic Messaging Email (PR version)"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/messaging/messaging-email:0.4.36-local.1"
+      },
+      {
+        "id": "greentic.messaging.slack.latest",
+        "label": {
+          "fallback": "Greentic Messaging Slack (latest)"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/messaging/messaging-slack:latest"
+      },
+      {
+        "id": "greentic.messaging.slack.pr-version",
+        "label": {
+          "fallback": "Greentic Messaging Slack (PR version)"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/messaging/messaging-slack:0.4.36-local.1"
+      },
+      {
+        "id": "greentic.messaging.teams.latest",
+        "label": {
+          "fallback": "Greentic Messaging Teams (latest)"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/messaging/messaging-teams:latest"
+      },
+      {
+        "id": "greentic.messaging.teams.pr-version",
+        "label": {
+          "fallback": "Greentic Messaging Teams (PR version)"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/messaging/messaging-teams:0.4.36-local.1"
+      },
+      {
+        "id": "greentic.messaging.telegram.latest",
+        "label": {
+          "fallback": "Greentic Messaging Telegram (latest)"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/messaging/messaging-telegram:latest"
+      },
+      {
+        "id": "greentic.messaging.telegram.pr-version",
+        "label": {
+          "fallback": "Greentic Messaging Telegram (PR version)"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/messaging/messaging-telegram:0.4.36-local.1"
+      },
+      {
+        "id": "greentic.messaging.webchat.latest",
+        "label": {
+          "fallback": "Greentic Messaging Webchat (latest)"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/messaging/messaging-webchat:latest"
+      },
+      {
+        "id": "greentic.messaging.webchat.pr-version",
+        "label": {
+          "fallback": "Greentic Messaging Webchat (PR version)"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/messaging/messaging-webchat:0.4.36-local.1"
+      },
+      {
+        "id": "greentic.messaging.webex.latest",
+        "label": {
+          "fallback": "Greentic Messaging Webex (latest)"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/messaging/messaging-webex:latest"
+      },
+      {
+        "id": "greentic.messaging.webex.pr-version",
+        "label": {
+          "fallback": "Greentic Messaging Webex (PR version)"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/messaging/messaging-webex:0.4.36-local.1"
+      },
+      {
+        "id": "greentic.messaging.whatsapp.latest",
+        "label": {
+          "fallback": "Greentic Messaging WhatsApp (latest)"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/messaging/messaging-whatsapp:latest"
+      },
+      {
+        "id": "greentic.messaging.whatsapp.pr-version",
+        "label": {
+          "fallback": "Greentic Messaging WhatsApp (PR version)"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/messaging/messaging-whatsapp:0.4.36-local.1"
+      }
+    ]
+  },
+  {
+    "category": "secrets",
+    "description": "Secrets runtime and broker access",
+    "items": [
+      {
+        "id": "greentic.secrets.aws-sm.v0-4-26",
+        "label": {
+          "fallback": "Greentic Secrets AWS SM (0.4.26)"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/secret/greentic.secrets.aws-sm.gtpack:0.4.26"
+      },
+      {
+        "id": "greentic.secrets.aws-sm.latest",
+        "label": {
+          "fallback": "Greentic Secrets AWS SM (latest)"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/secret/greentic.secrets.aws-sm.gtpack:latest"
+      },
+      {
+        "id": "greentic.secrets.azure-kv.v0-4-26",
+        "label": {
+          "fallback": "Greentic Secrets Azure KV (0.4.26)"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/secret/greentic.secrets.azure-kv.gtpack:0.4.26"
+      },
+      {
+        "id": "greentic.secrets.azure-kv.latest",
+        "label": {
+          "fallback": "Greentic Secrets Azure KV (latest)"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/secret/greentic.secrets.azure-kv.gtpack:latest"
+      },
+      {
+        "id": "greentic.secrets.gcp-sm.v0-4-26",
+        "label": {
+          "fallback": "Greentic Secrets GCP SM (0.4.26)"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/secret/greentic.secrets.gcp-sm.gtpack:0.4.26"
+      },
+      {
+        "id": "greentic.secrets.gcp-sm.latest",
+        "label": {
+          "fallback": "Greentic Secrets GCP SM (latest)"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/secret/greentic.secrets.gcp-sm.gtpack:latest"
+      },
+      {
+        "id": "greentic.secrets.k8s.v0-4-26",
+        "label": {
+          "fallback": "Greentic Secrets K8s (0.4.26)"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/secret/greentic.secrets.k8s.gtpack:0.4.26"
+      },
+      {
+        "id": "greentic.secrets.k8s.latest",
+        "label": {
+          "fallback": "Greentic Secrets K8s (latest)"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/secret/greentic.secrets.k8s.gtpack:latest"
+      },
+      {
+        "id": "greentic.secrets.providers.v0-4-26",
+        "label": {
+          "fallback": "Greentic Secrets Providers (0.4.26)"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/secret/greentic.secrets.providers.gtpack:0.4.26"
+      },
+      {
+        "id": "greentic.secrets.providers.latest",
+        "label": {
+          "fallback": "Greentic Secrets Providers (latest)"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/secret/greentic.secrets.providers.gtpack:latest"
+      },
+      {
+        "id": "greentic.secrets.vault-kv.v0-4-26",
+        "label": {
+          "fallback": "Greentic Secrets Vault KV (0.4.26)"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/secret/greentic.secrets.vault-kv.gtpack:0.4.26"
+      },
+      {
+        "id": "greentic.secrets.vault-kv.latest",
+        "label": {
+          "fallback": "Greentic Secrets Vault KV (latest)"
+        },
+        "reference": "oci://ghcr.io/greenticai/packs/secret/greentic.secrets.vault-kv.gtpack:latest"
+      }
+    ]
+  }
+]
