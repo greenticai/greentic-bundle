@@ -99,9 +99,8 @@ Current catalog and lock behavior:
   `ghcr://catalogs/well-known[:tag|@sha256:...]` maps to `ghcr.io/greenticai/catalogs/well-known[:tag|@sha256:...]` and defaults to `:latest` when no tag/digest is supplied.
 - `oci://<registry>/<repo>[:tag|@sha256:...]` is also accepted as the explicit remote format.
 - Remote GHCR/OCI catalogs now fetch through `greentic-distributor-client` and are cached back into the bundle workspace cache after resolution.
-- The checked-in source for the default public catalog is `packs/well-known.json`, stored as a top-level list of category objects with per-category `items`.
-- Pushing a change to `packs/well-known.json` on `main` or `master` now runs `.github/workflows/catalog.yml`, which publishes both `ghcr.io/greenticai/catalogs/well-known:sha-<commit>` and `:latest`.
-- The catalog workflow now publishes with `GITHUB_TOKEN` and OCI source metadata so GHCR links the package back to this repository on first publish; package visibility still needs to be set to `Public` once in the GitHub Packages UI if anonymous pulls are required.
+- The checked-in source for the default bundled provider catalog is `registries/providers.json`, using OCI registry format with top-level `categories` and `items`.
+- Pushing changes under `registries/` can publish the provider registry through `.github/workflows/publish-registry.yml` to `ghcr.io/<repo>/providers:latest`.
 - The repo now declares Rust 1.91 as its required toolchain, which aligns it with newer Greentic crate releases and supports the live distributor-client integration.
 
 Current i18n behavior:

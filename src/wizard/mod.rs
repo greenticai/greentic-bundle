@@ -2075,7 +2075,7 @@ fn prompt_access_target<R: BufRead, W: Write>(
 ///
 /// If `remote_catalogs` contains explicit references, they are used.
 /// Otherwise, tries to fetch from OCI registry, falling back to bundled
-/// well-known catalog if the fetch fails (network error, timeout, etc.).
+/// provider registry if the fetch fails (network error, timeout, etc.).
 ///
 /// Returns (should_persist_catalog_ref, catalog_ref, entries).
 fn resolve_extension_provider_catalog(
@@ -2124,8 +2124,8 @@ fn resolve_extension_provider_catalog(
         }
     }
 
-    // Fall back to bundled well-known catalog
-    let entries = crate::catalog::registry::bundled_well_known_catalog_entries()?;
+    // Fall back to bundled provider registry
+    let entries = crate::catalog::registry::bundled_provider_registry_entries()?;
     Ok((false, None, entries))
 }
 
@@ -2205,15 +2205,10 @@ fn build_extension_provider_options<'a>(
     let mut options = Vec::<ResolvedExtensionProviderOption<'a>>::new();
     for entry in entries {
         let display_name = clean_extension_provider_label(entry);
-        if let Some(existing) = options
-            .iter_mut()
-            .find(|existing| existing.display_name == display_name)
+        if options
+            .iter()
+            .any(|existing| existing.display_name == display_name)
         {
-            if reference_points_to_latest(&entry.reference)
-                && !reference_points_to_latest(&existing.entry.reference)
-            {
-                existing.entry = entry;
-            }
             continue;
         }
         options.push(ResolvedExtensionProviderOption {
@@ -2241,38 +2236,7 @@ fn clean_extension_provider_label(entry: &crate::catalog::registry::CatalogEntry
             return base.trim().to_string();
         }
     }
-    if let Some((base, suffix)) = trimmed.rsplit_once(" (")
-        && suffix.ends_with(')')
-    {
-        let inner = suffix.trim_end_matches(')');
-        if looks_like_semverish_version(inner) {
-            return base.trim().to_string();
-        }
-    }
     trimmed.to_string()
-}
-
-fn looks_like_semverish_version(value: &str) -> bool {
-    let mut saw_dot = false;
-    let mut saw_digit = false;
-    for ch in value.chars() {
-        if ch.is_ascii_digit() {
-            saw_digit = true;
-            continue;
-        }
-        if ch == '.' || ch == '-' {
-            if ch == '.' {
-                saw_dot = true;
-            }
-            continue;
-        }
-        return false;
-    }
-    saw_digit && saw_dot
-}
-
-fn reference_points_to_latest(reference: &str) -> bool {
-    reference.ends_with(":latest") || reference.ends_with("@latest")
 }
 
 /// (category_id, category_label, category_description, entry_indices)
@@ -3952,15 +3916,15 @@ mod tests {
     }
 
     #[test]
-    fn extension_provider_options_dedupe_and_prefer_latest_reference() {
+    fn extension_provider_options_dedupe_by_display_name() {
         let pinned = CatalogEntry {
             id: "greentic.secrets.aws-sm.v0-4-25".to_string(),
             category: Some("secrets".to_string()),
             category_label: None,
             category_description: None,
-            label: Some("Greentic Secrets AWS SM (0.4.25)".to_string()),
+            label: Some("Greentic Secrets AWS SM".to_string()),
             reference:
-                "oci://ghcr.io/greenticai/packs/secrets/greentic.secrets.aws-sm.gtpack:0.4.25"
+                "oci://ghcr.io/greenticai/packs/secret/greentic.secrets.aws-sm.gtpack:0.4.25"
                     .to_string(),
             setup: None,
         };
@@ -3969,9 +3933,9 @@ mod tests {
             category: Some("secrets".to_string()),
             category_label: None,
             category_description: None,
-            label: Some("Greentic Secrets AWS SM (latest)".to_string()),
+            label: Some("Greentic Secrets AWS SM".to_string()),
             reference:
-                "oci://ghcr.io/greenticai/packs/secrets/greentic.secrets.aws-sm.gtpack:latest"
+                "oci://ghcr.io/greenticai/packs/secret/greentic.secrets.aws-sm.gtpack:latest"
                     .to_string(),
             setup: None,
         };
@@ -3980,15 +3944,15 @@ mod tests {
 
         assert_eq!(options.len(), 1);
         assert_eq!(options[0].display_name, "Greentic Secrets AWS SM");
-        assert_eq!(options[0].entry.id, "greentic.secrets.aws-sm.latest");
+        assert_eq!(options[0].entry.id, "greentic.secrets.aws-sm.v0-4-25");
         assert_eq!(
             options[0].entry.reference,
-            "oci://ghcr.io/greenticai/packs/secrets/greentic.secrets.aws-sm.gtpack:latest"
+            "oci://ghcr.io/greenticai/packs/secret/greentic.secrets.aws-sm.gtpack:0.4.25"
         );
     }
 
     #[test]
-    fn clean_extension_provider_label_removes_latest_and_semver_suffixes() {
+    fn clean_extension_provider_label_removes_latest_suffix_only() {
         let latest = CatalogEntry {
             id: "x.latest".to_string(),
             category: None,
@@ -4023,7 +3987,7 @@ mod tests {
         );
         assert_eq!(
             clean_extension_provider_label(&semver),
-            "Greentic Secrets AWS SM"
+            "Greentic Secrets AWS SM (0.4.25)"
         );
         assert_eq!(
             clean_extension_provider_label(&pr),
