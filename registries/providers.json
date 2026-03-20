@@ -393,7 +393,7 @@
         "i18n_key": "provider.components.pack2flow",
         "fallback": "Pack to Flow"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/component-pack2flow:0.1.0"
+      "ref": "oci://ghcr.io/greenticai/component/component-pack2flow:latest"
     },
     {
       "id": "component-http",
@@ -402,7 +402,7 @@
         "i18n_key": "provider.components.http",
         "fallback": "HTTP Client"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/component-http:0.1.0"
+      "ref": "oci://ghcr.io/greenticai/component/component-http:latest"
     },
     {
       "id": "component-events2msg",
@@ -411,7 +411,7 @@
         "i18n_key": "provider.components.events2msg",
         "fallback": "Events to Messaging"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/component-events2msg:0.1.0"
+      "ref": "oci://ghcr.io/greenticai/component/component-events2msg:latest"
     },
     {
       "id": "component-msg2events",
@@ -420,7 +420,7 @@
         "i18n_key": "provider.components.msg2events",
         "fallback": "Messaging to Events"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/component-msg2events:0.1.0"
+      "ref": "oci://ghcr.io/greenticai/component/component-msg2events:latest"
     }
   ]
 }
