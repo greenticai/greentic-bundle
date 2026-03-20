@@ -66,6 +66,17 @@
         "i18n_key": "category.state.description",
         "fallback": "Session state storage providers"
       }
+    },
+    {
+      "id": "components",
+      "label": {
+        "i18n_key": "category.components",
+        "fallback": "Components"
+      },
+      "description": {
+        "i18n_key": "category.components.description",
+        "fallback": "Reusable WASM components for flow nodes"
+      }
     }
   ],
   "items": [
@@ -374,6 +385,42 @@
         "fallback": "Redis State"
       },
       "ref": "oci://ghcr.io/greenticai/packs/state/state-redis:latest"
+    },
+    {
+      "id": "component-pack2flow",
+      "category": "components",
+      "label": {
+        "i18n_key": "provider.components.pack2flow",
+        "fallback": "Pack to Flow"
+      },
+      "ref": "oci://ghcr.io/greenticai/packs/component-pack2flow:0.1.0"
+    },
+    {
+      "id": "component-http",
+      "category": "components",
+      "label": {
+        "i18n_key": "provider.components.http",
+        "fallback": "HTTP Client"
+      },
+      "ref": "oci://ghcr.io/greenticai/packs/component-http:0.1.0"
+    },
+    {
+      "id": "component-events2msg",
+      "category": "components",
+      "label": {
+        "i18n_key": "provider.components.events2msg",
+        "fallback": "Events to Messaging"
+      },
+      "ref": "oci://ghcr.io/greenticai/packs/component-events2msg:0.1.0"
+    },
+    {
+      "id": "component-msg2events",
+      "category": "components",
+      "label": {
+        "i18n_key": "provider.components.msg2events",
+        "fallback": "Messaging to Events"
+      },
+      "ref": "oci://ghcr.io/greenticai/packs/component-msg2events:0.1.0"
     }
   ]
 }
