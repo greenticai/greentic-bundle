@@ -2,7 +2,7 @@ name: Publish Provider Registry to GHCR
 
 on:
   push:
-    branches: [master]
+    branches: [main]
     paths:
       - 'registries/**'
   workflow_dispatch: {}
