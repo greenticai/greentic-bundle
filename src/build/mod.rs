@@ -46,6 +46,14 @@ pub struct InspectReport {
     pub manifest: ReaderBundleManifest,
     pub lock: ReaderBundleLock,
     pub runtime_surface: greentic_bundle_reader::BundleRuntimeSurface,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub contents: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct UnbundleResult {
+    pub artifact_path: String,
+    pub output_dir: String,
 }
 
 pub fn build_workspace(root: &Path, output: Option<&Path>, dry_run: bool) -> Result<BuildResult> {
@@ -87,6 +95,7 @@ pub fn inspect_target(root: Option<&Path>, artifact: Option<&Path>) -> Result<In
                 manifest: opened.manifest.clone(),
                 lock: opened.lock.clone(),
                 runtime_surface: opened.runtime_surface(),
+                contents: None,
             })
         }
         (None, Some(artifact)) => inspect_artifact(artifact),
@@ -194,6 +203,15 @@ fn inspect_artifact(artifact: &Path) -> Result<InspectReport> {
         manifest: opened.manifest.clone(),
         lock: opened.lock.clone(),
         runtime_surface: opened.runtime_surface(),
+        contents: Some(squashfs::list_artifact_contents(artifact)?),
+    })
+}
+
+pub fn unbundle_artifact(artifact: &Path, output_dir: &Path) -> Result<UnbundleResult> {
+    squashfs::unpack_artifact(artifact, output_dir)?;
+    Ok(UnbundleResult {
+        artifact_path: artifact.display().to_string(),
+        output_dir: output_dir.display().to_string(),
     })
 }
 

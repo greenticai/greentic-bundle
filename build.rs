@@ -4,13 +4,13 @@ use std::fs;
 use std::path::PathBuf;
 
 fn main() {
-    println!("cargo:rerun-if-changed=i18n/locales.json");
+    println!("cargo:rerun-if-changed=i18n-locales.json");
     println!("cargo:rerun-if-changed=i18n");
 
     let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").expect("manifest dir"));
     let i18n_dir = manifest_dir.join("i18n");
-    let locales_path = i18n_dir.join("locales.json");
-    let locales_raw = fs::read_to_string(&locales_path).expect("read i18n/locales.json");
+    let locales_path = manifest_dir.join("i18n-locales.json");
+    let locales_raw = fs::read_to_string(&locales_path).expect("read i18n-locales.json");
     let locales: Vec<String> = serde_json::from_str(&locales_raw).expect("parse locales.json");
 
     let mut catalogs = BTreeMap::new();

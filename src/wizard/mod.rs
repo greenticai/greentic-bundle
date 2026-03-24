@@ -103,6 +103,8 @@ enum InteractiveChoice {
     Update,
     Validate,
     Doctor,
+    Inspect,
+    Unbundle,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -115,6 +117,16 @@ pub enum RootMenuZeroAction {
 struct InteractiveRequest {
     request: NormalizedRequest,
     review_action: ReviewAction,
+}
+
+enum InteractiveSelection {
+    Request(InteractiveRequest),
+    Handled,
+}
+
+enum BundleTarget {
+    Workspace(PathBuf),
+    Artifact(PathBuf),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
@@ -274,27 +286,35 @@ pub fn run_interactive_with_zero_action(
     let stdout = io::stdout();
     let mut input = stdin.lock();
     let mut output = stdout.lock();
-    let Some(interactive) =
-        collect_guided_interactive_request(&mut input, &mut output, initial_mode, zero_action)?
-    else {
-        return Ok(None);
-    };
-    let resolved_execution = match execution {
-        ExecutionMode::DryRun => ExecutionMode::DryRun,
-        ExecutionMode::Execute => match interactive.review_action {
-            ReviewAction::BuildNow => ExecutionMode::Execute,
-            ReviewAction::DryRunOnly | ReviewAction::SaveAnswersOnly => ExecutionMode::DryRun,
-        },
-    };
-    Ok(Some(execute_request(
-        interactive.request,
-        resolved_execution,
-        matches!(interactive.review_action, ReviewAction::BuildNow)
-            && resolved_execution == ExecutionMode::Execute,
-        schema_version,
-        emit_answers,
-        None,
-    )?))
+    loop {
+        let Some(selection) =
+            collect_guided_interactive_request(&mut input, &mut output, initial_mode, zero_action)?
+        else {
+            return Ok(None);
+        };
+        let InteractiveSelection::Request(interactive) = selection else {
+            if initial_mode.is_none() {
+                continue;
+            }
+            return Ok(None);
+        };
+        let resolved_execution = match execution {
+            ExecutionMode::DryRun => ExecutionMode::DryRun,
+            ExecutionMode::Execute => match interactive.review_action {
+                ReviewAction::BuildNow => ExecutionMode::Execute,
+                ReviewAction::DryRunOnly | ReviewAction::SaveAnswersOnly => ExecutionMode::DryRun,
+            },
+        };
+        return Ok(Some(execute_request(
+            interactive.request,
+            resolved_execution,
+            matches!(interactive.review_action, ReviewAction::BuildNow)
+                && resolved_execution == ExecutionMode::Execute,
+            schema_version,
+            emit_answers,
+            None,
+        )?));
+    }
 }
 
 fn collect_guided_interactive_request<R: BufRead, W: Write>(
@@ -302,26 +322,49 @@ fn collect_guided_interactive_request<R: BufRead, W: Write>(
     output: &mut W,
     initial_mode: Option<WizardMode>,
     zero_action: RootMenuZeroAction,
-) -> Result<Option<InteractiveRequest>> {
-    let choice = match initial_mode {
-        Some(WizardMode::Create) => InteractiveChoice::Create,
-        Some(WizardMode::Update) => InteractiveChoice::Update,
-        Some(WizardMode::Doctor) => InteractiveChoice::Doctor,
-        None => {
-            let Some(choice) = choose_interactive_menu(input, output, zero_action)? else {
-                return Ok(None);
-            };
-            choice
-        }
+) -> Result<Option<InteractiveSelection>> {
+    if let Some(mode) = initial_mode {
+        let interactive = match mode {
+            WizardMode::Create => collect_create_flow(input, output)?,
+            WizardMode::Update => collect_update_flow(input, output, false)?,
+            WizardMode::Doctor => collect_doctor_flow(input, output)?,
+        };
+        return Ok(Some(InteractiveSelection::Request(interactive)));
+    }
+
+    let Some(choice) = choose_interactive_menu(input, output, zero_action)? else {
+        return Ok(None);
     };
 
-    let request = match choice {
-        InteractiveChoice::Create => collect_create_flow(input, output),
-        InteractiveChoice::Update => collect_update_flow(input, output, false),
-        InteractiveChoice::Validate => collect_update_flow(input, output, true),
-        InteractiveChoice::Doctor => collect_doctor_flow(input, output),
-    }?;
-    Ok(Some(request))
+    match choice {
+        InteractiveChoice::Create => {
+            return Ok(Some(InteractiveSelection::Request(collect_create_flow(
+                input, output,
+            )?)));
+        }
+        InteractiveChoice::Update => {
+            return Ok(Some(InteractiveSelection::Request(collect_update_flow(
+                input, output, false,
+            )?)));
+        }
+        InteractiveChoice::Validate => {
+            return Ok(Some(InteractiveSelection::Request(collect_update_flow(
+                input, output, true,
+            )?)));
+        }
+        InteractiveChoice::Doctor => {
+            perform_doctor_action(input, output)?;
+            return Ok(Some(InteractiveSelection::Handled));
+        }
+        InteractiveChoice::Inspect => {
+            perform_inspect_action(input, output)?;
+            return Ok(Some(InteractiveSelection::Handled));
+        }
+        InteractiveChoice::Unbundle => {
+            perform_unbundle_action(input, output)?;
+            return Ok(Some(InteractiveSelection::Handled));
+        }
+    }
 }
 
 fn choose_interactive_menu<R: BufRead, W: Write>(
@@ -330,10 +373,42 @@ fn choose_interactive_menu<R: BufRead, W: Write>(
     zero_action: RootMenuZeroAction,
 ) -> Result<Option<InteractiveChoice>> {
     writeln!(output, "{}", crate::i18n::tr("wizard.menu.title"))?;
-    writeln!(output, "1. {}", crate::i18n::tr("wizard.mode.create"))?;
-    writeln!(output, "2. {}", crate::i18n::tr("wizard.mode.update"))?;
-    writeln!(output, "3. {}", crate::i18n::tr("wizard.mode.validate"))?;
-    writeln!(output, "4. {}", crate::i18n::tr("wizard.mode.doctor"))?;
+    write_root_menu_option(
+        output,
+        "1",
+        &crate::i18n::tr("wizard.mode.create"),
+        &crate::i18n::tr("wizard.menu_desc.create"),
+    )?;
+    write_root_menu_option(
+        output,
+        "2",
+        &crate::i18n::tr("wizard.mode.update"),
+        &crate::i18n::tr("wizard.menu_desc.update"),
+    )?;
+    write_root_menu_option(
+        output,
+        "3",
+        &crate::i18n::tr("wizard.mode.validate"),
+        &crate::i18n::tr("wizard.menu_desc.validate"),
+    )?;
+    write_root_menu_option(
+        output,
+        "4",
+        &crate::i18n::tr("wizard.mode.doctor"),
+        &crate::i18n::tr("wizard.menu_desc.doctor"),
+    )?;
+    write_root_menu_option(
+        output,
+        "5",
+        &crate::i18n::tr("wizard.mode.inspect"),
+        &crate::i18n::tr("wizard.menu_desc.inspect"),
+    )?;
+    write_root_menu_option(
+        output,
+        "6",
+        &crate::i18n::tr("wizard.mode.unbundle"),
+        &crate::i18n::tr("wizard.menu_desc.unbundle"),
+    )?;
     let zero_label = match zero_action {
         RootMenuZeroAction::Exit => crate::i18n::tr("wizard.menu.exit"),
         RootMenuZeroAction::Back => crate::i18n::tr("wizard.action.back"),
@@ -353,9 +428,22 @@ fn choose_interactive_menu<R: BufRead, W: Write>(
             "2" | "update" | "open" => return Ok(Some(InteractiveChoice::Update)),
             "3" | "validate" => return Ok(Some(InteractiveChoice::Validate)),
             "4" | "doctor" => return Ok(Some(InteractiveChoice::Doctor)),
+            "5" | "inspect" => return Ok(Some(InteractiveChoice::Inspect)),
+            "6" | "unbundle" => return Ok(Some(InteractiveChoice::Unbundle)),
             _ => writeln!(output, "{}", crate::i18n::tr("wizard.error.invalid_choice"))?,
         }
     }
+}
+
+fn write_root_menu_option<W: Write>(
+    output: &mut W,
+    number: &str,
+    title: &str,
+    description: &str,
+) -> Result<()> {
+    writeln!(output, "{number}. {title}")?;
+    writeln!(output, "   {description}")?;
+    Ok(())
 }
 
 fn collect_create_flow<R: BufRead, W: Write>(
@@ -410,15 +498,20 @@ fn collect_update_flow<R: BufRead, W: Write>(
     output: &mut W,
     validate_only: bool,
 ) -> Result<InteractiveRequest> {
-    let root = PathBuf::from(prompt_required_string(
+    let target = prompt_bundle_target(
         input,
         output,
         &crate::i18n::tr("wizard.prompt.current_bundle_root"),
-        None,
-    )?);
-    let workspace = crate::project::read_bundle_workspace(&root)
-        .with_context(|| format!("read current bundle workspace {}", root.display()))?;
-    let mut state = request_from_workspace(&workspace, &root, WizardMode::Update);
+    )?;
+    let mut state = request_from_bundle_target(&target, WizardMode::Update)?;
+    if matches!(target, BundleTarget::Artifact(_)) && !validate_only {
+        state.output_dir = PathBuf::from(prompt_required_string(
+            input,
+            output,
+            &crate::i18n::tr("wizard.prompt.output_dir"),
+            Some(&state.output_dir.display().to_string()),
+        )?);
+    }
     state.bundle_name = prompt_required_string(
         input,
         output,
@@ -451,18 +544,156 @@ fn collect_doctor_flow<R: BufRead, W: Write>(
     input: &mut R,
     output: &mut W,
 ) -> Result<InteractiveRequest> {
-    let root = PathBuf::from(prompt_required_string(
+    let target = prompt_bundle_target(
         input,
         output,
         &crate::i18n::tr("wizard.prompt.current_bundle_root"),
-        None,
-    )?);
-    let workspace = crate::project::read_bundle_workspace(&root)
-        .with_context(|| format!("read current bundle workspace {}", root.display()))?;
+    )?;
     Ok(InteractiveRequest {
-        request: request_from_workspace(&workspace, &root, WizardMode::Doctor),
+        request: request_from_bundle_target(&target, WizardMode::Doctor)?,
         review_action: ReviewAction::DryRunOnly,
     })
+}
+
+fn perform_doctor_action<R: BufRead, W: Write>(input: &mut R, output: &mut W) -> Result<()> {
+    let target = prompt_bundle_target(
+        input,
+        output,
+        &crate::i18n::tr("wizard.prompt.bundle_target"),
+    )?;
+    let report = match &target {
+        BundleTarget::Workspace(root) => crate::build::doctor_target(Some(root), None)?,
+        BundleTarget::Artifact(artifact) => crate::build::doctor_target(None, Some(artifact))?,
+    };
+    writeln!(output, "{}", serde_json::to_string_pretty(&report)?)?;
+    Ok(())
+}
+
+fn perform_inspect_action<R: BufRead, W: Write>(input: &mut R, output: &mut W) -> Result<()> {
+    let target = prompt_bundle_target(
+        input,
+        output,
+        &crate::i18n::tr("wizard.prompt.bundle_target"),
+    )?;
+    let report = match &target {
+        BundleTarget::Workspace(root) => crate::build::inspect_target(Some(root), None)?,
+        BundleTarget::Artifact(artifact) => crate::build::inspect_target(None, Some(artifact))?,
+    };
+    if report.kind == "artifact" {
+        for entry in report.contents.as_deref().unwrap_or(&[]) {
+            writeln!(output, "{entry}")?;
+        }
+    } else {
+        writeln!(output, "{}", serde_json::to_string_pretty(&report)?)?;
+    }
+    Ok(())
+}
+
+fn perform_unbundle_action<R: BufRead, W: Write>(input: &mut R, output: &mut W) -> Result<()> {
+    let artifact = prompt_bundle_artifact_path(input, output)?;
+    let out = prompt_optional_string(
+        input,
+        output,
+        &crate::i18n::tr("wizard.prompt.unbundle_output_dir"),
+        Some("."),
+    )?;
+    let result = crate::build::unbundle_artifact(&artifact, Path::new(&out))?;
+    writeln!(output, "{}", serde_json::to_string_pretty(&result)?)?;
+    Ok(())
+}
+
+fn prompt_bundle_target<R: BufRead, W: Write>(
+    input: &mut R,
+    output: &mut W,
+    title: &str,
+) -> Result<BundleTarget> {
+    let raw = prompt_required_string(input, output, title, None)?;
+    parse_bundle_target(PathBuf::from(raw))
+}
+
+fn prompt_bundle_artifact_path<R: BufRead, W: Write>(
+    input: &mut R,
+    output: &mut W,
+) -> Result<PathBuf> {
+    let raw = prompt_required_string(
+        input,
+        output,
+        &crate::i18n::tr("wizard.prompt.bundle_artifact"),
+        None,
+    )?;
+    let path = PathBuf::from(raw);
+    if !is_bundle_artifact_path(&path) {
+        bail!(
+            "{}",
+            crate::i18n::tr("wizard.error.bundle_artifact_required")
+        );
+    }
+    if !path.exists() {
+        bail!(
+            "{}: {}",
+            crate::i18n::tr("wizard.error.bundle_target_missing"),
+            path.display()
+        );
+    }
+    Ok(path)
+}
+
+fn parse_bundle_target(path: PathBuf) -> Result<BundleTarget> {
+    if !path.exists() {
+        bail!(
+            "{}: {}",
+            crate::i18n::tr("wizard.error.bundle_target_missing"),
+            path.display()
+        );
+    }
+    if is_bundle_artifact_path(&path) {
+        Ok(BundleTarget::Artifact(path))
+    } else {
+        Ok(BundleTarget::Workspace(path))
+    }
+}
+
+fn request_from_bundle_target(
+    target: &BundleTarget,
+    mode: WizardMode,
+) -> Result<NormalizedRequest> {
+    match target {
+        BundleTarget::Workspace(root) => {
+            let workspace = crate::project::read_bundle_workspace(root)
+                .with_context(|| format!("read current bundle workspace {}", root.display()))?;
+            Ok(request_from_workspace(&workspace, root, mode))
+        }
+        BundleTarget::Artifact(artifact) => {
+            let staging = tempfile::tempdir().with_context(|| {
+                format!("create temporary workspace for {}", artifact.display())
+            })?;
+            crate::build::unbundle_artifact(artifact, staging.path())?;
+            let workspace =
+                crate::project::read_bundle_workspace(staging.path()).with_context(|| {
+                    format!("read unbundled bundle workspace {}", artifact.display())
+                })?;
+            let mut request = request_from_workspace(&workspace, staging.path(), mode);
+            request.output_dir = default_workspace_dir_for_artifact(artifact);
+            Ok(request)
+        }
+    }
+}
+
+fn default_workspace_dir_for_artifact(artifact: &Path) -> PathBuf {
+    let stem = artifact
+        .file_stem()
+        .map(|value| value.to_os_string())
+        .unwrap_or_else(|| "bundle".into());
+    artifact
+        .parent()
+        .unwrap_or_else(|| Path::new("."))
+        .join(stem)
+}
+
+fn is_bundle_artifact_path(path: &Path) -> bool {
+    path.extension()
+        .and_then(|value| value.to_str())
+        .is_some_and(|value| value.eq_ignore_ascii_case("gtbundle"))
 }
 
 fn execution_for_run(dry_run: bool) -> ExecutionMode {

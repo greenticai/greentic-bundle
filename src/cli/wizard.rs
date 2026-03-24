@@ -100,17 +100,25 @@ pub fn run(args: WizardArgs) -> Result<()> {
     match args.command {
         None => {
             let zero_action = embedded_root_zero_action();
-            let Some(result) = crate::wizard::run_interactive_with_zero_action(
-                None,
-                None,
-                None,
-                crate::wizard::ExecutionMode::Execute,
-                zero_action,
-            )?
-            else {
-                return Ok(());
-            };
-            crate::wizard::print_plan(&result.plan)
+            loop {
+                let result = match crate::wizard::run_interactive_with_zero_action(
+                    None,
+                    None,
+                    None,
+                    crate::wizard::ExecutionMode::Execute,
+                    zero_action,
+                ) {
+                    Ok(result) => result,
+                    Err(error) if error.to_string() == crate::i18n::tr("wizard.exit.message") => {
+                        return Ok(());
+                    }
+                    Err(error) => return Err(error),
+                };
+                let Some(result) = result else {
+                    return Ok(());
+                };
+                crate::wizard::print_plan(&result.plan)?;
+            }
         }
         Some(WizardCommand::Run(args)) => crate::wizard::run_command(args),
         Some(WizardCommand::Validate(args)) => crate::wizard::validate_command(args),

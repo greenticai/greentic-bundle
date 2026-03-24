@@ -1,0 +1,27 @@
+{
+  "format_version": "gtbundle-v1",
+  "bundle_id": "my-network-assistant",
+  "bundle_name": "My network assistant",
+  "requested_mode": "create",
+  "locale": "en",
+  "artifact_extension": ".gtbundle",
+  "generated_resolved_files": [
+    "resolved/default.yaml"
+  ],
+  "generated_setup_files": [],
+  "app_packs": [],
+  "extension_providers": [],
+  "catalogs": [],
+  "hooks": [],
+  "subscriptions": [],
+  "capabilities": [],
+  "resolved_targets": [
+    {
+      "path": "resolved/default.yaml",
+      "tenant": "default",
+      "default_policy": "forbidden",
+      "tenant_gmap": "tenants/default/tenant.gmap",
+      "app_pack_policies": []
+    }
+  ]
+}

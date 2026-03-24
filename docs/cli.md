@@ -46,7 +46,7 @@ Implemented baseline decisions:
 - `AnswerDocument` uses semver-based `schema_version`.
 - The repo starts as a small workspace so the read-only bundle reader crate can live under `crates/`.
 - The repo is now pinned to Rust 1.91 via `rust-toolchain.toml` and crate-level `rust-version`.
-- The embedded locale bundle is now generated from `i18n/locales.json` and compiled into the binary by `build.rs`.
+- The embedded locale bundle is now generated from `i18n-locales.json` and compiled into the binary by `build.rs`.
 - `build` is reserved as the future artifact-producing command for deterministic `.gtbundle` SquashFS output.
 - `wizard run`, `wizard validate`, and `wizard apply` share a normalized request model and deterministic plan envelope.
 - Bare `greentic-bundle wizard` now executes by default; use `--dry-run` when you only want the plan preview.

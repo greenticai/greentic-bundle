@@ -36,6 +36,43 @@ fn run_with_stdin_and_env(
     child.wait_with_output().expect("wait output")
 }
 
+fn run_command(args: &[&str]) -> std::process::Output {
+    Command::new(bundle_bin())
+        .args(args)
+        .output()
+        .expect("run command")
+}
+
+fn seed_workspace_with_artifact(root: &std::path::Path, artifact: &std::path::Path) {
+    let output = run_with_stdin(
+        &["wizard"],
+        &format!(
+            "1\nDemo Bundle\ndemo-bundle\n{}\n1\npack-a\n1\n1\n4\n4\n1\n0\n",
+            root.display()
+        ),
+    );
+    assert!(
+        output.status.success(),
+        "stdout={} stderr={}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+
+    let build = run_command(&[
+        "build",
+        "--root",
+        &root.display().to_string(),
+        "--output",
+        &artifact.display().to_string(),
+    ]);
+    assert!(
+        build.status.success(),
+        "stdout={} stderr={}",
+        String::from_utf8_lossy(&build.stdout),
+        String::from_utf8_lossy(&build.stderr)
+    );
+}
+
 #[test]
 fn bare_wizard_uses_back_for_embedded_root_menu() {
     let output = run_with_stdin_and_env(
@@ -58,7 +95,7 @@ fn bare_wizard_executes_create_flow_by_default() {
     let output = run_with_stdin(
         &["wizard"],
         &format!(
-            "1\nDemo Bundle\ndemo-bundle\n{}\n1\npack-a\n1\n1\n4\n4\n1\n",
+            "1\nDemo Bundle\ndemo-bundle\n{}\n1\npack-a\n1\n1\n4\n4\n1\n0\n",
             bundle_root.display()
         ),
     );
@@ -76,23 +113,17 @@ fn bare_wizard_executes_create_flow_by_default() {
 
 #[test]
 fn bare_wizard_renders_compact_mode_menu() {
-    let temp = TempDir::new().expect("tempdir");
-    let bundle_root = temp.path().join("bundle");
-
-    let output = run_with_stdin(
-        &["wizard", "run", "--dry-run"],
-        &format!(
-            "1\nDemo Bundle\ndemo-bundle\n{}\n1\npack-a\n1\n1\n4\n4\n1\n",
-            bundle_root.display()
-        ),
-    );
-    assert!(output.status.success());
+    let output = run_with_stdin(&["wizard", "run", "--dry-run"], "0\n");
+    assert!(!output.status.success());
     let stdout = String::from_utf8(output.stdout).expect("stdout");
-    assert!(
-        stdout.starts_with(
-            "Bundle Wizard\n1. create\n2. open existing bundle\n3. validate bundle\n4. doctor\n0. Exit\nSelect number or value: "
-        )
-    );
+    assert!(stdout.contains("1. create"));
+    assert!(stdout.contains("2. open existing bundle"));
+    assert!(stdout.contains("3. validate bundle"));
+    assert!(stdout.contains("4. doctor"));
+    assert!(stdout.contains("5. inspect"));
+    assert!(stdout.contains("6. unbundle"));
+    assert!(stdout.contains("Start a new bundle workspace"));
+    assert!(stdout.contains("Extract a .gtbundle into a directory"));
 }
 
 #[test]
@@ -113,6 +144,131 @@ fn bare_wizard_root_form_hides_verbose_qa_status_block() {
     assert_eq!(stdout.matches("Bundle Wizard").count(), 1);
     assert!(!stdout.contains("Status: need_input (0/9)"));
     assert!(!stdout.contains("Visible questions:"));
+}
+
+#[test]
+fn bare_wizard_update_accepts_gtbundle_path() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    let artifact = temp.path().join("bundle.gtbundle");
+    let edited = temp.path().join("edited-workspace");
+    seed_workspace_with_artifact(&root, &artifact);
+
+    let output = run_with_stdin(
+        &["wizard"],
+        &format!(
+            "2\n{}\n{}\n\n\n4\n4\n2\n0\n",
+            artifact.display(),
+            edited.display(),
+        ),
+    );
+    assert!(
+        output.status.success(),
+        "stdout={} stderr={}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let stdout = String::from_utf8(output.stdout).expect("stdout");
+    assert!(stdout.contains(edited.to_str().expect("utf8 edited")));
+    assert!(stdout.contains("\"execution\": \"dry_run\""));
+}
+
+#[test]
+fn bare_wizard_validate_accepts_gtbundle_path() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    let artifact = temp.path().join("bundle.gtbundle");
+    seed_workspace_with_artifact(&root, &artifact);
+
+    let output = run_with_stdin(&["wizard"], &format!("3\n{}\n\n\n0\n", artifact.display()));
+    assert!(
+        output.status.success(),
+        "stdout={} stderr={}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let stdout = String::from_utf8(output.stdout).expect("stdout");
+    assert!(stdout.contains("\"execution\": \"dry_run\""));
+    assert!(stdout.contains("\"target_root\""));
+}
+
+#[test]
+fn bare_wizard_doctor_accepts_gtbundle_path() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    let artifact = temp.path().join("bundle.gtbundle");
+    seed_workspace_with_artifact(&root, &artifact);
+
+    let output = run_with_stdin(&["wizard"], &format!("4\n{}\n0\n", artifact.display()));
+    assert!(
+        output.status.success(),
+        "stdout={} stderr={}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let stdout = String::from_utf8(output.stdout).expect("stdout");
+    assert!(stdout.contains("\"target\""));
+    assert!(stdout.contains("\"ok\": true"));
+}
+
+#[test]
+fn bare_wizard_inspect_accepts_gtbundle_path() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    let artifact = temp.path().join("bundle.gtbundle");
+    seed_workspace_with_artifact(&root, &artifact);
+
+    let output = run_with_stdin(&["wizard"], &format!("5\n{}\n0\n", artifact.display()));
+    assert!(
+        output.status.success(),
+        "stdout={} stderr={}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let stdout = String::from_utf8(output.stdout).expect("stdout");
+    assert!(stdout.contains("bundle.yaml"));
+    assert!(stdout.contains("bundle-lock.json"));
+}
+
+#[test]
+fn bare_wizard_returns_to_main_menu_after_task() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    let artifact = temp.path().join("bundle.gtbundle");
+    seed_workspace_with_artifact(&root, &artifact);
+
+    let output = run_with_stdin(&["wizard"], &format!("5\n{}\n0\n", artifact.display()));
+    assert!(
+        output.status.success(),
+        "stdout={} stderr={}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let stdout = String::from_utf8(output.stdout).expect("stdout");
+    assert!(stdout.contains("bundle.yaml"));
+    assert!(stdout.matches("Bundle Wizard").count() >= 2);
+}
+
+#[test]
+fn bare_wizard_unbundle_accepts_gtbundle_path() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    let artifact = temp.path().join("bundle.gtbundle");
+    let out = temp.path().join("unbundled");
+    seed_workspace_with_artifact(&root, &artifact);
+
+    let output = run_with_stdin(
+        &["wizard"],
+        &format!("6\n{}\n{}\n0\n", artifact.display(), out.display()),
+    );
+    assert!(
+        output.status.success(),
+        "stdout={} stderr={}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert!(out.join("bundle.yaml").exists());
+    assert!(out.join("bundle-lock.json").exists());
 }
 
 #[test]
@@ -154,7 +310,7 @@ fn bare_wizard_create_flow_skips_provider_setup_prompts() {
     let output = run_with_stdin(
         &["wizard"],
         &format!(
-            "1\nDemo Bundle\ndemo-bundle\n{}\n1\npack-a\n1\n1\n4\n2\n{}\n4\n1\n",
+            "1\nDemo Bundle\ndemo-bundle\n{}\n1\npack-a\n1\n1\n4\n2\n{}\n4\n1\n0\n",
             bundle_root.display(),
             provider_source.display(),
         ),

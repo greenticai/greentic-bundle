@@ -21,7 +21,7 @@ Current baseline:
 - structured `doctor` and `inspect` reports for workspaces and built artifacts
 - real `init`, `add`, and `remove` commands for authored workspace initialization and dependency mutation
 - repo toolchain pinned to Rust 1.91 via `rust-toolchain.toml` and `rust-version`
-- embedded locale bundle covering the approved 66-locale set from `i18n/locales.json`
+- embedded locale bundle covering the approved 66-locale set from `i18n-locales.json`
 - translation validation/status tooling in `ci/i18n_check.py`
 
 ## CI and Releases
@@ -105,7 +105,7 @@ Current catalog and lock behavior:
 
 Current i18n behavior:
 
-- `i18n/locales.json` is the source-of-truth language list for the embedded locale bundle.
+- `i18n-locales.json` is the source-of-truth language list for the embedded locale bundle.
 - Locale selection precedence is `--locale`, then `LC_ALL` / `LC_MESSAGES` / `LANG`, then OS locale via `sys-locale`, then `en`.
 - Locale normalization now accepts forms like `en_US.UTF-8`, `en_US`, `en-US`, and `de_DE@euro`.
 - All locale JSON files are compiled into the binary by `build.rs`; there is no runtime translation install step.
