@@ -41,6 +41,7 @@ include = [
     "README.md",
     "LICENSE",
     "build.rs",
+    "i18n-locales.json",
     "docs/**",
     "i18n/**",
     "registries/**",
