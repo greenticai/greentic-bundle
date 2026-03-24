@@ -120,7 +120,7 @@ struct InteractiveRequest {
 }
 
 enum InteractiveSelection {
-    Request(InteractiveRequest),
+    Request(Box<InteractiveRequest>),
     Handled,
 }
 
@@ -329,7 +329,7 @@ fn collect_guided_interactive_request<R: BufRead, W: Write>(
             WizardMode::Update => collect_update_flow(input, output, false)?,
             WizardMode::Doctor => collect_doctor_flow(input, output)?,
         };
-        return Ok(Some(InteractiveSelection::Request(interactive)));
+        return Ok(Some(InteractiveSelection::Request(Box::new(interactive))));
     }
 
     let Some(choice) = choose_interactive_menu(input, output, zero_action)? else {
@@ -337,32 +337,26 @@ fn collect_guided_interactive_request<R: BufRead, W: Write>(
     };
 
     match choice {
-        InteractiveChoice::Create => {
-            return Ok(Some(InteractiveSelection::Request(collect_create_flow(
-                input, output,
-            )?)));
-        }
-        InteractiveChoice::Update => {
-            return Ok(Some(InteractiveSelection::Request(collect_update_flow(
-                input, output, false,
-            )?)));
-        }
-        InteractiveChoice::Validate => {
-            return Ok(Some(InteractiveSelection::Request(collect_update_flow(
-                input, output, true,
-            )?)));
-        }
+        InteractiveChoice::Create => Ok(Some(InteractiveSelection::Request(Box::new(
+            collect_create_flow(input, output)?,
+        )))),
+        InteractiveChoice::Update => Ok(Some(InteractiveSelection::Request(Box::new(
+            collect_update_flow(input, output, false)?,
+        )))),
+        InteractiveChoice::Validate => Ok(Some(InteractiveSelection::Request(Box::new(
+            collect_update_flow(input, output, true)?,
+        )))),
         InteractiveChoice::Doctor => {
             perform_doctor_action(input, output)?;
-            return Ok(Some(InteractiveSelection::Handled));
+            Ok(Some(InteractiveSelection::Handled))
         }
         InteractiveChoice::Inspect => {
             perform_inspect_action(input, output)?;
-            return Ok(Some(InteractiveSelection::Handled));
+            Ok(Some(InteractiveSelection::Handled))
         }
         InteractiveChoice::Unbundle => {
             perform_unbundle_action(input, output)?;
-            return Ok(Some(InteractiveSelection::Handled));
+            Ok(Some(InteractiveSelection::Handled))
         }
     }
 }
