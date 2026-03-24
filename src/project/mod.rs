@@ -344,10 +344,26 @@ fn materialize_workspace_dependencies(
         materialize_reference_into(root, &mapping.reference, &mapping.destination)?;
     }
     for provider in &workspace.extension_providers {
+        if should_skip_extension_provider_materialization(provider) {
+            continue;
+        }
         let destination = provider_destination_path(provider);
         materialize_reference_into(root, provider, &destination)?;
     }
     Ok(())
+}
+
+fn should_skip_extension_provider_materialization(reference: &str) -> bool {
+    bundled_catalog_mode()
+        && (reference.starts_with("oci://")
+            || reference.starts_with("repo://")
+            || reference.starts_with("store://"))
+}
+
+fn bundled_catalog_mode() -> bool {
+    std::env::var("GREENTIC_BUNDLE_USE_BUNDLED_CATALOG")
+        .map(|value| value == "1" || value.eq_ignore_ascii_case("true"))
+        .unwrap_or(false)
 }
 
 struct MaterializedCopyTarget {

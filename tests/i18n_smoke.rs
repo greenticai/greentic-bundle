@@ -42,7 +42,7 @@ fn dutch_locale_changes_wizard_menu_strings() {
         .success()
         .stdout(predicate::str::contains("Bundle-wizard"))
         .stdout(predicate::str::contains("1. maken"))
-        .stdout(predicate::str::contains("Kies nummer of waarde:"))
+        .stdout(predicate::str::contains("Selecteer nummer of waarde:"))
         .stdout(predicate::str::contains("Bundlenaam"));
 }
 

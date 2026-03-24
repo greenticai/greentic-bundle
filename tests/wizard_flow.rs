@@ -394,7 +394,7 @@ fn bundled_common_extension_provider_is_not_persisted_to_remote_catalogs() {
     let output = run_with_stdin_and_env(
         &["wizard"],
         &format!(
-            "1\nDemo Bundle\ndemo-bundle\n{}\n1\npack-a\n1\n1\n4\n1\n2\n5\n4\n1\n",
+            "1\nDemo Bundle\ndemo-bundle\n{}\n1\npack-a\n1\n1\n4\n1\n2\n5\n4\n1\n0\n",
             bundle_root.display()
         ),
         &[("GREENTIC_BUNDLE_USE_BUNDLED_CATALOG", "1")],
@@ -423,7 +423,7 @@ fn create_flow_uses_pack_id_for_access_rules_and_resolved_policy() {
     let output = run_with_stdin(
         &["wizard"],
         &format!(
-            "1\nDemo Bundle\ndemo-bundle\n{}\n1\n{}\n1\n1\n4\n4\n1\n",
+            "1\nDemo Bundle\ndemo-bundle\n{}\n1\n{}\n1\n1\n4\n4\n1\n0\n",
             bundle_root.display(),
             pack_path.display(),
         ),
@@ -492,7 +492,7 @@ fn create_flow_materializes_pack_and_provider_gtpacks_into_bundle_layout() {
     let output = run_with_stdin(
         &["wizard"],
         &format!(
-            "1\nDemo Bundle\ndemo-bundle\n{}\n1\n{}\n1\n1\n4\n2\n{}\n4\n1\n",
+            "1\nDemo Bundle\ndemo-bundle\n{}\n1\n{}\n1\n1\n4\n2\n{}\n4\n1\n0\n",
             bundle_root.display(),
             pack_path.display(),
             provider_source.display(),
@@ -552,13 +552,14 @@ fn create_flow_fails_when_remote_provider_cannot_be_materialized() {
     fs::write(&pack_path, "app-pack-bytes").expect("write app pack");
     let bundle_root = temp.path().join("bundle");
 
-    let output = run_with_stdin(
+    let output = run_with_stdin_and_env(
         &["wizard", "--offline"],
         &format!(
             "1\nDemo Bundle\ndemo-bundle\n{}\n1\n{}\n1\n1\n4\n2\noci://ghcr.io/greenticai/packs/deployer/greentic.fixture.k8s.raw.gtpack:latest\n4\n1\n",
             bundle_root.display(),
             pack_path.display(),
         ),
+        &[("GREENTIC_BUNDLE_USE_BUNDLED_CATALOG", "0")],
     );
     assert!(
         !output.status.success(),
