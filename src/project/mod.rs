@@ -2,7 +2,8 @@ use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result};
 use greentic_distributor_client::{
-    DistClient, DistOptions, OciPackFetcher, PackFetchOptions, oci_packs::DefaultRegistryClient,
+    CachePolicy, DistClient, DistOptions, OciPackFetcher, PackFetchOptions, ResolvePolicy,
+    oci_packs::DefaultRegistryClient,
 };
 use serde::{Deserialize, Serialize};
 use tokio::runtime::Runtime;
@@ -486,9 +487,15 @@ fn resolve_remote_pack_path(root: &Path, reference: &str) -> Result<PathBuf> {
     };
     let client = DistClient::new(options);
     let runtime = Runtime::new().context("create artifact resolver runtime")?;
-    let resolved = runtime
-        .block_on(client.resolve_ref(reference))
+    let source = client
+        .parse_source(reference)
+        .with_context(|| format!("parse artifact ref {reference}"))?;
+    let descriptor = runtime
+        .block_on(client.resolve(source, ResolvePolicy))
         .with_context(|| format!("resolve artifact ref {reference}"))?;
+    let resolved = runtime
+        .block_on(client.fetch(&descriptor, CachePolicy))
+        .with_context(|| format!("fetch artifact ref {reference}"))?;
     if let Some(path) = resolved.wasm_path {
         return Ok(path);
     }

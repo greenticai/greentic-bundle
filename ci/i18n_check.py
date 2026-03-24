@@ -7,7 +7,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 I18N_DIR = ROOT / "i18n"
-LOCALES_PATH = I18N_DIR / "locales.json"
+LOCALES_PATH = ROOT / "i18n-locales.json"
 EN_PATH = I18N_DIR / "en.json"
 
 PLACEHOLDER_RE = re.compile(r"\{[A-Za-z0-9_.-]+\}")

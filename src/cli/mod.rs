@@ -11,6 +11,7 @@ pub mod export;
 pub mod init;
 pub mod inspect;
 pub mod remove;
+pub mod unbundle;
 pub mod wizard;
 
 #[derive(Debug, Parser)]
@@ -54,6 +55,8 @@ enum Commands {
     Export(export::ExportArgs),
     #[command(about = "cli.inspect.about")]
     Inspect(inspect::InspectArgs),
+    #[command(about = "cli.unbundle.about")]
+    Unbundle(unbundle::UnbundleArgs),
     #[command(about = "cli.add.about")]
     Add(add::AddArgs),
     #[command(about = "cli.remove.about")]
@@ -91,6 +94,7 @@ impl Cli {
             Commands::Build(args) => build::run(args),
             Commands::Export(args) => export::run(args),
             Commands::Inspect(args) => inspect::run(args),
+            Commands::Unbundle(args) => unbundle::run(args),
             Commands::Add(args) => add::run(args),
             Commands::Remove(args) => remove::run(args),
             Commands::Access(args) => access::run(args),

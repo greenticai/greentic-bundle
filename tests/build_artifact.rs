@@ -211,6 +211,26 @@ fn doctor_validates_workspace_and_artifact() {
 }
 
 #[test]
+fn inspect_artifact_includes_content_listing() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    seed_workspace(&root);
+    let artifact = root.join("demo.gtbundle");
+    greentic_bundle::build::build_workspace(&root, Some(&artifact), false).expect("build");
+
+    let report = greentic_bundle::build::inspect_target(None, Some(&artifact)).expect("inspect");
+    let contents = report.contents.expect("artifact contents");
+
+    assert!(contents.iter().any(|entry| entry == "bundle.yaml"));
+    assert!(contents.iter().any(|entry| entry == "bundle-lock.json"));
+    assert!(
+        contents
+            .iter()
+            .any(|entry| entry == "resolved/default.yaml")
+    );
+}
+
+#[test]
 fn dry_run_export_computes_plan_without_writing_artifact() {
     let temp = TempDir::new().expect("tempdir");
     let root = temp.path().join("bundle");

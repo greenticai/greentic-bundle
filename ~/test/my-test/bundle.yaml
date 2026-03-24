@@ -1,0 +1,15 @@
+schema_version: 1
+bundle_id: my-network-assistant
+bundle_name: My network assistant
+locale: en
+mode: create
+advanced_setup: false
+app_packs: []
+app_pack_mappings: []
+extension_providers: []
+remote_catalogs: []
+hooks: []
+subscriptions: []
+capabilities: []
+setup_execution_intent: false
+export_intent: false
