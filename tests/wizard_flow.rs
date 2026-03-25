@@ -813,6 +813,63 @@ fn wizard_validate_is_side_effect_free() {
 }
 
 #[test]
+fn wizard_validate_accepts_delegated_launcher_answers() {
+    let temp = TempDir::new().expect("tempdir");
+    let bundle_root = temp.path().join("bundle");
+    let pack_root = temp.path().join("test-pack");
+    let answers_path = temp.path().join("answers.json");
+    fs::create_dir_all(&pack_root).expect("pack dir");
+    write_answers(
+        &answers_path,
+        &format!(
+            r#"{{
+  "wizard_id":"greentic-bundle.wizard.run",
+  "schema_id":"greentic-bundle.wizard.answers",
+  "schema_version":"1.0.0",
+  "locale":"en",
+  "answers":{{
+    "selected_action":"bundle",
+    "bundle":{{
+      "name":"e2e-bundle",
+      "id":"ai.greentic.e2e.bundle",
+      "output_dir":"{}"
+    }},
+    "apps":[
+      {{
+        "source":"{}",
+        "selected_flows":"all"
+      }}
+    ],
+    "providers":{{
+      "messaging":[],
+      "events":[]
+    }}
+  }},
+  "locks":{{}}
+}}"#,
+            bundle_root.display(),
+            pack_root.display()
+        ),
+    );
+
+    let output = Command::new(bundle_bin())
+        .args(["wizard", "validate", "--answers"])
+        .arg(&answers_path)
+        .output()
+        .expect("run validate");
+    assert!(
+        output.status.success(),
+        "stdout={} stderr={}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert!(
+        !bundle_root.exists(),
+        "validate must not create workspace files"
+    );
+}
+
+#[test]
 fn wizard_apply_replays_from_answers() {
     let temp = TempDir::new().expect("tempdir");
     let bundle_root = temp.path().join("bundle");
@@ -881,6 +938,67 @@ fn wizard_apply_replays_from_answers() {
         Some(1)
     );
     assert!(bundle_root.join("state/cache/catalogs/index.json").exists());
+}
+
+#[test]
+fn wizard_apply_accepts_delegated_launcher_answers() {
+    let temp = TempDir::new().expect("tempdir");
+    let bundle_root = temp.path().join("bundle");
+    let pack_root = temp.path().join("test-pack");
+    let answers_path = temp.path().join("answers.json");
+    fs::create_dir_all(&pack_root).expect("pack dir");
+    write_answers(
+        &answers_path,
+        &format!(
+            r#"{{
+  "wizard_id":"greentic-bundle.wizard.run",
+  "schema_id":"greentic-bundle.wizard.answers",
+  "schema_version":"1.0.0",
+  "locale":"en",
+  "answers":{{
+    "selected_action":"bundle",
+    "bundle":{{
+      "name":"e2e-bundle",
+      "id":"ai.greentic.e2e.bundle",
+      "output_dir":"{}"
+    }},
+    "apps":[
+      {{
+        "source":"{}",
+        "selected_flows":"all"
+      }}
+    ],
+    "providers":{{
+      "messaging":[],
+      "events":[]
+    }}
+  }},
+  "locks":{{}}
+}}"#,
+            bundle_root.display(),
+            pack_root.display()
+        ),
+    );
+
+    let output = Command::new(bundle_bin())
+        .args(["wizard", "apply", "--answers"])
+        .arg(&answers_path)
+        .output()
+        .expect("run apply");
+    assert!(
+        output.status.success(),
+        "stdout={} stderr={}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert!(bundle_root.join("bundle.yaml").exists());
+    assert!(bundle_root.join("tenants/default/tenant.gmap").exists());
+    assert!(bundle_root.join("bundle.lock.json").exists());
+
+    let bundle_yaml = fs::read_to_string(bundle_root.join("bundle.yaml")).expect("bundle yaml");
+    assert!(bundle_yaml.contains("bundle_id: ai-greentic-e2e-bundle"));
+    assert!(bundle_yaml.contains(&format!("  - {}", pack_root.display())));
+    assert!(bundle_yaml.contains("bundle_name: e2e-bundle"));
 }
 
 #[test]
