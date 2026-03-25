@@ -2894,36 +2894,141 @@ fn normalized_request_from_document(
     document: AnswerDocument,
     mode_override: Option<WizardMode>,
 ) -> Result<NormalizedRequest> {
+    let answers = normalized_answers_from_document(&document.answers)?;
     let mode = match mode_override {
         Some(mode) => mode,
-        None => mode_from_answers(&document.answers)?,
+        None => mode_from_answers(&answers)?,
     };
-    let bundle_name = required_string(&document.answers, "bundle_name")?;
-    let bundle_id = required_string(&document.answers, "bundle_id")?;
-    let output_dir = PathBuf::from(required_string(&document.answers, "output_dir")?);
+    let bundle_name = required_string(&answers, "bundle_name")?;
+    let bundle_id = required_string(&answers, "bundle_id")?;
+    let output_dir = PathBuf::from(required_string(&answers, "output_dir")?);
     let request = normalize_request(SeedRequest {
         mode,
         locale: document.locale,
         bundle_name,
         bundle_id,
         output_dir,
-        app_pack_entries: optional_app_pack_entries(&document.answers, "app_pack_entries")?,
-        access_rules: optional_access_rules(&document.answers, "access_rules")?,
+        app_pack_entries: optional_app_pack_entries(&answers, "app_pack_entries")?,
+        access_rules: optional_access_rules(&answers, "access_rules")?,
         extension_provider_entries: optional_extension_provider_entries(
-            &document.answers,
+            &answers,
             "extension_provider_entries",
         )?,
-        advanced_setup: optional_bool(&document.answers, "advanced_setup")?,
-        app_packs: optional_string_list(&document.answers, "app_packs")?,
-        extension_providers: optional_string_list(&document.answers, "extension_providers")?,
-        remote_catalogs: optional_string_list(&document.answers, "remote_catalogs")?,
-        setup_specs: optional_object_map(&document.answers, "setup_specs")?,
-        setup_answers: optional_object_map(&document.answers, "setup_answers")?,
-        setup_execution_intent: optional_bool(&document.answers, "setup_execution_intent")?,
-        export_intent: optional_bool(&document.answers, "export_intent")?,
+        advanced_setup: optional_bool(&answers, "advanced_setup")?,
+        app_packs: optional_string_list(&answers, "app_packs")?,
+        extension_providers: optional_string_list(&answers, "extension_providers")?,
+        remote_catalogs: optional_string_list(&answers, "remote_catalogs")?,
+        setup_specs: optional_object_map(&answers, "setup_specs")?,
+        setup_answers: optional_object_map(&answers, "setup_answers")?,
+        setup_execution_intent: optional_bool(&answers, "setup_execution_intent")?,
+        export_intent: optional_bool(&answers, "export_intent")?,
     });
     validate_normalized_answer_request(&request)?;
     Ok(request)
+}
+
+fn normalized_answers_from_document(
+    answers: &BTreeMap<String, Value>,
+) -> Result<BTreeMap<String, Value>> {
+    let mut normalized = answers.clone();
+
+    if let Some(Value::Object(bundle)) = answers.get("bundle") {
+        copy_nested_string(bundle, "name", &mut normalized, "bundle_name")?;
+        copy_nested_string(bundle, "id", &mut normalized, "bundle_id")?;
+        copy_nested_string(bundle, "output_dir", &mut normalized, "output_dir")?;
+    }
+
+    if !normalized.contains_key("mode")
+        && let Some(Value::String(action)) = answers.get("selected_action")
+    {
+        if action == "bundle" {
+            normalized.insert("mode".to_string(), Value::String("create".to_string()));
+        } else {
+            return Err(invalid_answer_field("selected_action"));
+        }
+    }
+
+    if !normalized.contains_key("app_packs")
+        && !normalized.contains_key("app_pack_entries")
+        && let Some(Value::Array(apps)) = answers.get("apps")
+    {
+        normalized.insert(
+            "app_packs".to_string(),
+            Value::Array(
+                apps.iter()
+                    .map(app_reference_from_launcher_entry)
+                    .collect::<Result<Vec<_>>>()?
+                    .into_iter()
+                    .map(Value::String)
+                    .collect(),
+            ),
+        );
+    }
+
+    if !normalized.contains_key("extension_providers")
+        && !normalized.contains_key("extension_provider_entries")
+        && let Some(Value::Object(providers)) = answers.get("providers")
+    {
+        let mut refs = Vec::new();
+        for key in ["messaging", "events"] {
+            if let Some(value) = providers.get(key) {
+                refs.extend(string_list_from_launcher_value(value, "providers")?);
+            }
+        }
+        normalized.insert(
+            "extension_providers".to_string(),
+            Value::Array(refs.into_iter().map(Value::String).collect()),
+        );
+    }
+
+    Ok(normalized)
+}
+
+fn copy_nested_string(
+    object: &Map<String, Value>,
+    source_key: &str,
+    normalized: &mut BTreeMap<String, Value>,
+    target_key: &str,
+) -> Result<()> {
+    if normalized.contains_key(target_key) {
+        return Ok(());
+    }
+    match object.get(source_key) {
+        None => Ok(()),
+        Some(Value::String(value)) => {
+            normalized.insert(target_key.to_string(), Value::String(value.clone()));
+            Ok(())
+        }
+        Some(_) => Err(invalid_answer_field(target_key)),
+    }
+}
+
+fn app_reference_from_launcher_entry(value: &Value) -> Result<String> {
+    let object = value
+        .as_object()
+        .ok_or_else(|| invalid_answer_field("apps"))?;
+    object
+        .get("source")
+        .and_then(Value::as_str)
+        .filter(|value| !value.trim().is_empty())
+        .map(ToOwned::to_owned)
+        .ok_or_else(|| invalid_answer_field("apps"))
+}
+
+fn string_list_from_launcher_value(value: &Value, key: &str) -> Result<Vec<String>> {
+    match value {
+        Value::Array(entries) => entries
+            .iter()
+            .map(|entry| {
+                entry
+                    .as_str()
+                    .filter(|value| !value.trim().is_empty())
+                    .map(ToOwned::to_owned)
+                    .ok_or_else(|| invalid_answer_field(key))
+            })
+            .collect(),
+        _ => Err(invalid_answer_field(key)),
+    }
 }
 
 #[allow(dead_code)]
