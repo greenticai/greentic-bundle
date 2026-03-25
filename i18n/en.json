@@ -182,5 +182,10 @@
   "errors.answer_document.metadata_missing": "AnswerDocument metadata is missing; rerun with --migrate to adopt the current schema.",
   "errors.answer_document.schema_id_mismatch": "AnswerDocument schema_id does not match the bundle wizard schema.",
   "errors.answer_document.migrate_required": "AnswerDocument schema version differs from the requested target; rerun with --migrate.",
-  "errors.i18n.missing_locale": "Missing embedded locale catalog for {locale}"
+  "errors.i18n.missing_locale": "Missing embedded locale catalog for {locale}",
+  "errors.answer_document.invalid_json": "AnswerDocument answers file `{path}` must be valid JSON.",
+  "errors.answer_document.invalid_root": "Answers JSON must be an object.",
+  "errors.answer_document.invalid_document": "AnswerDocument has an invalid structure.",
+  "errors.answer_document.answer_missing": "AnswerDocument answer `{field}` is required.",
+  "errors.answer_document.answer_invalid": "AnswerDocument answer `{field}` is invalid."
 }

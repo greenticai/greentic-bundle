@@ -492,12 +492,12 @@ fn collect_update_flow<R: BufRead, W: Write>(
     output: &mut W,
     validate_only: bool,
 ) -> Result<InteractiveRequest> {
-    let target = prompt_bundle_target(
+    let (target, mut state) = prompt_request_from_bundle_target(
         input,
         output,
         &crate::i18n::tr("wizard.prompt.current_bundle_root"),
+        WizardMode::Update,
     )?;
-    let mut state = request_from_bundle_target(&target, WizardMode::Update)?;
     if matches!(target, BundleTarget::Artifact(_)) && !validate_only {
         state.output_dir = PathBuf::from(prompt_required_string(
             input,
@@ -538,38 +538,149 @@ fn collect_doctor_flow<R: BufRead, W: Write>(
     input: &mut R,
     output: &mut W,
 ) -> Result<InteractiveRequest> {
-    let target = prompt_bundle_target(
-        input,
-        output,
-        &crate::i18n::tr("wizard.prompt.current_bundle_root"),
-    )?;
     Ok(InteractiveRequest {
-        request: request_from_bundle_target(&target, WizardMode::Doctor)?,
+        request: prompt_request_from_bundle_target(
+            input,
+            output,
+            &crate::i18n::tr("wizard.prompt.current_bundle_root"),
+            WizardMode::Doctor,
+        )?
+        .1,
         review_action: ReviewAction::DryRunOnly,
     })
 }
 
 fn perform_doctor_action<R: BufRead, W: Write>(input: &mut R, output: &mut W) -> Result<()> {
-    let target = prompt_bundle_target(
+    run_prompted_bundle_target_action(
         input,
         output,
         &crate::i18n::tr("wizard.prompt.bundle_target"),
-    )?;
-    let report = match &target {
-        BundleTarget::Workspace(root) => crate::build::doctor_target(Some(root), None)?,
-        BundleTarget::Artifact(artifact) => crate::build::doctor_target(None, Some(artifact))?,
-    };
-    writeln!(output, "{}", serde_json::to_string_pretty(&report)?)?;
-    Ok(())
+        |target| match target {
+            BundleTarget::Workspace(root) => crate::build::doctor_target(Some(root), None),
+            BundleTarget::Artifact(artifact) => crate::build::doctor_target(None, Some(artifact)),
+        },
+    )
 }
 
 fn perform_inspect_action<R: BufRead, W: Write>(input: &mut R, output: &mut W) -> Result<()> {
-    let target = prompt_bundle_target(
-        input,
-        output,
-        &crate::i18n::tr("wizard.prompt.bundle_target"),
-    )?;
-    let report = match &target {
+    loop {
+        let target = prompt_bundle_target(
+            input,
+            output,
+            &crate::i18n::tr("wizard.prompt.bundle_target"),
+        )?;
+        match inspect_bundle_target(output, &target) {
+            Ok(()) => return Ok(()),
+            Err(error) => writeln!(output, "{error}")?,
+        }
+    }
+}
+
+fn perform_unbundle_action<R: BufRead, W: Write>(input: &mut R, output: &mut W) -> Result<()> {
+    loop {
+        let artifact = prompt_bundle_artifact_path(input, output)?;
+        let out = prompt_optional_string(
+            input,
+            output,
+            &crate::i18n::tr("wizard.prompt.unbundle_output_dir"),
+            Some("."),
+        )?;
+        match crate::build::unbundle_artifact(&artifact, Path::new(&out)) {
+            Ok(result) => {
+                writeln!(output, "{}", serde_json::to_string_pretty(&result)?)?;
+                return Ok(());
+            }
+            Err(error) => writeln!(output, "{error}")?,
+        }
+    }
+}
+
+fn prompt_bundle_target<R: BufRead, W: Write>(
+    input: &mut R,
+    output: &mut W,
+    title: &str,
+) -> Result<BundleTarget> {
+    loop {
+        let raw = prompt_required_string(input, output, title, None)?;
+        match parse_bundle_target(PathBuf::from(raw)) {
+            Ok(target) => return Ok(target),
+            Err(error) => writeln!(output, "{error}")?,
+        }
+    }
+}
+
+fn prompt_bundle_artifact_path<R: BufRead, W: Write>(
+    input: &mut R,
+    output: &mut W,
+) -> Result<PathBuf> {
+    loop {
+        let raw = prompt_required_string(
+            input,
+            output,
+            &crate::i18n::tr("wizard.prompt.bundle_artifact"),
+            None,
+        )?;
+        let path = PathBuf::from(raw);
+        if !is_bundle_artifact_path(&path) {
+            writeln!(
+                output,
+                "{}",
+                crate::i18n::tr("wizard.error.bundle_artifact_required")
+            )?;
+            continue;
+        }
+        if !path.exists() {
+            writeln!(
+                output,
+                "{}: {}",
+                crate::i18n::tr("wizard.error.bundle_target_missing"),
+                path.display()
+            )?;
+            continue;
+        }
+        return Ok(path);
+    }
+}
+
+fn prompt_request_from_bundle_target<R: BufRead, W: Write>(
+    input: &mut R,
+    output: &mut W,
+    title: &str,
+    mode: WizardMode,
+) -> Result<(BundleTarget, NormalizedRequest)> {
+    loop {
+        let target = prompt_bundle_target(input, output, title)?;
+        match request_from_bundle_target(&target, mode) {
+            Ok(request) => return Ok((target, request)),
+            Err(error) => writeln!(output, "{error}")?,
+        }
+    }
+}
+
+fn run_prompted_bundle_target_action<R: BufRead, W: Write, T, F>(
+    input: &mut R,
+    output: &mut W,
+    title: &str,
+    action: F,
+) -> Result<()>
+where
+    T: Serialize,
+    F: Fn(&BundleTarget) -> Result<T>,
+{
+    loop {
+        let target = prompt_bundle_target(input, output, title)?;
+        match action(&target) {
+            Ok(report) => {
+                writeln!(output, "{}", serde_json::to_string_pretty(&report)?)?;
+                return Ok(());
+            }
+            Err(error) => writeln!(output, "{error}")?,
+        }
+    }
+}
+
+fn inspect_bundle_target<W: Write>(output: &mut W, target: &BundleTarget) -> Result<()> {
+    let report = match target {
         BundleTarget::Workspace(root) => crate::build::inspect_target(Some(root), None)?,
         BundleTarget::Artifact(artifact) => crate::build::inspect_target(None, Some(artifact))?,
     };
@@ -581,55 +692,6 @@ fn perform_inspect_action<R: BufRead, W: Write>(input: &mut R, output: &mut W) -
         writeln!(output, "{}", serde_json::to_string_pretty(&report)?)?;
     }
     Ok(())
-}
-
-fn perform_unbundle_action<R: BufRead, W: Write>(input: &mut R, output: &mut W) -> Result<()> {
-    let artifact = prompt_bundle_artifact_path(input, output)?;
-    let out = prompt_optional_string(
-        input,
-        output,
-        &crate::i18n::tr("wizard.prompt.unbundle_output_dir"),
-        Some("."),
-    )?;
-    let result = crate::build::unbundle_artifact(&artifact, Path::new(&out))?;
-    writeln!(output, "{}", serde_json::to_string_pretty(&result)?)?;
-    Ok(())
-}
-
-fn prompt_bundle_target<R: BufRead, W: Write>(
-    input: &mut R,
-    output: &mut W,
-    title: &str,
-) -> Result<BundleTarget> {
-    let raw = prompt_required_string(input, output, title, None)?;
-    parse_bundle_target(PathBuf::from(raw))
-}
-
-fn prompt_bundle_artifact_path<R: BufRead, W: Write>(
-    input: &mut R,
-    output: &mut W,
-) -> Result<PathBuf> {
-    let raw = prompt_required_string(
-        input,
-        output,
-        &crate::i18n::tr("wizard.prompt.bundle_artifact"),
-        None,
-    )?;
-    let path = PathBuf::from(raw);
-    if !is_bundle_artifact_path(&path) {
-        bail!(
-            "{}",
-            crate::i18n::tr("wizard.error.bundle_artifact_required")
-        );
-    }
-    if !path.exists() {
-        bail!(
-            "{}: {}",
-            crate::i18n::tr("wizard.error.bundle_target_missing"),
-            path.display()
-        );
-    }
-    Ok(path)
 }
 
 fn parse_bundle_target(path: PathBuf) -> Result<BundleTarget> {
@@ -2735,8 +2797,12 @@ fn load_and_normalize_answers(
 ) -> Result<LoadedRequest> {
     let raw = fs::read_to_string(path)
         .with_context(|| format!("failed to read answers file {}", path.display()))?;
-    let value: Value = serde_json::from_str(&raw)
-        .with_context(|| format!("answers file {} must be valid JSON", path.display()))?;
+    let value: Value = serde_json::from_str(&raw).map_err(|_| {
+        anyhow::anyhow!(crate::i18n::trf(
+            "errors.answer_document.invalid_json",
+            &[("path", &path.display().to_string())],
+        ))
+    })?;
     let document = parse_answer_document(value, schema_version, migrate, locale)?;
     let locks = document.locks.clone();
     let build_bundle_now = answer_document_requests_bundle_build(&document);
@@ -2764,7 +2830,7 @@ fn parse_answer_document(
     let object = value
         .as_object()
         .cloned()
-        .ok_or_else(|| anyhow::anyhow!("answers JSON must be an object"))?;
+        .ok_or_else(|| anyhow::anyhow!(crate::i18n::tr("errors.answer_document.invalid_root")))?;
 
     let has_metadata = object.contains_key("wizard_id")
         || object.contains_key("schema_id")
@@ -2772,7 +2838,10 @@ fn parse_answer_document(
         || object.contains_key("locale");
 
     let document = if has_metadata {
-        let document: AnswerDocument = serde_json::from_value(Value::Object(object))?;
+        let document: AnswerDocument =
+            serde_json::from_value(Value::Object(object)).map_err(|_| {
+                anyhow::anyhow!(crate::i18n::tr("errors.answer_document.invalid_document"))
+            })?;
         document.validate()?;
         document
     } else if migrate {
@@ -2825,31 +2894,36 @@ fn normalized_request_from_document(
     document: AnswerDocument,
     mode_override: Option<WizardMode>,
 ) -> Result<NormalizedRequest> {
-    let mode = mode_override.unwrap_or_else(|| mode_from_answers(&document.answers));
+    let mode = match mode_override {
+        Some(mode) => mode,
+        None => mode_from_answers(&document.answers)?,
+    };
     let bundle_name = required_string(&document.answers, "bundle_name")?;
-    let bundle_id = normalize_bundle_id(&required_string(&document.answers, "bundle_id")?);
+    let bundle_id = required_string(&document.answers, "bundle_id")?;
     let output_dir = PathBuf::from(required_string(&document.answers, "output_dir")?);
-    Ok(normalize_request(SeedRequest {
+    let request = normalize_request(SeedRequest {
         mode,
         locale: document.locale,
         bundle_name,
         bundle_id,
         output_dir,
-        app_pack_entries: optional_app_pack_entries(&document.answers, "app_pack_entries"),
-        access_rules: optional_access_rules(&document.answers, "access_rules"),
+        app_pack_entries: optional_app_pack_entries(&document.answers, "app_pack_entries")?,
+        access_rules: optional_access_rules(&document.answers, "access_rules")?,
         extension_provider_entries: optional_extension_provider_entries(
             &document.answers,
             "extension_provider_entries",
-        ),
-        advanced_setup: optional_bool(&document.answers, "advanced_setup"),
-        app_packs: optional_string_list(&document.answers, "app_packs"),
-        extension_providers: optional_string_list(&document.answers, "extension_providers"),
-        remote_catalogs: optional_string_list(&document.answers, "remote_catalogs"),
-        setup_specs: optional_object_map(&document.answers, "setup_specs"),
-        setup_answers: optional_object_map(&document.answers, "setup_answers"),
-        setup_execution_intent: optional_bool(&document.answers, "setup_execution_intent"),
-        export_intent: optional_bool(&document.answers, "export_intent"),
-    }))
+        )?,
+        advanced_setup: optional_bool(&document.answers, "advanced_setup")?,
+        app_packs: optional_string_list(&document.answers, "app_packs")?,
+        extension_providers: optional_string_list(&document.answers, "extension_providers")?,
+        remote_catalogs: optional_string_list(&document.answers, "remote_catalogs")?,
+        setup_specs: optional_object_map(&document.answers, "setup_specs")?,
+        setup_answers: optional_object_map(&document.answers, "setup_answers")?,
+        setup_execution_intent: optional_bool(&document.answers, "setup_execution_intent")?,
+        export_intent: optional_bool(&document.answers, "export_intent")?,
+    });
+    validate_normalized_answer_request(&request)?;
+    Ok(request)
 }
 
 #[allow(dead_code)]
@@ -2923,78 +2997,136 @@ fn normalized_request_from_qa_answers(
     }))
 }
 
-fn mode_from_answers(answers: &BTreeMap<String, Value>) -> WizardMode {
-    match answers
-        .get("mode")
-        .and_then(Value::as_str)
-        .unwrap_or("create")
-        .to_ascii_lowercase()
-        .as_str()
-    {
-        "update" => WizardMode::Update,
-        "doctor" => WizardMode::Doctor,
-        _ => WizardMode::Create,
+fn mode_from_answers(answers: &BTreeMap<String, Value>) -> Result<WizardMode> {
+    match answers.get("mode") {
+        None => Ok(WizardMode::Create),
+        Some(Value::String(value)) => match value.to_ascii_lowercase().as_str() {
+            "create" => Ok(WizardMode::Create),
+            "update" => Ok(WizardMode::Update),
+            "doctor" => Ok(WizardMode::Doctor),
+            _ => Err(invalid_answer_field("mode")),
+        },
+        Some(_) => Err(invalid_answer_field("mode")),
     }
 }
 
 fn required_string(answers: &BTreeMap<String, Value>, key: &str) -> Result<String> {
-    answers
-        .get(key)
-        .and_then(Value::as_str)
-        .map(ToOwned::to_owned)
-        .ok_or_else(|| anyhow::anyhow!("missing required answer field: {key}"))
+    let value = answers.get(key).ok_or_else(|| missing_answer_field(key))?;
+    let text = value.as_str().ok_or_else(|| invalid_answer_field(key))?;
+    if text.trim().is_empty() {
+        return Err(invalid_answer_field(key));
+    }
+    Ok(text.to_string())
 }
 
-fn optional_bool(answers: &BTreeMap<String, Value>, key: &str) -> bool {
-    answers.get(key).and_then(Value::as_bool).unwrap_or(false)
-}
-
-fn optional_string_list(answers: &BTreeMap<String, Value>, key: &str) -> Vec<String> {
+fn optional_bool(answers: &BTreeMap<String, Value>, key: &str) -> Result<bool> {
     match answers.get(key) {
+        None => Ok(false),
+        Some(Value::Bool(value)) => Ok(*value),
+        Some(_) => Err(invalid_answer_field(key)),
+    }
+}
+
+fn optional_string_list(answers: &BTreeMap<String, Value>, key: &str) -> Result<Vec<String>> {
+    match answers.get(key) {
+        None => Ok(Vec::new()),
         Some(Value::Array(entries)) => entries
             .iter()
-            .filter_map(Value::as_str)
-            .map(ToOwned::to_owned)
+            .map(|entry| {
+                entry
+                    .as_str()
+                    .map(ToOwned::to_owned)
+                    .ok_or_else(|| invalid_answer_field(key))
+            })
             .collect(),
-        _ => Vec::new(),
+        Some(_) => Err(invalid_answer_field(key)),
     }
 }
 
-fn optional_object_map(answers: &BTreeMap<String, Value>, key: &str) -> BTreeMap<String, Value> {
+fn optional_object_map(
+    answers: &BTreeMap<String, Value>,
+    key: &str,
+) -> Result<BTreeMap<String, Value>> {
     match answers.get(key) {
-        Some(Value::Object(entries)) => entries
+        None => Ok(BTreeMap::new()),
+        Some(Value::Object(entries)) => Ok(entries
             .iter()
             .map(|(entry_key, entry_value)| (entry_key.clone(), entry_value.clone()))
-            .collect(),
-        _ => BTreeMap::new(),
+            .collect()),
+        Some(_) => Err(invalid_answer_field(key)),
     }
 }
 
-fn optional_app_pack_entries(answers: &BTreeMap<String, Value>, key: &str) -> Vec<AppPackEntry> {
+fn optional_app_pack_entries(
+    answers: &BTreeMap<String, Value>,
+    key: &str,
+) -> Result<Vec<AppPackEntry>> {
     answers
         .get(key)
         .cloned()
-        .and_then(|value| serde_json::from_value(value).ok())
-        .unwrap_or_default()
+        .map(|value| serde_json::from_value(value).map_err(|_| invalid_answer_field(key)))
+        .transpose()
+        .map(|value| value.unwrap_or_default())
 }
 
-fn optional_access_rules(answers: &BTreeMap<String, Value>, key: &str) -> Vec<AccessRuleInput> {
+fn optional_access_rules(
+    answers: &BTreeMap<String, Value>,
+    key: &str,
+) -> Result<Vec<AccessRuleInput>> {
     answers
         .get(key)
         .cloned()
-        .and_then(|value| serde_json::from_value(value).ok())
-        .unwrap_or_default()
+        .map(|value| serde_json::from_value(value).map_err(|_| invalid_answer_field(key)))
+        .transpose()
+        .map(|value| value.unwrap_or_default())
 }
 
 fn optional_extension_provider_entries(
     answers: &BTreeMap<String, Value>,
     key: &str,
-) -> Vec<ExtensionProviderEntry> {
+) -> Result<Vec<ExtensionProviderEntry>> {
     answers
         .get(key)
         .cloned()
-        .and_then(|value| serde_json::from_value(value).ok())
-        .unwrap_or_default()
+        .map(|value| serde_json::from_value(value).map_err(|_| invalid_answer_field(key)))
+        .transpose()
+        .map(|value| value.unwrap_or_default())
+}
+
+fn missing_answer_field(key: &str) -> anyhow::Error {
+    anyhow::anyhow!(crate::i18n::trf(
+        "errors.answer_document.answer_missing",
+        &[("field", key)],
+    ))
+}
+
+fn invalid_answer_field(key: &str) -> anyhow::Error {
+    anyhow::anyhow!(crate::i18n::trf(
+        "errors.answer_document.answer_invalid",
+        &[("field", key)],
+    ))
+}
+
+fn validate_normalized_answer_request(request: &NormalizedRequest) -> Result<()> {
+    if request.bundle_name.trim().is_empty() {
+        bail!(
+            "{}",
+            crate::i18n::trf(
+                "errors.answer_document.answer_invalid",
+                &[("field", "bundle_name")]
+            )
+        );
+    }
+    if request.bundle_id.trim().is_empty() {
+        bail!(
+            "{}",
+            crate::i18n::trf(
+                "errors.answer_document.answer_invalid",
+                &[("field", "bundle_id")]
+            )
+        );
+    }
+    Ok(())
 }
 
 fn requested_schema_version(schema_version: Option<&str>) -> Result<Version> {

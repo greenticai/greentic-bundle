@@ -43,6 +43,10 @@ fn run_command(args: &[&str]) -> std::process::Output {
         .expect("run command")
 }
 
+fn write_answers(path: &std::path::Path, body: &str) {
+    fs::write(path, body).expect("write answers");
+}
+
 fn seed_workspace_with_artifact(root: &std::path::Path, artifact: &std::path::Path) {
     let output = run_with_stdin(
         &["wizard"],
@@ -269,6 +273,68 @@ fn bare_wizard_unbundle_accepts_gtbundle_path() {
     );
     assert!(out.join("bundle.yaml").exists());
     assert!(out.join("bundle-lock.json").exists());
+}
+
+#[test]
+fn bare_wizard_update_reprompts_after_missing_bundle_target() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    let artifact = temp.path().join("bundle.gtbundle");
+    let edited = temp.path().join("edited-workspace");
+    let missing = temp.path().join("missing.gtbundle");
+    seed_workspace_with_artifact(&root, &artifact);
+
+    let output = run_with_stdin(
+        &["wizard"],
+        &format!(
+            "2\n{}\n{}\n{}\n\n\n4\n4\n2\n0\n",
+            missing.display(),
+            artifact.display(),
+            edited.display(),
+        ),
+    );
+    assert!(
+        output.status.success(),
+        "stdout={} stderr={}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+
+    let stdout = String::from_utf8(output.stdout).expect("stdout");
+    assert!(stdout.contains("Bundle target does not exist"));
+    assert!(stdout.contains(edited.to_str().expect("edited utf8")));
+    assert!(stdout.contains("\"execution\": \"dry_run\""));
+}
+
+#[test]
+fn bare_wizard_unbundle_reprompts_after_invalid_artifact_path() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    let artifact = temp.path().join("bundle.gtbundle");
+    let out = temp.path().join("unbundled");
+    let not_bundle = temp.path().join("not-a-bundle.txt");
+    seed_workspace_with_artifact(&root, &artifact);
+    fs::write(&not_bundle, "not a bundle").expect("write placeholder");
+
+    let output = run_with_stdin(
+        &["wizard"],
+        &format!(
+            "6\n{}\n{}\n{}\n0\n",
+            not_bundle.display(),
+            artifact.display(),
+            out.display()
+        ),
+    );
+    assert!(
+        output.status.success(),
+        "stdout={} stderr={}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+
+    let stdout = String::from_utf8(output.stdout).expect("stdout");
+    assert!(stdout.contains("A valid .gtbundle path is required"));
+    assert!(out.join("bundle.yaml").exists());
 }
 
 #[test]
@@ -708,9 +774,9 @@ fn wizard_validate_is_side_effect_free() {
     let temp = TempDir::new().expect("tempdir");
     let bundle_root = temp.path().join("bundle");
     let answers_path = temp.path().join("answers.json");
-    fs::write(
+    write_answers(
         &answers_path,
-        format!(
+        &format!(
             r#"{{
   "wizard_id":"greentic-bundle.wizard.run",
   "schema_id":"greentic-bundle.wizard.answers",
@@ -732,8 +798,7 @@ fn wizard_validate_is_side_effect_free() {
 }}"#,
             bundle_root.display()
         ),
-    )
-    .expect("write answers");
+    );
 
     let output = Command::new(bundle_bin())
         .args(["wizard", "validate", "--answers"])
@@ -758,9 +823,9 @@ fn wizard_apply_replays_from_answers() {
         r#"[{"id":"provider-a","label":"Provider A","reference":"repo://providers/provider-a@latest"}]"#,
     )
     .expect("write catalog");
-    fs::write(
+    write_answers(
         &answers_path,
-        format!(
+        &format!(
             r#"{{
   "wizard_id":"greentic-bundle.wizard.run",
   "schema_id":"greentic-bundle.wizard.answers",
@@ -783,8 +848,7 @@ fn wizard_apply_replays_from_answers() {
             bundle_root.display(),
             catalog_path.display()
         ),
-    )
-    .expect("write answers");
+    );
 
     let output = Command::new(bundle_bin())
         .args(["wizard", "apply", "--answers"])
@@ -824,9 +888,9 @@ fn wizard_apply_replays_build_bundle_artifact_when_answers_capture_execute_lock(
     let temp = TempDir::new().expect("tempdir");
     let bundle_root = temp.path().join("bundle");
     let answers_path = temp.path().join("answers.json");
-    fs::write(
+    write_answers(
         &answers_path,
-        format!(
+        &format!(
             r#"{{
   "wizard_id":"greentic-bundle.wizard.run",
   "schema_id":"greentic-bundle.wizard.answers",
@@ -848,8 +912,7 @@ fn wizard_apply_replays_build_bundle_artifact_when_answers_capture_execute_lock(
 }}"#,
             bundle_root.display()
         ),
-    )
-    .expect("write answers");
+    );
 
     let output = Command::new(bundle_bin())
         .args(["wizard", "apply", "--answers"])
@@ -915,9 +978,9 @@ fn wizard_apply_discovers_setup_specs_from_catalog_entries() {
 ]"#,
     )
     .expect("write catalog");
-    fs::write(
+    write_answers(
         &answers_path,
-        format!(
+        &format!(
             r#"{{
   "wizard_id":"greentic-bundle.wizard.run",
   "schema_id":"greentic-bundle.wizard.answers",
@@ -943,8 +1006,7 @@ fn wizard_apply_discovers_setup_specs_from_catalog_entries() {
             bundle_root.display(),
             catalog_path.display()
         ),
-    )
-    .expect("write answers");
+    );
 
     let output = Command::new(bundle_bin())
         .args(["wizard", "apply", "--answers"])
@@ -982,9 +1044,9 @@ fn wizard_validate_with_migrate_reemits_document() {
     let bundle_root = temp.path().join("bundle");
     let input_path = temp.path().join("legacy.json");
     let output_path = temp.path().join("migrated.json");
-    fs::write(
+    write_answers(
         &input_path,
-        format!(
+        &format!(
             r#"{{
   "answers":{{
     "mode":"create",
@@ -1002,8 +1064,7 @@ fn wizard_validate_with_migrate_reemits_document() {
 }}"#,
             bundle_root.display()
         ),
-    )
-    .expect("write legacy answers");
+    );
 
     let output = Command::new(bundle_bin())
         .args([
@@ -1038,9 +1099,9 @@ fn dry_run_prints_deterministic_plan_without_writes() {
     let temp = TempDir::new().expect("tempdir");
     let bundle_root = temp.path().join("bundle");
     let answers_path = temp.path().join("answers.json");
-    fs::write(
+    write_answers(
         &answers_path,
-        format!(
+        &format!(
             r#"{{
   "wizard_id":"greentic-bundle.wizard.run",
   "schema_id":"greentic-bundle.wizard.answers",
@@ -1062,8 +1123,7 @@ fn dry_run_prints_deterministic_plan_without_writes() {
 }}"#,
             bundle_root.display()
         ),
-    )
-    .expect("write answers");
+    );
 
     let output = Command::new(bundle_bin())
         .args(["wizard", "run", "--answers"])
@@ -1113,4 +1173,127 @@ fn wizard_apply_help_mentions_mode_flag() {
     assert!(output.status.success());
     let stdout = String::from_utf8(output.stdout).expect("stdout");
     assert!(stdout.contains("--mode <MODE>"));
+}
+
+#[test]
+fn wizard_answers_invalid_json_reports_localized_error() {
+    let temp = TempDir::new().expect("tempdir");
+    let answers_path = temp.path().join("answers.json");
+    write_answers(&answers_path, "{invalid json");
+
+    let output = Command::new(bundle_bin())
+        .args(["--locale", "nl", "wizard", "validate", "--answers"])
+        .arg(&answers_path)
+        .output()
+        .expect("run validate");
+
+    assert!(!output.status.success());
+    let expected = greentic_bundle::i18n::trf_for(
+        "nl",
+        "errors.answer_document.invalid_json",
+        &[("path", answers_path.to_str().expect("answers path utf8"))],
+    );
+    assert!(String::from_utf8_lossy(&output.stderr).contains(&expected));
+}
+
+#[test]
+fn wizard_answers_missing_required_field_fails_cleanly() {
+    let temp = TempDir::new().expect("tempdir");
+    let answers_path = temp.path().join("answers.json");
+    write_answers(
+        &answers_path,
+        r#"{
+  "wizard_id":"greentic-bundle.wizard.run",
+  "schema_id":"greentic-bundle.wizard.answers",
+  "schema_version":"1.0.0",
+  "locale":"en",
+  "answers":{
+    "mode":"create",
+    "bundle_id":"demo-bundle",
+    "output_dir":"/tmp/demo-bundle"
+  },
+  "locks":{}
+}"#,
+    );
+
+    let output = Command::new(bundle_bin())
+        .args(["wizard", "validate", "--answers"])
+        .arg(&answers_path)
+        .output()
+        .expect("run validate");
+
+    assert!(!output.status.success());
+    assert!(
+        String::from_utf8_lossy(&output.stderr)
+            .contains("AnswerDocument answer `bundle_name` is required.")
+    );
+}
+
+#[test]
+fn wizard_answers_invalid_field_type_is_rejected() {
+    let temp = TempDir::new().expect("tempdir");
+    let answers_path = temp.path().join("answers.json");
+    write_answers(
+        &answers_path,
+        r#"{
+  "wizard_id":"greentic-bundle.wizard.run",
+  "schema_id":"greentic-bundle.wizard.answers",
+  "schema_version":"1.0.0",
+  "locale":"en",
+  "answers":{
+    "mode":"create",
+    "bundle_name":"Demo Bundle",
+    "bundle_id":"demo-bundle",
+    "output_dir":"/tmp/demo-bundle",
+    "app_packs":"pack-a"
+  },
+  "locks":{}
+}"#,
+    );
+
+    let output = Command::new(bundle_bin())
+        .args(["wizard", "validate", "--answers"])
+        .arg(&answers_path)
+        .output()
+        .expect("run validate");
+
+    assert!(!output.status.success());
+    assert!(
+        String::from_utf8_lossy(&output.stderr)
+            .contains("AnswerDocument answer `app_packs` is invalid.")
+    );
+}
+
+#[test]
+fn wizard_answers_invalid_mode_is_rejected() {
+    let temp = TempDir::new().expect("tempdir");
+    let answers_path = temp.path().join("answers.json");
+    write_answers(
+        &answers_path,
+        r#"{
+  "wizard_id":"greentic-bundle.wizard.run",
+  "schema_id":"greentic-bundle.wizard.answers",
+  "schema_version":"1.0.0",
+  "locale":"en",
+  "answers":{
+    "mode":"wat",
+    "bundle_name":"Demo Bundle",
+    "bundle_id":"demo-bundle",
+    "output_dir":"/tmp/demo-bundle"
+  },
+  "locks":{}
+}"#,
+    );
+
+    let output = Command::new(bundle_bin())
+        .args(["wizard", "validate", "--answers"])
+        .arg(&answers_path)
+        .output()
+        .expect("run validate");
+
+    assert!(!output.status.success());
+    assert!(
+        String::from_utf8_lossy(&output.stderr)
+            .contains("AnswerDocument answer `mode` is invalid.")
+    );
 }
