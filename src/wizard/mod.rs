@@ -2722,6 +2722,9 @@ fn detected_reference_kind(root: &Path, raw: &str) -> &'static str {
     if raw.starts_with("file://") {
         return "file_uri";
     }
+    if raw.starts_with("https://") {
+        return "https";
+    }
     if raw.starts_with("oci://") {
         return "oci";
     }
@@ -4359,7 +4362,7 @@ mod tests {
 
     use super::{
         RootMenuZeroAction, build_extension_provider_options, choose_interactive_menu,
-        clean_extension_provider_label,
+        clean_extension_provider_label, detected_reference_kind,
     };
 
     #[test]
@@ -4454,6 +4457,15 @@ mod tests {
         assert_eq!(
             clean_extension_provider_label(&pr),
             "Greentic Messaging Dummy (PR version)"
+        );
+    }
+
+    #[test]
+    fn detected_reference_kind_classifies_https_refs() {
+        let root = std::path::Path::new(".");
+        assert_eq!(
+            detected_reference_kind(root, "https://example.com/packs/cards-demo.gtpack"),
+            "https"
         );
     }
 }
