@@ -357,7 +357,8 @@ fn should_skip_extension_provider_materialization(reference: &str) -> bool {
     bundled_catalog_mode()
         && (reference.starts_with("oci://")
             || reference.starts_with("repo://")
-            || reference.starts_with("store://"))
+            || reference.starts_with("store://")
+            || reference.starts_with("https://"))
 }
 
 fn bundled_catalog_mode() -> bool {
@@ -440,7 +441,8 @@ fn materialize_reference_into(
 
     if !(reference.starts_with("oci://")
         || reference.starts_with("repo://")
-        || reference.starts_with("store://"))
+        || reference.starts_with("store://")
+        || reference.starts_with("https://"))
     {
         return Ok(());
     }
@@ -1029,4 +1031,22 @@ fn write_if_missing(path: &Path, contents: &str) -> Result<()> {
     }
     std::fs::write(path, contents)?;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::should_skip_extension_provider_materialization;
+
+    #[test]
+    fn bundled_catalog_mode_skips_https_provider_materialization() {
+        unsafe {
+            std::env::set_var("GREENTIC_BUNDLE_USE_BUNDLED_CATALOG", "1");
+        }
+        assert!(should_skip_extension_provider_materialization(
+            "https://example.com/providers/events-webhook.gtpack"
+        ));
+        unsafe {
+            std::env::remove_var("GREENTIC_BUNDLE_USE_BUNDLED_CATALOG");
+        }
+    }
 }
