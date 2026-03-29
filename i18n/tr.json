@@ -187,5 +187,7 @@
   "wizard.stage.pack_access": "== Paket erişimi ==",
   "wizard.stage.review": "== İnceleme özeti ==",
   "wizard.validate.about": "Yeniden oynatılan bundle yanıtlarını doğrula",
-  "wizard.warning.advanced_without_refs": "Gelişmiş kurulum, uygulama paketleri veya extension provider'lar olmadan etkinleştirildi."
+  "wizard.warning.advanced_without_refs": "Gelişmiş kurulum, uygulama paketleri veya extension provider'lar olmadan etkinleştirildi.",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
+  "wizard.stage.capabilities": "== Bundle capabilities =="
 }

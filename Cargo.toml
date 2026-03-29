@@ -3,7 +3,7 @@ members = ["crates/greentic-bundle-reader"]
 resolver = "2"
 
 [workspace.package]
-version = "0.4.19"
+version = "0.4.20"
 
 [workspace.dependencies]
 anyhow = "1"
@@ -66,6 +66,7 @@ sys-locale.workspace = true
 tempfile.workspace = true
 tokio.workspace = true
 unic-langid.workspace = true
+zip = "8"
 
 [dev-dependencies]
 assert_cmd.workspace = true

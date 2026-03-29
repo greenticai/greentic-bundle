@@ -187,5 +187,7 @@
   "wizard.stage.pack_access": "== Πρόσβαση pack ==",
   "wizard.stage.review": "== Σύνοψη ελέγχου ==",
   "wizard.validate.about": "Επικύρωση επαναληφθεισών απαντήσεων bundle",
-  "wizard.warning.advanced_without_refs": "Η προχωρημένη ρύθμιση ενεργοποιήθηκε χωρίς app packs ή extension providers."
+  "wizard.warning.advanced_without_refs": "Η προχωρημένη ρύθμιση ενεργοποιήθηκε χωρίς app packs ή extension providers.",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
+  "wizard.stage.capabilities": "== Bundle capabilities =="
 }

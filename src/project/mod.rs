@@ -209,6 +209,14 @@ pub fn ensure_layout(root: &Path) -> Result<()> {
     Ok(())
 }
 
+/// Bundle-level capability for read-only asset access by packs.
+pub const CAP_BUNDLE_ASSETS_READ_V1: &str = "greentic.cap.bundle_assets.read.v1";
+
+/// Creates the `assets/` directory at the bundle root for bundle-level shared assets.
+pub fn ensure_assets_dir(root: &Path) -> Result<()> {
+    ensure_dir(&root.join("assets"))
+}
+
 pub fn read_bundle_workspace(root: &Path) -> Result<BundleWorkspaceDefinition> {
     let raw = std::fs::read_to_string(root.join(WORKSPACE_ROOT_FILE))?;
     let mut definition = serde_yaml_bw::from_str::<BundleWorkspaceDefinition>(&raw)?;
@@ -232,17 +240,28 @@ pub fn init_bundle_workspace(
     workspace: &BundleWorkspaceDefinition,
 ) -> Result<Vec<PathBuf>> {
     ensure_layout(root)?;
+    let has_bundle_assets = workspace
+        .capabilities
+        .iter()
+        .any(|c| c == CAP_BUNDLE_ASSETS_READ_V1);
+    if has_bundle_assets {
+        ensure_assets_dir(root)?;
+    }
     write_bundle_workspace(root, workspace)?;
     let lock = empty_bundle_lock(workspace);
     write_bundle_lock(root, &lock)?;
     sync_project(root)?;
-    Ok(vec![
+    let mut files = vec![
         root.join(WORKSPACE_ROOT_FILE),
         root.join(LOCK_FILE),
         root.join("tenants/default/tenant.gmap"),
         root.join("resolved/default.yaml"),
         root.join("state/resolved/default.yaml"),
-    ])
+    ];
+    if has_bundle_assets {
+        files.push(root.join("assets"));
+    }
+    Ok(files)
 }
 
 pub fn sync_lock_with_workspace(root: &Path, workspace: &BundleWorkspaceDefinition) -> Result<()> {
@@ -1031,6 +1050,69 @@ fn write_if_missing(path: &Path, contents: &str) -> Result<()> {
     }
     std::fs::write(path, contents)?;
     Ok(())
+}
+
+/// Extracts `assets/` entries from all provider `.gtpack` files into the bundle
+/// root so users can see and directly modify them. Existing files are never
+/// overwritten — user customizations are preserved.
+pub fn scaffold_assets_from_packs(root: &Path) -> Result<Vec<PathBuf>> {
+    let mut written = Vec::new();
+    let providers_dir = root.join("providers");
+    if !providers_dir.is_dir() {
+        return Ok(written);
+    }
+    for dir_entry in collect_gtpack_files(&providers_dir)? {
+        match extract_pack_assets(root, &dir_entry) {
+            Ok(paths) => written.extend(paths),
+            Err(err) => {
+                eprintln!(
+                    "Warning: could not scaffold assets from {}: {err}",
+                    dir_entry.display()
+                );
+            }
+        }
+    }
+    Ok(written)
+}
+
+fn collect_gtpack_files(dir: &Path) -> Result<Vec<PathBuf>> {
+    let mut files = Vec::new();
+    for entry in std::fs::read_dir(dir)? {
+        let entry = entry?;
+        let path = entry.path();
+        if path.is_dir() {
+            files.extend(collect_gtpack_files(&path)?);
+        } else if path.extension().is_some_and(|ext| ext == "gtpack") {
+            files.push(path);
+        }
+    }
+    Ok(files)
+}
+
+fn extract_pack_assets(root: &Path, pack_path: &Path) -> Result<Vec<PathBuf>> {
+    let file =
+        std::fs::File::open(pack_path).with_context(|| format!("open {}", pack_path.display()))?;
+    let mut archive =
+        zip::ZipArchive::new(file).with_context(|| format!("read zip {}", pack_path.display()))?;
+    let mut written = Vec::new();
+    for i in 0..archive.len() {
+        let mut entry = archive.by_index(i)?;
+        let name = entry.name().to_string();
+        if !name.starts_with("assets/") || entry.is_dir() {
+            continue;
+        }
+        let target = root.join(&name);
+        if target.exists() {
+            continue;
+        }
+        if let Some(parent) = target.parent() {
+            std::fs::create_dir_all(parent)?;
+        }
+        let mut out = std::fs::File::create(&target)?;
+        std::io::copy(&mut entry, &mut out)?;
+        written.push(target);
+    }
+    Ok(written)
 }
 
 #[cfg(test)]

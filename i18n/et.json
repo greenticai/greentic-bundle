@@ -187,5 +187,7 @@
   "wizard.stage.pack_access": "== Packi juurdepääs ==",
   "wizard.stage.review": "== Ülevaate kokkuvõte ==",
   "wizard.validate.about": "Valideeri taasesitatud bundle-vastused",
-  "wizard.warning.advanced_without_refs": "Täiustatud seadistus lubati ilma app packide või extension provideriteta."
+  "wizard.warning.advanced_without_refs": "Täiustatud seadistus lubati ilma app packide või extension provideriteta.",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
+  "wizard.stage.capabilities": "== Bundle capabilities =="
 }

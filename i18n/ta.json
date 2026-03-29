@@ -187,5 +187,7 @@
   "wizard.stage.pack_access": "== Pack அணுகல் ==",
   "wizard.stage.review": "== மதிப்பாய்வு சுருக்கம் ==",
   "wizard.validate.about": "மீளஇயக்கப்பட்ட bundle பதில்களை சரிபார்",
-  "wizard.warning.advanced_without_refs": "app packs அல்லது extension providers இன்றியே மேம்பட்ட அமைப்பு இயக்கப்பட்டது."
+  "wizard.warning.advanced_without_refs": "app packs அல்லது extension providers இன்றியே மேம்பட்ட அமைப்பு இயக்கப்பட்டது.",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
+  "wizard.stage.capabilities": "== Bundle capabilities =="
 }

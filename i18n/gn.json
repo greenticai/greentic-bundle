@@ -187,5 +187,7 @@
   "wizard.stage.pack_access": "== Pack jeike ==",
   "wizard.stage.review": "== Ñemohenda mbykymi ==",
   "wizard.validate.about": "Ehechajey bundle mbohovái oñembohasajevýva",
-  "wizard.warning.advanced_without_refs": "Ñemboheko hag̃uave oñemyandy app packs térã extension providers'ỹre."
+  "wizard.warning.advanced_without_refs": "Ñemboheko hag̃uave oñemyandy app packs térã extension providers'ỹre.",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
+  "wizard.stage.capabilities": "== Bundle capabilities =="
 }

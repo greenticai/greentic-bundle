@@ -187,5 +187,7 @@
   "wizard.stage.pack_access": "== Pack access ==",
   "wizard.stage.review": "== Review summary ==",
   "wizard.validate.about": "නැවත ක්‍රියාත්මක කළ bundle answers validate කරන්න",
-  "wizard.warning.advanced_without_refs": "app packs හෝ extension providers නොමැතිව Advanced setup සක්‍රිය කර ඇත."
+  "wizard.warning.advanced_without_refs": "app packs හෝ extension providers නොමැතිව Advanced setup සක්‍රිය කර ඇත.",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
+  "wizard.stage.capabilities": "== Bundle capabilities =="
 }

@@ -187,5 +187,7 @@
   "wizard.stage.pack_access": "== Pack piekļuve ==",
   "wizard.stage.review": "== Pārskata kopsavilkums ==",
   "wizard.validate.about": "Validēt atkārtoti izmantotās bundle atbildes",
-  "wizard.warning.advanced_without_refs": "Paplašinātā iestatīšana tika iespējota bez app packs vai extension providers."
+  "wizard.warning.advanced_without_refs": "Paplašinātā iestatīšana tika iespējota bez app packs vai extension providers.",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
+  "wizard.stage.capabilities": "== Bundle capabilities =="
 }

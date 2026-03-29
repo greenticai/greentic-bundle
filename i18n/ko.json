@@ -187,5 +187,7 @@
   "wizard.stage.pack_access": "== 팩 접근 ==",
   "wizard.stage.review": "== 검토 요약 ==",
   "wizard.validate.about": "재생된 번들 응답 검증",
-  "wizard.warning.advanced_without_refs": "앱 팩이나 확장 제공자 없이 고급 설정이 활성화되었습니다."
+  "wizard.warning.advanced_without_refs": "앱 팩이나 확장 제공자 없이 고급 설정이 활성화되었습니다.",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
+  "wizard.stage.capabilities": "== Bundle capabilities =="
 }

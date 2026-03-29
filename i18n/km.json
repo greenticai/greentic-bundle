@@ -187,5 +187,7 @@
   "wizard.stage.pack_access": "== សិទ្ធិចូលប្រើ pack ==",
   "wizard.stage.review": "== សេចក្តីសង្ខេបការពិនិត្យឡើងវិញ ==",
   "wizard.validate.about": "ផ្ទៀងផ្ទាត់ answers bundle ដែលបានចាក់ឡើងវិញ",
-  "wizard.warning.advanced_without_refs": "ការរៀបចំកម្រិតខ្ពស់ត្រូវបានបើក ដោយគ្មាន app packs ឬ extension providers។"
+  "wizard.warning.advanced_without_refs": "ការរៀបចំកម្រិតខ្ពស់ត្រូវបានបើក ដោយគ្មាន app packs ឬ extension providers។",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
+  "wizard.stage.capabilities": "== Bundle capabilities =="
 }

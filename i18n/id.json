@@ -187,5 +187,7 @@
   "wizard.stage.pack_access": "== Akses pack ==",
   "wizard.stage.review": "== Ringkasan tinjauan ==",
   "wizard.validate.about": "Validasi jawaban bundle yang diputar ulang",
-  "wizard.warning.advanced_without_refs": "Penyiapan lanjutan diaktifkan tanpa app pack atau extension provider."
+  "wizard.warning.advanced_without_refs": "Penyiapan lanjutan diaktifkan tanpa app pack atau extension provider.",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
+  "wizard.stage.capabilities": "== Bundle capabilities =="
 }

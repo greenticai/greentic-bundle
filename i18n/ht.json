@@ -187,5 +187,7 @@
   "wizard.stage.pack_access": "== Aksè pack ==",
   "wizard.stage.review": "== Rezime revizyon ==",
   "wizard.validate.about": "Valide repons bundle ki rejwe yo",
-  "wizard.warning.advanced_without_refs": "Konfigirasyon avanse te aktive san app packs oswa extension providers."
+  "wizard.warning.advanced_without_refs": "Konfigirasyon avanse te aktive san app packs oswa extension providers.",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
+  "wizard.stage.capabilities": "== Bundle capabilities =="
 }

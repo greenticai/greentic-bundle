@@ -187,5 +187,7 @@
   "wizard.stage.pack_access": "== Доступ pack ==",
   "wizard.stage.review": "== Сводка проверки ==",
   "wizard.validate.about": "Проверить повторно воспроизведенные ответы bundle",
-  "wizard.warning.advanced_without_refs": "Расширенная настройка была включена без app packs или extension providers."
+  "wizard.warning.advanced_without_refs": "Расширенная настройка была включена без app packs или extension providers.",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
+  "wizard.stage.capabilities": "== Bundle capabilities =="
 }

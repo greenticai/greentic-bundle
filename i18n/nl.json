@@ -187,5 +187,7 @@
   "wizard.stage.pack_access": "== Pack-toegang ==",
   "wizard.stage.review": "== Samenvatting beoordelen ==",
   "wizard.validate.about": "Opnieuw afgespeelde bundle-antwoorden valideren",
-  "wizard.warning.advanced_without_refs": "Geavanceerde configuratie is ingeschakeld zonder app-packs of extension-providers."
+  "wizard.warning.advanced_without_refs": "Geavanceerde configuratie is ingeschakeld zonder app-packs of extension-providers.",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
+  "wizard.stage.capabilities": "== Bundle capabilities =="
 }

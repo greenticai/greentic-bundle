@@ -187,5 +187,7 @@
   "wizard.stage.pack_access": "== وصول الحزمة ==",
   "wizard.stage.review": "== ملخص المراجعة ==",
   "wizard.validate.about": "التحقق من إجابات الحزمة المعاد تشغيلها",
-  "wizard.warning.advanced_without_refs": "تم تفعيل الإعداد المتقدم بدون app packs أو موفري extension."
+  "wizard.warning.advanced_without_refs": "تم تفعيل الإعداد المتقدم بدون app packs أو موفري extension.",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
+  "wizard.stage.capabilities": "== Bundle capabilities =="
 }
