@@ -446,26 +446,28 @@ fn collect_create_flow<R: BufRead, W: Write>(
     output: &mut W,
 ) -> Result<InteractiveRequest> {
     let locale = crate::i18n::current_locale();
+    let bundle_name = prompt_required_string(
+        input,
+        output,
+        &crate::i18n::tr("wizard.prompt.bundle_name"),
+        None,
+    )?;
+    let bundle_id = normalize_bundle_id(&prompt_required_string(
+        input,
+        output,
+        &crate::i18n::tr("wizard.prompt.bundle_id"),
+        None,
+    )?);
     let mut state = normalize_request(SeedRequest {
         mode: WizardMode::Create,
         locale,
-        bundle_name: prompt_required_string(
-            input,
-            output,
-            &crate::i18n::tr("wizard.prompt.bundle_name"),
-            None,
-        )?,
-        bundle_id: prompt_required_string(
-            input,
-            output,
-            &crate::i18n::tr("wizard.prompt.bundle_id"),
-            None,
-        )?,
+        bundle_name,
+        bundle_id: bundle_id.clone(),
         output_dir: PathBuf::from(prompt_required_string(
             input,
             output,
             &crate::i18n::tr("wizard.prompt.output_dir"),
-            None,
+            Some(&default_bundle_output_dir(&bundle_id).display().to_string()),
         )?),
         app_pack_entries: Vec::new(),
         access_rules: Vec::new(),
@@ -1180,6 +1182,17 @@ fn wizard_request_form_spec_json(
     defaults: Option<&RequestDefaults>,
 ) -> Result<String> {
     let defaults = defaults.cloned().unwrap_or_default();
+    let output_dir_default = defaults.output_dir.clone().or_else(|| {
+        if matches!(mode, WizardMode::Create) {
+            defaults
+                .bundle_id
+                .as_deref()
+                .map(default_bundle_output_dir)
+                .map(|path| path.display().to_string())
+        } else {
+            None
+        }
+    });
     Ok(json!({
         "id": format!("greentic-bundle-root-wizard-{}", mode_name(mode)),
         "title": crate::i18n::tr("wizard.menu.title"),
@@ -1211,8 +1224,8 @@ fn wizard_request_form_spec_json(
                 "id": "output_dir",
                 "type": "string",
                 "title": crate::i18n::tr("wizard.prompt.output_dir"),
-                "required": true,
-                "default_value": defaults.output_dir
+                "required": !matches!(mode, WizardMode::Create),
+                "default_value": output_dir_default
             },
             {
                 "id": "advanced_setup",
@@ -2947,7 +2960,14 @@ fn normalized_request_from_document(
     };
     let bundle_name = required_string(&answers, "bundle_name")?;
     let bundle_id = required_string(&answers, "bundle_id")?;
-    let output_dir = PathBuf::from(required_string(&answers, "output_dir")?);
+    let normalized_bundle_id = normalize_bundle_id(&bundle_id);
+    let output_dir = answers
+        .get("output_dir")
+        .and_then(Value::as_str)
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .map(PathBuf::from)
+        .unwrap_or_else(|| default_bundle_output_dir(&normalized_bundle_id));
     let request = normalize_request(SeedRequest {
         mode,
         locale: document.locale,
@@ -3098,12 +3118,13 @@ fn normalized_request_from_qa_answers(
             .and_then(Value::as_str)
             .ok_or_else(|| anyhow::anyhow!("wizard answer missing bundle_id"))?,
     );
-    let output_dir = PathBuf::from(
-        object
-            .get("output_dir")
-            .and_then(Value::as_str)
-            .ok_or_else(|| anyhow::anyhow!("wizard answer missing output_dir"))?,
-    );
+    let output_dir = object
+        .get("output_dir")
+        .and_then(Value::as_str)
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .map(PathBuf::from)
+        .unwrap_or_else(|| default_bundle_output_dir(&bundle_id));
 
     Ok(normalize_request(SeedRequest {
         mode,
@@ -3730,6 +3751,15 @@ fn normalize_output_dir(path: PathBuf) -> PathBuf {
         PathBuf::from(".")
     } else {
         path
+    }
+}
+
+fn default_bundle_output_dir(bundle_id: &str) -> PathBuf {
+    let normalized = normalize_bundle_id(bundle_id);
+    if normalized.is_empty() {
+        PathBuf::from("./bundle")
+    } else {
+        PathBuf::from(format!("./{normalized}-bundle"))
     }
 }
 
