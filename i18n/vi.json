@@ -187,5 +187,10 @@
   "wizard.stage.pack_access": "== Quyền truy cập pack ==",
   "wizard.stage.review": "== Tóm tắt đánh giá ==",
   "wizard.validate.about": "Xác thực các câu trả lời bundle được phát lại",
-  "wizard.warning.advanced_without_refs": "Thiết lập nâng cao đã được bật mà không có app pack hoặc extension provider."
+  "wizard.warning.advanced_without_refs": "Thiết lập nâng cao đã được bật mà không có app pack hoặc extension provider.",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
+  "wizard.prompt.enable_webchat_oauth": "Enable OAuth login for WebChat GUI? (y/N)",
+  "wizard.prompt.enable_webchat_i18n": "Enable multi-language for WebChat GUI? (y/N)",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
+  "wizard.prompt.enable_webchat_embed": "Enable embeddable WebChat widget? (y/N)"
 }

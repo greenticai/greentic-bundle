@@ -187,5 +187,10 @@
   "wizard.stage.pack_access": "== Prístup packu ==",
   "wizard.stage.review": "== Súhrn kontroly ==",
   "wizard.validate.about": "Validovať znovu prehrané odpovede bundla",
-  "wizard.warning.advanced_without_refs": "Pokročilé nastavenie bolo povolené bez app packov alebo extension providerov."
+  "wizard.warning.advanced_without_refs": "Pokročilé nastavenie bolo povolené bez app packov alebo extension providerov.",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
+  "wizard.prompt.enable_webchat_oauth": "Enable OAuth login for WebChat GUI? (y/N)",
+  "wizard.prompt.enable_webchat_i18n": "Enable multi-language for WebChat GUI? (y/N)",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
+  "wizard.prompt.enable_webchat_embed": "Enable embeddable WebChat widget? (y/N)"
 }

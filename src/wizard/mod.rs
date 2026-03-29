@@ -45,6 +45,7 @@ pub struct NormalizedRequest {
     pub setup_answers: BTreeMap<String, Value>,
     pub setup_execution_intent: bool,
     pub export_intent: bool,
+    pub capabilities: Vec<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, serde::Deserialize)]
@@ -477,9 +478,11 @@ fn collect_create_flow<R: BufRead, W: Write>(
         setup_answers: BTreeMap::new(),
         setup_execution_intent: false,
         export_intent: false,
+        capabilities: Vec::new(),
     });
     state = edit_app_packs(input, output, state, false)?;
     state = edit_extension_providers(input, output, state, false)?;
+    state = edit_bundle_capabilities(input, output, state)?;
     let review_action = review_summary(input, output, &state, false)?;
     Ok(InteractiveRequest {
         request: state,
@@ -521,6 +524,7 @@ fn collect_update_flow<R: BufRead, W: Write>(
     if !validate_only {
         state = edit_app_packs(input, output, state, true)?;
         state = edit_extension_providers(input, output, state, true)?;
+        state = edit_bundle_capabilities(input, output, state)?;
         let review_action = review_summary(input, output, &state, true)?;
         Ok(InteractiveRequest {
             request: state,
@@ -1282,6 +1286,7 @@ struct SeedRequest {
     setup_answers: BTreeMap<String, Value>,
     setup_execution_intent: bool,
     export_intent: bool,
+    capabilities: Vec<String>,
 }
 
 fn normalize_request(seed: SeedRequest) -> NormalizedRequest {
@@ -1370,6 +1375,7 @@ fn normalize_request(seed: SeedRequest) -> NormalizedRequest {
         setup_answers: seed.setup_answers,
         setup_execution_intent: seed.setup_execution_intent,
         export_intent: seed.export_intent,
+        capabilities: sorted_unique(seed.capabilities),
     }
 }
 
@@ -1468,6 +1474,7 @@ fn request_from_workspace(
         setup_answers: BTreeMap::new(),
         setup_execution_intent: false,
         export_intent: false,
+        capabilities: workspace.capabilities.clone(),
     })
 }
 
@@ -1740,6 +1747,13 @@ fn review_summary<R: BufRead, W: Write>(
                 .map(|entry| format!("{} [{}]", entry.display_name, entry.reference))
                 .collect::<Vec<_>>(),
         )?;
+        if !state.capabilities.is_empty() {
+            render_named_entries(
+                output,
+                &crate::i18n::tr("wizard.stage.capabilities"),
+                &state.capabilities,
+            )?;
+        }
         writeln!(
             output,
             "1. {}",
@@ -1851,6 +1865,86 @@ fn group_pack_entries(entries: &[AppPackEntry]) -> Vec<PackGroup> {
     groups
 }
 
+fn edit_bundle_capabilities<R: BufRead, W: Write>(
+    input: &mut R,
+    output: &mut W,
+    mut state: NormalizedRequest,
+) -> Result<NormalizedRequest> {
+    // Bundle assets capability
+    let cap_assets = crate::project::CAP_BUNDLE_ASSETS_READ_V1.to_string();
+    let assets_enabled = state.capabilities.contains(&cap_assets);
+    let answer = prompt_qa_boolean(
+        input,
+        output,
+        &crate::i18n::tr("wizard.prompt.enable_bundle_assets"),
+        false,
+        Some(Value::Bool(assets_enabled)),
+    )?;
+    if answer.as_bool().unwrap_or(false) {
+        if !state.capabilities.contains(&cap_assets) {
+            state.capabilities.push(cap_assets.clone());
+        }
+    } else {
+        state.capabilities.retain(|c| c != &cap_assets);
+    }
+
+    // OAuth capability
+    let cap_oauth = crate::project::CAP_WEBCHAT_OAUTH_V1.to_string();
+    let oauth_enabled = state.capabilities.contains(&cap_oauth);
+    let answer = prompt_qa_boolean(
+        input,
+        output,
+        &crate::i18n::tr("wizard.prompt.enable_webchat_oauth"),
+        false,
+        Some(Value::Bool(oauth_enabled)),
+    )?;
+    if answer.as_bool().unwrap_or(false) {
+        if !state.capabilities.contains(&cap_oauth) {
+            state.capabilities.push(cap_oauth.clone());
+        }
+    } else {
+        state.capabilities.retain(|c| c != &cap_oauth);
+    }
+
+    // i18n capability
+    let cap_i18n = crate::project::CAP_WEBCHAT_I18N_V1.to_string();
+    let i18n_enabled = state.capabilities.contains(&cap_i18n);
+    let answer = prompt_qa_boolean(
+        input,
+        output,
+        &crate::i18n::tr("wizard.prompt.enable_webchat_i18n"),
+        false,
+        Some(Value::Bool(i18n_enabled)),
+    )?;
+    if answer.as_bool().unwrap_or(false) {
+        if !state.capabilities.contains(&cap_i18n) {
+            state.capabilities.push(cap_i18n.clone());
+        }
+    } else {
+        state.capabilities.retain(|c| c != &cap_i18n);
+    }
+
+    // Embed capability
+    let cap_embed = crate::project::CAP_WEBCHAT_EMBED_V1.to_string();
+    let embed_enabled = state.capabilities.contains(&cap_embed);
+    let answer = prompt_qa_boolean(
+        input,
+        output,
+        &crate::i18n::tr("wizard.prompt.enable_webchat_embed"),
+        false,
+        Some(Value::Bool(embed_enabled)),
+    )?;
+    if answer.as_bool().unwrap_or(false) {
+        if !state.capabilities.contains(&cap_embed) {
+            state.capabilities.push(cap_embed);
+        }
+    } else {
+        state.capabilities.retain(|c| c != &cap_embed);
+    }
+
+    Ok(state)
+}
+
 fn rebuild_request(request: NormalizedRequest) -> NormalizedRequest {
     normalize_request(SeedRequest {
         mode: request.mode,
@@ -1869,6 +1963,7 @@ fn rebuild_request(request: NormalizedRequest) -> NormalizedRequest {
         setup_answers: BTreeMap::new(),
         setup_execution_intent: false,
         export_intent: false,
+        capabilities: request.capabilities,
     })
 }
 
@@ -2925,6 +3020,7 @@ fn normalized_request_from_document(
         setup_answers: optional_object_map(&answers, "setup_answers")?,
         setup_execution_intent: optional_bool(&answers, "setup_execution_intent")?,
         export_intent: optional_bool(&answers, "export_intent")?,
+        capabilities: optional_string_list(&answers, "capabilities")?,
     });
     validate_normalized_answer_request(&request)?;
     Ok(request)
@@ -3102,6 +3198,16 @@ fn normalized_request_from_qa_answers(
             .get("export_intent")
             .and_then(Value::as_bool)
             .unwrap_or(false),
+        capabilities: object
+            .get("capabilities")
+            .and_then(Value::as_array)
+            .map(|arr| {
+                arr.iter()
+                    .filter_map(Value::as_str)
+                    .map(ToOwned::to_owned)
+                    .collect()
+            })
+            .unwrap_or_default(),
     }))
 }
 
@@ -3329,6 +3435,17 @@ fn answer_document_from_request(
         (
             "export_intent".to_string(),
             Value::Bool(request.export_intent),
+        ),
+        (
+            "capabilities".to_string(),
+            Value::Array(
+                request
+                    .capabilities
+                    .iter()
+                    .cloned()
+                    .map(Value::String)
+                    .collect(),
+            ),
         ),
     ]);
     Ok(document)
@@ -3582,6 +3699,27 @@ fn apply_plan(
         .with_context(|| format!("write {}", lock_file.display()))?;
     crate::project::sync_project(&request.output_dir)?;
 
+    if request
+        .capabilities
+        .iter()
+        .any(|c| c == crate::project::CAP_BUNDLE_ASSETS_READ_V1)
+    {
+        let tenants: Vec<String> = request
+            .access_rules
+            .iter()
+            .map(|r| r.tenant.clone())
+            .chain(std::iter::once("default".to_string()))
+            .collect::<std::collections::BTreeSet<_>>()
+            .into_iter()
+            .collect();
+        let scaffolded = crate::project::scaffold_assets_from_packs(
+            &request.output_dir,
+            &tenants,
+            &request.capabilities,
+        )?;
+        writes.extend(scaffolded);
+    }
+
     writes.push(bundle_yaml);
     writes.push(tenant_gmap);
     writes.push(lock_file);
@@ -3623,6 +3761,7 @@ fn workspace_definition_from_request(
     workspace.app_packs = request.app_packs.clone();
     workspace.extension_providers = request.extension_providers.clone();
     workspace.remote_catalogs = request.remote_catalogs.clone();
+    workspace.capabilities = request.capabilities.clone();
     workspace.setup_execution_intent = false;
     workspace.export_intent = false;
     workspace.canonicalize();

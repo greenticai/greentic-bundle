@@ -187,5 +187,10 @@
   "wizard.stage.pack_access": "== Packi juurdepääs ==",
   "wizard.stage.review": "== Ülevaate kokkuvõte ==",
   "wizard.validate.about": "Valideeri taasesitatud bundle-vastused",
-  "wizard.warning.advanced_without_refs": "Täiustatud seadistus lubati ilma app packide või extension provideriteta."
+  "wizard.warning.advanced_without_refs": "Täiustatud seadistus lubati ilma app packide või extension provideriteta.",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
+  "wizard.prompt.enable_webchat_oauth": "Enable OAuth login for WebChat GUI? (y/N)",
+  "wizard.prompt.enable_webchat_i18n": "Enable multi-language for WebChat GUI? (y/N)",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
+  "wizard.prompt.enable_webchat_embed": "Enable embeddable WebChat widget? (y/N)"
 }

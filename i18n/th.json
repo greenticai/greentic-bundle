@@ -187,5 +187,10 @@
   "wizard.stage.pack_access": "== การเข้าถึง pack ==",
   "wizard.stage.review": "== สรุปการตรวจทาน ==",
   "wizard.validate.about": "ตรวจสอบ answers ของ bundle ที่เล่นซ้ำ",
-  "wizard.warning.advanced_without_refs": "เปิดใช้การตั้งค่าขั้นสูงโดยไม่มี app packs หรือ extension providers"
+  "wizard.warning.advanced_without_refs": "เปิดใช้การตั้งค่าขั้นสูงโดยไม่มี app packs หรือ extension providers",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
+  "wizard.prompt.enable_webchat_oauth": "Enable OAuth login for WebChat GUI? (y/N)",
+  "wizard.prompt.enable_webchat_i18n": "Enable multi-language for WebChat GUI? (y/N)",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
+  "wizard.prompt.enable_webchat_embed": "Enable embeddable WebChat widget? (y/N)"
 }

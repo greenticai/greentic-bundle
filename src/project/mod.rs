@@ -209,6 +209,23 @@ pub fn ensure_layout(root: &Path) -> Result<()> {
     Ok(())
 }
 
+/// Bundle-level capability for read-only asset access by packs.
+pub const CAP_BUNDLE_ASSETS_READ_V1: &str = "greentic.cap.bundle_assets.read.v1";
+
+/// Capability that enables OAuth authentication providers in webchat-gui.
+pub const CAP_WEBCHAT_OAUTH_V1: &str = "greentic.cap.webchat.oauth.v1";
+
+/// Capability that enables multi-language locale picker in webchat-gui.
+pub const CAP_WEBCHAT_I18N_V1: &str = "greentic.cap.webchat.i18n.v1";
+
+/// WebChat GUI capability: enable embeddable widget mode with iframe snippet.
+pub const CAP_WEBCHAT_EMBED_V1: &str = "greentic.cap.webchat.embed.v1";
+
+/// Creates the `assets/` directory at the bundle root for bundle-level shared assets.
+pub fn ensure_assets_dir(root: &Path) -> Result<()> {
+    ensure_dir(&root.join("assets"))
+}
+
 pub fn read_bundle_workspace(root: &Path) -> Result<BundleWorkspaceDefinition> {
     let raw = std::fs::read_to_string(root.join(WORKSPACE_ROOT_FILE))?;
     let mut definition = serde_yaml_bw::from_str::<BundleWorkspaceDefinition>(&raw)?;
@@ -232,17 +249,28 @@ pub fn init_bundle_workspace(
     workspace: &BundleWorkspaceDefinition,
 ) -> Result<Vec<PathBuf>> {
     ensure_layout(root)?;
+    let has_bundle_assets = workspace
+        .capabilities
+        .iter()
+        .any(|c| c == CAP_BUNDLE_ASSETS_READ_V1);
+    if has_bundle_assets {
+        ensure_assets_dir(root)?;
+    }
     write_bundle_workspace(root, workspace)?;
     let lock = empty_bundle_lock(workspace);
     write_bundle_lock(root, &lock)?;
     sync_project(root)?;
-    Ok(vec![
+    let mut files = vec![
         root.join(WORKSPACE_ROOT_FILE),
         root.join(LOCK_FILE),
         root.join("tenants/default/tenant.gmap"),
         root.join("resolved/default.yaml"),
         root.join("state/resolved/default.yaml"),
-    ])
+    ];
+    if has_bundle_assets {
+        files.push(root.join("assets"));
+    }
+    Ok(files)
 }
 
 pub fn sync_lock_with_workspace(root: &Path, workspace: &BundleWorkspaceDefinition) -> Result<()> {
@@ -1031,6 +1059,227 @@ fn write_if_missing(path: &Path, contents: &str) -> Result<()> {
     }
     std::fs::write(path, contents)?;
     Ok(())
+}
+
+/// Scaffolds tenant skin assets from provider `.gtpack` files into the bundle.
+///
+/// For each provider pack that contains a `skins/default/` directory, copies
+/// those files into `assets/.../skins/{tenant}/` for every tenant in the bundle.
+/// This gives users a ready-to-edit skin per tenant based on the pack defaults.
+/// Existing files are never overwritten — user customizations are preserved.
+pub fn scaffold_assets_from_packs(
+    root: &Path,
+    tenants: &[String],
+    capabilities: &[String],
+) -> Result<Vec<PathBuf>> {
+    let mut written = Vec::new();
+    let providers_dir = root.join("providers");
+    if !providers_dir.is_dir() {
+        return Ok(written);
+    }
+    let tenant_list: Vec<&str> = if tenants.is_empty() {
+        vec!["default"]
+    } else {
+        tenants.iter().map(String::as_str).collect()
+    };
+    for pack_path in collect_gtpack_files(&providers_dir)? {
+        match scaffold_pack_skins(root, &pack_path, &tenant_list, capabilities) {
+            Ok(paths) => written.extend(paths),
+            Err(err) => {
+                eprintln!(
+                    "Warning: could not scaffold assets from {}: {err}",
+                    pack_path.display()
+                );
+            }
+        }
+    }
+    Ok(written)
+}
+
+fn collect_gtpack_files(dir: &Path) -> Result<Vec<PathBuf>> {
+    let mut files = Vec::new();
+    for entry in std::fs::read_dir(dir)? {
+        let entry = entry?;
+        let path = entry.path();
+        if path.is_dir() {
+            files.extend(collect_gtpack_files(&path)?);
+        } else if path.extension().is_some_and(|ext| ext == "gtpack") {
+            files.push(path);
+        }
+    }
+    Ok(files)
+}
+
+/// Copies `skins/default/` from the pack into `skins/{tenant}/` for each
+/// tenant. Also copies `config/tenants/default.json` → `config/tenants/{tenant}.json`.
+fn scaffold_pack_skins(
+    root: &Path,
+    pack_path: &Path,
+    tenants: &[&str],
+    capabilities: &[String],
+) -> Result<Vec<PathBuf>> {
+    let file =
+        std::fs::File::open(pack_path).with_context(|| format!("open {}", pack_path.display()))?;
+    let mut archive =
+        zip::ZipArchive::new(file).with_context(|| format!("read zip {}", pack_path.display()))?;
+
+    // Collect default skin + config entries into memory so we can replay per tenant.
+    let mut default_skin_entries: Vec<(String, Vec<u8>)> = Vec::new();
+    let mut default_config: Option<Vec<u8>> = None;
+
+    for i in 0..archive.len() {
+        let mut entry = archive.by_index(i)?;
+        if entry.is_dir() {
+            continue;
+        }
+        let name = entry.name().to_string();
+
+        // Collect config/tenants/default.json
+        if name.contains("/config/tenants/default.json") && name.starts_with("assets/") {
+            let mut buf = Vec::new();
+            std::io::Read::read_to_end(&mut entry, &mut buf)?;
+            default_config = Some(buf);
+            continue;
+        }
+        // Collect skins/default/ files
+        if name.contains("/skins/default/") && name.starts_with("assets/") {
+            let mut buf = Vec::new();
+            std::io::Read::read_to_end(&mut entry, &mut buf)?;
+            default_skin_entries.push((name, buf));
+        }
+    }
+
+    if default_skin_entries.is_empty() {
+        return Ok(Vec::new());
+    }
+
+    let mut written = Vec::new();
+    for tenant in tenants {
+        // Copy skins/default/ → skins/{tenant}/
+        for (src_path, data) in &default_skin_entries {
+            let dest_path = src_path.replace("/skins/default/", &format!("/skins/{tenant}/"));
+            let target = root.join(&dest_path);
+            if target.exists() {
+                continue;
+            }
+            if let Some(parent) = target.parent() {
+                std::fs::create_dir_all(parent)?;
+            }
+            // Replace tenant references in skin.json
+            if dest_path.ends_with("/skin.json") {
+                let content = String::from_utf8_lossy(data)
+                    .replace(
+                        "\"tenant\": \"default\"",
+                        &format!("\"tenant\": \"{tenant}\""),
+                    )
+                    .replace("/skins/default/", &format!("/skins/{tenant}/"))
+                    .replace("/skins/_template/", &format!("/skins/{tenant}/"));
+                std::fs::write(&target, content)?;
+            } else {
+                std::fs::write(&target, data)?;
+            }
+            written.push(target);
+        }
+        // Copy config/tenants/default.json → config/tenants/{tenant}.json
+        if let Some(config_data) = &default_config {
+            let config_dir_path = default_skin_entries
+                .first()
+                .map(|(p, _)| {
+                    // Derive the assets prefix (e.g., "assets/webchat-gui/")
+                    p.split("/skins/").next().unwrap_or("assets")
+                })
+                .unwrap_or("assets");
+            let dest = format!("{config_dir_path}/config/tenants/{tenant}.json");
+            let target = root.join(&dest);
+            if !target.exists() {
+                if let Some(parent) = target.parent() {
+                    std::fs::create_dir_all(parent)?;
+                }
+                let mut content = String::from_utf8_lossy(config_data)
+                    .replace(
+                        "\"tenant_id\": \"default\"",
+                        &format!("\"tenant_id\": \"{tenant}\""),
+                    )
+                    .replace(
+                        "\"legacy_skin\": \"default\"",
+                        &format!("\"legacy_skin\": \"{tenant}\""),
+                    )
+                    .replace("/skins/default/", &format!("/skins/{tenant}/"));
+                // Strip the "auth" section when OAuth capability is absent.
+                if !capabilities.iter().any(|c| c == CAP_WEBCHAT_OAUTH_V1)
+                    && let Ok(mut json) = serde_json::from_str::<serde_json::Value>(&content)
+                {
+                    if let Some(obj) = json.as_object_mut() {
+                        obj.remove("auth");
+                    }
+                    content = serde_json::to_string_pretty(&json).unwrap_or(content);
+                }
+                std::fs::write(&target, content)?;
+                written.push(target);
+            }
+        }
+
+        // Generate embed snippets when embed capability is enabled
+        if capabilities.iter().any(|c| c == CAP_WEBCHAT_EMBED_V1) {
+            let assets_prefix = default_skin_entries
+                .first()
+                .map(|(p, _)| p.split("/skins/").next().unwrap_or("assets"))
+                .unwrap_or("assets");
+            let snippet_dir = root.join(format!("{assets_prefix}/embed"));
+            std::fs::create_dir_all(&snippet_dir)?;
+
+            let snippet_path = snippet_dir.join(format!("{tenant}.html"));
+            if !snippet_path.exists() {
+                let snippet = format!(
+                    r#"<!-- Greentic WebChat Embed Snippets for tenant: {tenant} -->
+<!-- Replace {{{{PUBLIC_BASE_URL}}}} with your actual domain -->
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- TYPE 1: Fullpage Link (share this URL directly)        -->
+<!-- ═══════════════════════════════════════════════════════ -->
+
+{{{{PUBLIC_BASE_URL}}}}/v1/web/webchat/{tenant}/
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- TYPE 2: Inline Iframe (embed in your page)             -->
+<!-- ═══════════════════════════════════════════════════════ -->
+
+<iframe
+  src="{{{{PUBLIC_BASE_URL}}}}/v1/web/webchat/{tenant}/"
+  width="100%"
+  height="600"
+  style="border:none;border-radius:8px"
+  allow="microphone; camera"
+  title="Greentic WebChat">
+</iframe>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- TYPE 3: Chat Bubble (floating widget on your site)     -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- Defaults (color, title, logo) auto-loaded from skin.json -->
+
+<script>
+  window.greenticChatConfig = {{
+    tenant: '{tenant}',
+    baseUrl: '{{{{PUBLIC_BASE_URL}}}}',
+    // Override skin.json defaults (all optional):
+    // bubble: {{ color: '#10B981', label: 'Chat with us', position: 'bottom-right' }},
+    // window: {{ width: 400, height: 620, title: 'Assistant' }},
+  }};
+</script>
+<script src="{{{{PUBLIC_BASE_URL}}}}/v1/web/webchat/{tenant}/embed.js" defer></script>
+"#,
+                    tenant = tenant
+                );
+                std::fs::write(&snippet_path, snippet)?;
+                written.push(snippet_path);
+            }
+        }
+    }
+    Ok(written)
 }
 
 #[cfg(test)]

@@ -187,5 +187,10 @@
   "wizard.stage.pack_access": "== Pack 访问 ==",
   "wizard.stage.review": "== 审查摘要 ==",
   "wizard.validate.about": "验证重放的 bundle 答案",
-  "wizard.warning.advanced_without_refs": "已启用高级设置，但没有 app packs 或 extension providers。"
+  "wizard.warning.advanced_without_refs": "已启用高级设置，但没有 app packs 或 extension providers。",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
+  "wizard.prompt.enable_webchat_oauth": "Enable OAuth login for WebChat GUI? (y/N)",
+  "wizard.prompt.enable_webchat_i18n": "Enable multi-language for WebChat GUI? (y/N)",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
+  "wizard.prompt.enable_webchat_embed": "Enable embeddable WebChat widget? (y/N)"
 }

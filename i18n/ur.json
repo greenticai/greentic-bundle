@@ -187,5 +187,10 @@
   "wizard.stage.pack_access": "== Pack رسائی ==",
   "wizard.stage.review": "== جائزہ خلاصہ ==",
   "wizard.validate.about": "دوبارہ چلائے گئے bundle جوابات کی توثیق کریں",
-  "wizard.warning.advanced_without_refs": "app packs یا extension providers کے بغیر advanced setup فعال کیا گیا تھا۔"
+  "wizard.warning.advanced_without_refs": "app packs یا extension providers کے بغیر advanced setup فعال کیا گیا تھا۔",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
+  "wizard.prompt.enable_webchat_oauth": "Enable OAuth login for WebChat GUI? (y/N)",
+  "wizard.prompt.enable_webchat_i18n": "Enable multi-language for WebChat GUI? (y/N)",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
+  "wizard.prompt.enable_webchat_embed": "Enable embeddable WebChat widget? (y/N)"
 }

@@ -187,5 +187,10 @@
   "wizard.stage.pack_access": "== Dostęp do pack ==",
   "wizard.stage.review": "== Podsumowanie przeglądu ==",
   "wizard.validate.about": "Zweryfikuj odtworzone odpowiedzi bundle",
-  "wizard.warning.advanced_without_refs": "Włączono konfigurację zaawansowaną bez app packów ani extension providerów."
+  "wizard.warning.advanced_without_refs": "Włączono konfigurację zaawansowaną bez app packów ani extension providerów.",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
+  "wizard.prompt.enable_webchat_oauth": "Enable OAuth login for WebChat GUI? (y/N)",
+  "wizard.prompt.enable_webchat_i18n": "Enable multi-language for WebChat GUI? (y/N)",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
+  "wizard.prompt.enable_webchat_embed": "Enable embeddable WebChat widget? (y/N)"
 }

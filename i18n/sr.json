@@ -187,5 +187,10 @@
   "wizard.stage.pack_access": "== Pack pristup ==",
   "wizard.stage.review": "== Rezime pregleda ==",
   "wizard.validate.about": "Validiraj ponovljene bundle odgovore",
-  "wizard.warning.advanced_without_refs": "Napredno podešavanje je omogućeno bez app pack-ova ili extension provider-a."
+  "wizard.warning.advanced_without_refs": "Napredno podešavanje je omogućeno bez app pack-ova ili extension provider-a.",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
+  "wizard.prompt.enable_webchat_oauth": "Enable OAuth login for WebChat GUI? (y/N)",
+  "wizard.prompt.enable_webchat_i18n": "Enable multi-language for WebChat GUI? (y/N)",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
+  "wizard.prompt.enable_webchat_embed": "Enable embeddable WebChat widget? (y/N)"
 }
