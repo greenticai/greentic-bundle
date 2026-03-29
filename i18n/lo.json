@@ -187,5 +187,7 @@
   "wizard.stage.pack_access": "== ການເຂົ້າເຖິງ pack ==",
   "wizard.stage.review": "== ສະຫຼຸບການທົບທວນ ==",
   "wizard.validate.about": "ກວດສອບຄຳຕອບ bundle ທີ່ replay ແລ້ວ",
-  "wizard.warning.advanced_without_refs": "ເປີດໃຊ້ການຕັ້ງຄ່າຂັ້ນສູງໂດຍບໍ່ມີ app packs ຫຼື extension providers."
+  "wizard.warning.advanced_without_refs": "ເປີດໃຊ້ການຕັ້ງຄ່າຂັ້ນສູງໂດຍບໍ່ມີ app packs ຫຼື extension providers.",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
+  "wizard.stage.capabilities": "== Bundle capabilities =="
 }

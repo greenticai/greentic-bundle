@@ -187,5 +187,7 @@
   "wizard.stage.pack_access": "== Pack-Zugriff ==",
   "wizard.stage.review": "== Prüfzusammenfassung ==",
   "wizard.validate.about": "Wiedergegebene Bundle-Antworten validieren",
-  "wizard.warning.advanced_without_refs": "Die erweiterte Einrichtung wurde ohne App-Packs oder Extension-Provider aktiviert."
+  "wizard.warning.advanced_without_refs": "Die erweiterte Einrichtung wurde ohne App-Packs oder Extension-Provider aktiviert.",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
+  "wizard.stage.capabilities": "== Bundle capabilities =="
 }

@@ -187,5 +187,7 @@
   "wizard.stage.pack_access": "== Pack رسائی ==",
   "wizard.stage.review": "== جائزہ خلاصہ ==",
   "wizard.validate.about": "دوبارہ چلائے گئے bundle جوابات کی توثیق کریں",
-  "wizard.warning.advanced_without_refs": "app packs یا extension providers کے بغیر advanced setup فعال کیا گیا تھا۔"
+  "wizard.warning.advanced_without_refs": "app packs یا extension providers کے بغیر advanced setup فعال کیا گیا تھا۔",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
+  "wizard.stage.capabilities": "== Bundle capabilities =="
 }

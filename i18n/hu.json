@@ -187,5 +187,7 @@
   "wizard.stage.pack_access": "== Pack hozzáférés ==",
   "wizard.stage.review": "== Áttekintés ==",
   "wizard.validate.about": "Újrajátszott bundle-válaszok ellenőrzése",
-  "wizard.warning.advanced_without_refs": "A speciális beállítás engedélyezve lett app packok vagy extension providerek nélkül."
+  "wizard.warning.advanced_without_refs": "A speciális beállítás engedélyezve lett app packok vagy extension providerek nélkül.",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
+  "wizard.stage.capabilities": "== Bundle capabilities =="
 }

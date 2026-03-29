@@ -187,5 +187,7 @@
   "wizard.stage.pack_access": "== Pack-adgang ==",
   "wizard.stage.review": "== Gennemgangsoversigt ==",
   "wizard.validate.about": "Validér genafspillede bundle-svar",
-  "wizard.warning.advanced_without_refs": "Avanceret opsætning blev aktiveret uden app packs eller extension providers."
+  "wizard.warning.advanced_without_refs": "Avanceret opsætning blev aktiveret uden app packs eller extension providers.",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
+  "wizard.stage.capabilities": "== Bundle capabilities =="
 }

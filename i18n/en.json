@@ -98,6 +98,8 @@
   "wizard.prompt.remote_catalogs": "Remote catalogs (comma-separated)",
   "wizard.prompt.setup_execution": "Enable setup execution intent? (y/N)",
   "wizard.prompt.export_intent": "Enable export intent? (y/N)",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
   "wizard.stage.app_packs": "== App packs ==",
   "wizard.stage.current_app_packs": "Current app packs",
   "wizard.stage.map_app_pack": "== Map app pack ==",

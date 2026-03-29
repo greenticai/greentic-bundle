@@ -187,5 +187,7 @@
   "wizard.stage.pack_access": "== Dostęp do pack ==",
   "wizard.stage.review": "== Podsumowanie przeglądu ==",
   "wizard.validate.about": "Zweryfikuj odtworzone odpowiedzi bundle",
-  "wizard.warning.advanced_without_refs": "Włączono konfigurację zaawansowaną bez app packów ani extension providerów."
+  "wizard.warning.advanced_without_refs": "Włączono konfigurację zaawansowaną bez app packów ani extension providerów.",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
+  "wizard.stage.capabilities": "== Bundle capabilities =="
 }

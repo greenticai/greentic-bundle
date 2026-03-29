@@ -187,5 +187,7 @@
   "wizard.stage.pack_access": "== Pack mantaña ==",
   "wizard.stage.review": "== Uñakipaña tukuyañ yatiyawi ==",
   "wizard.validate.about": "mayampi apnaqata bundle jaysäwinaka chiqapa uñakipaña",
-  "wizard.warning.advanced_without_refs": "Avanzado wakichañax app packs jan ukax extension providers janïr utjkipan ch'amanchatänwa."
+  "wizard.warning.advanced_without_refs": "Avanzado wakichañax app packs jan ukax extension providers janïr utjkipan ch'amanchatänwa.",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
+  "wizard.stage.capabilities": "== Bundle capabilities =="
 }

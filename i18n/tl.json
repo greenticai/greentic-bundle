@@ -187,5 +187,7 @@
   "wizard.stage.pack_access": "== Access ng pack ==",
   "wizard.stage.review": "== Buod ng pagsusuri ==",
   "wizard.validate.about": "I-validate ang mga ni-replay na sagot ng bundle",
-  "wizard.warning.advanced_without_refs": "Pinagana ang advanced setup nang walang mga app pack o extension provider."
+  "wizard.warning.advanced_without_refs": "Pinagana ang advanced setup nang walang mga app pack o extension provider.",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
+  "wizard.stage.capabilities": "== Bundle capabilities =="
 }

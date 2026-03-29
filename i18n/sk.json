@@ -187,5 +187,7 @@
   "wizard.stage.pack_access": "== Prístup packu ==",
   "wizard.stage.review": "== Súhrn kontroly ==",
   "wizard.validate.about": "Validovať znovu prehrané odpovede bundla",
-  "wizard.warning.advanced_without_refs": "Pokročilé nastavenie bolo povolené bez app packov alebo extension providerov."
+  "wizard.warning.advanced_without_refs": "Pokročilé nastavenie bolo povolené bez app packov alebo extension providerov.",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
+  "wizard.stage.capabilities": "== Bundle capabilities =="
 }

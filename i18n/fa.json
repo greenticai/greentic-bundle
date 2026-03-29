@@ -187,5 +187,7 @@
   "wizard.stage.pack_access": "== دسترسی pack ==",
   "wizard.stage.review": "== خلاصه بازبینی ==",
   "wizard.validate.about": "اعتبارسنجی پاسخ‌های بازپخش‌شده bundle",
-  "wizard.warning.advanced_without_refs": "تنظیمات پیشرفته بدون app pack یا extension provider فعال شد."
+  "wizard.warning.advanced_without_refs": "تنظیمات پیشرفته بدون app pack یا extension provider فعال شد.",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
+  "wizard.stage.capabilities": "== Bundle capabilities =="
 }

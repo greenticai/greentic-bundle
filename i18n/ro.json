@@ -187,5 +187,7 @@
   "wizard.stage.pack_access": "== Acces pachet ==",
   "wizard.stage.review": "== Rezumat revizuire ==",
   "wizard.validate.about": "Validează răspunsurile bundle reluate",
-  "wizard.warning.advanced_without_refs": "Configurarea avansată a fost activată fără pachete de aplicație sau furnizori de extensii."
+  "wizard.warning.advanced_without_refs": "Configurarea avansată a fost activată fără pachete de aplicație sau furnizori de extensii.",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
+  "wizard.stage.capabilities": "== Bundle capabilities =="
 }
