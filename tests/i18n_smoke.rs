@@ -37,7 +37,9 @@ fn root_help_uses_localized_embedded_strings() {
 fn dutch_locale_changes_wizard_menu_strings() {
     let mut cmd = Command::new(bundle_bin());
     cmd.args(["--locale", "nl", "wizard", "run", "--dry-run"]);
-    cmd.write_stdin("1\nDemo Bundle\ndemo-bundle\n/tmp/demo-bundle-nl\n1\npack-a\n1\n1\n4\n4\n2\n");
+    cmd.write_stdin(
+        "1\nDemo Bundle\ndemo-bundle\n/tmp/demo-bundle-nl\n1\npack-a\n1\n1\n4\n4\nn\n2\n",
+    );
     cmd.assert()
         .success()
         .stdout(predicate::str::contains("Bundle-wizard"))
