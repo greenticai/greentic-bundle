@@ -1052,9 +1052,11 @@ fn write_if_missing(path: &Path, contents: &str) -> Result<()> {
     Ok(())
 }
 
-/// Extracts `assets/` entries from all provider `.gtpack` files into the bundle
-/// root so users can see and directly modify them. Existing files are never
-/// overwritten — user customizations are preserved.
+/// Extracts `assets/webchat-gui/` entries from all provider `.gtpack` files into
+/// the bundle root so users can see and directly modify skins, config, and other
+/// webchat-gui assets. Other internal pack assets (fixtures, schemas,
+/// secret-requirements, etc.) are intentionally excluded. Existing files are
+/// never overwritten — user customizations are preserved.
 pub fn scaffold_assets_from_packs(root: &Path) -> Result<Vec<PathBuf>> {
     let mut written = Vec::new();
     let providers_dir = root.join("providers");
@@ -1098,7 +1100,7 @@ fn extract_pack_assets(root: &Path, pack_path: &Path) -> Result<Vec<PathBuf>> {
     for i in 0..archive.len() {
         let mut entry = archive.by_index(i)?;
         let name = entry.name().to_string();
-        if !name.starts_with("assets/") || entry.is_dir() {
+        if !name.starts_with("assets/webchat-gui/") || entry.is_dir() {
             continue;
         }
         let target = root.join(&name);
