@@ -70,7 +70,7 @@ Tests require `GREENTIC_BUNDLE_USE_BUNDLED_CATALOG=1` to use the embedded provid
 
 ### Toolchain
 
-Rust 1.91 pinned via `rust-toolchain.toml`. Edition 2024. YAML parsing uses `serde_yaml_gtc` (imported as `serde_yaml_bw`).
+Rust 1.94.0 pinned via `rust-toolchain.toml`. Edition 2024. YAML parsing uses `serde_yaml_gtc` (imported as `serde_yaml_bw`).
 
 ### Release Flow
 
