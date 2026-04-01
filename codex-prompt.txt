@@ -1,0 +1,44 @@
+You are operating in a CI environment as a Rust Semver Reviewer.
+
+Task:
+1) Analyze the cargo-semver-checks violations listed below.
+2) Apply minimal, safe fixes to resolve each violation.
+3) Write SEMVER_FIX_REPORT.md summarizing your actions.
+
+Fix strategies (in order of preference):
+- For "enum variant added on exhaustive enum": add #[non_exhaustive] to the enum.
+- For "constructible struct adds field": add #[non_exhaustive] to the struct.
+- For "enum variant discriminant changed": add explicit discriminant values to preserve the original ordering, OR add #[non_exhaustive].
+- For removed/renamed public items: restore the old item as a deprecated alias if possible.
+- As a last resort: bump the crate version (minor for 0.x crates, major for 1.x+).
+
+Important rules:
+- Do NOT change any logic or behavior — only add attributes or version bumps.
+- Do NOT modify test files unless a test directly asserts on a removed item.
+- Prefer #[non_exhaustive] over version bumps — it is the least disruptive fix.
+- If adding #[non_exhaustive], also ensure existing match arms have a wildcard `_ => {}` catch-all where needed in the same crate.
+
+cargo-semver-checks output:
+[1m[32m    Building[0m greentic-bundle v0.4.27 (current)
+[1m[32m       Built[0m [ 107.998s] (current)
+[1m[32m     Parsing[0m greentic-bundle v0.4.27 (current)
+[1m[32m      Parsed[0m [   0.053s] (current)
+[1m[32m    Building[0m greentic-bundle v0.4.26 (baseline)
+[1m[32m       Built[0m [ 106.691s] (baseline)
+[1m[32m     Parsing[0m greentic-bundle v0.4.26 (baseline)
+[1m[32m      Parsed[0m [   0.050s] (baseline)
+[1m[32m    Checking[0m greentic-bundle v0.4.26 -> v0.4.27 (minor change)
+[1m[31m     Checked[0m [   0.055s] 196 checks: 195 pass, 1 fail, 0 warn, 56 skip
+
+--- failure constructible_struct_adds_field: externally-constructible struct adds field ---
+
+[1mDescription:[0m
+A pub struct constructible with a struct literal has a new pub field. Existing struct literals must be updated to include the new field.
+        ref: https://doc.rust-lang.org/reference/expressions/struct-expr.html
+       impl: https://github.com/obi1kenobi/cargo-semver-checks/tree/v0.47.0/src/lints/constructible_struct_adds_field.ron
+
+[1mFailed in:[0m
+  field WizardArgs.schema in /home/runner/work/greentic-bundle/greentic-bundle/src/cli/wizard.rs:15
+
+[1m[31m     Summary[0m semver requires new major version: 1 major and 0 minor checks failed
+[1m[32m    Finished[0m [ 218.439s] greentic-bundle
