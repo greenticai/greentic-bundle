@@ -4,6 +4,7 @@ use anyhow::Result;
 use clap::{Args, Subcommand, ValueEnum};
 
 #[derive(Debug, Args)]
+#[non_exhaustive]
 pub struct WizardArgs {
     #[arg(
         long,
