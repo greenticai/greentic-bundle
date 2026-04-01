@@ -266,7 +266,7 @@ impl CatalogEntry {
 mod tests {
     use serde_json::json;
 
-    use super::{bundled_provider_registry_entries, load_catalog_entries};
+    use super::{bundled_provider_registry_entries, load_catalog_entries, parse_catalog_bytes};
 
     #[test]
     fn parses_inline_setup_metadata_from_array_catalog() {
@@ -428,5 +428,43 @@ mod tests {
             entries[0].reference,
             "oci://ghcr.io/greenticai/packs/messaging/messaging-teams:latest"
         );
+    }
+
+    #[test]
+    fn parses_flat_registry_object_items() {
+        let entries = load_catalog_entries(
+            br#"{
+  "items": [
+    {
+      "id":"provider-a",
+      "label":{"fallback":"Provider A"},
+      "ref":"repo://providers/provider-a@1"
+    }
+  ]
+}"#,
+            "flat-object",
+        )
+        .expect("entries");
+
+        assert_eq!(entries.len(), 1);
+        assert_eq!(entries[0].id, "provider-a");
+        assert_eq!(entries[0].label.as_deref(), Some("Provider A"));
+        assert_eq!(entries[0].reference, "repo://providers/provider-a@1");
+    }
+
+    #[test]
+    fn catalog_summary_deduplicates_item_ids() {
+        let summary = parse_catalog_bytes(
+            br#"[
+  {"id":"provider-b","reference":"repo://providers/provider-b@1"},
+  {"id":"provider-a","reference":"repo://providers/provider-a@1"},
+  {"id":"provider-a","reference":"repo://providers/provider-a@2"}
+]"#,
+            "summary",
+        )
+        .expect("summary");
+
+        assert_eq!(summary.item_count, 2);
+        assert_eq!(summary.item_ids, vec!["provider-a", "provider-b"]);
     }
 }

@@ -54,6 +54,8 @@
   "cli.option.locale": "Locale koji se koristi za CLI i poruke čarobnjaka",
   "cli.option.migrate": "Dozvoli migraciju starijih verzija AnswerDocument šeme",
   "cli.option.offline": "Onemogući operacije koje zavise od mreže kada ih buduće komande podrže",
+  "cli.option.schema": "Odštampaj trenutnu šemu answers.json i izađi",
+  "cli.option.schema.long": "Odštampaj trenutnu šemu answers.json i izađi.\n\nAgentic alati za programiranje kao što su Codex i Claude treba prvo da pozovu ovo kako bi preuzeli trenutnu šemu odgovora, popunili answers.json i ponovo pokrenuli čarobnjak bez interakcije.",
   "cli.option.schema_version": "Ciljna verzija šeme za emitovane ili migrirane odgovore",
   "cli.remove.about": "Ukloni reference za authored bundle",
   "cli.remove.app_pack.about": "Ukloni referencu na app-pack",
@@ -159,6 +161,7 @@
   "wizard.prompt.choose_extension_provider": "Izaberi extension provider",
   "wizard.prompt.choose_scope": "Izaberi opseg",
   "wizard.prompt.current_bundle_root": "Trenutni bundle direktorijum ili .gtbundle putanja",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
   "wizard.prompt.export_intent": "Omogući nameru izvoza? (y/N)",
   "wizard.prompt.extension_provider_reference": "Unesi referencu extension provider-a ili lokalnu putanju",
   "wizard.prompt.extension_providers": "Extension provider-i (odvojeni zarezima)",
@@ -179,6 +182,7 @@
   "wizard.stage.access_rules": "== Pravila pristupa ==",
   "wizard.stage.advanced_access_rules": "== Napredna pravila pristupa ==",
   "wizard.stage.app_packs": "== App pack-ovi ==",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
   "wizard.stage.current_access_rules": "Trenutna pravila",
   "wizard.stage.current_app_packs": "Trenutni app pack-ovi",
   "wizard.stage.current_extension_providers": "Trenutni extension provider-i",
@@ -187,7 +191,5 @@
   "wizard.stage.pack_access": "== Pack pristup ==",
   "wizard.stage.review": "== Rezime pregleda ==",
   "wizard.validate.about": "Validiraj ponovljene bundle odgovore",
-  "wizard.warning.advanced_without_refs": "Napredno podešavanje je omogućeno bez app pack-ova ili extension provider-a.",
-  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
-  "wizard.stage.capabilities": "== Bundle capabilities =="
+  "wizard.warning.advanced_without_refs": "Napredno podešavanje je omogućeno bez app pack-ova ili extension provider-a."
 }

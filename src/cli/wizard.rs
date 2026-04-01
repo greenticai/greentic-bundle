@@ -5,6 +5,14 @@ use clap::{Args, Subcommand, ValueEnum};
 
 #[derive(Debug, Args)]
 pub struct WizardArgs {
+    #[arg(
+        long,
+        global = true,
+        default_value_t = false,
+        help = "cli.option.schema",
+        long_help = "cli.option.schema.long"
+    )]
+    pub schema: bool,
     #[command(subcommand)]
     pub command: Option<WizardCommand>,
 }
@@ -97,6 +105,13 @@ pub struct WizardApplyArgs {
 }
 
 pub fn run(args: WizardArgs) -> Result<()> {
+    if args.schema {
+        let schema =
+            crate::wizard::answer_document_schema(args.schema_mode(), args.schema_version())?;
+        println!("{}", serde_json::to_string_pretty(&schema)?);
+        return Ok(());
+    }
+
     match args.command {
         None => {
             let zero_action = embedded_root_zero_action();
@@ -123,6 +138,26 @@ pub fn run(args: WizardArgs) -> Result<()> {
         Some(WizardCommand::Run(args)) => crate::wizard::run_command(args),
         Some(WizardCommand::Validate(args)) => crate::wizard::validate_command(args),
         Some(WizardCommand::Apply(args)) => crate::wizard::apply_command(args),
+    }
+}
+
+impl WizardArgs {
+    fn schema_mode(&self) -> Option<WizardMode> {
+        match self.command.as_ref() {
+            Some(WizardCommand::Run(args)) => args.mode,
+            Some(WizardCommand::Validate(args)) => args.mode,
+            Some(WizardCommand::Apply(args)) => args.mode,
+            None => None,
+        }
+    }
+
+    fn schema_version(&self) -> Option<&str> {
+        match self.command.as_ref() {
+            Some(WizardCommand::Run(args)) => args.schema_version.as_deref(),
+            Some(WizardCommand::Validate(args)) => args.schema_version.as_deref(),
+            Some(WizardCommand::Apply(args)) => args.schema_version.as_deref(),
+            None => None,
+        }
     }
 }
 

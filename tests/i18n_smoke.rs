@@ -54,6 +54,7 @@ fn wizard_run_help_shows_replay_flags() {
     cmd.args(["wizard", "run", "--help"]);
     cmd.assert()
         .success()
+        .stdout(predicate::str::contains("--schema"))
         .stdout(predicate::str::contains("--answers <FILE>"))
         .stdout(predicate::str::contains("--emit-answers <FILE>"))
         .stdout(predicate::str::contains("--schema-version <VER>"))

@@ -54,6 +54,8 @@
   "cli.option.locale": "CLI 및 마법사 메시지에 사용되는 로케일",
   "cli.option.migrate": "이전 AnswerDocument 스키마 버전 마이그레이션 허용",
   "cli.option.offline": "향후 명령이 지원할 때 네트워크 의존 작업 비활성화",
+  "cli.option.schema": "현재 answers.json 스키마를 출력하고 종료합니다",
+  "cli.option.schema.long": "현재 answers.json 스키마를 출력하고 종료합니다.\n\nCodex 및 Claude와 같은 에이전트형 코딩 도구는 현재 답변 스키마를 가져오고, answers.json을 작성한 뒤, 마법사를 비대화형으로 다시 실행하기 위해 먼저 이를 호출해야 합니다.",
   "cli.option.schema_version": "출력되거나 마이그레이션된 응답의 대상 스키마 버전",
   "cli.remove.about": "작성된 번들 참조 제거",
   "cli.remove.app_pack.about": "app-pack 참조 제거",
@@ -159,6 +161,7 @@
   "wizard.prompt.choose_extension_provider": "확장 제공자 선택",
   "wizard.prompt.choose_scope": "범위 선택",
   "wizard.prompt.current_bundle_root": "현재 번들 디렉터리 또는 .gtbundle 경로",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
   "wizard.prompt.export_intent": "내보내기 의도를 활성화하시겠습니까? (y/N)",
   "wizard.prompt.extension_provider_reference": "확장 제공자 참조 또는 로컬 경로 입력",
   "wizard.prompt.extension_providers": "확장 제공자(쉼표로 구분)",
@@ -179,6 +182,7 @@
   "wizard.stage.access_rules": "== 접근 규칙 ==",
   "wizard.stage.advanced_access_rules": "== 고급 접근 규칙 ==",
   "wizard.stage.app_packs": "== 앱 팩 ==",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
   "wizard.stage.current_access_rules": "현재 규칙",
   "wizard.stage.current_app_packs": "현재 앱 팩",
   "wizard.stage.current_extension_providers": "현재 확장 제공자",
@@ -187,7 +191,5 @@
   "wizard.stage.pack_access": "== 팩 접근 ==",
   "wizard.stage.review": "== 검토 요약 ==",
   "wizard.validate.about": "재생된 번들 응답 검증",
-  "wizard.warning.advanced_without_refs": "앱 팩이나 확장 제공자 없이 고급 설정이 활성화되었습니다.",
-  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
-  "wizard.stage.capabilities": "== Bundle capabilities =="
+  "wizard.warning.advanced_without_refs": "앱 팩이나 확장 제공자 없이 고급 설정이 활성화되었습니다."
 }

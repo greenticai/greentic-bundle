@@ -54,6 +54,8 @@
   "cli.option.locale": "Paramètre régional utilisé pour les messages CLI et de l'assistant",
   "cli.option.migrate": "Autoriser la migration des anciennes versions du schéma AnswerDocument",
   "cli.option.offline": "Désactiver les opérations dépendant du réseau quand de futures commandes le prendront en charge",
+  "cli.option.schema": "Afficher le schéma actuel de answers.json et quitter",
+  "cli.option.schema.long": "Afficher le schéma actuel de answers.json et quitter.\n\nLes outils de codage agentiques tels que Codex et Claude doivent d'abord appeler ceci pour récupérer le schéma de réponse actuel, remplir answers.json et rejouer l'assistant de manière non interactive.",
   "cli.option.schema_version": "Version cible du schéma pour les réponses émises ou migrées",
   "cli.remove.about": "Supprimer des références de bundle créées",
   "cli.remove.app_pack.about": "Supprimer une référence app-pack",
@@ -159,6 +161,7 @@
   "wizard.prompt.choose_extension_provider": "Choisissez un fournisseur d'extensions",
   "wizard.prompt.choose_scope": "Choisissez une portée",
   "wizard.prompt.current_bundle_root": "Répertoire actuel du bundle ou chemin .gtbundle",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
   "wizard.prompt.export_intent": "Activer l'intention d'export ? (y/N)",
   "wizard.prompt.extension_provider_reference": "Saisissez la référence du fournisseur d'extensions ou le chemin local",
   "wizard.prompt.extension_providers": "Fournisseurs d'extensions (séparés par des virgules)",
@@ -179,6 +182,7 @@
   "wizard.stage.access_rules": "== Règles d'accès ==",
   "wizard.stage.advanced_access_rules": "== Règles d'accès avancées ==",
   "wizard.stage.app_packs": "== App packs ==",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
   "wizard.stage.current_access_rules": "Règles actuelles",
   "wizard.stage.current_app_packs": "App packs actuels",
   "wizard.stage.current_extension_providers": "Fournisseurs d'extensions actuels",
@@ -187,7 +191,5 @@
   "wizard.stage.pack_access": "== Accès au pack ==",
   "wizard.stage.review": "== Résumé de révision ==",
   "wizard.validate.about": "Valider les réponses de bundle rejouées",
-  "wizard.warning.advanced_without_refs": "La configuration avancée a été activée sans app packs ni fournisseurs d'extensions.",
-  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
-  "wizard.stage.capabilities": "== Bundle capabilities =="
+  "wizard.warning.advanced_without_refs": "La configuration avancée a été activée sans app packs ni fournisseurs d'extensions."
 }

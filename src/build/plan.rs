@@ -2,6 +2,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result};
+use serde_yaml_bw::Value;
 
 use super::manifest::{BundleManifest, ResolvedReferencePolicy, ResolvedTargetSummary};
 
@@ -28,19 +29,18 @@ pub fn build_state(root: &Path) -> Result<BuildState> {
             )
         })?;
 
-    let bundle_id =
-        find_yaml_scalar(&bundle_yaml, "bundle_id").unwrap_or_else(|| lock.bundle_id.clone());
-    let bundle_name =
-        find_yaml_scalar(&bundle_yaml, "bundle_name").unwrap_or_else(|| bundle_id.clone());
+    let bundle_doc = parse_yaml_document(&bundle_yaml);
+    let bundle_id = yaml_string(&bundle_doc, "bundle_id").unwrap_or_else(|| lock.bundle_id.clone());
+    let bundle_name = yaml_string(&bundle_doc, "bundle_name").unwrap_or_else(|| bundle_id.clone());
     let requested_mode =
-        find_yaml_scalar(&bundle_yaml, "mode").unwrap_or_else(|| lock.requested_mode.clone());
-    let locale = find_yaml_scalar(&bundle_yaml, "locale").unwrap_or_else(|| "en".to_string());
-    let app_packs = find_yaml_list(&bundle_yaml, "app_packs");
-    let extension_providers = find_yaml_list(&bundle_yaml, "extension_providers");
-    let catalogs = find_yaml_list(&bundle_yaml, "remote_catalogs");
-    let hooks = find_yaml_list(&bundle_yaml, "hooks");
-    let subscriptions = find_yaml_list(&bundle_yaml, "subscriptions");
-    let capabilities = find_yaml_list(&bundle_yaml, "capabilities");
+        yaml_string(&bundle_doc, "mode").unwrap_or_else(|| lock.requested_mode.clone());
+    let locale = yaml_string(&bundle_doc, "locale").unwrap_or_else(|| "en".to_string());
+    let app_packs = yaml_string_list(&bundle_doc, "app_packs");
+    let extension_providers = yaml_string_list(&bundle_doc, "extension_providers");
+    let catalogs = yaml_string_list(&bundle_doc, "remote_catalogs");
+    let hooks = yaml_string_list(&bundle_doc, "hooks");
+    let subscriptions = yaml_string_list(&bundle_doc, "subscriptions");
+    let capabilities = yaml_string_list(&bundle_doc, "capabilities");
     let resolved_files = collect_files(root, &root.join("resolved"))?;
     let setup_files = collect_named_files(root, &lock.setup_state_files)?;
     let asset_files = collect_asset_files(root)?;
@@ -176,51 +176,51 @@ fn walk(dir: &Path) -> Result<Vec<PathBuf>> {
     Ok(out)
 }
 
-fn find_yaml_scalar(raw: &str, key: &str) -> Option<String> {
-    raw.lines().find_map(|line| {
-        let (left, right) = line.split_once(':')?;
-        (left.trim() == key).then(|| right.trim().to_string())
-    })
+fn parse_yaml_document(raw: &str) -> Option<Value> {
+    serde_yaml_bw::from_str(raw).ok()
 }
 
-fn find_yaml_list(raw: &str, key: &str) -> Vec<String> {
-    let mut lines = raw.lines().peekable();
-    while let Some(line) = lines.next() {
-        let Some((left, right)) = line.split_once(':') else {
-            continue;
-        };
-        if left.trim() != key {
-            continue;
-        }
-        let inline = right.trim();
-        if inline == "[]" || inline == "[ ]" {
-            return Vec::new();
-        }
-        if !inline.is_empty() {
-            return vec![inline.to_string()];
-        }
-        let mut items = Vec::new();
-        while let Some(next) = lines.peek().copied() {
-            let trimmed = next.trim();
-            if let Some(value) = trimmed.strip_prefix("- ") {
-                items.push(value.trim().to_string());
-                lines.next();
-            } else {
-                break;
-            }
-        }
-        return items;
+fn yaml_string(doc: &Option<Value>, key: &str) -> Option<String> {
+    doc.as_ref()?.get(key)?.as_str().map(ToOwned::to_owned)
+}
+
+fn yaml_string_list(doc: &Option<Value>, key: &str) -> Vec<String> {
+    match doc.as_ref().and_then(|value| value.get(key)) {
+        Some(Value::Sequence(items)) => items
+            .iter()
+            .filter_map(|item| item.as_str().map(ToOwned::to_owned))
+            .collect(),
+        Some(Value::Null(_)) | None => Vec::new(),
+        Some(Value::String(value, _)) => vec![value.clone()],
+        _ => Vec::new(),
     }
-    Vec::new()
 }
 
 fn parse_resolved_target(path: &str, raw: &str) -> Option<ResolvedTargetSummary> {
-    let tenant = find_yaml_scalar(raw, "tenant")?;
-    let default_policy =
-        find_yaml_scalar(raw, "default").unwrap_or_else(|| "forbidden".to_string());
-    let tenant_gmap = find_yaml_scalar(raw, "tenant_gmap")?;
-    let team_gmap = find_yaml_scalar(raw, "team_gmap");
-    let team = find_yaml_scalar(raw, "team");
+    let doc = parse_yaml_document(raw)?;
+    let tenant = doc.get("tenant")?.as_str()?.to_string();
+    let default_policy = doc
+        .get("policy")
+        .and_then(|value| value.get("default"))
+        .and_then(Value::as_str)
+        .unwrap_or("forbidden")
+        .to_string();
+    let tenant_gmap = doc
+        .get("policy")
+        .and_then(|value| value.get("source"))
+        .and_then(|value| value.get("tenant_gmap"))
+        .and_then(Value::as_str)?
+        .to_string();
+    let team_gmap = doc
+        .get("policy")
+        .and_then(|value| value.get("source"))
+        .and_then(|value| value.get("team_gmap"))
+        .and_then(Value::as_str)
+        .map(ToOwned::to_owned);
+    let team = doc
+        .get("team")
+        .and_then(Value::as_str)
+        .map(ToOwned::to_owned);
     Some(ResolvedTargetSummary {
         path: path.to_string(),
         tenant,

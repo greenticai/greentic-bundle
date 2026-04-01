@@ -54,6 +54,8 @@
   "cli.option.locale": "Configuración regional usada para los mensajes de CLI y del asistente",
   "cli.option.migrate": "Permitir migrar versiones antiguas del esquema de AnswerDocument",
   "cli.option.offline": "Deshabilitar operaciones dependientes de la red cuando los futuros comandos lo admitan",
+  "cli.option.schema": "Imprime el esquema actual de answers.json y sale",
+  "cli.option.schema.long": "Imprime el esquema actual de answers.json y sale.\n\nLas herramientas de programación agéntica como Codex y Claude deben llamar esto primero para obtener el esquema de respuesta actual, completar answers.json y volver a ejecutar el asistente de forma no interactiva.",
   "cli.option.schema_version": "Versión de esquema objetivo para las respuestas emitidas o migradas",
   "cli.remove.about": "Eliminar referencias creadas del bundle",
   "cli.remove.app_pack.about": "Eliminar una referencia de app-pack",
@@ -159,6 +161,7 @@
   "wizard.prompt.choose_extension_provider": "Elegir proveedor de extensiones",
   "wizard.prompt.choose_scope": "Elegir alcance",
   "wizard.prompt.current_bundle_root": "Directorio actual del bundle o ruta .gtbundle",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
   "wizard.prompt.export_intent": "¿Habilitar intención de exportación? (y/N)",
   "wizard.prompt.extension_provider_reference": "Introduzca la referencia del proveedor de extensiones o la ruta local",
   "wizard.prompt.extension_providers": "Proveedores de extensiones (separados por comas)",
@@ -179,6 +182,7 @@
   "wizard.stage.access_rules": "== Reglas de acceso ==",
   "wizard.stage.advanced_access_rules": "== Reglas de acceso avanzadas ==",
   "wizard.stage.app_packs": "== App packs ==",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
   "wizard.stage.current_access_rules": "Reglas actuales",
   "wizard.stage.current_app_packs": "App packs actuales",
   "wizard.stage.current_extension_providers": "Proveedores de extensiones actuales",
@@ -187,7 +191,5 @@
   "wizard.stage.pack_access": "== Acceso al pack ==",
   "wizard.stage.review": "== Resumen de revisión ==",
   "wizard.validate.about": "Validar respuestas reproducidas del bundle",
-  "wizard.warning.advanced_without_refs": "La configuración avanzada se habilitó sin app packs ni proveedores de extensiones.",
-  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
-  "wizard.stage.capabilities": "== Bundle capabilities =="
+  "wizard.warning.advanced_without_refs": "La configuración avanzada se habilitó sin app packs ni proveedores de extensiones."
 }

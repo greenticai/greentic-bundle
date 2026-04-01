@@ -54,6 +54,8 @@
   "cli.option.locale": "CLI:ssä ja ohjatussa toiminnossa käytettävä locale",
   "cli.option.migrate": "Salli vanhempien AnswerDocument-skeemaversioiden migrointi",
   "cli.option.offline": "Poista verkkoriippuvaiset toiminnot käytöstä, kun tulevat komennot tukevat sitä",
+  "cli.option.schema": "Tulosta nykyinen answers.json-skeema ja poistu",
+  "cli.option.schema.long": "Tulosta nykyinen answers.json-skeema ja poistu.\n\nAgenttipohjaisten koodaustyökalujen, kuten Codexin ja Clauden, tulee kutsua tätä ensin hakeakseen nykyisen vastausskeeman, täyttääkseen answers.json-tiedoston ja suorittaakseen ohjatun toiminnon uudelleen ilman vuorovaikutusta.",
   "cli.option.schema_version": "Kohdeskeemaversio tuotetuille tai migroiduille vastauksille",
   "cli.remove.about": "Poista kirjoitettuja bundle-viitteitä",
   "cli.remove.app_pack.about": "Poista app-pack-viite",
@@ -159,6 +161,7 @@
   "wizard.prompt.choose_extension_provider": "Valitse extension provider",
   "wizard.prompt.choose_scope": "Valitse laajuus",
   "wizard.prompt.current_bundle_root": "Nykyinen bundle-hakemisto tai .gtbundle-polku",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
   "wizard.prompt.export_intent": "Ota vientiaikomus käyttöön? (y/N)",
   "wizard.prompt.extension_provider_reference": "Syötä extension provider -viite tai paikallinen polku",
   "wizard.prompt.extension_providers": "Extension providerit (pilkuilla eroteltu)",
@@ -179,6 +182,7 @@
   "wizard.stage.access_rules": "== Käyttöoikeussäännöt ==",
   "wizard.stage.advanced_access_rules": "== Edistyneet käyttöoikeussäännöt ==",
   "wizard.stage.app_packs": "== App packit ==",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
   "wizard.stage.current_access_rules": "Nykyiset säännöt",
   "wizard.stage.current_app_packs": "Nykyiset app packit",
   "wizard.stage.current_extension_providers": "Nykyiset extension providerit",
@@ -187,7 +191,5 @@
   "wizard.stage.pack_access": "== Pack-käyttö ==",
   "wizard.stage.review": "== Tarkistusyhteenveto ==",
   "wizard.validate.about": "Validoi toistetut bundle-vastaukset",
-  "wizard.warning.advanced_without_refs": "Edistynyt asetus otettiin käyttöön ilman app packeja tai extension providereita.",
-  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
-  "wizard.stage.capabilities": "== Bundle capabilities =="
+  "wizard.warning.advanced_without_refs": "Edistynyt asetus otettiin käyttöön ilman app packeja tai extension providereita."
 }

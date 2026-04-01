@@ -54,6 +54,8 @@
   "cli.option.locale": "CLI மற்றும் wizard செய்திகளுக்குப் பயன்படுத்தப்படும் locale",
   "cli.option.migrate": "பழைய AnswerDocument schema பதிப்புகளை மாற்ற அனுமதி",
   "cli.option.offline": "எதிர்கால கட்டளைகள் ஆதரிக்கும் போது நெட்வொர்க் சார்ந்த செயல்பாடுகளை முடக்கு",
+  "cli.option.schema": "தற்போதைய answers.json ஸ்கீமாவை அச்சிட்டு வெளியேறு",
+  "cli.option.schema.long": "தற்போதைய answers.json ஸ்கீமாவை அச்சிட்டு வெளியேறு.\n\nCodex மற்றும் Claude போன்ற ஏஜென்டிக் கோடிங் கருவிகள் தற்போதைய பதில் ஸ்கீமாவைப் பெற, answers.json-ஐ நிரப்ப, மற்றும் விஸார்டை இடையூறு இல்லாமல் மீண்டும் இயக்க இதை முதலில் அழைக்க வேண்டும்.",
   "cli.option.schema_version": "வெளியிடப்பட்ட அல்லது மாற்றப்பட்ட பதில்களுக்கான இலக்கு schema பதிப்பு",
   "cli.remove.about": "உருவாக்கப்பட்ட bundle குறிப்புகளை அகற்று",
   "cli.remove.app_pack.about": "ஒரு app-pack குறிப்பை அகற்று",
@@ -159,6 +161,7 @@
   "wizard.prompt.choose_extension_provider": "extension provider-ஐத் தேர்ந்தெடு",
   "wizard.prompt.choose_scope": "வரம்பைத் தேர்ந்தெடு",
   "wizard.prompt.current_bundle_root": "தற்போதைய bundle அடைவு அல்லது .gtbundle பாதை",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
   "wizard.prompt.export_intent": "export நோக்கத்தை இயக்கவா? (y/N)",
   "wizard.prompt.extension_provider_reference": "extension provider குறிப்பு அல்லது உள்ளூர் பாதையை உள்ளிடவும்",
   "wizard.prompt.extension_providers": "Extension providers (கமாவால் பிரிக்கப்பட்டது)",
@@ -179,6 +182,7 @@
   "wizard.stage.access_rules": "== அணுகல் விதிகள் ==",
   "wizard.stage.advanced_access_rules": "== மேம்பட்ட அணுகல் விதிகள் ==",
   "wizard.stage.app_packs": "== App packs ==",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
   "wizard.stage.current_access_rules": "தற்போதைய விதிகள்",
   "wizard.stage.current_app_packs": "தற்போதைய app packs",
   "wizard.stage.current_extension_providers": "தற்போதைய extension providers",
@@ -187,7 +191,5 @@
   "wizard.stage.pack_access": "== Pack அணுகல் ==",
   "wizard.stage.review": "== மதிப்பாய்வு சுருக்கம் ==",
   "wizard.validate.about": "மீளஇயக்கப்பட்ட bundle பதில்களை சரிபார்",
-  "wizard.warning.advanced_without_refs": "app packs அல்லது extension providers இன்றியே மேம்பட்ட அமைப்பு இயக்கப்பட்டது.",
-  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
-  "wizard.stage.capabilities": "== Bundle capabilities =="
+  "wizard.warning.advanced_without_refs": "app packs அல்லது extension providers இன்றியே மேம்பட்ட அமைப்பு இயக்கப்பட்டது."
 }

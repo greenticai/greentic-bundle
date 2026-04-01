@@ -54,6 +54,8 @@
   "cli.option.locale": "CLI ja viisardi sõnumites kasutatav locale",
   "cli.option.migrate": "Luba vanemate AnswerDocument skeemiversioonide migreerimine",
   "cli.option.offline": "Keela võrgust sõltuvad toimingud, kui tulevased käsud seda toetavad",
+  "cli.option.schema": "Prindi praegune answers.json skeem ja välju",
+  "cli.option.schema.long": "Prindi praegune answers.json skeem ja välju.\n\nAgentipõhised kodeerimistööriistad nagu Codex ja Claude peaksid selle esmalt käivitama, et hankida praegune vastuste skeem, täita answers.json ja esitada viisard mitteinteraktiivselt uuesti.",
   "cli.option.schema_version": "Väljastatavate või migreeritud vastuste sihtskeemiversioon",
   "cli.remove.about": "Eemalda loodud bundle-viiteid",
   "cli.remove.app_pack.about": "Eemalda app-pack viide",
@@ -159,6 +161,7 @@
   "wizard.prompt.choose_extension_provider": "Vali extension provider",
   "wizard.prompt.choose_scope": "Vali ulatus",
   "wizard.prompt.current_bundle_root": "Praegune bundle-kataloog või .gtbundle tee",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
   "wizard.prompt.export_intent": "Luba eksportimise kavatsus? (y/N)",
   "wizard.prompt.extension_provider_reference": "Sisesta extension provideri viide või kohalik tee",
   "wizard.prompt.extension_providers": "Extension providerid (komadega eraldatud)",
@@ -179,6 +182,7 @@
   "wizard.stage.access_rules": "== Juurdepääsureeglid ==",
   "wizard.stage.advanced_access_rules": "== Täiustatud juurdepääsureeglid ==",
   "wizard.stage.app_packs": "== App packid ==",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
   "wizard.stage.current_access_rules": "Praegused reeglid",
   "wizard.stage.current_app_packs": "Praegused app packid",
   "wizard.stage.current_extension_providers": "Praegused extension providerid",
@@ -187,7 +191,5 @@
   "wizard.stage.pack_access": "== Packi juurdepääs ==",
   "wizard.stage.review": "== Ülevaate kokkuvõte ==",
   "wizard.validate.about": "Valideeri taasesitatud bundle-vastused",
-  "wizard.warning.advanced_without_refs": "Täiustatud seadistus lubati ilma app packide või extension provideriteta.",
-  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
-  "wizard.stage.capabilities": "== Bundle capabilities =="
+  "wizard.warning.advanced_without_refs": "Täiustatud seadistus lubati ilma app packide või extension provideriteta."
 }

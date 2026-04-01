@@ -54,6 +54,8 @@
   "cli.option.locale": "Locale ที่ใช้สำหรับข้อความ CLI และวิซาร์ด",
   "cli.option.migrate": "อนุญาตให้ย้ายเวอร์ชัน schema ของ AnswerDocument ที่เก่ากว่า",
   "cli.option.offline": "ปิดการทำงานที่ขึ้นกับเครือข่ายเมื่อคำสั่งในอนาคตรองรับ",
+  "cli.option.schema": "พิมพ์สคีมาปัจจุบันของ answers.json แล้วออก",
+  "cli.option.schema.long": "พิมพ์สคีมาปัจจุบันของ answers.json แล้วออก\n\nเครื่องมือเขียนโค้ดแบบเอเจนต์ เช่น Codex และ Claude ควรเรียกใช้สิ่งนี้ก่อนเพื่อดึงสคีมาคำตอบปัจจุบัน กรอก answers.json และเล่นวิซาร์ดซ้ำในโหมดไม่โต้ตอบ",
   "cli.option.schema_version": "เวอร์ชัน schema เป้าหมายสำหรับ answers ที่สร้างหรือย้าย",
   "cli.remove.about": "ลบการอ้างอิง bundle ที่สร้างขึ้น",
   "cli.remove.app_pack.about": "ลบการอ้างอิง app-pack",
@@ -159,6 +161,7 @@
   "wizard.prompt.choose_extension_provider": "เลือก extension provider",
   "wizard.prompt.choose_scope": "เลือกขอบเขต",
   "wizard.prompt.current_bundle_root": "ไดเรกทอรี bundle ปัจจุบันหรือพาธ .gtbundle",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
   "wizard.prompt.export_intent": "เปิดใช้เจตนา export หรือไม่? (y/N)",
   "wizard.prompt.extension_provider_reference": "ป้อนการอ้างอิง extension provider หรือพาธภายในเครื่อง",
   "wizard.prompt.extension_providers": "Extension providers (คั่นด้วยจุลภาค)",
@@ -179,6 +182,7 @@
   "wizard.stage.access_rules": "== กฎการเข้าถึง ==",
   "wizard.stage.advanced_access_rules": "== กฎการเข้าถึงขั้นสูง ==",
   "wizard.stage.app_packs": "== App packs ==",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
   "wizard.stage.current_access_rules": "กฎปัจจุบัน",
   "wizard.stage.current_app_packs": "App packs ปัจจุบัน",
   "wizard.stage.current_extension_providers": "Extension providers ปัจจุบัน",
@@ -187,7 +191,5 @@
   "wizard.stage.pack_access": "== การเข้าถึง pack ==",
   "wizard.stage.review": "== สรุปการตรวจทาน ==",
   "wizard.validate.about": "ตรวจสอบ answers ของ bundle ที่เล่นซ้ำ",
-  "wizard.warning.advanced_without_refs": "เปิดใช้การตั้งค่าขั้นสูงโดยไม่มี app packs หรือ extension providers",
-  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
-  "wizard.stage.capabilities": "== Bundle capabilities =="
+  "wizard.warning.advanced_without_refs": "เปิดใช้การตั้งค่าขั้นสูงโดยไม่มี app packs หรือ extension providers"
 }

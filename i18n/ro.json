@@ -54,6 +54,8 @@
   "cli.option.locale": "Localizarea folosită pentru mesajele CLI și ale asistentului",
   "cli.option.migrate": "Permite migrarea versiunilor mai vechi ale schemei AnswerDocument",
   "cli.option.offline": "Dezactivează operațiunile dependente de rețea când comenzile viitoare vor suporta asta",
+  "cli.option.schema": "Afișează schema curentă answers.json și ieși",
+  "cli.option.schema.long": "Afișează schema curentă answers.json și ieși.\n\nInstrumentele de programare agentică precum Codex și Claude ar trebui să apeleze mai întâi aceasta pentru a prelua schema curentă de răspuns, să completeze answers.json și să ruleze din nou expertul în mod neinteractiv.",
   "cli.option.schema_version": "Versiunea schemei țintă pentru răspunsurile emise sau migrate",
   "cli.remove.about": "Elimină referințe bundle create",
   "cli.remove.app_pack.about": "Elimină o referință app-pack",
@@ -159,6 +161,7 @@
   "wizard.prompt.choose_extension_provider": "Alege furnizorul de extensii",
   "wizard.prompt.choose_scope": "Alege domeniul",
   "wizard.prompt.current_bundle_root": "Directorul bundle curent sau calea .gtbundle",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
   "wizard.prompt.export_intent": "Activezi intenția de export? (y/N)",
   "wizard.prompt.extension_provider_reference": "Introdu referința furnizorului de extensii sau calea locală",
   "wizard.prompt.extension_providers": "Furnizori de extensii (separați prin virgulă)",
@@ -179,6 +182,7 @@
   "wizard.stage.access_rules": "== Reguli de acces ==",
   "wizard.stage.advanced_access_rules": "== Reguli avansate de acces ==",
   "wizard.stage.app_packs": "== Pachete de aplicație ==",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
   "wizard.stage.current_access_rules": "Reguli curente",
   "wizard.stage.current_app_packs": "Pachete de aplicație curente",
   "wizard.stage.current_extension_providers": "Furnizori de extensii curenți",
@@ -187,7 +191,5 @@
   "wizard.stage.pack_access": "== Acces pachet ==",
   "wizard.stage.review": "== Rezumat revizuire ==",
   "wizard.validate.about": "Validează răspunsurile bundle reluate",
-  "wizard.warning.advanced_without_refs": "Configurarea avansată a fost activată fără pachete de aplicație sau furnizori de extensii.",
-  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
-  "wizard.stage.capabilities": "== Bundle capabilities =="
+  "wizard.warning.advanced_without_refs": "Configurarea avansată a fost activată fără pachete de aplicație sau furnizori de extensii."
 }

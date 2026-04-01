@@ -54,6 +54,8 @@
   "cli.option.locale": "Locale používané pre správy CLI a sprievodcu",
   "cli.option.migrate": "Povoliť migráciu starších verzií schémy AnswerDocument",
   "cli.option.offline": "Zakázať operácie závislé od siete, keď ich budúce príkazy budú podporovať",
+  "cli.option.schema": "Vypíše aktuálnu schému answers.json a skončí",
+  "cli.option.schema.long": "Vypíše aktuálnu schému answers.json a skončí.\n\nAgentické nástroje na programovanie, ako sú Codex a Claude, by mali toto zavolať najprv, aby získali aktuálnu schému odpovedí, vyplnili answers.json a znovu prehrali sprievodcu neinteraktívne.",
   "cli.option.schema_version": "Cieľová verzia schémy pre exportované alebo migrované odpovede",
   "cli.remove.about": "Odstrániť vytvorené referencie bundla",
   "cli.remove.app_pack.about": "Odstrániť referenciu na app-pack",
@@ -159,6 +161,7 @@
   "wizard.prompt.choose_extension_provider": "Vyberte extension provider",
   "wizard.prompt.choose_scope": "Vyberte rozsah",
   "wizard.prompt.current_bundle_root": "Aktuálny adresár bundla alebo cesta .gtbundle",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
   "wizard.prompt.export_intent": "Povoliť zámer exportu? (y/N)",
   "wizard.prompt.extension_provider_reference": "Zadajte referenciu extension provider alebo lokálnu cestu",
   "wizard.prompt.extension_providers": "Extension provideri (oddelení čiarkou)",
@@ -179,6 +182,7 @@
   "wizard.stage.access_rules": "== Pravidlá prístupu ==",
   "wizard.stage.advanced_access_rules": "== Pokročilé pravidlá prístupu ==",
   "wizard.stage.app_packs": "== App packy ==",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
   "wizard.stage.current_access_rules": "Aktuálne pravidlá",
   "wizard.stage.current_app_packs": "Aktuálne app packy",
   "wizard.stage.current_extension_providers": "Aktuálni extension provideri",
@@ -187,7 +191,5 @@
   "wizard.stage.pack_access": "== Prístup packu ==",
   "wizard.stage.review": "== Súhrn kontroly ==",
   "wizard.validate.about": "Validovať znovu prehrané odpovede bundla",
-  "wizard.warning.advanced_without_refs": "Pokročilé nastavenie bolo povolené bez app packov alebo extension providerov.",
-  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
-  "wizard.stage.capabilities": "== Bundle capabilities =="
+  "wizard.warning.advanced_without_refs": "Pokročilé nastavenie bolo povolené bez app packov alebo extension providerov."
 }

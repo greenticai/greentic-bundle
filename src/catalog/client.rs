@@ -138,4 +138,33 @@ mod tests {
         assert_eq!(mapped.oci_reference, "ghcr.io/example/catalogs/demo:1");
         assert_eq!(mapped.source_kind, RemoteCatalogSourceKind::Oci);
     }
+
+    #[test]
+    fn preserves_explicit_tag_for_ghcr_shortcut() {
+        let mapped = map_remote_catalog_reference("ghcr://catalogs/well-known:2").expect("mapped");
+        assert_eq!(
+            mapped.oci_reference,
+            "ghcr.io/greenticai/catalogs/well-known:2"
+        );
+    }
+
+    #[test]
+    fn rejects_empty_remote_catalog_paths() {
+        let oci_error = map_remote_catalog_reference("oci://").expect_err("expected oci error");
+        assert!(oci_error.to_string().contains("missing an OCI path"));
+
+        let ghcr_error = map_remote_catalog_reference("ghcr:///").expect_err("expected ghcr error");
+        assert!(ghcr_error.to_string().contains("missing a GHCR path"));
+    }
+
+    #[test]
+    fn rejects_unsupported_remote_catalog_scheme() {
+        let error = map_remote_catalog_reference("https://example.com/catalog.json")
+            .expect_err("expected unsupported scheme error");
+        assert!(
+            error
+                .to_string()
+                .contains("not a supported remote catalog ref")
+        );
+    }
 }

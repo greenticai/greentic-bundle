@@ -54,6 +54,8 @@
   "cli.option.locale": "Locale ojeporúva CLI ha wizard marandupe",
   "cli.option.migrate": "Emoneĩ ymaguare AnswerDocument esquema hag̃ua ñemiguasu",
   "cli.option.offline": "Embogue red rehe odependeva apopyrã tenonderãite umi tembiapoukapy oipytyvõvo",
+  "cli.option.schema": "Ehechauka pe esquema ko'ág̃agua answers.json rehegua ha esẽ",
+  "cli.option.schema.long": "Ehechauka pe esquema ko'ág̃agua answers.json rehegua ha esẽ.\n\nTembipuru kuatia'apo agente rehegua, Codex ha Claude-icha, ohenói va'erã kóva raẽ ogueru hag̃ua pe esquema ko'ág̃agua ñembohovái rehegua, omyenyhẽ hag̃ua answers.json, ha ombohasajey hag̃ua pe asisténte jeporandu'ỹre.",
   "cli.option.schema_version": "Esquema versión objetivo respuestas osẽva térã oñemiguasúva hag̃ua",
   "cli.remove.about": "Embogue bundle referencia jehaipyre",
   "cli.remove.app_pack.about": "Embogue app-pack referencia",
@@ -159,6 +161,7 @@
   "wizard.prompt.choose_extension_provider": "Eiporavo extension provider",
   "wizard.prompt.choose_scope": "Eiporavo alcance",
   "wizard.prompt.current_bundle_root": "Bundle ñongatuha ko'ág̃agua térã .gtbundle rape",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
   "wizard.prompt.export_intent": "¿Emyandy export intención? (y/N)",
   "wizard.prompt.extension_provider_reference": "Eike extension provider referencia térã tape local",
   "wizard.prompt.extension_providers": "Extension providers (comas rupive oñemboja'óva)",
@@ -179,6 +182,7 @@
   "wizard.stage.access_rules": "== Jeike regla ==",
   "wizard.stage.advanced_access_rules": "== Jeike regla hag̃uave ==",
   "wizard.stage.app_packs": "== App packs ==",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
   "wizard.stage.current_access_rules": "Regla ko'ág̃agua",
   "wizard.stage.current_app_packs": "App packs ko'ág̃agua",
   "wizard.stage.current_extension_providers": "Extension providers ko'ág̃agua",
@@ -187,7 +191,5 @@
   "wizard.stage.pack_access": "== Pack jeike ==",
   "wizard.stage.review": "== Ñemohenda mbykymi ==",
   "wizard.validate.about": "Ehechajey bundle mbohovái oñembohasajevýva",
-  "wizard.warning.advanced_without_refs": "Ñemboheko hag̃uave oñemyandy app packs térã extension providers'ỹre.",
-  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
-  "wizard.stage.capabilities": "== Bundle capabilities =="
+  "wizard.warning.advanced_without_refs": "Ñemboheko hag̃uave oñemyandy app packs térã extension providers'ỹre."
 }

@@ -36,3 +36,25 @@ fn team_overlay_wins_over_tenant_rules() {
     .expect("decision");
     assert_eq!(decision.policy, Policy::Public);
 }
+
+#[test]
+fn exact_flow_beats_pack_wildcard_flow_rule() {
+    let rules = parse_str("pack-a/_ = forbidden\npack-a/main = public\n").expect("parse rules");
+    let decision = eval_policy(&rules, &target("pack-a", Some("main"), None)).expect("decision");
+    assert_eq!(decision.policy, Policy::Public);
+    assert_eq!(decision.rank, 4);
+}
+
+#[test]
+fn tenant_rules_apply_when_team_overlay_has_no_match() {
+    let tenant_rules = parse_str("pack-a/main/node-x = public\n").expect("tenant");
+    let team_rules = parse_str("pack-b = forbidden\n").expect("team");
+    let decision = eval_with_overlay(
+        &tenant_rules,
+        &team_rules,
+        &target("pack-a", Some("main"), Some("node-x")),
+    )
+    .expect("decision");
+    assert_eq!(decision.policy, Policy::Public);
+    assert_eq!(decision.rank, 5);
+}

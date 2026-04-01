@@ -54,6 +54,8 @@
   "cli.option.locale": "CLI සහ wizard පණිවිඩ සඳහා භාවිතා කරන locale",
   "cli.option.migrate": "පැරණි AnswerDocument schema versions migrate කිරීමට ඉඩ දෙන්න",
   "cli.option.offline": "අනාගත commands එයට සහාය දෙන විට network-dependent operations අක්‍රිය කරන්න",
+  "cli.option.schema": "වර්තමාන answers.json ස්කීමාව මුද්‍රණය කර පිටවන්න",
+  "cli.option.schema.long": "වර්තමාන answers.json ස්කීමාව මුද්‍රණය කර පිටවන්න.\n\nCodex සහ Claude වැනි agentic coding tools වර්තමාන පිළිතුරු ස්කීමාව ලබාගැනීමට, answers.json පුරවා ගැනීමට, සහ wizard එක අන්තර්ක්‍රියාකාරී නොවන ආකාරයෙන් නැවත ධාවනය කිරීමට පළමුව මෙය කැඳවිය යුතුය.",
   "cli.option.schema_version": "නිකුත් කරන හෝ migrate කරන answers සඳහා target schema version",
   "cli.remove.about": "authored bundle references ඉවත් කරන්න",
   "cli.remove.app_pack.about": "app-pack reference එකක් ඉවත් කරන්න",
@@ -159,6 +161,7 @@
   "wizard.prompt.choose_extension_provider": "extension provider තෝරන්න",
   "wizard.prompt.choose_scope": "scope තෝරන්න",
   "wizard.prompt.current_bundle_root": "වත්මන් bundle directory හෝ .gtbundle path",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
   "wizard.prompt.export_intent": "export intent සක්‍රිය කරන්නද? (y/N)",
   "wizard.prompt.extension_provider_reference": "extension provider reference හෝ local path ඇතුල් කරන්න",
   "wizard.prompt.extension_providers": "Extension providers (comma-separated)",
@@ -179,6 +182,7 @@
   "wizard.stage.access_rules": "== Access rules ==",
   "wizard.stage.advanced_access_rules": "== Advanced access rules ==",
   "wizard.stage.app_packs": "== App packs ==",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
   "wizard.stage.current_access_rules": "වත්මන් rules",
   "wizard.stage.current_app_packs": "වත්මන් app packs",
   "wizard.stage.current_extension_providers": "වත්මන් extension providers",
@@ -187,7 +191,5 @@
   "wizard.stage.pack_access": "== Pack access ==",
   "wizard.stage.review": "== Review summary ==",
   "wizard.validate.about": "නැවත ක්‍රියාත්මක කළ bundle answers validate කරන්න",
-  "wizard.warning.advanced_without_refs": "app packs හෝ extension providers නොමැතිව Advanced setup සක්‍රිය කර ඇත.",
-  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
-  "wizard.stage.capabilities": "== Bundle capabilities =="
+  "wizard.warning.advanced_without_refs": "app packs හෝ extension providers නොමැතිව Advanced setup සක්‍රිය කර ඇත."
 }

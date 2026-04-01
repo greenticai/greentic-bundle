@@ -54,6 +54,8 @@
   "cli.option.locale": "Lokalizacija koja se koristi za CLI i poruke čarobnjaka",
   "cli.option.migrate": "Dopusti migraciju starijih verzija sheme AnswerDocumenta",
   "cli.option.offline": "Onemogući operacije ovisne o mreži kada ih buduće naredbe podrže",
+  "cli.option.schema": "Ispiši trenutačnu shemu answers.json i izađi",
+  "cli.option.schema.long": "Ispiši trenutačnu shemu answers.json i izađi.\n\nAgentski alati za programiranje kao što su Codex i Claude trebaju prvo pozvati ovo kako bi dohvatili trenutačnu shemu odgovora, ispunili answers.json i ponovno pokrenuli čarobnjak bez interakcije.",
   "cli.option.schema_version": "Ciljna verzija sheme za emitirane ili migrirane odgovore",
   "cli.remove.about": "Ukloni autorske reference bundlea",
   "cli.remove.app_pack.about": "Ukloni referencu na app-pack",
@@ -159,6 +161,7 @@
   "wizard.prompt.choose_extension_provider": "Odaberi pružatelja proširenja",
   "wizard.prompt.choose_scope": "Odaberi opseg",
   "wizard.prompt.current_bundle_root": "Trenutačni direktorij bundlea ili putanja .gtbundle",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
   "wizard.prompt.export_intent": "Omogući namjeru izvoza? (y/N)",
   "wizard.prompt.extension_provider_reference": "Unesi referencu pružatelja proširenja ili lokalnu putanju",
   "wizard.prompt.extension_providers": "Pružatelji proširenja (odvojeni zarezima)",
@@ -179,6 +182,7 @@
   "wizard.stage.access_rules": "== Pravila pristupa ==",
   "wizard.stage.advanced_access_rules": "== Napredna pravila pristupa ==",
   "wizard.stage.app_packs": "== App packovi ==",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
   "wizard.stage.current_access_rules": "Trenutačna pravila",
   "wizard.stage.current_app_packs": "Trenutačni app packovi",
   "wizard.stage.current_extension_providers": "Trenutačni pružatelji proširenja",
@@ -187,7 +191,5 @@
   "wizard.stage.pack_access": "== Pristup packu ==",
   "wizard.stage.review": "== Sažetak pregleda ==",
   "wizard.validate.about": "Provjeri ponovno reproducirane odgovore bundlea",
-  "wizard.warning.advanced_without_refs": "Napredno postavljanje omogućeno je bez app packova ili pružatelja proširenja.",
-  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
-  "wizard.stage.capabilities": "== Bundle capabilities =="
+  "wizard.warning.advanced_without_refs": "Napredno postavljanje omogućeno je bez app packova ili pružatelja proširenja."
 }

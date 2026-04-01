@@ -178,6 +178,7 @@ mod tests {
             "en-US",
             "wizard",
             "run",
+            "--schema",
             "--answers",
             "answers.json",
             "--emit-answers",
@@ -191,22 +192,25 @@ mod tests {
 
         assert_eq!(cli.locale.as_deref(), Some("en-US"));
         match cli.command {
-            Commands::Wizard(args) => match args.command.expect("wizard subcommand") {
-                super::wizard::WizardCommand::Run(run) => {
-                    assert_eq!(
-                        run.answers.as_deref(),
-                        Some(std::path::Path::new("answers.json"))
-                    );
-                    assert_eq!(
-                        run.emit_answers.as_deref(),
-                        Some(std::path::Path::new("out.json"))
-                    );
-                    assert_eq!(run.schema_version.as_deref(), Some("1.2.3"));
-                    assert!(run.migrate);
-                    assert!(run.dry_run);
+            Commands::Wizard(args) => {
+                assert!(args.schema);
+                match args.command.expect("wizard subcommand") {
+                    super::wizard::WizardCommand::Run(run) => {
+                        assert_eq!(
+                            run.answers.as_deref(),
+                            Some(std::path::Path::new("answers.json"))
+                        );
+                        assert_eq!(
+                            run.emit_answers.as_deref(),
+                            Some(std::path::Path::new("out.json"))
+                        );
+                        assert_eq!(run.schema_version.as_deref(), Some("1.2.3"));
+                        assert!(run.migrate);
+                        assert!(run.dry_run);
+                    }
+                    _ => panic!("expected run"),
                 }
-                _ => panic!("expected run"),
-            },
+            }
             _ => panic!("expected wizard"),
         }
     }
@@ -233,5 +237,94 @@ mod tests {
             },
             _ => panic!("expected access"),
         }
+    }
+
+    #[test]
+    fn parses_build_export_doctor_and_inspect_flags() {
+        let build = Cli::try_parse_from([
+            "greentic-bundle",
+            "build",
+            "--root",
+            "bundle",
+            "--output",
+            "out.gtbundle",
+            "--dry-run",
+        ])
+        .expect("build parses");
+        match build.command {
+            Commands::Build(args) => {
+                assert_eq!(args.root, std::path::PathBuf::from("bundle"));
+                assert_eq!(args.output, Some(std::path::PathBuf::from("out.gtbundle")));
+                assert!(args.dry_run);
+            }
+            _ => panic!("expected build"),
+        }
+
+        let doctor = Cli::try_parse_from([
+            "greentic-bundle",
+            "doctor",
+            "--artifact",
+            "demo.gtbundle",
+            "--json",
+        ])
+        .expect("doctor parses");
+        match doctor.command {
+            Commands::Doctor(args) => {
+                assert_eq!(
+                    args.artifact,
+                    Some(std::path::PathBuf::from("demo.gtbundle"))
+                );
+                assert!(args.json);
+            }
+            _ => panic!("expected doctor"),
+        }
+
+        let export = Cli::try_parse_from([
+            "greentic-bundle",
+            "export",
+            "--build-dir",
+            "state/build/demo/normalized",
+            "--output",
+            "demo.gtbundle",
+            "--dry-run",
+        ])
+        .expect("export parses");
+        match export.command {
+            Commands::Export(args) => {
+                assert_eq!(
+                    args.build_dir,
+                    std::path::PathBuf::from("state/build/demo/normalized")
+                );
+                assert_eq!(args.output, std::path::PathBuf::from("demo.gtbundle"));
+                assert!(args.dry_run);
+            }
+            _ => panic!("expected export"),
+        }
+
+        let inspect = Cli::try_parse_from(["greentic-bundle", "inspect", "bundle", "--json"])
+            .expect("inspect parses");
+        match inspect.command {
+            Commands::Inspect(args) => {
+                assert_eq!(args.target, Some(std::path::PathBuf::from("bundle")));
+                assert!(args.json);
+            }
+            _ => panic!("expected inspect"),
+        }
+    }
+
+    #[test]
+    fn command_defaults_use_current_directory() {
+        assert_eq!(
+            super::build::BuildArgs::default().root,
+            std::path::PathBuf::from(".")
+        );
+        assert_eq!(
+            super::doctor::DoctorArgs::default().root,
+            std::path::PathBuf::from(".")
+        );
+        assert_eq!(
+            super::inspect::InspectArgs::default().root,
+            std::path::PathBuf::from(".")
+        );
     }
 }

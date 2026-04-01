@@ -54,6 +54,8 @@
   "cli.option.locale": "CLI ਅਤੇ wizard ਸੁਨੇਹਿਆਂ ਲਈ ਵਰਤਿਆ ਜਾਣ ਵਾਲਾ locale",
   "cli.option.migrate": "ਪੁਰਾਣੀਆਂ AnswerDocument schema ਵਰਜਨਾਂ ਨੂੰ migrate ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਦਿਓ",
   "cli.option.offline": "ਜਦੋਂ ਭਵਿੱਖ ਦੀਆਂ ਕਮਾਂਡਾਂ ਇਸਦਾ ਸਮਰਥਨ ਕਰਨ, network-dependent ਕਾਰਵਾਈਆਂ ਅਯੋਗ ਕਰੋ",
+  "cli.option.schema": "ਮੌਜੂਦਾ answers.json ਸਕੀਮਾ ਪ੍ਰਿੰਟ ਕਰੋ ਅਤੇ ਬਾਹਰ ਨਿਕਲੋ",
+  "cli.option.schema.long": "ਮੌਜੂਦਾ answers.json ਸਕੀਮਾ ਪ੍ਰਿੰਟ ਕਰੋ ਅਤੇ ਬਾਹਰ ਨਿਕਲੋ।\n\nCodex ਅਤੇ Claude ਵਰਗੇ ਏਜੈਂਟਿਕ ਕੋਡਿੰਗ ਟੂਲਜ਼ ਨੂੰ ਮੌਜੂਦਾ answer schema ਪ੍ਰਾਪਤ ਕਰਨ ਲਈ ਪਹਿਲਾਂ ਇਹ ਕਾਲ ਕਰਨੀ ਚਾਹੀਦੀ ਹੈ, answers.json ਭਰਨਾ ਚਾਹੀਦਾ ਹੈ, ਅਤੇ ਵਿਜ਼ਾਰਡ ਨੂੰ ਬਿਨਾਂ ਇੰਟਰਐਕਟਿਵ ਤਰੀਕੇ ਨਾਲ ਮੁੜ ਚਲਾਉਣਾ ਚਾਹੀਦਾ ਹੈ।",
   "cli.option.schema_version": "ਨਿਕਾਲੇ ਜਾਂ migrate ਕੀਤੇ ਜਵਾਬਾਂ ਲਈ target schema ਵਰਜਨ",
   "cli.remove.about": "ਲਿਖੇ ਗਏ bundle ਹਵਾਲੇ ਹਟਾਓ",
   "cli.remove.app_pack.about": "ਇੱਕ app-pack ਹਵਾਲਾ ਹਟਾਓ",
@@ -159,6 +161,7 @@
   "wizard.prompt.choose_extension_provider": "extension provider ਚੁਣੋ",
   "wizard.prompt.choose_scope": "scope ਚੁਣੋ",
   "wizard.prompt.current_bundle_root": "ਮੌਜੂਦਾ bundle ਡਾਇਰੈਕਟਰੀ ਜਾਂ .gtbundle path",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
   "wizard.prompt.export_intent": "export intent ਸਮਰੱਥ ਕਰੋ? (y/N)",
   "wizard.prompt.extension_provider_reference": "extension provider ਹਵਾਲਾ ਜਾਂ local path ਦਰਜ ਕਰੋ",
   "wizard.prompt.extension_providers": "Extension providers (comma-separated)",
@@ -179,6 +182,7 @@
   "wizard.stage.access_rules": "== Access rules ==",
   "wizard.stage.advanced_access_rules": "== Advanced access rules ==",
   "wizard.stage.app_packs": "== App packs ==",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
   "wizard.stage.current_access_rules": "ਮੌਜੂਦਾ ਨਿਯਮ",
   "wizard.stage.current_app_packs": "ਮੌਜੂਦਾ app packs",
   "wizard.stage.current_extension_providers": "ਮੌਜੂਦਾ extension providers",
@@ -187,7 +191,5 @@
   "wizard.stage.pack_access": "== Pack access ==",
   "wizard.stage.review": "== Review summary ==",
   "wizard.validate.about": "ਮੁੜ ਚਲਾਏ bundle ਜਵਾਬਾਂ ਦੀ ਜਾਂਚ ਕਰੋ",
-  "wizard.warning.advanced_without_refs": "Advanced setup ਨੂੰ app packs ਜਾਂ extension providers ਤੋਂ ਬਿਨਾਂ ਸਮਰੱਥ ਕੀਤਾ ਗਿਆ ਸੀ।",
-  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
-  "wizard.stage.capabilities": "== Bundle capabilities =="
+  "wizard.warning.advanced_without_refs": "Advanced setup ਨੂੰ app packs ਜਾਂ extension providers ਤੋਂ ਬਿਨਾਂ ਸਮਰੱਥ ਕੀਤਾ ਗਿਆ ਸੀ।"
 }

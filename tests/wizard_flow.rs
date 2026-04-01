@@ -773,6 +773,84 @@ fn wizard_run_emit_answers_writes_envelope() {
 }
 
 #[test]
+fn wizard_schema_emits_current_answer_document_contract() {
+    let output = run_command(&["wizard", "--schema"]);
+    assert!(
+        output.status.success(),
+        "stdout={} stderr={}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+
+    let schema: Value = serde_json::from_slice(&output.stdout).expect("parse schema");
+    assert_eq!(
+        schema.get("title").and_then(Value::as_str),
+        Some("greentic-bundle wizard answers")
+    );
+    assert_eq!(
+        schema
+            .pointer("/properties/wizard_id/const")
+            .and_then(Value::as_str),
+        Some("greentic-bundle.wizard.run")
+    );
+    assert_eq!(
+        schema
+            .pointer("/properties/schema_id/const")
+            .and_then(Value::as_str),
+        Some("greentic-bundle.wizard.answers")
+    );
+    assert_eq!(
+        schema
+            .pointer("/properties/schema_version/const")
+            .and_then(Value::as_str),
+        Some("1.0.0")
+    );
+    assert_eq!(
+        schema
+            .pointer("/properties/answers/required")
+            .and_then(Value::as_array)
+            .expect("answers required")
+            .iter()
+            .filter_map(Value::as_str)
+            .collect::<Vec<_>>(),
+        vec!["bundle_name", "bundle_id"]
+    );
+}
+
+#[test]
+fn wizard_schema_can_specialize_mode_and_schema_version() {
+    let output = run_command(&[
+        "wizard",
+        "run",
+        "--schema",
+        "--mode",
+        "update",
+        "--schema-version",
+        "1.2.3",
+    ]);
+    assert!(
+        output.status.success(),
+        "stdout={} stderr={}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+
+    let schema: Value = serde_json::from_slice(&output.stdout).expect("parse schema");
+    assert_eq!(
+        schema
+            .pointer("/properties/schema_version/const")
+            .and_then(Value::as_str),
+        Some("1.2.3")
+    );
+    assert_eq!(
+        schema
+            .pointer("/properties/answers/properties/mode/const")
+            .and_then(Value::as_str),
+        Some("update")
+    );
+}
+
+#[test]
 fn wizard_validate_is_side_effect_free() {
     let temp = TempDir::new().expect("tempdir");
     let bundle_root = temp.path().join("bundle");
@@ -1417,4 +1495,64 @@ fn wizard_answers_invalid_mode_is_rejected() {
         String::from_utf8_lossy(&output.stderr)
             .contains("AnswerDocument answer `mode` is invalid.")
     );
+}
+
+#[test]
+fn wizard_answers_require_migrate_for_legacy_documents() {
+    let temp = TempDir::new().expect("tempdir");
+    let answers_path = temp.path().join("answers.json");
+    write_answers(
+        &answers_path,
+        r#"{
+  "mode":"create",
+  "bundle_name":"Demo Bundle",
+  "bundle_id":"demo-bundle",
+  "output_dir":"/tmp/demo-bundle"
+}"#,
+    );
+
+    let output = Command::new(bundle_bin())
+        .args(["wizard", "validate", "--answers"])
+        .arg(&answers_path)
+        .output()
+        .expect("run validate");
+
+    assert!(!output.status.success());
+    assert!(
+        String::from_utf8_lossy(&output.stderr)
+            .contains("AnswerDocument metadata is missing; rerun with --migrate")
+    );
+}
+
+#[test]
+fn wizard_answers_migrate_legacy_documents_when_requested() {
+    let temp = TempDir::new().expect("tempdir");
+    let answers_path = temp.path().join("answers.json");
+    write_answers(
+        &answers_path,
+        r#"{
+  "mode":"create",
+  "bundle_name":"Demo Bundle",
+  "bundle_id":"demo-bundle",
+  "output_dir":"/tmp/demo-bundle",
+  "locks":{"execution":"dry_run"}
+}"#,
+    );
+
+    let output = Command::new(bundle_bin())
+        .args(["wizard", "validate", "--answers"])
+        .arg(&answers_path)
+        .arg("--migrate")
+        .output()
+        .expect("run validate");
+
+    assert!(
+        output.status.success(),
+        "stdout={} stderr={}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let stdout = String::from_utf8(output.stdout).expect("stdout");
+    assert!(stdout.contains("\"bundle_id\": \"demo-bundle\""));
+    assert!(stdout.contains("\"execution\": \"dry_run\""));
 }

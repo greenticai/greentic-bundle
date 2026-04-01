@@ -6,6 +6,8 @@
   "cli.option.locale": "Locale used for CLI and wizard messages",
   "cli.option.offline": "Disable network-dependent operations when future commands support it",
   "cli.option.answers": "Load AnswerDocument JSON",
+  "cli.option.schema": "Print the current answers.json schema and exit",
+  "cli.option.schema.long": "Print the current answers.json schema and exit.\n\nAgentic coding tools such as Codex and Claude should call this first to fetch the current answer schema, fill out answers.json, and replay the wizard non-interactively.",
   "cli.option.emit_answers": "Write AnswerDocument JSON after execution",
   "cli.option.schema_version": "Target schema version for emitted or migrated answers",
   "cli.option.migrate": "Allow migrating older AnswerDocument schema versions",

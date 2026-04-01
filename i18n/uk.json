@@ -54,6 +54,8 @@
   "cli.option.locale": "Локаль, що використовується для CLI та повідомлень майстра",
   "cli.option.migrate": "Дозволити міграцію старіших версій схеми AnswerDocument",
   "cli.option.offline": "Вимкнути операції, залежні від мережі, коли майбутні команди це підтримуватимуть",
+  "cli.option.schema": "Вивести поточну схему answers.json і завершити роботу",
+  "cli.option.schema.long": "Вивести поточну схему answers.json і завершити роботу.\n\nАгентні інструменти для програмування, такі як Codex і Claude, повинні спочатку викликати це, щоб отримати поточну схему відповідей, заповнити answers.json і повторно відтворити майстер у неінтерактивному режимі.",
   "cli.option.schema_version": "Цільова версія схеми для створених або мігрованих відповідей",
   "cli.remove.about": "Видалити посилання на авторські bundle",
   "cli.remove.app_pack.about": "Видалити посилання на app-pack",
@@ -159,6 +161,7 @@
   "wizard.prompt.choose_extension_provider": "Виберіть extension provider",
   "wizard.prompt.choose_scope": "Виберіть область",
   "wizard.prompt.current_bundle_root": "Поточний каталог bundle або шлях до .gtbundle",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
   "wizard.prompt.export_intent": "Увімкнути намір експорту? (y/N)",
   "wizard.prompt.extension_provider_reference": "Введіть посилання на extension provider або локальний шлях",
   "wizard.prompt.extension_providers": "Extension providers (через кому)",
@@ -179,6 +182,7 @@
   "wizard.stage.access_rules": "== Правила доступу ==",
   "wizard.stage.advanced_access_rules": "== Розширені правила доступу ==",
   "wizard.stage.app_packs": "== App packs ==",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
   "wizard.stage.current_access_rules": "Поточні правила",
   "wizard.stage.current_app_packs": "Поточні app packs",
   "wizard.stage.current_extension_providers": "Поточні extension providers",
@@ -187,7 +191,5 @@
   "wizard.stage.pack_access": "== Доступ до pack ==",
   "wizard.stage.review": "== Підсумок перегляду ==",
   "wizard.validate.about": "Перевірити відтворені відповіді bundle",
-  "wizard.warning.advanced_without_refs": "Розширене налаштування було ввімкнено без app packs або extension providers.",
-  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
-  "wizard.stage.capabilities": "== Bundle capabilities =="
+  "wizard.warning.advanced_without_refs": "Розширене налаштування було ввімкнено без app packs або extension providers."
 }

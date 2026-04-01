@@ -54,6 +54,8 @@
   "cli.option.locale": "Lokalisering brugt til CLI- og wizard-meddelelser",
   "cli.option.migrate": "Tillad migrering af ældre schema-versioner af AnswerDocument",
   "cli.option.offline": "Deaktiver netværksafhængige handlinger, når fremtidige kommandoer understøtter det",
+  "cli.option.schema": "Udskriv det aktuelle answers.json-skema og afslut",
+  "cli.option.schema.long": "Udskriv det aktuelle answers.json-skema og afslut.\n\nAgentiske kodningsværktøjer såsom Codex og Claude bør kalde dette først for at hente det aktuelle svarskema, udfylde answers.json og afspille guiden igen ikke-interaktivt.",
   "cli.option.schema_version": "Mål-schema-version for udsendte eller migrerede svar",
   "cli.remove.about": "Fjern oprettede bundle-referencer",
   "cli.remove.app_pack.about": "Fjern en app-pack-reference",
@@ -159,6 +161,7 @@
   "wizard.prompt.choose_extension_provider": "Vælg extension provider",
   "wizard.prompt.choose_scope": "Vælg scope",
   "wizard.prompt.current_bundle_root": "Nuværende bundle-mappe eller .gtbundle-sti",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
   "wizard.prompt.export_intent": "Aktivér eksporthensigt? (y/N)",
   "wizard.prompt.extension_provider_reference": "Indtast extension provider-reference eller lokal sti",
   "wizard.prompt.extension_providers": "Extension providers (kommasepareret)",
@@ -179,6 +182,7 @@
   "wizard.stage.access_rules": "== Adgangsregler ==",
   "wizard.stage.advanced_access_rules": "== Avancerede adgangsregler ==",
   "wizard.stage.app_packs": "== App packs ==",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
   "wizard.stage.current_access_rules": "Nuværende regler",
   "wizard.stage.current_app_packs": "Nuværende app packs",
   "wizard.stage.current_extension_providers": "Nuværende extension providers",
@@ -187,7 +191,5 @@
   "wizard.stage.pack_access": "== Pack-adgang ==",
   "wizard.stage.review": "== Gennemgangsoversigt ==",
   "wizard.validate.about": "Validér genafspillede bundle-svar",
-  "wizard.warning.advanced_without_refs": "Avanceret opsætning blev aktiveret uden app packs eller extension providers.",
-  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
-  "wizard.stage.capabilities": "== Bundle capabilities =="
+  "wizard.warning.advanced_without_refs": "Avanceret opsætning blev aktiveret uden app packs eller extension providers."
 }
