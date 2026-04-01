@@ -54,6 +54,8 @@
   "cli.option.locale": "CLI ve sihirbaz iletileri için kullanılan yerel ayar",
   "cli.option.migrate": "Eski AnswerDocument şema sürümlerinin taşınmasına izin ver",
   "cli.option.offline": "Gelecekteki komutlar desteklediğinde ağa bağlı işlemleri devre dışı bırak",
+  "cli.option.schema": "Geçerli answers.json şemasını yazdır ve çık",
+  "cli.option.schema.long": "Geçerli answers.json şemasını yazdır ve çık.\n\nCodex ve Claude gibi aracı tabanlı kodlama araçları, geçerli yanıt şemasını almak, answers.json dosyasını doldurmak ve sihirbazı etkileşimsiz olarak yeniden çalıştırmak için önce bunu çağırmalıdır.",
   "cli.option.schema_version": "Üretilen veya taşınan yanıtlar için hedef şema sürümü",
   "cli.remove.about": "Oluşturulmuş bundle referanslarını kaldır",
   "cli.remove.app_pack.about": "Bir app-pack referansını kaldır",
@@ -159,6 +161,7 @@
   "wizard.prompt.choose_extension_provider": "Extension provider seç",
   "wizard.prompt.choose_scope": "Kapsam seç",
   "wizard.prompt.current_bundle_root": "Geçerli bundle dizini veya .gtbundle yolu",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
   "wizard.prompt.export_intent": "Dışa aktarma niyeti etkinleştirilsin mi? (e/H)",
   "wizard.prompt.extension_provider_reference": "Extension provider referansı veya yerel yol girin",
   "wizard.prompt.extension_providers": "Extension provider'lar (virgülle ayrılmış)",
@@ -179,6 +182,7 @@
   "wizard.stage.access_rules": "== Erişim kuralları ==",
   "wizard.stage.advanced_access_rules": "== Gelişmiş erişim kuralları ==",
   "wizard.stage.app_packs": "== Uygulama paketleri ==",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
   "wizard.stage.current_access_rules": "Geçerli kurallar",
   "wizard.stage.current_app_packs": "Geçerli uygulama paketleri",
   "wizard.stage.current_extension_providers": "Geçerli extension provider'lar",
@@ -187,7 +191,5 @@
   "wizard.stage.pack_access": "== Paket erişimi ==",
   "wizard.stage.review": "== İnceleme özeti ==",
   "wizard.validate.about": "Yeniden oynatılan bundle yanıtlarını doğrula",
-  "wizard.warning.advanced_without_refs": "Gelişmiş kurulum, uygulama paketleri veya extension provider'lar olmadan etkinleştirildi.",
-  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
-  "wizard.stage.capabilities": "== Bundle capabilities =="
+  "wizard.warning.advanced_without_refs": "Gelişmiş kurulum, uygulama paketleri veya extension provider'lar olmadan etkinleştirildi."
 }

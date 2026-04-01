@@ -54,6 +54,8 @@
   "cli.option.locale": "CLI とウィザードのメッセージで使用するロケール",
   "cli.option.migrate": "古い AnswerDocument スキーマバージョンの移行を許可",
   "cli.option.offline": "将来のコマンドが対応した際にネットワーク依存の操作を無効化",
+  "cli.option.schema": "現在の answers.json スキーマを表示して終了",
+  "cli.option.schema.long": "現在の answers.json スキーマを表示して終了。\n\nCodex や Claude などのエージェント型コーディングツールは、まずこれを呼び出して現在の回答スキーマを取得し、answers.json を埋めて、ウィザードを非対話的に再実行する必要があります。",
   "cli.option.schema_version": "出力または移行される回答の対象スキーマバージョン",
   "cli.remove.about": "作成済み bundle 参照を削除",
   "cli.remove.app_pack.about": "app-pack 参照を削除",
@@ -159,6 +161,7 @@
   "wizard.prompt.choose_extension_provider": "extension provider を選択",
   "wizard.prompt.choose_scope": "スコープを選択",
   "wizard.prompt.current_bundle_root": "現在の bundle ディレクトリまたは .gtbundle パス",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
   "wizard.prompt.export_intent": "エクスポート意図を有効にしますか? (y/N)",
   "wizard.prompt.extension_provider_reference": "extension provider 参照またはローカルパスを入力",
   "wizard.prompt.extension_providers": "Extension providers (カンマ区切り)",
@@ -179,6 +182,7 @@
   "wizard.stage.access_rules": "== アクセスルール ==",
   "wizard.stage.advanced_access_rules": "== 高度なアクセスルール ==",
   "wizard.stage.app_packs": "== アプリパック ==",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
   "wizard.stage.current_access_rules": "現在のルール",
   "wizard.stage.current_app_packs": "現在のアプリパック",
   "wizard.stage.current_extension_providers": "現在の extension providers",
@@ -187,7 +191,5 @@
   "wizard.stage.pack_access": "== パックアクセス ==",
   "wizard.stage.review": "== レビュー概要 ==",
   "wizard.validate.about": "再生された bundle の回答を検証",
-  "wizard.warning.advanced_without_refs": "アプリパックまたは extension provider がないまま高度な設定が有効になりました。",
-  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
-  "wizard.stage.capabilities": "== Bundle capabilities =="
+  "wizard.warning.advanced_without_refs": "アプリパックまたは extension provider がないまま高度な設定が有効になりました。"
 }

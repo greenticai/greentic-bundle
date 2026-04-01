@@ -54,6 +54,8 @@
   "cli.option.locale": "Locale, използван за CLI и съобщенията на wizard",
   "cli.option.migrate": "Разрешаване на миграция на по-стари версии на схемата на AnswerDocument",
   "cli.option.offline": "Деактивиране на зависещи от мрежата операции, когато бъдещи команди го поддържат",
+  "cli.option.schema": "Отпечатва текущата схема на answers.json и излиза",
+  "cli.option.schema.long": "Отпечатва текущата схема на answers.json и излиза.\n\nАгентни инструменти за програмиране като Codex и Claude трябва първо да извикат това, за да извлекат текущата схема за отговори, да попълнят answers.json и да възпроизведат съветника в неинтерактивен режим.",
   "cli.option.schema_version": "Целева версия на схемата за изведени или мигрирани отговори",
   "cli.remove.about": "Премахване на авторски препратки за bundle",
   "cli.remove.app_pack.about": "Премахване на препратка към app-pack",
@@ -159,6 +161,7 @@
   "wizard.prompt.choose_extension_provider": "Изберете extension provider",
   "wizard.prompt.choose_scope": "Изберете обхват",
   "wizard.prompt.current_bundle_root": "Текуща директория на bundle или път към .gtbundle",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
   "wizard.prompt.export_intent": "Да се активира ли намерение за export? (y/N)",
   "wizard.prompt.extension_provider_reference": "Въведете препратка към extension provider или локален път",
   "wizard.prompt.extension_providers": "Extension providers (разделени със запетая)",
@@ -179,6 +182,7 @@
   "wizard.stage.access_rules": "== Правила за достъп ==",
   "wizard.stage.advanced_access_rules": "== Разширени правила за достъп ==",
   "wizard.stage.app_packs": "== App packs ==",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
   "wizard.stage.current_access_rules": "Текущи правила",
   "wizard.stage.current_app_packs": "Текущи app packs",
   "wizard.stage.current_extension_providers": "Текущи extension providers",
@@ -187,7 +191,5 @@
   "wizard.stage.pack_access": "== Достъп до pack ==",
   "wizard.stage.review": "== Обобщение за преглед ==",
   "wizard.validate.about": "Валидиране на преиграни отговори за bundle",
-  "wizard.warning.advanced_without_refs": "Разширената настройка беше активирана без app packs или extension providers.",
-  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
-  "wizard.stage.capabilities": "== Bundle capabilities =="
+  "wizard.warning.advanced_without_refs": "Разширената настройка беше активирана без app packs или extension providers."
 }

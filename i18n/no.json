@@ -54,6 +54,8 @@
   "cli.option.locale": "Locale brukt for CLI- og wizard-meldinger",
   "cli.option.migrate": "Tillat migrering av eldre schema-versjoner for AnswerDocument",
   "cli.option.offline": "Deaktiver nettverksavhengige operasjoner når fremtidige kommandoer støtter det",
+  "cli.option.schema": "Skriv ut gjeldende answers.json-skjema og avslutt",
+  "cli.option.schema.long": "Skriv ut gjeldende answers.json-skjema og avslutt.\n\nAgentbaserte kodeverktøy som Codex og Claude bør kalle dette først for å hente gjeldende svarskjema, fylle ut answers.json og kjøre veiviseren på nytt ikke-interaktivt.",
   "cli.option.schema_version": "Målschema-versjon for genererte eller migrerte svar",
   "cli.remove.about": "Fjern forfattede bundle-referanser",
   "cli.remove.app_pack.about": "Fjern en app-pack-referanse",
@@ -159,6 +161,7 @@
   "wizard.prompt.choose_extension_provider": "Velg extension provider",
   "wizard.prompt.choose_scope": "Velg omfang",
   "wizard.prompt.current_bundle_root": "Gjeldende bundle-mappe eller .gtbundle-sti",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
   "wizard.prompt.export_intent": "Aktiver eksportintensjon? (y/N)",
   "wizard.prompt.extension_provider_reference": "Skriv inn extension provider-referanse eller lokal sti",
   "wizard.prompt.extension_providers": "Extension providers (kommaseparert)",
@@ -179,6 +182,7 @@
   "wizard.stage.access_rules": "== Tilgangsregler ==",
   "wizard.stage.advanced_access_rules": "== Avanserte tilgangsregler ==",
   "wizard.stage.app_packs": "== App packs ==",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
   "wizard.stage.current_access_rules": "Gjeldende regler",
   "wizard.stage.current_app_packs": "Gjeldende app packs",
   "wizard.stage.current_extension_providers": "Gjeldende extension providers",
@@ -187,7 +191,5 @@
   "wizard.stage.pack_access": "== Pack-tilgang ==",
   "wizard.stage.review": "== Oppsummering ==",
   "wizard.validate.about": "Valider avspilte bundle-svar",
-  "wizard.warning.advanced_without_refs": "Avansert oppsett ble aktivert uten app packs eller extension providers.",
-  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
-  "wizard.stage.capabilities": "== Bundle capabilities =="
+  "wizard.warning.advanced_without_refs": "Avansert oppsett ble aktivert uten app packs eller extension providers."
 }

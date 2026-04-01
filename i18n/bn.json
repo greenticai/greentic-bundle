@@ -54,6 +54,8 @@
   "cli.option.locale": "CLI এবং wizard message-এর জন্য ব্যবহৃত locale",
   "cli.option.migrate": "পুরোনো AnswerDocument schema versions migrate করার অনুমতি দিন",
   "cli.option.offline": "ভবিষ্যতের command-গুলো সমর্থন করলে network-dependent operations নিষ্ক্রিয় করুন",
+  "cli.option.schema": "বর্তমান answers.json স্কিমা প্রিন্ট করে প্রস্থান করুন",
+  "cli.option.schema.long": "বর্তমান answers.json স্কিমা প্রিন্ট করে প্রস্থান করুন।\n\nCodex এবং Claude-এর মতো agentic coding tools-গুলোকে বর্তমান answer schema আনতে, answers.json পূরণ করতে, এবং wizard-টি non-interactively পুনরায় চালাতে এটি প্রথমে কল করা উচিত।",
   "cli.option.schema_version": "emitted বা migrated answers-এর জন্য target schema version",
   "cli.remove.about": "authored bundle references সরান",
   "cli.remove.app_pack.about": "একটি app-pack রেফারেন্স সরান",
@@ -159,6 +161,7 @@
   "wizard.prompt.choose_extension_provider": "extension provider নির্বাচন করুন",
   "wizard.prompt.choose_scope": "scope নির্বাচন করুন",
   "wizard.prompt.current_bundle_root": "বর্তমান bundle directory বা .gtbundle path",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
   "wizard.prompt.export_intent": "export intent সক্রিয় করবেন? (y/N)",
   "wizard.prompt.extension_provider_reference": "extension provider reference বা local path লিখুন",
   "wizard.prompt.extension_providers": "Extension providers (comma-separated)",
@@ -179,6 +182,7 @@
   "wizard.stage.access_rules": "== Access rules ==",
   "wizard.stage.advanced_access_rules": "== Advanced access rules ==",
   "wizard.stage.app_packs": "== App packs ==",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
   "wizard.stage.current_access_rules": "বর্তমান rules",
   "wizard.stage.current_app_packs": "বর্তমান app packs",
   "wizard.stage.current_extension_providers": "বর্তমান extension providers",
@@ -187,7 +191,5 @@
   "wizard.stage.pack_access": "== Pack access ==",
   "wizard.stage.review": "== Review summary ==",
   "wizard.validate.about": "replayed bundle answers যাচাই করুন",
-  "wizard.warning.advanced_without_refs": "app packs বা extension providers ছাড়াই advanced setup সক্রিয় করা হয়েছে।",
-  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
-  "wizard.stage.capabilities": "== Bundle capabilities =="
+  "wizard.warning.advanced_without_refs": "app packs বা extension providers ছাড়াই advanced setup সক্রিয় করা হয়েছে।"
 }

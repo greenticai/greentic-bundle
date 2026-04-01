@@ -211,6 +211,206 @@ pub fn run_command(args: WizardRunArgs) -> Result<()> {
     Ok(())
 }
 
+pub fn answer_document_schema(
+    mode: Option<WizardMode>,
+    schema_version: Option<&str>,
+) -> Result<Value> {
+    let schema_version = requested_schema_version(schema_version)?;
+    let selected_mode = mode.map(mode_name);
+    let mode_schema = match selected_mode {
+        Some(mode) => json!({
+            "type": "string",
+            "const": mode,
+            "description": "Wizard mode. When omitted, the CLI can also supply --mode."
+        }),
+        None => json!({
+            "type": "string",
+            "enum": ["create", "update", "doctor"],
+            "description": "Wizard mode. Defaults to create when omitted unless the CLI supplies --mode."
+        }),
+    };
+
+    Ok(json!({
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": "https://greenticai.github.io/greentic-bundle/schemas/wizard.answers.schema.json",
+        "title": "greentic-bundle wizard answers",
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+            "wizard_id": {
+                "type": "string",
+                "const": WIZARD_ID
+            },
+            "schema_id": {
+                "type": "string",
+                "const": ANSWER_SCHEMA_ID
+            },
+            "schema_version": {
+                "type": "string",
+                "const": schema_version.to_string()
+            },
+            "locale": {
+                "type": "string",
+                "minLength": 1
+            },
+            "answers": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "mode": mode_schema,
+                    "bundle_name": non_empty_string_schema("Human-friendly bundle name."),
+                    "bundle_id": non_empty_string_schema("Stable bundle id."),
+                    "output_dir": non_empty_string_schema("Workspace output directory."),
+                    "advanced_setup": {
+                        "type": "boolean"
+                    },
+                    "app_pack_entries": {
+                        "type": "array",
+                        "items": app_pack_entry_schema()
+                    },
+                    "access_rules": {
+                        "type": "array",
+                        "items": access_rule_schema()
+                    },
+                    "extension_provider_entries": {
+                        "type": "array",
+                        "items": extension_provider_entry_schema()
+                    },
+                    "app_packs": string_array_schema("App-pack references or local paths."),
+                    "extension_providers": string_array_schema("Extension provider references or local paths."),
+                    "remote_catalogs": string_array_schema("Additional remote catalog references."),
+                    "setup_specs": {
+                        "type": "object",
+                        "additionalProperties": true
+                    },
+                    "setup_answers": {
+                        "type": "object",
+                        "additionalProperties": true
+                    },
+                    "setup_execution_intent": {
+                        "type": "boolean"
+                    },
+                    "export_intent": {
+                        "type": "boolean"
+                    },
+                    "capabilities": string_array_schema("Requested bundle capabilities.")
+                },
+                "required": ["bundle_name", "bundle_id"]
+            },
+            "locks": {
+                "type": "object",
+                "additionalProperties": true,
+                "properties": {
+                    "execution": {
+                        "type": "string",
+                        "enum": ["dry_run", "execute"]
+                    }
+                }
+            }
+        },
+        "required": ["wizard_id", "schema_id", "schema_version", "locale", "answers"]
+    }))
+}
+
+fn non_empty_string_schema(description: &str) -> Value {
+    json!({
+        "type": "string",
+        "minLength": 1,
+        "description": description
+    })
+}
+
+fn string_array_schema(description: &str) -> Value {
+    json!({
+        "type": "array",
+        "description": description,
+        "items": {
+            "type": "string",
+            "minLength": 1
+        }
+    })
+}
+
+fn app_pack_entry_schema() -> Value {
+    json!({
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+            "reference": non_empty_string_schema("Resolved reference or source path."),
+            "detected_kind": non_empty_string_schema("Detected source kind."),
+            "pack_id": non_empty_string_schema("Pack id."),
+            "display_name": non_empty_string_schema("Pack display name."),
+            "version": {
+                "type": ["string", "null"]
+            },
+            "mapping": app_pack_mapping_schema()
+        },
+        "required": ["reference", "detected_kind", "pack_id", "display_name", "mapping"]
+    })
+}
+
+fn app_pack_mapping_schema() -> Value {
+    json!({
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+            "scope": {
+                "type": "string",
+                "enum": ["global", "tenant", "tenant_team"]
+            },
+            "tenant": {
+                "type": ["string", "null"]
+            },
+            "team": {
+                "type": ["string", "null"]
+            }
+        },
+        "required": ["scope"]
+    })
+}
+
+fn access_rule_schema() -> Value {
+    json!({
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+            "rule_path": non_empty_string_schema("Resolved GMAP rule path."),
+            "policy": {
+                "type": "string",
+                "enum": ["allow", "forbid"]
+            },
+            "tenant": non_empty_string_schema("Tenant id."),
+            "team": {
+                "type": ["string", "null"]
+            }
+        },
+        "required": ["rule_path", "policy", "tenant"]
+    })
+}
+
+fn extension_provider_entry_schema() -> Value {
+    json!({
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+            "reference": non_empty_string_schema("Resolved reference or source path."),
+            "detected_kind": non_empty_string_schema("Detected source kind."),
+            "provider_id": non_empty_string_schema("Provider id."),
+            "display_name": non_empty_string_schema("Provider display name."),
+            "version": {
+                "type": ["string", "null"]
+            },
+            "source_catalog": {
+                "type": ["string", "null"]
+            },
+            "group": {
+                "type": ["string", "null"]
+            }
+        },
+        "required": ["reference", "detected_kind", "provider_id", "display_name"]
+    })
+}
+
 pub fn validate_command(args: WizardValidateArgs) -> Result<()> {
     let locale = crate::i18n::current_locale();
     let loaded = load_and_normalize_answers(

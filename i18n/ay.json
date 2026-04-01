@@ -54,6 +54,8 @@
   "cli.option.locale": "CLI ukhamarak wizard yatiyäwinakataki apnaqata locale",
   "cli.option.migrate": "nayra AnswerDocument schema versiones migración jaytaña",
   "cli.option.offline": "red-munayiri luräwinaka sayt'ayaña kunapachatix qhipa kamachinakax yanapt'ki ukhaxa",
+  "cli.option.schema": "Jichha answers.json esquema uñt'ayaña ukat mistuña",
+  "cli.option.schema.long": "Jichha answers.json esquema uñt'ayaña ukat mistuña.\n\nCodex ukhamarak Claude ukanakjam agentic coding herramientas ukanakax nayraqat aka jawsapxañapawa jichha respuesta esquema apthapiñataki, answers.json phuqhachañataki, ukat asistente jan interactivoki mayampi sarayañataki.",
   "cli.option.schema_version": "mistut jan ukax migrat jaysäwinakataki schema versión amta",
   "cli.remove.about": "qillqata bundle uñt'ayäwinaka apsuña",
   "cli.remove.app_pack.about": "mä app-pack uñt'ayaña apsuña",
@@ -159,6 +161,7 @@
   "wizard.prompt.choose_extension_provider": "extension provider ajlliña",
   "wizard.prompt.choose_scope": "ámbito ajlliña",
   "wizard.prompt.current_bundle_root": "jichha bundle directorio jan ukax .gtbundle thaki",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
   "wizard.prompt.export_intent": "export amta ch'amanchaña? (y/N)",
   "wizard.prompt.extension_provider_reference": "extension provider uñt'ayaña jan ukax local thaki qillqt'am",
   "wizard.prompt.extension_providers": "Extension providers (coma ukanakampi jaljata)",
@@ -179,6 +182,7 @@
   "wizard.stage.access_rules": "== Mantaña kamachinaka ==",
   "wizard.stage.advanced_access_rules": "== Avanzado mantaña kamachinaka ==",
   "wizard.stage.app_packs": "== App packs ==",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
   "wizard.stage.current_access_rules": "Jichha kamachinaka",
   "wizard.stage.current_app_packs": "Jichha app packs",
   "wizard.stage.current_extension_providers": "Jichha extension providers",
@@ -187,7 +191,5 @@
   "wizard.stage.pack_access": "== Pack mantaña ==",
   "wizard.stage.review": "== Uñakipaña tukuyañ yatiyawi ==",
   "wizard.validate.about": "mayampi apnaqata bundle jaysäwinaka chiqapa uñakipaña",
-  "wizard.warning.advanced_without_refs": "Avanzado wakichañax app packs jan ukax extension providers janïr utjkipan ch'amanchatänwa.",
-  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
-  "wizard.stage.capabilities": "== Bundle capabilities =="
+  "wizard.warning.advanced_without_refs": "Avanzado wakichañax app packs jan ukax extension providers janïr utjkipan ch'amanchatänwa."
 }

@@ -201,6 +201,99 @@ fn replayed_setup_answers_produce_same_normalized_persisted_output() {
     );
 }
 
+#[test]
+fn setup_persistence_applies_defaults_and_splits_secret_values() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    let instructions = greentic_bundle::setup::persist::collect_setup_instructions(
+        &BTreeMap::from([(
+            "provider-a".to_string(),
+            json!({
+                "type": "legacy",
+                "spec": {
+                    "title": "Provider A Setup",
+                    "questions": [
+                        {"name": "enabled", "kind": "boolean", "required": true},
+                        {"name": "region", "kind": "string", "required": false, "default": "eu-west-1"},
+                        {"name": "api_token", "kind": "string", "required": true, "secret": true}
+                    ]
+                }
+            }),
+        )]),
+        &BTreeMap::from([(
+            "provider-a".to_string(),
+            json!({"enabled": "true", "api_token": "secret123"}),
+        )]),
+    )
+    .expect("instructions");
+
+    let result = greentic_bundle::setup::persist::persist_setup(
+        &root,
+        &instructions,
+        &greentic_bundle::setup::backend::FileSetupBackend::new(&root),
+    )
+    .expect("persist");
+
+    assert_eq!(
+        result.writes,
+        vec!["state/setup/provider-a.json".to_string()]
+    );
+    let state = &result.states[0];
+    assert_eq!(state.normalized_answers.get("enabled"), Some(&json!(true)));
+    assert_eq!(
+        state.normalized_answers.get("region"),
+        Some(&json!("eu-west-1"))
+    );
+    assert_eq!(
+        state.non_secret_config.get("region"),
+        Some(&json!("eu-west-1"))
+    );
+    assert_eq!(
+        state.secret_values.get("api_token"),
+        Some(&json!("secret123"))
+    );
+    assert!(!state.non_secret_config.contains_key("api_token"));
+    assert!(root.join("state/setup/provider-a.json").exists());
+}
+
+#[test]
+fn provider_qa_bridge_falls_back_to_ids_and_description_keys() {
+    let qa_output = json!({
+        "questions": [
+            {
+                "id": "api_token",
+                "label": {"key": "provider.qa.setup.api_token"},
+                "required": true,
+                "default": "seed"
+            }
+        ]
+    });
+    let i18n = BTreeMap::from([(
+        "provider.schema.config.api_token.description".to_string(),
+        "API token for outbound calls".to_string(),
+    )]);
+
+    let form = greentic_bundle::setup::qa_bridge::provider_qa_to_form_spec(
+        &qa_output,
+        &i18n,
+        "provider-a",
+    );
+
+    assert_eq!(form.id, "provider-a-setup");
+    assert_eq!(form.title, "provider-a setup");
+    assert_eq!(form.questions.len(), 1);
+    assert_eq!(form.questions[0].title, "api_token");
+    assert_eq!(
+        form.questions[0].description.as_deref(),
+        Some("API token for outbound calls")
+    );
+    assert_eq!(
+        form.questions[0].default_value.as_ref(),
+        Some(&json!("seed"))
+    );
+    assert!(form.questions[0].secret);
+}
+
 fn read_json(path: &Path) -> Value {
     serde_json::from_slice(&fs::read(path).expect("read json")).expect("parse json")
 }

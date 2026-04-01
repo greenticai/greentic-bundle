@@ -54,6 +54,8 @@
   "cli.option.locale": "Lokal yo itilize pou mesaj CLI ak wizard",
   "cli.option.migrate": "Pèmèt migrasyon ansyen vèsyon schema AnswerDocument",
   "cli.option.offline": "Dezaktive operasyon ki depann de rezo lè kòmand nan lavni sipòte sa",
+  "cli.option.schema": "Afiche chema answers.json aktyèl la epi sòti",
+  "cli.option.schema.long": "Afiche chema answers.json aktyèl la epi sòti.\n\nZouti kodaj ajantik tankou Codex ak Claude ta dwe rele sa an premye pou pran chema repons aktyèl la, ranpli answers.json, epi rejwe asistan an san entèraksyon.",
   "cli.option.schema_version": "Vèsyon schema sib pou repons ki pwodui oswa migre",
   "cli.remove.about": "Retire referans bundle ekri",
   "cli.remove.app_pack.about": "Retire yon referans app-pack",
@@ -159,6 +161,7 @@
   "wizard.prompt.choose_extension_provider": "Chwazi extension provider",
   "wizard.prompt.choose_scope": "Chwazi dimansyon",
   "wizard.prompt.current_bundle_root": "Repètwa bundle aktyèl oswa chemen .gtbundle",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
   "wizard.prompt.export_intent": "Aktive entansyon ekspòtasyon? (y/N)",
   "wizard.prompt.extension_provider_reference": "Antre referans extension provider oswa chemen lokal",
   "wizard.prompt.extension_providers": "Extension providers (separe ak vigil)",
@@ -179,6 +182,7 @@
   "wizard.stage.access_rules": "== Règ aksè ==",
   "wizard.stage.advanced_access_rules": "== Règ aksè avanse ==",
   "wizard.stage.app_packs": "== App packs ==",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
   "wizard.stage.current_access_rules": "Règ aktyèl yo",
   "wizard.stage.current_app_packs": "App packs aktyèl yo",
   "wizard.stage.current_extension_providers": "Extension providers aktyèl yo",
@@ -187,7 +191,5 @@
   "wizard.stage.pack_access": "== Aksè pack ==",
   "wizard.stage.review": "== Rezime revizyon ==",
   "wizard.validate.about": "Valide repons bundle ki rejwe yo",
-  "wizard.warning.advanced_without_refs": "Konfigirasyon avanse te aktive san app packs oswa extension providers.",
-  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
-  "wizard.stage.capabilities": "== Bundle capabilities =="
+  "wizard.warning.advanced_without_refs": "Konfigirasyon avanse te aktive san app packs oswa extension providers."
 }

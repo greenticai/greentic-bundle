@@ -417,6 +417,139 @@ fn reader_runtime_surface_exposes_catalogs_and_file_views() {
 }
 
 #[test]
+fn build_accepts_quoted_scalars_and_inline_yaml_lists() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    seed_workspace(&root);
+    fs::write(
+        root.join("bundle.yaml"),
+        "\
+schema_version: 1
+bundle_id: \"demo-bundle\"
+bundle_name: \"Demo Bundle\"
+locale: \"en\"
+mode: \"create\"
+advanced_setup: true
+app_packs: [pack-a, pack-b]
+extension_providers: [provider-a, provider-b]
+remote_catalogs: [file://catalog-a.json, file://catalog-b.json]
+hooks: [hook-a, hook-b]
+subscriptions: [subscription-a, subscription-b]
+capabilities: [capability-a, capability-b]
+setup_execution_intent: true
+export_intent: false
+",
+    )
+    .expect("rewrite bundle yaml");
+
+    let report = greentic_bundle::build::build_workspace(&root, None, false).expect("build");
+    let opened = greentic_bundle_reader::open_build_dir(Path::new(&report.build_dir))
+        .expect("open build dir");
+    let surface = opened.runtime_surface();
+
+    assert_eq!(surface.bundle_id, "demo-bundle");
+    assert_eq!(surface.bundle_name, "Demo Bundle");
+    assert_eq!(surface.locale, "en");
+    assert_eq!(surface.requested_mode, "create");
+    assert_eq!(
+        opened
+            .manifest
+            .app_packs
+            .iter()
+            .map(String::as_str)
+            .collect::<Vec<_>>(),
+        vec!["pack-a", "pack-b"]
+    );
+    assert_eq!(
+        opened
+            .manifest
+            .extension_providers
+            .iter()
+            .map(String::as_str)
+            .collect::<Vec<_>>(),
+        vec!["provider-a", "provider-b"]
+    );
+    assert_eq!(
+        opened
+            .manifest
+            .catalogs
+            .iter()
+            .map(String::as_str)
+            .collect::<Vec<_>>(),
+        vec!["file://catalog-a.json", "file://catalog-b.json"]
+    );
+    assert_eq!(
+        surface.hooks,
+        vec!["hook-a".to_string(), "hook-b".to_string()]
+    );
+    assert_eq!(
+        surface.subscriptions,
+        vec!["subscription-a".to_string(), "subscription-b".to_string()]
+    );
+    assert_eq!(
+        surface.capabilities,
+        vec!["capability-a".to_string(), "capability-b".to_string()]
+    );
+}
+
+#[test]
+fn build_parses_nested_resolved_target_metadata() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    seed_workspace(&root);
+    fs::write(
+        root.join("resolved/default.yaml"),
+        "\
+version: 1
+tenant: default
+team: ops
+project_root: /tmp/demo
+bundle:
+  bundle_id: demo-bundle
+  bundle_name: Demo Bundle
+  locale: en
+  mode: create
+policy:
+  source:
+    tenant_gmap: tenants/default/tenant.gmap
+    team_gmap: tenants/default/teams/ops/team.gmap
+app_packs:
+  - reference: pack-a
+    policy: public
+  - reference: pack-b
+    policy: forbidden
+",
+    )
+    .expect("rewrite resolved");
+
+    let report = greentic_bundle::build::build_workspace(&root, None, false).expect("build");
+    let target = greentic_bundle_reader::open_build_dir(Path::new(&report.build_dir))
+        .expect("open build dir")
+        .runtime_surface()
+        .resolved_targets
+        .into_iter()
+        .next()
+        .expect("resolved target");
+
+    assert_eq!(target.tenant, "default");
+    assert_eq!(target.team.as_deref(), Some("ops"));
+    assert_eq!(target.default_policy, "forbidden");
+    assert_eq!(target.tenant_gmap, "tenants/default/tenant.gmap");
+    assert_eq!(
+        target.team_gmap.as_deref(),
+        Some("tenants/default/teams/ops/team.gmap")
+    );
+    assert_eq!(
+        target
+            .app_pack_policies
+            .iter()
+            .map(|policy| (policy.reference.as_str(), policy.policy.as_str()))
+            .collect::<Vec<_>>(),
+        vec![("pack-a", "public"), ("pack-b", "forbidden")]
+    );
+}
+
+#[test]
 fn reader_rejects_mismatched_setup_file_contract() {
     let temp = TempDir::new().expect("tempdir");
     let build_dir = temp.path().join("normalized");

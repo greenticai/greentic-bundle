@@ -54,6 +54,8 @@
   "cli.option.locale": "Locale gebruikt voor CLI- en wizardberichten",
   "cli.option.migrate": "Migratie van oudere AnswerDocument-schema-versies toestaan",
   "cli.option.offline": "Netwerkafhankelijke bewerkingen uitschakelen wanneer toekomstige opdrachten dit ondersteunen",
+  "cli.option.schema": "Druk het huidige answers.json-schema af en sluit af",
+  "cli.option.schema.long": "Druk het huidige answers.json-schema af en sluit af.\n\nAgentische codeertools zoals Codex en Claude moeten dit eerst aanroepen om het huidige antwoordschema op te halen, answers.json in te vullen en de wizard niet-interactief opnieuw af te spelen.",
   "cli.option.schema_version": "Doelschemaversie voor uitgegeven of gemigreerde antwoorden",
   "cli.remove.about": "Geschreven bundle-verwijzingen verwijderen",
   "cli.remove.app_pack.about": "Een app-pack-verwijzing verwijderen",
@@ -159,6 +161,7 @@
   "wizard.prompt.choose_extension_provider": "Kies extension-provider",
   "wizard.prompt.choose_scope": "Kies scope",
   "wizard.prompt.current_bundle_root": "Huidige bundle-directory of .gtbundle-pad",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
   "wizard.prompt.export_intent": "Exportintentie inschakelen? (y/N)",
   "wizard.prompt.extension_provider_reference": "Voer extension-provider-verwijzing of lokaal pad in",
   "wizard.prompt.extension_providers": "Extension-providers (komma-gescheiden)",
@@ -179,6 +182,7 @@
   "wizard.stage.access_rules": "== Toegangsregels ==",
   "wizard.stage.advanced_access_rules": "== Geavanceerde toegangsregels ==",
   "wizard.stage.app_packs": "== App-packs ==",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
   "wizard.stage.current_access_rules": "Huidige regels",
   "wizard.stage.current_app_packs": "Huidige app-packs",
   "wizard.stage.current_extension_providers": "Huidige extension-providers",
@@ -187,7 +191,5 @@
   "wizard.stage.pack_access": "== Pack-toegang ==",
   "wizard.stage.review": "== Samenvatting beoordelen ==",
   "wizard.validate.about": "Opnieuw afgespeelde bundle-antwoorden valideren",
-  "wizard.warning.advanced_without_refs": "Geavanceerde configuratie is ingeschakeld zonder app-packs of extension-providers.",
-  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
-  "wizard.stage.capabilities": "== Bundle capabilities =="
+  "wizard.warning.advanced_without_refs": "Geavanceerde configuratie is ingeschakeld zonder app-packs of extension-providers."
 }

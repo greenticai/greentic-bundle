@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "global": {
+    "line_coverage_min": 60.0
+  },
+  "defaults": {
+    "per_file_line_coverage_min": 60.0
+  },
+  "exclusions": {
+    "files": [
+      "build.rs",
+      "src/lib.rs",
+      "src/main.rs"
+    ]
+  },
+  "per_file": {
+    "src/access/eval.rs": {
+      "line_coverage_min": 85.0
+    },
+    "src/build/plan.rs": {
+      "line_coverage_min": 75.0
+    },
+    "src/catalog/resolve.rs": {
+      "line_coverage_min": 75.0
+    },
+    "crates/greentic-bundle-reader/src/lib.rs": {
+      "line_coverage_min": 70.0
+    }
+  }
+}

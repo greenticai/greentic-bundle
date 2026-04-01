@@ -54,6 +54,8 @@
   "cli.option.locale": "A CLI-hez és a varázslóüzenetekhez használt területi beállítás",
   "cli.option.migrate": "Régebbi AnswerDocument séma-verziók migrálásának engedélyezése",
   "cli.option.offline": "A hálózatfüggő műveletek letiltása, amikor a jövőbeli parancsok támogatják",
+  "cli.option.schema": "Kiírja az aktuális answers.json sémát, majd kilép",
+  "cli.option.schema.long": "Kiírja az aktuális answers.json sémát, majd kilép.\n\nAz olyan agentikus kódoló eszközöknek, mint a Codex és a Claude, ezt kell először meghívniuk, hogy lekérjék az aktuális válaszsémát, kitöltsék az answers.json fájlt, és nem interaktív módon újrajátsszák a varázslót.",
   "cli.option.schema_version": "A kiadott vagy migrált válaszok cél séma-verziója",
   "cli.remove.about": "Létrehozott bundle-hivatkozások eltávolítása",
   "cli.remove.app_pack.about": "App-pack hivatkozás eltávolítása",
@@ -159,6 +161,7 @@
   "wizard.prompt.choose_extension_provider": "Válassz extension providert",
   "wizard.prompt.choose_scope": "Válassz hatókört",
   "wizard.prompt.current_bundle_root": "Jelenlegi bundle könyvtár vagy .gtbundle útvonal",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
   "wizard.prompt.export_intent": "Exportálási szándék engedélyezése? (y/N)",
   "wizard.prompt.extension_provider_reference": "Add meg az extension provider hivatkozást vagy helyi útvonalat",
   "wizard.prompt.extension_providers": "Extension providerek (vesszővel elválasztva)",
@@ -179,6 +182,7 @@
   "wizard.stage.access_rules": "== Hozzáférési szabályok ==",
   "wizard.stage.advanced_access_rules": "== Speciális hozzáférési szabályok ==",
   "wizard.stage.app_packs": "== App packok ==",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
   "wizard.stage.current_access_rules": "Jelenlegi szabályok",
   "wizard.stage.current_app_packs": "Jelenlegi app packok",
   "wizard.stage.current_extension_providers": "Jelenlegi extension providerek",
@@ -187,7 +191,5 @@
   "wizard.stage.pack_access": "== Pack hozzáférés ==",
   "wizard.stage.review": "== Áttekintés ==",
   "wizard.validate.about": "Újrajátszott bundle-válaszok ellenőrzése",
-  "wizard.warning.advanced_without_refs": "A speciális beállítás engedélyezve lett app packok vagy extension providerek nélkül.",
-  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
-  "wizard.stage.capabilities": "== Bundle capabilities =="
+  "wizard.warning.advanced_without_refs": "A speciális beállítás engedélyezve lett app packok vagy extension providerek nélkül."
 }

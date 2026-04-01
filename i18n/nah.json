@@ -54,6 +54,8 @@
   "cli.option.locale": "Locale mochihua para CLI ihuan wizard messages",
   "cli.option.migrate": "Xikcahuili migrating older AnswerDocument schema versions",
   "cli.option.offline": "Xiktzacua network-dependent operations cuix future commands quiselisej",
+  "cli.option.schema": "Xikihkuilo in schema achto answers.json wan xikisā",
+  "cli.option.schema.long": "Xikihkuilo in schema achto answers.json wan xikisā.\n\nAgentic coding tools ken Codex wan Claude moneki kichiwaske inin achto para kikuitiske in schema tlen axkan answers.json, kimitemitiske answers.json, wan okseppa kiyolitiske in wizard ahmo non-interactively.",
   "cli.option.schema_version": "Target schema version para emitted noso migrated answers",
   "cli.remove.about": "Xikquixti authored bundle references",
   "cli.remove.app_pack.about": "Xikquixti se app-pack reference",
@@ -159,6 +161,7 @@
   "wizard.prompt.choose_extension_provider": "Xikpejpena extension provider",
   "wizard.prompt.choose_scope": "Xikpejpena scope",
   "wizard.prompt.current_bundle_root": "Axcān bundle directory noso .gtbundle path",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
   "wizard.prompt.export_intent": "Xikcahuili export intent? (y/N)",
   "wizard.prompt.extension_provider_reference": "Xiccalaquili extension provider reference noso local path",
   "wizard.prompt.extension_providers": "Extension providers (comma-separated)",
@@ -179,6 +182,7 @@
   "wizard.stage.access_rules": "== Access rules ==",
   "wizard.stage.advanced_access_rules": "== Advanced access rules ==",
   "wizard.stage.app_packs": "== App packs ==",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
   "wizard.stage.current_access_rules": "Axcān rules",
   "wizard.stage.current_app_packs": "Axcān app packs",
   "wizard.stage.current_extension_providers": "Axcān extension providers",
@@ -187,7 +191,5 @@
   "wizard.stage.pack_access": "== Pack access ==",
   "wizard.stage.review": "== Review summary ==",
   "wizard.validate.about": "Xikvalidate replayed bundle answers",
-  "wizard.warning.advanced_without_refs": "Advanced setup omocahuili without app packs noso extension providers.",
-  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
-  "wizard.stage.capabilities": "== Bundle capabilities =="
+  "wizard.warning.advanced_without_refs": "Advanced setup omocahuili without app packs noso extension providers."
 }

@@ -54,6 +54,8 @@
   "cli.option.locale": "CLI chaymanta wizard willakuykunapaq llamk'asqa locale",
   "cli.option.migrate": "Machu AnswerDocument schema versionkunata migrayta saqiy",
   "cli.option.offline": "Llika-mast'arisqa ruwaykunata wañuchiy imaymana qhipa kamachikuna yanapasqanpi",
+  "cli.option.schema": "Kunan answers.json schema nisqata qillqay hinaspa lluqsiy",
+  "cli.option.schema.long": "Kunan answers.json schema nisqata qillqay hinaspa lluqsiy.\n\nCodex hinallataq Claude hina agentic coding tools nisqakuna kayta ñawpaqta waqyayta tiyan kunan answer schema apamunankupaq, answers.json hunt'achinankupaq, hinaspa wizard nisqata mana rimanakuspa kutichinankupaq.",
   "cli.option.schema_version": "Lluqsichisqa utaq migrasqa kutichiykunapaq target schema version",
   "cli.remove.about": "qillqasqa bundle qhawachiykunata qulluy",
   "cli.remove.app_pack.about": "app-pack qhawachiyta qulluy",
@@ -159,6 +161,7 @@
   "wizard.prompt.choose_extension_provider": "Extension providerta akllay",
   "wizard.prompt.choose_scope": "Alcanceta akllay",
   "wizard.prompt.current_bundle_root": "Kunan bundle directorio utaq .gtbundle ñan",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
   "wizard.prompt.export_intent": "Export munayta saqichiychu? (y/N)",
   "wizard.prompt.extension_provider_reference": "Extension provider qhawachiyta utaq local ñanta qillqay",
   "wizard.prompt.extension_providers": "Extension providerkuna (comawan rakisqa)",
@@ -179,6 +182,7 @@
   "wizard.stage.access_rules": "== Yaykuy kamachikuna ==",
   "wizard.stage.advanced_access_rules": "== Ñawpaqman risaq yaykuy kamachikuna ==",
   "wizard.stage.app_packs": "== App packkuna ==",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
   "wizard.stage.current_access_rules": "Kunan kamachikuna",
   "wizard.stage.current_app_packs": "Kunan app packkuna",
   "wizard.stage.current_extension_providers": "Kunan extension providerkuna",
@@ -187,7 +191,5 @@
   "wizard.stage.pack_access": "== Pack yaykuy ==",
   "wizard.stage.review": "== Qhaway resumen ==",
   "wizard.validate.about": "Kutichisqa bundle answerkunata chiqaqchay",
-  "wizard.warning.advanced_without_refs": "Ñawpaqman risaq setupqa saqichisqa karqan mana app packkunayoq nitaq extension providerkunayoq.",
-  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
-  "wizard.stage.capabilities": "== Bundle capabilities =="
+  "wizard.warning.advanced_without_refs": "Ñawpaqman risaq setupqa saqichisqa karqan mana app packkunayoq nitaq extension providerkunayoq."
 }

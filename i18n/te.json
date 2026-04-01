@@ -54,6 +54,8 @@
   "cli.option.locale": "CLI మరియు wizard సందేశాలకు ఉపయోగించే locale",
   "cli.option.migrate": "పాత AnswerDocument schema సంస్కరణలను మార్చడానికి అనుమతించండి",
   "cli.option.offline": "భవిష్యత్తు కమాండ్లు మద్దతు ఇచ్చినప్పుడు నెట్‌వర్క్‌పై ఆధారపడే ఆపరేషన్‌లను నిలిపివేయండి",
+  "cli.option.schema": "ప్రస్తుత answers.json స్కీమాను ముద్రించి నిష్క్రమించండి",
+  "cli.option.schema.long": "ప్రస్తుత answers.json స్కీమాను ముద్రించి నిష్క్రమించండి.\n\nCodex మరియు Claude వంటి ఏజెంటిక్ కోడింగ్ సాధనాలు ప్రస్తుత సమాధాన స్కీమాను పొందడానికి, answers.json ను పూరించడానికి, మరియు విజార్డ్‌ను నాన్-ఇంటరాక్టివ్‌గా మళ్లీ నడపడానికి ముందుగా దీన్ని పిలవాలి.",
   "cli.option.schema_version": "ఉత్పత్తి చేయబడిన లేదా మార్చబడిన answers కోసం లక్ష్య schema సంస్కరణ",
   "cli.remove.about": "రచించిన bundle సూచనలను తొలగించండి",
   "cli.remove.app_pack.about": "ఒక app-pack సూచనను తొలగించండి",
@@ -159,6 +161,7 @@
   "wizard.prompt.choose_extension_provider": "extension provider ను ఎంచుకోండి",
   "wizard.prompt.choose_scope": "scope ను ఎంచుకోండి",
   "wizard.prompt.current_bundle_root": "ప్రస్తుత bundle డైరెక్టరీ లేదా .gtbundle మార్గం",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
   "wizard.prompt.export_intent": "export intent ను ప్రారంభించాలా? (y/N)",
   "wizard.prompt.extension_provider_reference": "extension provider సూచన లేదా స్థానిక మార్గాన్ని నమోదు చేయండి",
   "wizard.prompt.extension_providers": "Extension providers (comma-separated)",
@@ -179,6 +182,7 @@
   "wizard.stage.access_rules": "== యాక్సెస్ నియమాలు ==",
   "wizard.stage.advanced_access_rules": "== ఆధునిక యాక్సెస్ నియమాలు ==",
   "wizard.stage.app_packs": "== App packs ==",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
   "wizard.stage.current_access_rules": "ప్రస్తుత నియమాలు",
   "wizard.stage.current_app_packs": "ప్రస్తుత app packs",
   "wizard.stage.current_extension_providers": "ప్రస్తుత extension providers",
@@ -187,7 +191,5 @@
   "wizard.stage.pack_access": "== Pack access ==",
   "wizard.stage.review": "== సమీక్ష సారాంశం ==",
   "wizard.validate.about": "replay చేసిన bundle answers ను ధృవీకరించండి",
-  "wizard.warning.advanced_without_refs": "app packs లేదా extension providers లేకుండా advanced setup ప్రారంభించబడింది.",
-  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
-  "wizard.stage.capabilities": "== Bundle capabilities =="
+  "wizard.warning.advanced_without_refs": "app packs లేదా extension providers లేకుండా advanced setup ప్రారంభించబడింది."
 }

@@ -54,6 +54,8 @@
   "cli.option.locale": "Locale ທີ່ໃຊ້ສຳລັບຂໍ້ຄວາມ CLI ແລະ wizard",
   "cli.option.migrate": "ອະນຸຍາດໃຫ້ migrate ເວີຊັນ schema ເກົ່າຂອງ AnswerDocument",
   "cli.option.offline": "ປິດການດຳເນີນງານທີ່ພຶ່ງພາເຄືອຂ່າຍເມື່ອຄຳສັ່ງໃນອະນາຄົດຮອງຮັບ",
+  "cli.option.schema": "ພິມ schema ປັດຈຸບັນຂອງ answers.json ແລະອອກ",
+  "cli.option.schema.long": "ພິມ schema ປັດຈຸບັນຂອງ answers.json ແລະອອກ.\n\nເຄື່ອງມືຂຽນໂຄ້ດແບບ agentic ເຊັ່ນ Codex ແລະ Claude ຄວນເອີ້ນໃຊ້ອັນນີ້ກ່ອນ ເພື່ອດຶງ schema ຄໍາຕອບປັດຈຸບັນ, ຕື່ມ answers.json, ແລະຫຼິ້ນຊ້ຳ wizard ແບບບໍ່ໂຕ້ຕອບ.",
   "cli.option.schema_version": "ເວີຊັນ schema ເປົ້າໝາຍສຳລັບຄຳຕອບທີ່ຖືກສົ່ງອອກ ຫຼື migrate",
   "cli.remove.about": "ເອົາການອ້າງອີງ bundle ທີ່ສ້າງຂຶ້ນອອກ",
   "cli.remove.app_pack.about": "ເອົາການອ້າງອີງ app-pack ອອກ",
@@ -159,6 +161,7 @@
   "wizard.prompt.choose_extension_provider": "ເລືອກ extension provider",
   "wizard.prompt.choose_scope": "ເລືອກ scope",
   "wizard.prompt.current_bundle_root": "ໄດເລັກທໍຣີ bundle ປັດຈຸບັນ ຫຼືເສັ້ນທາງ .gtbundle",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
   "wizard.prompt.export_intent": "ເປີດໃຊ້ export intent ບໍ? (y/N)",
   "wizard.prompt.extension_provider_reference": "ປ້ອນ reference ຂອງ extension provider ຫຼື local path",
   "wizard.prompt.extension_providers": "Extension providers (ຄັ່ນດ້ວຍຈຸດຈຸດ)",
@@ -179,6 +182,7 @@
   "wizard.stage.access_rules": "== ກົດການເຂົ້າເຖິງ ==",
   "wizard.stage.advanced_access_rules": "== ກົດການເຂົ້າເຖິງຂັ້ນສູງ ==",
   "wizard.stage.app_packs": "== App packs ==",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
   "wizard.stage.current_access_rules": "ກົດປັດຈຸບັນ",
   "wizard.stage.current_app_packs": "App packs ປັດຈຸບັນ",
   "wizard.stage.current_extension_providers": "Extension providers ປັດຈຸບັນ",
@@ -187,7 +191,5 @@
   "wizard.stage.pack_access": "== ການເຂົ້າເຖິງ pack ==",
   "wizard.stage.review": "== ສະຫຼຸບການທົບທວນ ==",
   "wizard.validate.about": "ກວດສອບຄຳຕອບ bundle ທີ່ replay ແລ້ວ",
-  "wizard.warning.advanced_without_refs": "ເປີດໃຊ້ການຕັ້ງຄ່າຂັ້ນສູງໂດຍບໍ່ມີ app packs ຫຼື extension providers.",
-  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
-  "wizard.stage.capabilities": "== Bundle capabilities =="
+  "wizard.warning.advanced_without_refs": "ເປີດໃຊ້ການຕັ້ງຄ່າຂັ້ນສູງໂດຍບໍ່ມີ app packs ຫຼື extension providers."
 }

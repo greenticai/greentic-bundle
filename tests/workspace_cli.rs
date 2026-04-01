@@ -1,6 +1,7 @@
 use std::fs;
 
 use assert_cmd::Command;
+use greentic_bundle::catalog::registry::bundled_provider_registry_entries;
 use serde_json::Value;
 use tempfile::TempDir;
 
@@ -82,6 +83,51 @@ fn add_app_pack_execute_updates_bundle_yaml_and_lock() {
 }
 
 #[test]
+fn add_all_bundled_provider_registry_entries_execute_successfully() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    init_workspace(&root);
+
+    let entries = bundled_provider_registry_entries().expect("bundled provider registry");
+    assert!(
+        !entries.is_empty(),
+        "bundled provider registry should not be empty"
+    );
+
+    for entry in &entries {
+        cargo_bin()
+            .env("GREENTIC_BUNDLE_USE_BUNDLED_CATALOG", "1")
+            .args([
+                "add",
+                "extension-provider",
+                &entry.reference,
+                "--root",
+                root.to_str().expect("utf8 root"),
+                "--execute",
+            ])
+            .assert()
+            .success();
+    }
+
+    let bundle_yaml = fs::read_to_string(root.join("bundle.yaml")).expect("bundle yaml");
+    let lock = fs::read_to_string(root.join("bundle.lock.json")).expect("lock");
+    for entry in &entries {
+        assert!(
+            bundle_yaml.contains(&entry.reference),
+            "bundle.yaml is missing bundled provider {} ({})",
+            entry.id,
+            entry.reference
+        );
+        assert!(
+            lock.contains(&entry.reference),
+            "bundle.lock.json is missing bundled provider {} ({})",
+            entry.id,
+            entry.reference
+        );
+    }
+}
+
+#[test]
 fn remove_extension_provider_execute_updates_bundle_yaml_and_lock() {
     let temp = TempDir::new().expect("tempdir");
     let root = temp.path().join("bundle");
@@ -139,6 +185,104 @@ fn add_dry_run_does_not_write_workspace() {
 }
 
 #[test]
+fn add_duplicate_app_pack_reports_no_change() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    init_workspace(&root);
+
+    cargo_bin()
+        .args([
+            "add",
+            "app-pack",
+            "pack-a",
+            "--root",
+            root.to_str().expect("utf8 root"),
+            "--execute",
+        ])
+        .assert()
+        .success();
+
+    let output = cargo_bin()
+        .args([
+            "add",
+            "app-pack",
+            "pack-a",
+            "--root",
+            root.to_str().expect("utf8 root"),
+            "--dry-run",
+        ])
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+
+    let preview: Value = serde_json::from_slice(&output).expect("json");
+    assert_eq!(preview.get("changed").and_then(Value::as_bool), Some(false));
+    assert_eq!(
+        preview.pointer("/next_values/0").and_then(Value::as_str),
+        Some("pack-a")
+    );
+}
+
+#[test]
+fn remove_missing_extension_provider_reports_no_change() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    init_workspace(&root);
+
+    let output = cargo_bin()
+        .args([
+            "remove",
+            "extension-provider",
+            "provider-missing",
+            "--root",
+            root.to_str().expect("utf8 root"),
+            "--dry-run",
+        ])
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+
+    let preview: Value = serde_json::from_slice(&output).expect("json");
+    assert_eq!(preview.get("changed").and_then(Value::as_bool), Some(false));
+    assert_eq!(
+        preview.pointer("/field").and_then(Value::as_str),
+        Some("extension_providers")
+    );
+}
+
+#[test]
+fn init_preview_defaults_name_and_normalizes_bundle_id_from_path() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("My Demo_Bundle");
+
+    let output = cargo_bin()
+        .args(["init", root.to_str().expect("utf8 root")])
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+
+    let preview: Value = serde_json::from_slice(&output).expect("json");
+    assert_eq!(
+        preview.pointer("/bundle_name").and_then(Value::as_str),
+        Some("My Demo_Bundle")
+    );
+    assert_eq!(
+        preview.pointer("/bundle_id").and_then(Value::as_str),
+        Some("my-demo-bundle")
+    );
+    assert!(
+        !root.exists(),
+        "preview mode must not create workspace files"
+    );
+}
+
+#[test]
 fn inspect_accepts_positional_gtbundle_and_lists_contents() {
     let temp = TempDir::new().expect("tempdir");
     let root = temp.path().join("bundle");
@@ -169,6 +313,196 @@ fn inspect_accepts_positional_gtbundle_and_lists_contents() {
     assert!(stdout.contains("bundle.yaml"));
     assert!(stdout.contains("bundle-lock.json"));
     assert!(!stdout.contains("\"kind\""));
+}
+
+#[test]
+fn inspect_json_flag_keeps_structured_output_for_artifacts() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    init_workspace(&root);
+    let artifact = root.join("demo-bundle.gtbundle");
+
+    cargo_bin()
+        .args([
+            "build",
+            "--root",
+            root.to_str().expect("utf8 root"),
+            "--output",
+            artifact.to_str().expect("utf8 artifact"),
+        ])
+        .assert()
+        .success();
+
+    let output = cargo_bin()
+        .args([
+            "inspect",
+            artifact.to_str().expect("utf8 artifact"),
+            "--json",
+        ])
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+    let report: Value = serde_json::from_slice(&output).expect("json");
+
+    assert_eq!(report.get("kind").and_then(Value::as_str), Some("artifact"));
+    assert!(report.get("contents").and_then(Value::as_array).is_some());
+}
+
+#[test]
+fn doctor_artifact_flag_takes_precedence_over_root() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    let bogus_root = temp.path().join("missing-root");
+    init_workspace(&root);
+    let artifact = root.join("demo-bundle.gtbundle");
+
+    cargo_bin()
+        .args([
+            "build",
+            "--root",
+            root.to_str().expect("utf8 root"),
+            "--output",
+            artifact.to_str().expect("utf8 artifact"),
+        ])
+        .assert()
+        .success();
+
+    let output = cargo_bin()
+        .args([
+            "doctor",
+            "--root",
+            bogus_root.to_str().expect("utf8 bogus root"),
+            "--artifact",
+            artifact.to_str().expect("utf8 artifact"),
+        ])
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+    let report: Value = serde_json::from_slice(&output).expect("json");
+
+    assert_eq!(
+        report.get("target").and_then(Value::as_str),
+        Some(artifact.to_str().expect("utf8 artifact"))
+    );
+    assert_eq!(report.get("ok").and_then(Value::as_bool), Some(true));
+}
+
+#[test]
+fn doctor_without_artifact_checks_workspace_root() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    init_workspace(&root);
+
+    let output = cargo_bin()
+        .args(["doctor", "--root", root.to_str().expect("utf8 root")])
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+    let report: Value = serde_json::from_slice(&output).expect("json");
+
+    assert_eq!(
+        report.get("target").and_then(Value::as_str),
+        Some(root.to_str().expect("utf8 root"))
+    );
+    assert!(report.get("checks").and_then(Value::as_array).is_some());
+}
+
+#[test]
+fn build_dry_run_reports_artifact_path_without_writing_it() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    let artifact = root.join("dry-run.gtbundle");
+    init_workspace(&root);
+
+    let output = cargo_bin()
+        .args([
+            "build",
+            "--root",
+            root.to_str().expect("utf8 root"),
+            "--output",
+            artifact.to_str().expect("utf8 artifact"),
+            "--dry-run",
+        ])
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+    let report: Value = serde_json::from_slice(&output).expect("json");
+
+    assert_eq!(
+        report.get("artifact_path").and_then(Value::as_str),
+        Some(artifact.to_str().expect("utf8 artifact"))
+    );
+    assert!(!artifact.exists(), "dry-run build must not write artifact");
+}
+
+#[test]
+fn export_dry_run_reports_output_without_writing_artifact() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    let artifact = root.join("exported.gtbundle");
+    init_workspace(&root);
+
+    cargo_bin()
+        .args(["build", "--root", root.to_str().expect("utf8 root")])
+        .assert()
+        .success();
+
+    let build_dir = root.join("state/build/demo-bundle/normalized");
+    let output = cargo_bin()
+        .args([
+            "export",
+            "--build-dir",
+            build_dir.to_str().expect("utf8 build dir"),
+            "--output",
+            artifact.to_str().expect("utf8 artifact"),
+            "--dry-run",
+        ])
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+    let report: Value = serde_json::from_slice(&output).expect("json");
+
+    assert_eq!(
+        report.get("artifact_path").and_then(Value::as_str),
+        Some(artifact.to_str().expect("utf8 artifact"))
+    );
+    assert!(!artifact.exists(), "dry-run export must not write artifact");
+}
+
+#[test]
+fn inspect_directory_target_reports_workspace_kind() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    init_workspace(&root);
+
+    let output = cargo_bin()
+        .arg("inspect")
+        .arg(root.to_str().expect("utf8 root"))
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+    let report: Value = serde_json::from_slice(&output).expect("json");
+
+    assert_eq!(
+        report.get("kind").and_then(Value::as_str),
+        Some("workspace")
+    );
+    assert_eq!(
+        report.get("target").and_then(Value::as_str),
+        Some(root.to_str().expect("utf8 root"))
+    );
 }
 
 #[test]

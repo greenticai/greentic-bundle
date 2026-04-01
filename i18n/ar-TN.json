@@ -54,6 +54,8 @@
   "cli.option.locale": "اللغة المستعملة لرسائل CLI والمعالج",
   "cli.option.migrate": "اسمح بترحيل إصدارات schema الأقدم لـ AnswerDocument",
   "cli.option.offline": "عطّل العمليات المعتمدة على الشبكة وقت تدعمها الأوامر المستقبلية",
+  "cli.option.schema": "اطبع مخطط answers.json الحالي ثم اخرج",
+  "cli.option.schema.long": "اطبع مخطط answers.json الحالي ثم اخرج.\n\nيجب على أدوات البرمجة الوكيلة مثل Codex وClaude استدعاء هذا أولاً لجلب مخطط الإجابات الحالي، ثم ملء answers.json، وإعادة تشغيل المعالج بشكل غير تفاعلي.",
   "cli.option.schema_version": "إصدار schema المستهدف للإجابات المُخرجة أو المُرحّلة",
   "cli.remove.about": "احذف مراجع حزمة مؤلَّفة",
   "cli.remove.app_pack.about": "احذف مرجع app-pack",
@@ -159,6 +161,7 @@
   "wizard.prompt.choose_extension_provider": "اختر extension provider",
   "wizard.prompt.choose_scope": "اختر النطاق",
   "wizard.prompt.current_bundle_root": "دليل الحزمة الحالي أو مسار .gtbundle",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
   "wizard.prompt.export_intent": "تفعيل نية التصدير؟ (y/N)",
   "wizard.prompt.extension_provider_reference": "أدخل مرجع extension provider أو مسارًا محليًا",
   "wizard.prompt.extension_providers": "Extension providers (مفصولة بفواصل)",
@@ -179,6 +182,7 @@
   "wizard.stage.access_rules": "== قواعد الوصول ==",
   "wizard.stage.advanced_access_rules": "== قواعد الوصول المتقدّمة ==",
   "wizard.stage.app_packs": "== App packs ==",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
   "wizard.stage.current_access_rules": "القواعد الحالية",
   "wizard.stage.current_app_packs": "App packs الحالية",
   "wizard.stage.current_extension_providers": "Extension providers الحالية",
@@ -187,7 +191,5 @@
   "wizard.stage.pack_access": "== وصول الحزمة ==",
   "wizard.stage.review": "== ملخّص المراجعة ==",
   "wizard.validate.about": "تحقّق من إجابات الحزمة المعاد تشغيلها",
-  "wizard.warning.advanced_without_refs": "تمّ تفعيل الإعداد المتقدّم دون app packs أو extension providers.",
-  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
-  "wizard.stage.capabilities": "== Bundle capabilities =="
+  "wizard.warning.advanced_without_refs": "تمّ تفعيل الإعداد المتقدّم دون app packs أو extension providers."
 }

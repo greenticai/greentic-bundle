@@ -54,6 +54,8 @@
   "cli.option.locale": "Locale na ginagamit para sa CLI at mga mensahe ng wizard",
   "cli.option.migrate": "Payagan ang pag-migrate ng mas lumang bersyon ng schema ng AnswerDocument",
   "cli.option.offline": "Huwag paganahin ang mga operasyong nakadepende sa network kapag sinuportahan ito ng mga susunod na command",
+  "cli.option.schema": "I-print ang kasalukuyang schema ng answers.json at lumabas",
+  "cli.option.schema.long": "I-print ang kasalukuyang schema ng answers.json at lumabas.\n\nAng mga agentic coding tool tulad ng Codex at Claude ay dapat tawagin muna ito upang kunin ang kasalukuyang schema ng sagot, punan ang answers.json, at ulitin ang wizard nang hindi interaktibo.",
   "cli.option.schema_version": "Target na bersyon ng schema para sa inilabas o inilipat na mga sagot",
   "cli.remove.about": "Alisin ang mga authored na bundle reference",
   "cli.remove.app_pack.about": "Alisin ang sanggunian ng app-pack",
@@ -159,6 +161,7 @@
   "wizard.prompt.choose_extension_provider": "Pumili ng extension provider",
   "wizard.prompt.choose_scope": "Pumili ng scope",
   "wizard.prompt.current_bundle_root": "Kasalukuyang directory ng bundle o path ng .gtbundle",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
   "wizard.prompt.export_intent": "Paganahin ang export intent? (y/N)",
   "wizard.prompt.extension_provider_reference": "Ilagay ang extension provider reference o lokal na path",
   "wizard.prompt.extension_providers": "Mga extension provider (pinaghiwalay ng kuwit)",
@@ -179,6 +182,7 @@
   "wizard.stage.access_rules": "== Mga access rule ==",
   "wizard.stage.advanced_access_rules": "== Mga advanced na access rule ==",
   "wizard.stage.app_packs": "== Mga app pack ==",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
   "wizard.stage.current_access_rules": "Kasalukuyang mga rule",
   "wizard.stage.current_app_packs": "Kasalukuyang mga app pack",
   "wizard.stage.current_extension_providers": "Kasalukuyang mga extension provider",
@@ -187,7 +191,5 @@
   "wizard.stage.pack_access": "== Access ng pack ==",
   "wizard.stage.review": "== Buod ng pagsusuri ==",
   "wizard.validate.about": "I-validate ang mga ni-replay na sagot ng bundle",
-  "wizard.warning.advanced_without_refs": "Pinagana ang advanced setup nang walang mga app pack o extension provider.",
-  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
-  "wizard.stage.capabilities": "== Bundle capabilities =="
+  "wizard.warning.advanced_without_refs": "Pinagana ang advanced setup nang walang mga app pack o extension provider."
 }

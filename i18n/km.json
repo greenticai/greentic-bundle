@@ -54,6 +54,8 @@
   "cli.option.locale": "Locale ដែលប្រើសម្រាប់សារ CLI និង wizard",
   "cli.option.migrate": "អនុញ្ញាតឱ្យផ្លាស់ប្តូរកំណែ schema ចាស់របស់ AnswerDocument",
   "cli.option.offline": "បិទប្រតិបត្តិការដែលពឹងផ្អែកលើបណ្តាញ នៅពេលពាក្យបញ្ជានាពេលអនាគតគាំទ្រវា",
+  "cli.option.schema": "បោះពុម្ព schema បច្ចុប្បន្នរបស់ answers.json ហើយចាកចេញ",
+  "cli.option.schema.long": "បោះពុម្ព schema បច្ចុប្បន្នរបស់ answers.json ហើយចាកចេញ។\n\nឧបករណ៍សរសេរកូដបែប agentic ដូចជា Codex និង Claude គួរតែហៅវាជាមុនសិន ដើម្បីទាញយក schema ចម្លើយបច្ចុប្បន្ន បំពេញ answers.json ហើយដំណើរការ wizard ឡើងវិញដោយមិនមានអន្តរកម្ម។",
   "cli.option.schema_version": "កំណែ schema គោលដៅសម្រាប់ answers ដែលបញ្ចេញ ឬបាន migrate",
   "cli.remove.about": "ដកសេចក្តីយោង bundle ដែលបាននិពន្ធ",
   "cli.remove.app_pack.about": "ដកសេចក្តីយោង app-pack",
@@ -159,6 +161,7 @@
   "wizard.prompt.choose_extension_provider": "ជ្រើសរើស extension provider",
   "wizard.prompt.choose_scope": "ជ្រើសរើស scope",
   "wizard.prompt.current_bundle_root": "ថត bundle បច្ចុប្បន្ន ឬ path .gtbundle",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
   "wizard.prompt.export_intent": "បើក export intent? (y/N)",
   "wizard.prompt.extension_provider_reference": "បញ្ចូលសេចក្តីយោង extension provider ឬ path មូលដ្ឋាន",
   "wizard.prompt.extension_providers": "Extension providers (បំបែកដោយសញ្ញាក្បៀស)",
@@ -179,6 +182,7 @@
   "wizard.stage.access_rules": "== ច្បាប់សិទ្ធិចូលប្រើ ==",
   "wizard.stage.advanced_access_rules": "== ច្បាប់សិទ្ធិចូលប្រើកម្រិតខ្ពស់ ==",
   "wizard.stage.app_packs": "== App packs ==",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
   "wizard.stage.current_access_rules": "ច្បាប់បច្ចុប្បន្ន",
   "wizard.stage.current_app_packs": "App packs បច្ចុប្បន្ន",
   "wizard.stage.current_extension_providers": "Extension providers បច្ចុប្បន្ន",
@@ -187,7 +191,5 @@
   "wizard.stage.pack_access": "== សិទ្ធិចូលប្រើ pack ==",
   "wizard.stage.review": "== សេចក្តីសង្ខេបការពិនិត្យឡើងវិញ ==",
   "wizard.validate.about": "ផ្ទៀងផ្ទាត់ answers bundle ដែលបានចាក់ឡើងវិញ",
-  "wizard.warning.advanced_without_refs": "ការរៀបចំកម្រិតខ្ពស់ត្រូវបានបើក ដោយគ្មាន app packs ឬ extension providers។",
-  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
-  "wizard.stage.capabilities": "== Bundle capabilities =="
+  "wizard.warning.advanced_without_refs": "ការរៀបចំកម្រិតខ្ពស់ត្រូវបានបើក ដោយគ្មាន app packs ឬ extension providers។"
 }

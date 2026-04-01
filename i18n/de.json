@@ -54,6 +54,8 @@
   "cli.option.locale": "Für CLI- und Wizard-Nachrichten verwendete Locale",
   "cli.option.migrate": "Migration älterer AnswerDocument-Schemaversionen erlauben",
   "cli.option.offline": "Netzwerkabhängige Operationen deaktivieren, wenn zukünftige Befehle dies unterstützen",
+  "cli.option.schema": "Das aktuelle answers.json-Schema ausgeben und beenden",
+  "cli.option.schema.long": "Das aktuelle answers.json-Schema ausgeben und beenden.\n\nAgentische Coding-Tools wie Codex und Claude sollten dies zuerst aufrufen, um das aktuelle Antwortschema abzurufen, answers.json auszufüllen und den Assistenten nicht interaktiv erneut abzuspielen.",
   "cli.option.schema_version": "Ziel-Schemaversion für ausgegebene oder migrierte Antworten",
   "cli.remove.about": "Erstellte Bundle-Referenzen entfernen",
   "cli.remove.app_pack.about": "Eine app-pack-Referenz entfernen",
@@ -159,6 +161,7 @@
   "wizard.prompt.choose_extension_provider": "Extension-Provider auswählen",
   "wizard.prompt.choose_scope": "Bereich auswählen",
   "wizard.prompt.current_bundle_root": "Aktuelles Bundle-Verzeichnis oder .gtbundle-Pfad",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
   "wizard.prompt.export_intent": "Exportabsicht aktivieren? (j/N)",
   "wizard.prompt.extension_provider_reference": "Extension-Provider-Referenz oder lokalen Pfad eingeben",
   "wizard.prompt.extension_providers": "Extension-Provider (kommagetrennt)",
@@ -179,6 +182,7 @@
   "wizard.stage.access_rules": "== Zugriffsregeln ==",
   "wizard.stage.advanced_access_rules": "== Erweiterte Zugriffsregeln ==",
   "wizard.stage.app_packs": "== App-Packs ==",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
   "wizard.stage.current_access_rules": "Aktuelle Regeln",
   "wizard.stage.current_app_packs": "Aktuelle App-Packs",
   "wizard.stage.current_extension_providers": "Aktuelle Extension-Provider",
@@ -187,7 +191,5 @@
   "wizard.stage.pack_access": "== Pack-Zugriff ==",
   "wizard.stage.review": "== Prüfzusammenfassung ==",
   "wizard.validate.about": "Wiedergegebene Bundle-Antworten validieren",
-  "wizard.warning.advanced_without_refs": "Die erweiterte Einrichtung wurde ohne App-Packs oder Extension-Provider aktiviert.",
-  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
-  "wizard.stage.capabilities": "== Bundle capabilities =="
+  "wizard.warning.advanced_without_refs": "Die erweiterte Einrichtung wurde ohne App-Packs oder Extension-Provider aktiviert."
 }

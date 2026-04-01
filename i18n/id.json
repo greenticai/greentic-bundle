@@ -54,6 +54,8 @@
   "cli.option.locale": "Locale yang digunakan untuk pesan CLI dan wizard",
   "cli.option.migrate": "Izinkan migrasi versi skema AnswerDocument yang lebih lama",
   "cli.option.offline": "Nonaktifkan operasi yang bergantung pada jaringan saat perintah mendatang mendukungnya",
+  "cli.option.schema": "Cetak skema answers.json saat ini lalu keluar",
+  "cli.option.schema.long": "Cetak skema answers.json saat ini lalu keluar.\n\nAlat pengodean agentik seperti Codex dan Claude harus memanggil ini terlebih dahulu untuk mengambil skema jawaban saat ini, mengisi answers.json, dan memutar ulang wizard secara non-interaktif.",
   "cli.option.schema_version": "Versi skema target untuk jawaban yang dihasilkan atau dimigrasikan",
   "cli.remove.about": "Hapus referensi bundle yang dibuat",
   "cli.remove.app_pack.about": "Hapus referensi app-pack",
@@ -159,6 +161,7 @@
   "wizard.prompt.choose_extension_provider": "Pilih extension provider",
   "wizard.prompt.choose_scope": "Pilih cakupan",
   "wizard.prompt.current_bundle_root": "Direktori bundle saat ini atau path .gtbundle",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
   "wizard.prompt.export_intent": "Aktifkan niat ekspor? (y/N)",
   "wizard.prompt.extension_provider_reference": "Masukkan referensi extension provider atau path lokal",
   "wizard.prompt.extension_providers": "Extension provider (dipisahkan koma)",
@@ -179,6 +182,7 @@
   "wizard.stage.access_rules": "== Aturan akses ==",
   "wizard.stage.advanced_access_rules": "== Aturan akses lanjutan ==",
   "wizard.stage.app_packs": "== App pack ==",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
   "wizard.stage.current_access_rules": "Aturan saat ini",
   "wizard.stage.current_app_packs": "App pack saat ini",
   "wizard.stage.current_extension_providers": "Extension provider saat ini",
@@ -187,7 +191,5 @@
   "wizard.stage.pack_access": "== Akses pack ==",
   "wizard.stage.review": "== Ringkasan tinjauan ==",
   "wizard.validate.about": "Validasi jawaban bundle yang diputar ulang",
-  "wizard.warning.advanced_without_refs": "Penyiapan lanjutan diaktifkan tanpa app pack atau extension provider.",
-  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
-  "wizard.stage.capabilities": "== Bundle capabilities =="
+  "wizard.warning.advanced_without_refs": "Penyiapan lanjutan diaktifkan tanpa app pack atau extension provider."
 }

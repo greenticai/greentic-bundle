@@ -54,6 +54,8 @@
   "cli.option.locale": "Локаль, используемая для CLI и сообщений мастера",
   "cli.option.migrate": "Разрешить миграцию старых версий схемы AnswerDocument",
   "cli.option.offline": "Отключить операции, зависящие от сети, когда будущие команды будут это поддерживать",
+  "cli.option.schema": "Вывести текущую схему answers.json и выйти",
+  "cli.option.schema.long": "Вывести текущую схему answers.json и выйти.\n\nАгентные инструменты для программирования, такие как Codex и Claude, должны сначала вызвать это, чтобы получить текущую схему ответов, заполнить answers.json и повторно воспроизвести мастер в неинтерактивном режиме.",
   "cli.option.schema_version": "Целевая версия схемы для выводимых или мигрируемых ответов",
   "cli.remove.about": "Удалить ссылки на созданные bundle",
   "cli.remove.app_pack.about": "Удалить ссылку на app-pack",
@@ -159,6 +161,7 @@
   "wizard.prompt.choose_extension_provider": "Выберите extension provider",
   "wizard.prompt.choose_scope": "Выберите область",
   "wizard.prompt.current_bundle_root": "Текущий каталог bundle или путь к .gtbundle",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
   "wizard.prompt.export_intent": "Включить намерение экспорта? (y/N)",
   "wizard.prompt.extension_provider_reference": "Введите ссылку на extension provider или локальный путь",
   "wizard.prompt.extension_providers": "Extension providers (через запятую)",
@@ -179,6 +182,7 @@
   "wizard.stage.access_rules": "== Правила доступа ==",
   "wizard.stage.advanced_access_rules": "== Расширенные правила доступа ==",
   "wizard.stage.app_packs": "== App packs ==",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
   "wizard.stage.current_access_rules": "Текущие правила",
   "wizard.stage.current_app_packs": "Текущие app packs",
   "wizard.stage.current_extension_providers": "Текущие extension providers",
@@ -187,7 +191,5 @@
   "wizard.stage.pack_access": "== Доступ pack ==",
   "wizard.stage.review": "== Сводка проверки ==",
   "wizard.validate.about": "Проверить повторно воспроизведенные ответы bundle",
-  "wizard.warning.advanced_without_refs": "Расширенная настройка была включена без app packs или extension providers.",
-  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
-  "wizard.stage.capabilities": "== Bundle capabilities =="
+  "wizard.warning.advanced_without_refs": "Расширенная настройка была включена без app packs или extension providers."
 }

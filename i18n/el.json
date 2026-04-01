@@ -54,6 +54,8 @@
   "cli.option.locale": "Τοπική ρύθμιση που χρησιμοποιείται για μηνύματα CLI και wizard",
   "cli.option.migrate": "Να επιτρέπεται η μετεγκατάσταση παλαιότερων εκδόσεων σχήματος AnswerDocument",
   "cli.option.offline": "Απενεργοποίηση λειτουργιών που εξαρτώνται από δίκτυο όταν οι μελλοντικές εντολές το υποστηρίζουν",
+  "cli.option.schema": "Εκτύπωση του τρέχοντος σχήματος answers.json και έξοδος",
+  "cli.option.schema.long": "Εκτύπωση του τρέχοντος σχήματος answers.json και έξοδος.\n\nΕργαλεία agentic προγραμματισμού όπως τα Codex και Claude θα πρέπει να καλέσουν πρώτα αυτό για να ανακτήσουν το τρέχον σχήμα απαντήσεων, να συμπληρώσουν το answers.json και να επαναλάβουν τον οδηγό χωρίς αλληλεπίδραση.",
   "cli.option.schema_version": "Έκδοση σχήματος στόχος για παραγόμενες ή μετεγκατεστημένες απαντήσεις",
   "cli.remove.about": "Αφαίρεση αναφορών authored bundle",
   "cli.remove.app_pack.about": "Αφαίρεση αναφοράς app-pack",
@@ -159,6 +161,7 @@
   "wizard.prompt.choose_extension_provider": "Επιλέξτε extension provider",
   "wizard.prompt.choose_scope": "Επιλέξτε scope",
   "wizard.prompt.current_bundle_root": "Τρέχων κατάλογος bundle ή διαδρομή .gtbundle",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
   "wizard.prompt.export_intent": "Ενεργοποίηση πρόθεσης export; (y/N)",
   "wizard.prompt.extension_provider_reference": "Εισαγάγετε αναφορά extension provider ή τοπική διαδρομή",
   "wizard.prompt.extension_providers": "Extension providers (διαχωρισμένοι με κόμμα)",
@@ -179,6 +182,7 @@
   "wizard.stage.access_rules": "== Κανόνες πρόσβασης ==",
   "wizard.stage.advanced_access_rules": "== Προχωρημένοι κανόνες πρόσβασης ==",
   "wizard.stage.app_packs": "== App packs ==",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
   "wizard.stage.current_access_rules": "Τρέχοντες κανόνες",
   "wizard.stage.current_app_packs": "Τρέχοντα app packs",
   "wizard.stage.current_extension_providers": "Τρέχοντες extension providers",
@@ -187,7 +191,5 @@
   "wizard.stage.pack_access": "== Πρόσβαση pack ==",
   "wizard.stage.review": "== Σύνοψη ελέγχου ==",
   "wizard.validate.about": "Επικύρωση επαναληφθεισών απαντήσεων bundle",
-  "wizard.warning.advanced_without_refs": "Η προχωρημένη ρύθμιση ενεργοποιήθηκε χωρίς app packs ή extension providers.",
-  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
-  "wizard.stage.capabilities": "== Bundle capabilities =="
+  "wizard.warning.advanced_without_refs": "Η προχωρημένη ρύθμιση ενεργοποιήθηκε χωρίς app packs ή extension providers."
 }

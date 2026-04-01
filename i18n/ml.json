@@ -54,6 +54,8 @@
   "cli.option.locale": "CLI-യ്ക്കും wizard സന്ദേശങ്ങൾക്കുമുപയോഗിക്കുന്ന locale",
   "cli.option.migrate": "പഴയ AnswerDocument schema പതിപ്പുകൾ migrate ചെയ്യാൻ അനുവദിക്കുക",
   "cli.option.offline": "ഭാവിയിലെ കമാൻഡുകൾ പിന്തുണയ്ക്കുമ്പോൾ നെറ്റ്‌വർക്ക് ആശ്രിത പ്രവർത്തനങ്ങൾ പ്രവർത്തനരഹിതമാക്കുക",
+  "cli.option.schema": "നിലവിലെ answers.json സ്കീമ അച്ചടിച്ച് പുറത്തുകടക്കുക",
+  "cli.option.schema.long": "നിലവിലെ answers.json സ്കീമ അച്ചടിച്ച് പുറത്തുകടക്കുക.\n\nCodex, Claude പോലുള്ള ഏജന്റിക് കോഡിംഗ് ഉപകരണങ്ങൾ നിലവിലെ answer schema ലഭ്യമാക്കാൻ ഇത് ആദ്യം വിളിക്കണം, answers.json പൂരിപ്പിക്കണം, കൂടാതെ വിസാർഡ് non-interactively ആയി വീണ്ടും പ്രവർത്തിപ്പിക്കണം.",
   "cli.option.schema_version": "പുറത്തുവിടുന്ന അല്ലെങ്കിൽ migrate ചെയ്യുന്ന ഉത്തരങ്ങൾക്കുള്ള ലക്ഷ്യ schema പതിപ്പ്",
   "cli.remove.about": "രചിച്ച bundle റഫറൻസുകൾ നീക്കുക",
   "cli.remove.app_pack.about": "ഒരു app-pack റഫറൻസ് നീക്കുക",
@@ -159,6 +161,7 @@
   "wizard.prompt.choose_extension_provider": "extension provider തിരഞ്ഞെടുക്കുക",
   "wizard.prompt.choose_scope": "scope തിരഞ്ഞെടുക്കുക",
   "wizard.prompt.current_bundle_root": "നിലവിലെ bundle ഡയറക്ടറി അല്ലെങ്കിൽ .gtbundle പാത",
+  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
   "wizard.prompt.export_intent": "export intent പ്രവർത്തനക്ഷമമാക്കണോ? (y/N)",
   "wizard.prompt.extension_provider_reference": "extension provider reference അല്ലെങ്കിൽ local path നൽകുക",
   "wizard.prompt.extension_providers": "Extension providers (comma-separated)",
@@ -179,6 +182,7 @@
   "wizard.stage.access_rules": "== Access rules ==",
   "wizard.stage.advanced_access_rules": "== Advanced access rules ==",
   "wizard.stage.app_packs": "== App packs ==",
+  "wizard.stage.capabilities": "== Bundle capabilities ==",
   "wizard.stage.current_access_rules": "നിലവിലെ നിയമങ്ങൾ",
   "wizard.stage.current_app_packs": "നിലവിലെ app packs",
   "wizard.stage.current_extension_providers": "നിലവിലെ extension providers",
@@ -187,7 +191,5 @@
   "wizard.stage.pack_access": "== Pack access ==",
   "wizard.stage.review": "== Review summary ==",
   "wizard.validate.about": "replay ചെയ്ത bundle ഉത്തരങ്ങൾ സാധൂകരിക്കുക",
-  "wizard.warning.advanced_without_refs": "app packs അല്ലെങ്കിൽ extension providers ഇല്ലാതെ Advanced setup പ്രവർത്തനക്ഷമമാക്കി.",
-  "wizard.prompt.enable_bundle_assets": "Enable bundle-level assets (./assets/)? (y/N)",
-  "wizard.stage.capabilities": "== Bundle capabilities =="
+  "wizard.warning.advanced_without_refs": "app packs അല്ലെങ്കിൽ extension providers ഇല്ലാതെ Advanced setup പ്രവർത്തനക്ഷമമാക്കി."
 }

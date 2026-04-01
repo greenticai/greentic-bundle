@@ -166,6 +166,25 @@ fn upsert_policy_preserves_comments_and_blank_lines() {
     );
 }
 
+#[test]
+fn upsert_policy_rewrites_existing_rule_without_duplication() {
+    let temp = TempDir::new().expect("tempdir");
+    let path = temp.path().join("tenant.gmap");
+    fs::write(&path, "_ = forbidden\npack-a/main = forbidden\n").expect("seed gmap");
+
+    greentic_bundle::access::upsert_policy(
+        &path,
+        "pack-a/main",
+        greentic_bundle::access::Policy::Public,
+    )
+    .expect("upsert");
+
+    assert_eq!(
+        fs::read_to_string(&path).expect("read gmap"),
+        "_ = forbidden\npack-a/main = public\n"
+    );
+}
+
 fn assert_resolved_manifest(
     path: &Path,
     tenant: &str,
