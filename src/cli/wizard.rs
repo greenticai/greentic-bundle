@@ -12,7 +12,7 @@ pub struct WizardArgs {
         help = "cli.option.schema",
         long_help = "cli.option.schema.long"
     )]
-    pub(crate) schema: bool,
+    pub schema: bool,
     #[command(subcommand)]
     pub command: Option<WizardCommand>,
 }
