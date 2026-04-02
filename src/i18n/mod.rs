@@ -25,13 +25,8 @@ pub fn tr(key: &str) -> String {
 
 pub fn tr_for(locale: &str, key: &str) -> String {
     let catalogs = catalogs();
-    for candidate in locale_chain(locale) {
-        if let Some(message) = catalogs
-            .get(&candidate)
-            .and_then(|catalog| catalog.get(key))
-        {
-            return message.clone();
-        }
+    if let Some(message) = translated_message(catalogs, locale, key) {
+        return message.to_string();
     }
     key.to_string()
 }
@@ -41,11 +36,11 @@ pub fn trf(key: &str, args: &[(&str, &str)]) -> String {
 }
 
 pub fn trf_for(locale: &str, key: &str, args: &[(&str, &str)]) -> String {
-    let mut rendered = tr_for(locale, key);
-    for (name, value) in args {
-        rendered = rendered.replace(&format!("{{{name}}}"), value);
+    let rendered = tr_for(locale, key);
+    if args.is_empty() {
+        return rendered;
     }
-    rendered
+    render_template(&rendered, args)
 }
 
 pub fn current_locale() -> String {
@@ -185,6 +180,66 @@ pub fn load_catalog(locale: &str) -> Result<BTreeMap<String, String>> {
         "{}",
         trf("errors.i18n.missing_locale", &[("locale", locale)])
     ))
+}
+
+fn translated_message<'a>(
+    catalogs: &'a BTreeMap<String, BTreeMap<String, String>>,
+    locale: &str,
+    key: &str,
+) -> Option<&'a str> {
+    let normalized = normalize_locale(locale)?;
+    if let Some(message) = catalogs
+        .get(&normalized)
+        .and_then(|catalog| catalog.get(key))
+        .map(String::as_str)
+    {
+        return Some(message);
+    }
+
+    let base = base_language(&normalized);
+    if let Some(base) = base.as_deref()
+        && base != normalized
+        && let Some(message) = catalogs
+            .get(base)
+            .and_then(|catalog| catalog.get(key))
+            .map(String::as_str)
+    {
+        return Some(message);
+    }
+
+    if normalized != "en" && base.as_deref() != Some("en") {
+        return catalogs
+            .get("en")
+            .and_then(|catalog| catalog.get(key))
+            .map(String::as_str);
+    }
+
+    None
+}
+
+fn render_template(template: &str, args: &[(&str, &str)]) -> String {
+    let mut out = String::with_capacity(template.len());
+    let mut rest = template;
+
+    while let Some(start) = rest.find('{') {
+        out.push_str(&rest[..start]);
+        let Some(end_offset) = rest[start + 1..].find('}') else {
+            out.push_str(&rest[start..]);
+            return out;
+        };
+
+        let end = start + 1 + end_offset;
+        let key = &rest[start + 1..end];
+        if let Some((_, value)) = args.iter().find(|(name, _)| *name == key) {
+            out.push_str(value);
+        } else {
+            out.push_str(&rest[start..=end]);
+        }
+        rest = &rest[end + 1..];
+    }
+
+    out.push_str(rest);
+    out
 }
 
 #[cfg(test)]

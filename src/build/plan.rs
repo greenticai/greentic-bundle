@@ -228,43 +228,25 @@ fn parse_resolved_target(path: &str, raw: &str) -> Option<ResolvedTargetSummary>
         default_policy,
         tenant_gmap,
         team_gmap,
-        app_pack_policies: parse_reference_policies(raw),
+        app_pack_policies: parse_reference_policies(&doc),
     })
 }
 
-fn parse_reference_policies(raw: &str) -> Vec<ResolvedReferencePolicy> {
-    let mut lines = raw.lines().peekable();
-    while let Some(line) = lines.next() {
-        let Some((left, _)) = line.split_once(':') else {
-            continue;
-        };
-        if left.trim() != "app_packs" {
-            continue;
-        }
+fn parse_reference_policies(doc: &Value) -> Vec<ResolvedReferencePolicy> {
+    let Some(Value::Sequence(items)) = doc.get("app_packs") else {
+        return Vec::new();
+    };
 
-        let mut entries = Vec::new();
-        while let Some(next) = lines.peek().copied() {
-            let trimmed = next.trim();
-            if trimmed == "[]" {
-                lines.next();
-                break;
-            }
-            let Some(reference) = trimmed.strip_prefix("- reference:") else {
-                break;
-            };
-            let reference = reference.trim().to_string();
-            lines.next();
-
-            let mut policy = "unset".to_string();
-            if let Some(policy_line) = lines.peek().copied()
-                && let Some(value) = policy_line.trim().strip_prefix("policy:")
-            {
-                policy = value.trim().to_string();
-                lines.next();
-            }
-            entries.push(ResolvedReferencePolicy { reference, policy });
-        }
-        return entries;
-    }
-    Vec::new()
+    items
+        .iter()
+        .filter_map(|item| {
+            let reference = item.get("reference")?.as_str()?.to_string();
+            let policy = item
+                .get("policy")
+                .and_then(Value::as_str)
+                .unwrap_or("unset")
+                .to_string();
+            Some(ResolvedReferencePolicy { reference, policy })
+        })
+        .collect()
 }

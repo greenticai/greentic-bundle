@@ -28,6 +28,27 @@ pub struct CatalogSummary {
     pub item_ids: Vec<String>,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ParsedCatalog {
+    pub entries: Vec<CatalogEntry>,
+    pub summary: CatalogSummary,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+enum ArrayCatalogFormat {
+    Categorized(Vec<ProviderRegistryCategory>),
+    Flat(Vec<CatalogEntry>),
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+enum ObjectCatalogFormat {
+    Oci(OciProviderRegistryFile),
+    Categorized(CategorizedProviderRegistryFile),
+    Flat(ProviderRegistryFile),
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct ProviderRegistryFile {
     #[serde(default)]
@@ -99,8 +120,8 @@ struct OciProviderRegistryItem {
 }
 
 pub fn parse_catalog_bytes(bytes: &[u8], source: &str) -> Result<CatalogSummary> {
-    let entries = load_catalog_entries(bytes, source)?;
-    Ok(summary_from_entries(entries))
+    let entries = parse_catalog_entries(bytes, source)?;
+    Ok(summary_from_entries(&entries))
 }
 
 pub fn bundled_provider_registry_entries() -> Result<Vec<CatalogEntry>> {
@@ -111,23 +132,27 @@ pub fn bundled_provider_registry_entries() -> Result<Vec<CatalogEntry>> {
 }
 
 pub fn load_catalog_entries(bytes: &[u8], source: &str) -> Result<Vec<CatalogEntry>> {
+    parse_catalog_entries(bytes, source)
+}
+
+pub fn parse_catalog(bytes: &[u8], source: &str) -> Result<ParsedCatalog> {
+    let entries = parse_catalog_entries(bytes, source)?;
+    Ok(ParsedCatalog {
+        summary: summary_from_entries(&entries),
+        entries,
+    })
+}
+
+fn parse_catalog_entries(bytes: &[u8], source: &str) -> Result<Vec<CatalogEntry>> {
     let raw = std::str::from_utf8(bytes)
         .with_context(|| format!("catalog {source} must be valid UTF-8 JSON"))?;
+    let trimmed = raw.trim_start();
 
-    let value: serde_json::Value = serde_json::from_str(raw)
-        .with_context(|| format!("parse catalog/provider registry file {source}"))?;
-
-    if let Some(values) = value.as_array() {
-        let looks_categorized = values.iter().all(|entry| {
-            entry
-                .as_object()
-                .map(|object| object.contains_key("category") && object.contains_key("items"))
-                .unwrap_or(false)
-        });
-        if looks_categorized {
-            let categories: Vec<ProviderRegistryCategory> = serde_json::from_value(value)
-                .with_context(|| format!("parse categorized catalog array {source}"))?;
-            return Ok(categories
+    if trimmed.starts_with('[') {
+        return match serde_json::from_str::<ArrayCatalogFormat>(trimmed)
+            .with_context(|| format!("parse catalog/provider registry file {source}"))?
+        {
+            ArrayCatalogFormat::Categorized(categories) => Ok(categories
                 .into_iter()
                 .flat_map(|category| {
                     let category_name = category.category;
@@ -136,91 +161,85 @@ pub fn load_catalog_entries(bytes: &[u8], source: &str) -> Result<Vec<CatalogEnt
                         CatalogEntry::from_categorized_item(
                             item,
                             &category_name,
-                            None, // Legacy format uses category name as label
+                            None,
                             category_description.as_deref(),
                         )
                     })
                 })
-                .collect());
-        }
-
-        return serde_json::from_value::<Vec<CatalogEntry>>(serde_json::Value::Array(
-            values.to_vec(),
-        ))
-        .with_context(|| format!("parse catalog array {source}"));
+                .collect()),
+            ArrayCatalogFormat::Flat(entries) => Ok(entries),
+        };
     }
 
-    // OCI registry format: categories and items at root level (items reference category by id)
-    if value.get("categories").is_some() && value.get("items").is_some() {
-        let registry: OciProviderRegistryFile = serde_json::from_value(value)
-            .with_context(|| format!("parse OCI provider registry file {source}"))?;
-        // Build category lookup for labels and descriptions
-        let category_map: std::collections::HashMap<String, &OciProviderRegistryCategory> =
-            registry
+    if trimmed.starts_with('{') {
+        return match serde_json::from_str::<ObjectCatalogFormat>(trimmed)
+            .with_context(|| format!("parse catalog/provider registry file {source}"))?
+        {
+            ObjectCatalogFormat::Oci(registry) => {
+                // Build category lookup for labels and descriptions once per catalog parse.
+                let category_map: std::collections::HashMap<String, &OciProviderRegistryCategory> =
+                    registry
+                        .categories
+                        .iter()
+                        .map(|c| (c.id.clone(), c))
+                        .collect();
+                Ok(registry
+                    .items
+                    .into_iter()
+                    .map(|item| {
+                        let category_meta = item
+                            .category
+                            .as_ref()
+                            .and_then(|cat_id| category_map.get(cat_id));
+                        let category_label = category_meta
+                            .filter(|c| !c.label.fallback.is_empty())
+                            .map(|c| c.label.fallback.clone());
+                        let category_description = category_meta
+                            .and_then(|c| c.description.as_ref())
+                            .map(|d| d.fallback.clone());
+                        CatalogEntry {
+                            id: item.id,
+                            category: item.category,
+                            category_label,
+                            category_description,
+                            label: (!item.label.fallback.is_empty()).then_some(item.label.fallback),
+                            reference: item.reference,
+                            setup: item.setup,
+                        }
+                    })
+                    .collect())
+            }
+            ObjectCatalogFormat::Categorized(registry) => Ok(registry
                 .categories
-                .iter()
-                .map(|c| (c.id.clone(), c))
-                .collect();
-        return Ok(registry
-            .items
-            .into_iter()
-            .map(|item| {
-                let category_meta = item
-                    .category
-                    .as_ref()
-                    .and_then(|cat_id| category_map.get(cat_id));
-                let category_label = category_meta
-                    .filter(|c| !c.label.fallback.is_empty())
-                    .map(|c| c.label.fallback.clone());
-                let category_description = category_meta
-                    .and_then(|c| c.description.as_ref())
-                    .map(|d| d.fallback.clone());
-                CatalogEntry {
-                    id: item.id,
-                    category: item.category,
-                    category_label,
-                    category_description,
-                    label: (!item.label.fallback.is_empty()).then_some(item.label.fallback),
-                    reference: item.reference,
-                    setup: item.setup,
-                }
-            })
-            .collect());
-    }
-
-    // Legacy categorized format: items nested inside category objects
-    if value.get("categories").is_some() {
-        let registry: CategorizedProviderRegistryFile = serde_json::from_value(value)
-            .with_context(|| {
-                format!("parse categorized catalog/provider registry file {source}")
-            })?;
-        return Ok(registry
-            .categories
-            .into_iter()
-            .flat_map(|category| {
-                let category_name = category.category;
-                let category_description = category.description;
-                category.items.into_iter().map(move |item| {
-                    CatalogEntry::from_categorized_item(
-                        item,
-                        &category_name,
-                        None, // Legacy format uses category name as label
-                        category_description.as_deref(),
-                    )
+                .into_iter()
+                .flat_map(|category| {
+                    let category_name = category.category;
+                    let category_description = category.description;
+                    category.items.into_iter().map(move |item| {
+                        CatalogEntry::from_categorized_item(
+                            item,
+                            &category_name,
+                            None,
+                            category_description.as_deref(),
+                        )
+                    })
                 })
-            })
-            .collect());
+                .collect()),
+            ObjectCatalogFormat::Flat(registry) => {
+                Ok(registry.items.into_iter().map(CatalogEntry::from).collect())
+            }
+        };
     }
 
-    let registry: ProviderRegistryFile = serde_json::from_value(value)
-        .with_context(|| format!("parse flat catalog/provider registry file {source}"))?;
-    Ok(registry.items.into_iter().map(CatalogEntry::from).collect())
+    Err(anyhow::anyhow!(
+        "parse catalog/provider registry file {source}: expected JSON object or array"
+    ))
 }
 
-fn summary_from_entries(entries: Vec<CatalogEntry>) -> CatalogSummary {
+fn summary_from_entries(entries: &[CatalogEntry]) -> CatalogSummary {
     let mut item_ids = entries
-        .into_iter()
-        .map(|entry| entry.id)
+        .iter()
+        .map(|entry| entry.id.clone())
         .collect::<Vec<_>>();
     item_ids.sort();
     item_ids.dedup();
