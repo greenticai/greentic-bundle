@@ -6,7 +6,7 @@ use sha2::{Digest, Sha256};
 
 use super::cache;
 use super::client::{CatalogArtifactClient, DistributorCatalogClient};
-use super::registry::{CatalogEntry, load_catalog_entries, parse_catalog_bytes};
+use super::registry::{CatalogEntry, parse_catalog};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CatalogResolveOptions {
@@ -104,8 +104,8 @@ fn resolve_one(
         let bytes = std::fs::read(&resolved_path)
             .with_context(|| format!("read catalog {}", resolved_path.display()))?;
         let digest = digest_hex(&bytes);
-        let catalog_entries = load_catalog_entries(&bytes, &resolved_path.display().to_string())?;
-        let summary = parse_catalog_bytes(&bytes, &resolved_path.display().to_string())?;
+        let source = resolved_path.display().to_string();
+        let parsed = parse_catalog(&bytes, &source)?;
         let cache_paths = if options.write_cache {
             cache::cache_catalog_bytes(root, reference, &digest, &bytes)?
         } else {
@@ -114,11 +114,11 @@ fn resolve_one(
         return Ok((
             CatalogLockEntry {
                 requested_ref: reference.to_string(),
-                resolved_ref: resolved_path.display().to_string(),
+                resolved_ref: source,
                 digest,
                 source: "local_file".to_string(),
-                item_count: summary.item_count,
-                item_ids: summary.item_ids,
+                item_count: parsed.summary.item_count,
+                item_ids: parsed.summary.item_ids,
                 cache_path: cache::resolve_cached_path(root, reference)?
                     .map(|path| relative_display(root, &path)),
             },
@@ -126,7 +126,7 @@ fn resolve_one(
                 .into_iter()
                 .map(|path| relative_display(root, &path))
                 .collect(),
-            catalog_entries,
+            parsed.entries,
         ));
     }
 
@@ -134,20 +134,20 @@ fn resolve_one(
         let bytes = std::fs::read(&cached_path)
             .with_context(|| format!("read cached catalog {}", cached_path.display()))?;
         let digest = digest_hex(&bytes);
-        let catalog_entries = load_catalog_entries(&bytes, &cached_path.display().to_string())?;
-        let summary = parse_catalog_bytes(&bytes, &cached_path.display().to_string())?;
+        let source = cached_path.display().to_string();
+        let parsed = parse_catalog(&bytes, &source)?;
         return Ok((
             CatalogLockEntry {
                 requested_ref: reference.to_string(),
                 resolved_ref: reference.to_string(),
                 digest,
                 source: "workspace_cache".to_string(),
-                item_count: summary.item_count,
-                item_ids: summary.item_ids,
+                item_count: parsed.summary.item_count,
+                item_ids: parsed.summary.item_ids,
                 cache_path: Some(relative_display(root, &cached_path)),
             },
             Vec::new(),
-            catalog_entries,
+            parsed.entries,
         ));
     }
 
@@ -159,8 +159,7 @@ fn resolve_one(
     }
 
     let fetched = client.fetch_catalog(root, reference)?;
-    let catalog_entries = load_catalog_entries(&fetched.bytes, reference)?;
-    let summary = parse_catalog_bytes(&fetched.bytes, reference)?;
+    let parsed = parse_catalog(&fetched.bytes, reference)?;
     let cache_paths = if options.write_cache {
         cache::cache_catalog_bytes(root, reference, &fetched.digest, &fetched.bytes)?
     } else {
@@ -172,8 +171,8 @@ fn resolve_one(
             resolved_ref: fetched.resolved_ref,
             digest: fetched.digest,
             source: "remote".to_string(),
-            item_count: summary.item_count,
-            item_ids: summary.item_ids,
+            item_count: parsed.summary.item_count,
+            item_ids: parsed.summary.item_ids,
             cache_path: cache::resolve_cached_path(root, reference)?
                 .map(|path| relative_display(root, &path)),
         },
@@ -181,7 +180,7 @@ fn resolve_one(
             .into_iter()
             .map(|path| relative_display(root, &path))
             .collect(),
-        catalog_entries,
+        parsed.entries,
     ))
 }
 
