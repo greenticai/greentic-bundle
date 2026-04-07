@@ -6,6 +6,7 @@ use crate::setup::SetupSpecInput;
 pub const BUNDLED_PROVIDER_REGISTRY_SOURCE: &str = "registries/providers.json";
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CatalogEntry {
     pub id: String,
     #[serde(default)]
