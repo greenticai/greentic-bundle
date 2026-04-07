@@ -1880,12 +1880,14 @@ fn edit_extension_providers<R: BufRead, W: Write>(
             "1" => {
                 if let Some(entry) = add_common_extension_provider(input, output, &state)? {
                     state.extension_provider_entries.push(entry);
+                    state = resolve_dependency_capabilities(input, output, state)?;
                     state = rebuild_request(state);
                 }
             }
             "2" => {
                 if let Some(entry) = add_custom_extension_provider(input, output, &state)? {
                     state.extension_provider_entries.push(entry);
+                    state = resolve_dependency_capabilities(input, output, state)?;
                     state = rebuild_request(state);
                 }
             }
@@ -1898,6 +1900,131 @@ fn edit_extension_providers<R: BufRead, W: Write>(
             _ => writeln!(output, "{}", crate::i18n::tr("wizard.error.invalid_choice"))?,
         }
     }
+}
+
+/// After adding an extension provider, resolve any required capabilities.
+///
+/// Checks all currently selected providers for `required_capabilities` against
+/// the catalog. Auto-adds dependencies with a single provider, prompts when
+/// multiple options exist, and warns when no provider is found.
+fn resolve_dependency_capabilities<R: BufRead, W: Write>(
+    input: &mut R,
+    output: &mut W,
+    mut state: NormalizedRequest,
+) -> Result<NormalizedRequest> {
+    let (_, _, catalog_entries) =
+        resolve_extension_provider_catalog(&state.output_dir, &state.remote_catalogs)?;
+    if catalog_entries.is_empty() {
+        return Ok(state);
+    }
+
+    // Collect required_capabilities from all currently selected providers.
+    let already_included: std::collections::BTreeSet<String> = state
+        .extension_provider_entries
+        .iter()
+        .map(|e| e.provider_id.clone())
+        .collect();
+
+    let mut requirements = Vec::new();
+    for entry in &state.extension_provider_entries {
+        // Look up catalog entry for this provider to find required_capabilities.
+        if let Some(cat_entry) = catalog_entries.iter().find(|e| e.id == entry.provider_id) {
+            for cap in &cat_entry.required_capabilities {
+                requirements.push(
+                    crate::catalog::capability_resolver::CapabilityRequirement {
+                        capability: cap.clone(),
+                        required_by: entry.provider_id.clone(),
+                    },
+                );
+            }
+        }
+    }
+
+    if requirements.is_empty() {
+        return Ok(state);
+    }
+
+    let resolution = crate::catalog::capability_resolver::resolve_capabilities(
+        &requirements,
+        &catalog_entries,
+        &already_included,
+    );
+
+    // Auto-add single-provider dependencies.
+    for dep in &resolution.auto_resolved {
+        let label = dep
+            .provider
+            .label
+            .as_deref()
+            .unwrap_or(&dep.provider.id);
+        writeln!(
+            output,
+            "  [auto] {} requires {} — adding {label}",
+            dep.required_by, dep.capability,
+        )?;
+        state.extension_provider_entries.push(ExtensionProviderEntry {
+            detected_kind: detected_reference_kind(&state.output_dir, &dep.provider.reference)
+                .to_string(),
+            reference: dep.provider.reference.clone(),
+            provider_id: dep.provider.id.clone(),
+            display_name: label.to_string(),
+            version: inferred_reference_version(&dep.provider.reference),
+            source_catalog: None,
+            group: Some("dependency".to_string()),
+        });
+    }
+
+    // Prompt user to choose when multiple providers satisfy a capability.
+    for choice in &resolution.choices {
+        writeln!(
+            output,
+            "\n{} requires capability: {}",
+            choice.required_by, choice.capability,
+        )?;
+        let labels: Vec<String> = choice
+            .options
+            .iter()
+            .map(|e| {
+                e.label
+                    .as_deref()
+                    .unwrap_or(&e.id)
+                    .to_string()
+            })
+            .collect();
+        if let Some(index) = choose_named_index(
+            input,
+            output,
+            &format!("Choose provider for {}", choice.capability),
+            &labels,
+        )? {
+            let selected = &choice.options[index];
+            let label = selected
+                .label
+                .as_deref()
+                .unwrap_or(&selected.id);
+            state.extension_provider_entries.push(ExtensionProviderEntry {
+                detected_kind: detected_reference_kind(&state.output_dir, &selected.reference)
+                    .to_string(),
+                reference: selected.reference.clone(),
+                provider_id: selected.id.clone(),
+                display_name: label.to_string(),
+                version: inferred_reference_version(&selected.reference),
+                source_catalog: None,
+                group: Some("dependency".to_string()),
+            });
+        }
+    }
+
+    // Warn about unresolved capabilities.
+    for unresolved in &resolution.unresolved {
+        writeln!(
+            output,
+            "  [warn] {} requires {} but no provider found in catalog",
+            unresolved.required_by, unresolved.capability,
+        )?;
+    }
+
+    Ok(state)
 }
 
 fn review_summary<R: BufRead, W: Write>(
@@ -4697,6 +4824,8 @@ mod tests {
                 "oci://ghcr.io/greenticai/packs/secret/greentic.secrets.aws-sm.gtpack:0.4.25"
                     .to_string(),
             setup: None,
+            provided_capabilities: Vec::new(),
+            required_capabilities: Vec::new(),
         };
         let latest = CatalogEntry {
             id: "greentic.secrets.aws-sm.latest".to_string(),
@@ -4708,6 +4837,8 @@ mod tests {
                 "oci://ghcr.io/greenticai/packs/secret/greentic.secrets.aws-sm.gtpack:latest"
                     .to_string(),
             setup: None,
+            provided_capabilities: Vec::new(),
+            required_capabilities: Vec::new(),
         };
         let entries = vec![&pinned, &latest];
         let options = build_extension_provider_options(&entries);
@@ -4731,6 +4862,8 @@ mod tests {
             label: Some("Greentic Secrets AWS SM (latest)".to_string()),
             reference: "oci://ghcr.io/example/secrets:latest".to_string(),
             setup: None,
+            provided_capabilities: Vec::new(),
+            required_capabilities: Vec::new(),
         };
         let semver = CatalogEntry {
             id: "x.0.4.25".to_string(),
@@ -4740,6 +4873,8 @@ mod tests {
             label: Some("Greentic Secrets AWS SM (0.4.25)".to_string()),
             reference: "oci://ghcr.io/example/secrets:0.4.25".to_string(),
             setup: None,
+            provided_capabilities: Vec::new(),
+            required_capabilities: Vec::new(),
         };
         let pr = CatalogEntry {
             id: "x.pr".to_string(),
@@ -4749,6 +4884,8 @@ mod tests {
             label: Some("Greentic Messaging Dummy (PR version)".to_string()),
             reference: "oci://ghcr.io/example/messaging:<pr-version>".to_string(),
             setup: None,
+            provided_capabilities: Vec::new(),
+            required_capabilities: Vec::new(),
         };
 
         assert_eq!(

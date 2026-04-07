@@ -1,4 +1,5 @@
 pub mod cache;
+pub mod capability_resolver;
 pub mod client;
 pub mod registry;
 pub mod resolve;

@@ -20,6 +20,12 @@ pub struct CatalogEntry {
     pub reference: String,
     #[serde(default)]
     pub setup: Option<SetupSpecInput>,
+    /// Capabilities this pack provides (e.g. `greentic:state/state-store`).
+    #[serde(default)]
+    pub provided_capabilities: Vec<String>,
+    /// Capabilities this pack requires from other packs.
+    #[serde(default)]
+    pub required_capabilities: Vec<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -78,6 +84,10 @@ struct ProviderRegistryItem {
     reference: String,
     #[serde(default)]
     setup: Option<SetupSpecInput>,
+    #[serde(default)]
+    provided_capabilities: Vec<String>,
+    #[serde(default)]
+    required_capabilities: Vec<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -117,6 +127,10 @@ struct OciProviderRegistryItem {
     reference: String,
     #[serde(default)]
     setup: Option<SetupSpecInput>,
+    #[serde(default)]
+    provided_capabilities: Vec<String>,
+    #[serde(default)]
+    required_capabilities: Vec<String>,
 }
 
 pub fn parse_catalog_bytes(bytes: &[u8], source: &str) -> Result<CatalogSummary> {
@@ -205,6 +219,8 @@ fn parse_catalog_entries(bytes: &[u8], source: &str) -> Result<Vec<CatalogEntry>
                             label: (!item.label.fallback.is_empty()).then_some(item.label.fallback),
                             reference: item.reference,
                             setup: item.setup,
+                            provided_capabilities: item.provided_capabilities,
+                            required_capabilities: item.required_capabilities,
                         }
                     })
                     .collect())
@@ -260,6 +276,8 @@ impl From<ProviderRegistryItem> for CatalogEntry {
             label: (!item.label.fallback.is_empty()).then_some(item.label.fallback),
             reference: item.reference,
             setup: item.setup,
+            provided_capabilities: item.provided_capabilities,
+            required_capabilities: item.required_capabilities,
         }
     }
 }

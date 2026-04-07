@@ -87,7 +87,8 @@
         "i18n_key": "provider.messaging.teams",
         "fallback": "MS-Teams"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/messaging/messaging-teams:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/messaging/messaging-teams:latest",
+      "required_capabilities": ["greentic:state/state-store"]
     },
     {
       "id": "messaging-slack",
@@ -96,7 +97,8 @@
         "i18n_key": "provider.messaging.slack",
         "fallback": "Slack"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/messaging/messaging-slack:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/messaging/messaging-slack:latest",
+      "required_capabilities": ["greentic:state/state-store"]
     },
     {
       "id": "messaging-webex",
@@ -105,7 +107,8 @@
         "i18n_key": "provider.messaging.webex",
         "fallback": "WebEx"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/messaging/messaging-webex:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/messaging/messaging-webex:latest",
+      "required_capabilities": ["greentic:state/state-store"]
     },
     {
       "id": "messaging-webchat",
@@ -114,7 +117,8 @@
         "i18n_key": "provider.messaging.webchat",
         "fallback": "WebChat"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/messaging/messaging-webchat:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/messaging/messaging-webchat:latest",
+      "required_capabilities": ["greentic:state/state-store"]
     },
     {
       "id": "messaging-webchat-gui",
@@ -123,7 +127,8 @@
         "i18n_key": "provider.messaging.webchat-gui",
         "fallback": "WebChat (GUI)"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/messaging/messaging-webchat-gui:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/messaging/messaging-webchat-gui:latest",
+      "required_capabilities": ["greentic:state/state-store"]
     },
     {
       "id": "messaging-whatsapp",
@@ -132,7 +137,8 @@
         "i18n_key": "provider.messaging.whatsapp",
         "fallback": "WhatsApp"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/messaging/messaging-whatsapp:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/messaging/messaging-whatsapp:latest",
+      "required_capabilities": ["greentic:state/state-store"]
     },
     {
       "id": "messaging-telegram",
@@ -141,7 +147,8 @@
         "i18n_key": "provider.messaging.telegram",
         "fallback": "Telegram"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/messaging/messaging-telegram:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/messaging/messaging-telegram:latest",
+      "required_capabilities": ["greentic:state/state-store"]
     },
     {
       "id": "messaging-email",
@@ -150,7 +157,8 @@
         "i18n_key": "provider.messaging.email",
         "fallback": "Email"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/messaging/messaging-email:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/messaging/messaging-email:latest",
+      "required_capabilities": ["greentic:state/state-store"]
     },
     {
       "id": "events-webhook",
@@ -375,7 +383,8 @@
         "i18n_key": "provider.state.memory",
         "fallback": "In-Memory State"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/state/state-memory:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/state/state-memory:latest",
+      "provided_capabilities": ["greentic:state/state-store"]
     },
     {
       "id": "state-redis",
@@ -384,7 +393,8 @@
         "i18n_key": "provider.state.redis",
         "fallback": "Redis State"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/state/state-redis:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/state/state-redis:latest",
+      "provided_capabilities": ["greentic:state/state-store"]
     },
     {
       "id": "component-pack2flow",

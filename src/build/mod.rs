@@ -58,6 +58,13 @@ pub struct UnbundleResult {
 
 pub fn build_workspace(root: &Path, output: Option<&Path>, dry_run: bool) -> Result<BuildResult> {
     let state = plan::build_state(root)?;
+
+    // Validate pack dependencies at build time.
+    let dep_warnings = validate_bundle_dependencies(root);
+    for warning in &dep_warnings {
+        eprintln!("  [dependency] {warning}");
+    }
+
     let artifact = output
         .map(|path| path.to_path_buf())
         .unwrap_or_else(|| default_artifact_path(root, &state.manifest.bundle_id));
@@ -116,6 +123,8 @@ fn doctor_workspace(root: &Path) -> Result<DoctorReport> {
     let drift_ok = lock::lock_matches_manifest(&state.lock, &state.manifest);
     let reader_validation = open_workspace_build_dir(root);
     let reader_ok = reader_validation.is_ok();
+    let dep_warnings = validate_bundle_dependencies(root);
+    let deps_ok = dep_warnings.is_empty();
     let checks = vec![
         DoctorCheck {
             name: "bundle.yaml".to_string(),
@@ -148,6 +157,15 @@ fn doctor_workspace(root: &Path) -> Result<DoctorReport> {
                             "workspace manifest/lock do not satisfy reader contract".to_string()
                         }),
                 )
+            },
+        },
+        DoctorCheck {
+            name: "pack dependencies".to_string(),
+            ok: deps_ok,
+            details: if deps_ok {
+                None
+            } else {
+                Some(dep_warnings.join("; "))
             },
         },
     ];
@@ -213,6 +231,64 @@ pub fn unbundle_artifact(artifact: &Path, output_dir: &Path) -> Result<UnbundleR
         artifact_path: artifact.display().to_string(),
         output_dir: output_dir.display().to_string(),
     })
+}
+
+/// Validate pack dependencies using catalog metadata.
+///
+/// Matches extension providers listed in `bundle.yaml` against the bundled
+/// catalog registry to check that all `required_capabilities` are satisfied
+/// by some other provider in the bundle. Returns human-readable warnings.
+fn validate_bundle_dependencies(root: &Path) -> Vec<String> {
+    let catalog_entries = match crate::catalog::registry::bundled_provider_registry_entries() {
+        Ok(entries) => entries,
+        Err(_) => return Vec::new(),
+    };
+
+    // Read the workspace definition to get the list of extension providers.
+    let workspace = match crate::project::read_bundle_workspace(root) {
+        Ok(ws) => ws,
+        Err(_) => return Vec::new(),
+    };
+
+    // Build set of provider IDs present in the bundle.
+    let included_ids: std::collections::BTreeSet<String> = workspace
+        .extension_providers
+        .iter()
+        .filter_map(|reference| {
+            catalog_entries
+                .iter()
+                .find(|e| e.reference == *reference)
+                .map(|e| e.id.clone())
+        })
+        .collect();
+
+    // Also include capabilities provided by included packs.
+    let mut provided_caps = std::collections::BTreeSet::new();
+    for entry in &catalog_entries {
+        if included_ids.contains(&entry.id) {
+            for cap in &entry.provided_capabilities {
+                provided_caps.insert(cap.clone());
+            }
+        }
+    }
+
+    // Check required capabilities for each included provider.
+    let mut warnings = Vec::new();
+    for entry in &catalog_entries {
+        if !included_ids.contains(&entry.id) {
+            continue;
+        }
+        for cap in &entry.required_capabilities {
+            if !provided_caps.contains(cap) {
+                warnings.push(format!(
+                    "{} requires capability '{}' but no provider in the bundle satisfies it",
+                    entry.id, cap,
+                ));
+            }
+        }
+    }
+
+    warnings
 }
 
 pub fn default_artifact_path(root: &Path, bundle_id: &str) -> PathBuf {
