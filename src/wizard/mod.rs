@@ -49,6 +49,7 @@ pub struct NormalizedRequest {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, serde::Deserialize)]
+#[non_exhaustive]
 pub struct AppPackEntry {
     pub reference: String,
     pub detected_kind: String,
