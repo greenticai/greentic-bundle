@@ -450,6 +450,18 @@ fn materialize_reference_into(
 
     if let Some(local_path) = parse_local_pack_reference(root, reference) {
         if local_path.is_dir() {
+            // Pack source directory — copy the whole tree into the bundle so
+            // that the pack is available at the declared reference path.
+            let dir_dest = root.join(reference);
+            if !dir_dest.exists() {
+                copy_dir_recursive(&local_path, &dir_dest).with_context(|| {
+                    format!(
+                        "copy pack dir {} to {}",
+                        local_path.display(),
+                        dir_dest.display()
+                    )
+                })?;
+            }
             return Ok(());
         }
         std::fs::copy(&local_path, &destination).with_context(|| {
@@ -485,8 +497,14 @@ fn parse_local_pack_reference(root: &Path, reference: &str) -> Option<PathBuf> {
     if candidate.is_absolute() {
         return candidate.exists().then_some(candidate);
     }
+    // Try relative to bundle root first, then fall back to CWD so that
+    // `gtc wizard --answers` can resolve pack references that are relative
+    // to where the command was invoked (e.g. a sibling crate directory).
     let joined = root.join(&candidate);
-    joined.exists().then_some(joined)
+    if joined.exists() {
+        return Some(joined);
+    }
+    candidate.exists().then_some(candidate)
 }
 
 fn resolve_remote_pack_path(root: &Path, reference: &str) -> Result<PathBuf> {
@@ -1038,6 +1056,22 @@ fn relative_path(root: &Path, path: &Path) -> String {
 
 fn ensure_dir(path: &Path) -> Result<()> {
     std::fs::create_dir_all(path)?;
+    Ok(())
+}
+
+/// Recursively copy a directory tree from `src` to `dst`.
+pub fn copy_dir_recursive(src: &Path, dst: &Path) -> Result<()> {
+    std::fs::create_dir_all(dst)?;
+    for entry in std::fs::read_dir(src)? {
+        let entry = entry?;
+        let file_type = entry.file_type()?;
+        let target = dst.join(entry.file_name());
+        if file_type.is_dir() {
+            copy_dir_recursive(&entry.path(), &target)?;
+        } else {
+            std::fs::copy(entry.path(), &target)?;
+        }
+    }
     Ok(())
 }
 

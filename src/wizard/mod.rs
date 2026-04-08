@@ -56,6 +56,11 @@ pub struct AppPackEntry {
     pub display_name: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub version: Option<String>,
+    /// Optional source path for `local_dir` packs.  When set, the wizard
+    /// copies this path into the output bundle at `reference`.  Resolved
+    /// relative to CWD.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source: Option<String>,
     pub mapping: AppPackMappingInput,
 }
 
@@ -1515,6 +1520,7 @@ fn normalize_request(seed: SeedRequest) -> NormalizedRequest {
                 pack_id: inferred_reference_id(reference),
                 display_name: inferred_display_name(reference),
                 version: inferred_reference_version(reference),
+                source: None,
                 mapping: AppPackMappingInput {
                     scope: "global".to_string(),
                     tenant: None,
@@ -1625,6 +1631,7 @@ fn request_from_workspace(
                 version: inferred_reference_version(reference),
                 detected_kind: detected_reference_kind(root, reference).to_string(),
                 reference: reference.clone(),
+                source: None,
                 mapping: AppPackMappingInput {
                     scope: "global".to_string(),
                     tenant: None,
@@ -1642,6 +1649,7 @@ fn request_from_workspace(
                 version: inferred_reference_version(&mapping.reference),
                 detected_kind: detected_reference_kind(root, &mapping.reference).to_string(),
                 reference: mapping.reference.clone(),
+                source: None,
                 mapping: AppPackMappingInput {
                     scope: match mapping.scope {
                         crate::project::MappingScope::Global => "global".to_string(),
@@ -2554,6 +2562,7 @@ fn add_app_pack<R: BufRead, W: Write>(
                     pack_id: resolved.id,
                     display_name: resolved.display_name,
                     version: resolved.version,
+                    source: None,
                     mapping,
                 }));
             }
@@ -3955,6 +3964,38 @@ fn apply_plan(
 
     let workspace = workspace_definition_from_request(request);
     let mut writes = crate::project::init_bundle_workspace(&request.output_dir, &workspace)?;
+
+    // Copy local app packs that have an explicit `source` path into the
+    // output bundle before workspace materialization runs.
+    for entry in &request.app_pack_entries {
+        if let Some(source) = &entry.source {
+            let source_path = PathBuf::from(source);
+            let dest = request.output_dir.join(&entry.reference);
+            if !dest.exists() && source_path.exists() {
+                if source_path.is_dir() {
+                    crate::project::copy_dir_recursive(&source_path, &dest)
+                        .with_context(|| {
+                            format!(
+                                "copy app pack source {} to {}",
+                                source_path.display(),
+                                dest.display()
+                            )
+                        })?;
+                } else {
+                    if let Some(parent) = dest.parent() {
+                        fs::create_dir_all(parent)?;
+                    }
+                    fs::copy(&source_path, &dest).with_context(|| {
+                        format!(
+                            "copy app pack source {} to {}",
+                            source_path.display(),
+                            dest.display()
+                        )
+                    })?;
+                }
+            }
+        }
+    }
 
     for entry in &request.app_pack_entries {
         if let Some(tenant) = &entry.mapping.tenant {
