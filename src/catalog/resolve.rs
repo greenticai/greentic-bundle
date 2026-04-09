@@ -65,8 +65,14 @@ pub fn resolve_catalogs_with_client(
     refs.sort();
     refs.dedup();
 
-    for reference in refs {
-        let resolved = resolve_one(root, &reference, options, client)?;
+    let total = refs.len();
+    for (index, reference) in refs.iter().enumerate() {
+        eprintln!(
+            "  [{}/{}] Resolving: {reference}",
+            index + 1,
+            total
+        );
+        let resolved = resolve_one(root, reference, options, client)?;
         cache_writes.extend(resolved.1);
         discovered_items.extend(resolved.2);
         entries.push(resolved.0);
