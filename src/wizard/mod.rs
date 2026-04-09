@@ -975,6 +975,12 @@ fn execute_request(
     source_locks: Option<BTreeMap<String, Value>>,
 ) -> Result<WizardRunResult> {
     let target_version = requested_schema_version(schema_version)?;
+    if !request.remote_catalogs.is_empty() {
+        eprintln!(
+            "[resolve] Resolving {} remote catalog(s)...",
+            request.remote_catalogs.len()
+        );
+    }
     let catalog_resolution = crate::catalog::resolve::resolve_catalogs(
         &request.output_dir,
         &request.remote_catalogs,
@@ -983,6 +989,12 @@ fn execute_request(
             write_cache: execution == ExecutionMode::Execute,
         },
     )?;
+    if !request.remote_catalogs.is_empty() {
+        eprintln!(
+            "[resolve] Catalog resolution complete ({} entries)",
+            catalog_resolution.entries.len()
+        );
+    }
     let request = discover_setup_specs(request, &catalog_resolution);
     let setup_writes = preview_setup_writes(&request, execution)?;
     let bundle_lock = build_bundle_lock(&request, execution, &catalog_resolution, &setup_writes);

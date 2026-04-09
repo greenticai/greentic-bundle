@@ -359,15 +359,41 @@ fn materialize_workspace_dependencies(
     root: &Path,
     workspace: &BundleWorkspaceDefinition,
 ) -> Result<()> {
-    for mapping in app_pack_copy_targets(workspace) {
+    let app_targets = app_pack_copy_targets(workspace);
+    let provider_targets: Vec<_> = workspace
+        .extension_providers
+        .iter()
+        .filter(|p| !should_skip_extension_provider_materialization(p))
+        .collect();
+    let total = app_targets.len() + provider_targets.len();
+    let mut current = 0usize;
+
+    for mapping in &app_targets {
+        current += 1;
+        let dest = root.join(&mapping.destination);
+        if dest.exists() {
+            eprintln!("  [{current}/{total}] Cached: {}", mapping.reference);
+        } else {
+            eprintln!(
+                "  [{current}/{total}] Resolving app pack: {}",
+                mapping.reference
+            );
+        }
         materialize_reference_into(root, &mapping.reference, &mapping.destination)?;
     }
-    for provider in &workspace.extension_providers {
-        if should_skip_extension_provider_materialization(provider) {
-            continue;
-        }
+    for provider in &provider_targets {
+        current += 1;
         let destination = provider_destination_path(provider);
+        let dest = root.join(&destination);
+        if dest.exists() {
+            eprintln!("  [{current}/{total}] Cached: {provider}");
+        } else {
+            eprintln!("  [{current}/{total}] Resolving provider: {provider}");
+        }
         materialize_reference_into(root, provider, &destination)?;
+    }
+    if total > 0 {
+        eprintln!("  [done] Resolved {total} package(s)");
     }
     Ok(())
 }
@@ -444,6 +470,9 @@ fn materialize_reference_into(
     relative_destination: &Path,
 ) -> Result<()> {
     let destination = root.join(relative_destination);
+    if destination.exists() {
+        return Ok(());
+    }
     if let Some(parent) = destination.parent() {
         ensure_dir(parent)?;
     }
