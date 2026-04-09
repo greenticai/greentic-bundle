@@ -372,10 +372,7 @@ fn materialize_workspace_dependencies(
         current += 1;
         let dest = root.join(&mapping.destination);
         if dest.exists() {
-            eprintln!(
-                "  [{current}/{total}] Cached: {}",
-                mapping.reference
-            );
+            eprintln!("  [{current}/{total}] Cached: {}", mapping.reference);
         } else {
             eprintln!(
                 "  [{current}/{total}] Resolving app pack: {}",
@@ -389,13 +386,9 @@ fn materialize_workspace_dependencies(
         let destination = provider_destination_path(provider);
         let dest = root.join(&destination);
         if dest.exists() {
-            eprintln!(
-                "  [{current}/{total}] Cached: {provider}"
-            );
+            eprintln!("  [{current}/{total}] Cached: {provider}");
         } else {
-            eprintln!(
-                "  [{current}/{total}] Resolving provider: {provider}"
-            );
+            eprintln!("  [{current}/{total}] Resolving provider: {provider}");
         }
         materialize_reference_into(root, provider, &destination)?;
     }
