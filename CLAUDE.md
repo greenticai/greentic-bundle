@@ -23,6 +23,10 @@ cargo doc --no-deps --all-features
 
 Tests require `GREENTIC_BUNDLE_USE_BUNDLED_CATALOG=1` to use the embedded provider catalog instead of fetching from a remote registry.
 
+## Cargo Features
+
+- **`extensions`** (default-off) — enables the bundle extension host under `src/ext/` and the `greentic-bundle ext …` subcommand. Pulls in optional deps `jsonschema`, `thiserror`, `walkdir`. Build with `cargo build --features extensions`; test with `cargo test --features extensions --all-targets`. Binary-size delta guard: ≤500 KB vs default build on main.
+
 ## Architecture
 
 **greentic-bundle** is a Rust CLI for authoring Greentic bundles — containerized app collections with deterministic, reproducible builds packaged as SquashFS `.gtbundle` artifacts.
@@ -34,7 +38,7 @@ Tests require `GREENTIC_BUNDLE_USE_BUNDLED_CATALOG=1` to use the embedded provid
 
 ### Core Subsystems (under `src/`)
 
-- **`cli/`** — Clap-based command router: `wizard`, `build`, `inspect`, `doctor`, `access`, `init`, `add`, `remove`, `export`, `unbundle`
+- **`cli/`** — Clap-based command router: `wizard`, `build`, `inspect`, `doctor`, `access`, `init`, `add`, `remove`, `export`, `unbundle`, `ext` (feature-gated)
 - **`wizard/`** — Interactive staged composition flow (bundle basics → app-pack add/map → extension-providers → access review → build/dry-run/save). The largest module (~4500 LOC)
 - **`project/`** — `BundleWorkspaceDefinition` model backed by `bundle.yaml`. Defines app-pack mappings, tenant/team layout, and resolved output generation
 - **`catalog/`** — Registry resolution and caching. Supports `file://`, `ghcr://`, and `oci://` catalog URIs. Caches under `state/cache/catalogs/`
@@ -43,6 +47,7 @@ Tests require `GREENTIC_BUNDLE_USE_BUNDLED_CATALOG=1` to use the embedded provid
 - **`answers/`** — Semver-versioned answer documents for replaying wizard sessions
 - **`setup/`** — Bridges legacy setup specs and provider QA payloads into normalized `FormSpec` persisted under `state/setup/`
 - **`i18n/`** — 66 locales embedded at compile time via `build.rs`. Locale precedence: `--locale` flag → `LC_ALL`/`LC_MESSAGES`/`LANG` → OS locale → `en`
+- **`ext/`** — Bundle extension host (feature-gated via `extensions`, default-off). Discovers `.gtxpack` extensions from `state/ext/` (or `--extension-dir`), dispatches `ext {list,info,validate,render,install-dir}` subcommand. Mode A (builtin delegated) routes `render` calls to `BuiltinRecipeId::Standard` handler which synthesizes an ephemeral workspace from a `DesignerSession` and produces a deterministic `.gtpack` ZIP. Mode B (full WASM) is declared but returns `ExtensionError::ModeBNotImplemented`. Companion reference extensions live in the sibling repo [`greentic-bundle-extensions`](https://github.com/greentic-biz/greentic-bundle-extensions). See `docs/superpowers/specs/2026-04-17-bundle-extension-migration-design.md` on branch `spec/wasm-bundle-extensions` for the full design.
 
 ### Key Conventions
 
