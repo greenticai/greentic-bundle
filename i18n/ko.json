@@ -191,5 +191,16 @@
   "wizard.stage.pack_access": "== 팩 접근 ==",
   "wizard.stage.review": "== 검토 요약 ==",
   "wizard.validate.about": "재생된 번들 응답 검증",
-  "wizard.warning.advanced_without_refs": "앱 팩이나 확장 제공자 없이 고급 설정이 활성화되었습니다."
+  "wizard.warning.advanced_without_refs": "앱 팩이나 확장 제공자 없이 고급 설정이 활성화되었습니다.",
+  "cli.ext.about": "Bundle extensions (feature-gated)",
+  "cli.ext.list.about": "List installed bundle extensions and their recipes",
+  "cli.ext.info.about": "Print metadata for one installed bundle extension",
+  "cli.ext.info.not_found": "Extension '{id}' not found in install directory",
+  "cli.ext.validate.about": "Validate a config JSON against a recipe's config schema",
+  "cli.ext.validate.ok": "Config is valid",
+  "cli.ext.validate.failed": "Config validation failed",
+  "cli.ext.render.about": "Render a bundle artifact via the ext dispatcher",
+  "cli.ext.render.wrote": "Wrote {file} (sha256={sha256})",
+  "cli.ext.install_dir.about": "Print the resolved extension install directory",
+  "cli.ext.feature_disabled": "The 'extensions' feature is not enabled in this build. Rebuild with `cargo build --features extensions`."
 }

@@ -68,10 +68,21 @@ tokio.workspace = true
 unic-langid.workspace = true
 zip = "8"
 
+# feature: extensions (bundle-ext Phase A).
+# Note: greentic-ext-{contract,runtime} are Phase B concerns — Mode A routes
+# render to the native builtin_bridge without invoking any WASM runtime.
+# Those git deps land when Mode B is implemented.
+jsonschema = { version = "0.18", optional = true, default-features = false }
+thiserror = { version = "2", optional = true }
+walkdir = { version = "2", optional = true }
+
 [dev-dependencies]
 assert_cmd.workspace = true
 criterion = "0.8"
 predicates.workspace = true
+sha2.workspace = true
+tempfile.workspace = true
+zip = "8"
 
 [build-dependencies]
 serde_json.workspace = true
@@ -79,3 +90,11 @@ serde_json.workspace = true
 [[bench]]
 name = "perf"
 harness = false
+
+[features]
+default = []
+extensions = [
+  "dep:jsonschema",
+  "dep:thiserror",
+  "dep:walkdir",
+]

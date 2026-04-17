@@ -191,5 +191,16 @@
   "wizard.stage.pack_access": "== Pack prieiga ==",
   "wizard.stage.review": "== Peržiūros santrauka ==",
   "wizard.validate.about": "Tikrinti atkurtus bundle atsakymus",
-  "wizard.warning.advanced_without_refs": "Išplėstinė sąranka buvo įjungta be app packs arba extension providers."
+  "wizard.warning.advanced_without_refs": "Išplėstinė sąranka buvo įjungta be app packs arba extension providers.",
+  "cli.ext.about": "Bundle extensions (feature-gated)",
+  "cli.ext.list.about": "List installed bundle extensions and their recipes",
+  "cli.ext.info.about": "Print metadata for one installed bundle extension",
+  "cli.ext.info.not_found": "Extension '{id}' not found in install directory",
+  "cli.ext.validate.about": "Validate a config JSON against a recipe's config schema",
+  "cli.ext.validate.ok": "Config is valid",
+  "cli.ext.validate.failed": "Config validation failed",
+  "cli.ext.render.about": "Render a bundle artifact via the ext dispatcher",
+  "cli.ext.render.wrote": "Wrote {file} (sha256={sha256})",
+  "cli.ext.install_dir.about": "Print the resolved extension install directory",
+  "cli.ext.feature_disabled": "The 'extensions' feature is not enabled in this build. Rebuild with `cargo build --features extensions`."
 }
