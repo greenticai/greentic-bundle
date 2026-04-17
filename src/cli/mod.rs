@@ -8,13 +8,13 @@ pub mod add;
 pub mod build;
 pub mod doctor;
 pub mod export;
+#[cfg(feature = "extensions")]
+pub mod ext;
 pub mod init;
 pub mod inspect;
 pub mod remove;
 pub mod unbundle;
 pub mod wizard;
-#[cfg(feature = "extensions")]
-pub mod ext;
 
 #[derive(Debug, Parser)]
 #[command(
@@ -245,9 +245,7 @@ fn run_ext(args: ext::ExtArgs) -> anyhow::Result<()> {
                     for e in errs {
                         eprintln!("{}: {e}", e.instance_path);
                     }
-                    return Err(anyhow::anyhow!(crate::i18n::tr(
-                        "cli.ext.validate.failed"
-                    )));
+                    return Err(anyhow::anyhow!(crate::i18n::tr("cli.ext.validate.failed")));
                 }
             }
         }
@@ -275,10 +273,7 @@ fn run_ext(args: ext::ExtArgs) -> anyhow::Result<()> {
                         "{}",
                         crate::i18n::trf(
                             "cli.ext.render.wrote",
-                            &[
-                                ("file", path_str.as_str()),
-                                ("sha256", art.sha256.as_str()),
-                            ],
+                            &[("file", path_str.as_str()), ("sha256", art.sha256.as_str()),],
                         )
                     );
                 }

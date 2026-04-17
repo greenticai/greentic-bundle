@@ -19,9 +19,7 @@ pub fn invoke_recipe(
     match &entry.execution {
         Execution::Builtin { builtin_id } => {
             let id = BuiltinRecipeId::from_str(builtin_id).ok_or_else(|| {
-                ExtensionError::InvalidDescriptor(format!(
-                    "unknown builtinId '{builtin_id}'"
-                ))
+                ExtensionError::InvalidDescriptor(format!("unknown builtinId '{builtin_id}'"))
             })?;
             match id {
                 BuiltinRecipeId::Standard => {
@@ -80,10 +78,7 @@ mod tests {
     #[test]
     fn unknown_builtin_id_errors() {
         let mut reg = ExtensionRegistry::new();
-        register(
-            &mut reg,
-            r#"{ "kind": "builtin", "builtinId": "mystery" }"#,
-        );
+        register(&mut reg, r#"{ "kind": "builtin", "builtinId": "mystery" }"#);
         let err = invoke_recipe(&reg, "x.test", "standard", "{}", "{}").unwrap_err();
         assert!(matches!(err, ExtensionError::InvalidDescriptor(_)));
     }

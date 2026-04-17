@@ -36,7 +36,10 @@ mod tests {
     #[test]
     fn display_not_found() {
         let e = ExtensionError::NotFound("greentic.bundle-standard".into());
-        assert_eq!(e.to_string(), "extension not found: greentic.bundle-standard");
+        assert_eq!(
+            e.to_string(),
+            "extension not found: greentic.bundle-standard"
+        );
     }
 
     #[test]
@@ -54,7 +57,10 @@ mod tests {
     #[test]
     fn mode_b_variant_distinct() {
         let e = ExtensionError::ModeBNotImplemented;
-        assert_eq!(e.to_string(), "Mode B (full WASM) not implemented in Phase A");
+        assert_eq!(
+            e.to_string(),
+            "Mode B (full WASM) not implemented in Phase A"
+        );
     }
 
     #[test]

@@ -7,12 +7,7 @@ use predicates::prelude::*;
 fn ext_list_finds_fixture() {
     Command::cargo_bin("greentic-bundle")
         .unwrap()
-        .args([
-            "ext",
-            "--extension-dir",
-            "testdata/ext",
-            "list",
-        ])
+        .args(["ext", "--extension-dir", "testdata/ext", "list"])
         .assert()
         .success()
         .stdout(predicate::str::contains("greentic.bundle-fixture"))

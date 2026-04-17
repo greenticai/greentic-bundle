@@ -36,7 +36,11 @@ fn ext_render_produces_valid_gtpack() {
         .collect();
     assert!(names.iter().any(|n| n.ends_with("bundle.yaml")));
     assert!(names.iter().any(|n| n.ends_with("flows/main.ygtc")));
-    assert!(names.iter().any(|n| n.ends_with("assets/cards/welcome.json")));
+    assert!(
+        names
+            .iter()
+            .any(|n| n.ends_with("assets/cards/welcome.json"))
+    );
 }
 
 #[test]

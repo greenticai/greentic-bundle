@@ -166,7 +166,10 @@ mod tests {
 
     #[test]
     fn builtin_recipe_id_round_trip() {
-        assert_eq!(BuiltinRecipeId::from_str("standard"), Some(BuiltinRecipeId::Standard));
+        assert_eq!(
+            BuiltinRecipeId::from_str("standard"),
+            Some(BuiltinRecipeId::Standard)
+        );
         assert_eq!(BuiltinRecipeId::Standard.as_str(), "standard");
         assert_eq!(BuiltinRecipeId::from_str("unknown"), None);
     }
