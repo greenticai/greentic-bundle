@@ -11,4 +11,4 @@ pub mod builtin_bridge;
 pub mod wasm;
 pub mod errors;
 
-pub use errors::ExtensionError;
+// Re-exports added as sub-modules are implemented (Task 2+).
