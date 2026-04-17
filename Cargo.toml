@@ -68,6 +68,12 @@ tokio.workspace = true
 unic-langid.workspace = true
 zip = "8"
 
+# feature: extensions (bundle-ext Phase A)
+greentic-ext-contract = { git = "ssh://git@github.com/greenticai/greentic-designer-extensions", rev = "1659c762ab50b015c16db08ab0a879082f140065", optional = true }
+greentic-ext-runtime  = { git = "ssh://git@github.com/greenticai/greentic-designer-extensions", rev = "1659c762ab50b015c16db08ab0a879082f140065", optional = true }
+jsonschema = { version = "0.18", optional = true, default-features = false }
+thiserror = { version = "2", optional = true }
+
 [dev-dependencies]
 assert_cmd.workspace = true
 criterion = "0.8"
@@ -79,3 +85,12 @@ serde_json.workspace = true
 [[bench]]
 name = "perf"
 harness = false
+
+[features]
+default = []
+extensions = [
+  "dep:greentic-ext-contract",
+  "dep:greentic-ext-runtime",
+  "dep:jsonschema",
+  "dep:thiserror",
+]
