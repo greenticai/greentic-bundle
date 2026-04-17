@@ -23,7 +23,7 @@ jobs:
       - name: Install SquashFS tools
         run: sudo apt-get update && sudo apt-get install -y squashfs-tools
 
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@1.94.0
 
       - uses: Swatinem/rust-cache@v2
 
