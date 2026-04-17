@@ -13,6 +13,8 @@ pub mod inspect;
 pub mod remove;
 pub mod unbundle;
 pub mod wizard;
+#[cfg(feature = "extensions")]
+pub mod ext;
 
 #[derive(Debug, Parser)]
 #[command(
