@@ -80,6 +80,9 @@ walkdir = { version = "2", optional = true }
 assert_cmd.workspace = true
 criterion = "0.8"
 predicates.workspace = true
+sha2.workspace = true
+tempfile.workspace = true
+zip = "8"
 
 [build-dependencies]
 serde_json.workspace = true
