@@ -114,6 +114,23 @@ src/ext/
 └── errors.rs                ExtensionError enum (thiserror)
 ```
 
+### Install directory convention
+
+Phase A uses a **workspace-local install directory** at `state/ext/`, mirroring the existing `state/` convention for mutable workspace state (cache, build artifacts, setup, resolved output). Structure:
+
+```
+state/ext/
+├── <extension-id-1>/
+│   ├── describe.json
+│   ├── extension.wasm
+│   ├── schemas/
+│   └── i18n/
+└── <extension-id-2>/
+    └── ...
+```
+
+An `--extension-dir <PATH>` CLI flag overrides the default for testing and for non-workspace invocations (e.g., the host dispatcher when called from a daemon or designer). A user-global install directory is **not** part of Phase A; it can be layered later if demand arises.
+
 ### Changes to existing files (minimal)
 
 | File | Change |
@@ -234,7 +251,9 @@ Input:
 
 Flow:
   1. Parse config_json → StandardConfig
-  2. Create a deterministic tmpdir under state/ext-render/<session-id>/
+  2. Compute session-id = hex(sha256(flows_json || contents_json || sorted_assets || config_json))[..16]
+     Create a deterministic tmpdir under state/ext-render/<session-id>/
+     (same inputs always yield the same session-id → reproducible + cacheable)
   3. Synthesize ephemeral BundleWorkspaceDefinition:
        - Write flows from flows_json → flows/*.ygtc
        - Write contents from contents_json → assets/cards/*.json
