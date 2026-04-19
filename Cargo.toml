@@ -9,6 +9,7 @@ version = "0.4.29"
 anyhow = "1"
 assert_cmd = "2"
 clap = { version = "4", features = ["derive"] }
+constant_time_eq = "=0.4.2"
 greentic-bundle-reader = { version = "0.4", path = "crates/greentic-bundle-reader" }
 greentic-distributor-client = { version = "0.4", default-features = false, features = ["dist-client", "pack-fetch"] }
 greentic-qa-lib = "0.4"
@@ -53,6 +54,7 @@ include = [
 [dependencies]
 anyhow.workspace = true
 clap.workspace = true
+constant_time_eq.workspace = true
 greentic-bundle-reader.workspace = true
 greentic-distributor-client.workspace = true
 greentic-qa-lib.workspace = true

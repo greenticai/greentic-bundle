@@ -34,7 +34,7 @@ Tests require `GREENTIC_BUNDLE_USE_BUNDLED_CATALOG=1` to use the embedded provid
 
 ### Core Subsystems (under `src/`)
 
-- **`cli/`** — Clap-based command router: `wizard`, `build`, `inspect`, `doctor`, `access`, `init`, `add`, `remove`, `export`, `unbundle`
+- **`cli/`** — Clap-based command router: `wizard`, `build`, `inspect`, `doctor`, `access`, `init`, `add`, `remove`, `export`, `unbundle`, `ext` (feature-gated)
 - **`wizard/`** — Interactive staged composition flow (bundle basics → app-pack add/map → extension-providers → access review → build/dry-run/save). The largest module (~4500 LOC)
 - **`project/`** — `BundleWorkspaceDefinition` model backed by `bundle.yaml`. Defines app-pack mappings, tenant/team layout, and resolved output generation
 - **`catalog/`** — Registry resolution and caching. Supports `file://`, `ghcr://`, and `oci://` catalog URIs. Caches under `state/cache/catalogs/`
@@ -51,6 +51,7 @@ Tests require `GREENTIC_BUNDLE_USE_BUNDLED_CATALOG=1` to use the embedded provid
 - **Workspace-local state**: Mutable state lives under `state/` (cache, build artifacts, setup, resolved output)
 - **Answer replay**: Wizard outputs are replayable via `wizard apply --answers <FILE>`
 - **Offline mode**: `--offline` flag; catalogs are cached for replay from `state/cache/catalogs/`
+- **Bundle extensions**: `ext` subcommand (behind `--features extensions`) discovers extensions from `state/ext/` (or `--extension-dir`) and invokes recipes. The `render` verb accepts `-` for `--config`/`--session` (stdin; mutually exclusive) and a `--json` flag that emits single-line JSON summary / error instead of the human-readable i18n output.
 
 ### Bundle Workspace Paths
 

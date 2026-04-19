@@ -10,6 +10,8 @@ pub mod doctor;
 pub mod export;
 #[cfg(feature = "extensions")]
 pub mod ext;
+#[cfg(feature = "extensions")]
+mod ext_helpers;
 pub mod init;
 pub mod inspect;
 pub mod remove;
@@ -255,30 +257,62 @@ fn run_ext(args: ext::ExtArgs) -> anyhow::Result<()> {
             config,
             session,
             out,
+            json,
         } => {
-            let config_json = fs::read_to_string(&config)?;
-            let session_json = fs::read_to_string(&session)?;
-            let art = invoke_recipe(
+            use ext_helpers::{extension_error_code, fail_json, read_input};
+
+            // Can't multiplex a single stdin between two --config and --session reads.
+            if config == "-" && session == "-" {
+                return Err(fail_json(
+                    json,
+                    "invalid-args",
+                    "only one of --config and --session may read from stdin",
+                ));
+            }
+            if json && out.is_none() {
+                return Err(fail_json(json, "invalid-args", "--json requires --out"));
+            }
+
+            let config_json = read_input(&config)
+                .map_err(|e| fail_json(json, "invalid-config", &e.to_string()))?;
+            let session_json = read_input(&session)
+                .map_err(|e| fail_json(json, "invalid-session", &e.to_string()))?;
+
+            let result = invoke_recipe(
                 &registry,
                 &extension_id,
                 &recipe_id,
                 &config_json,
                 &session_json,
-            )?;
-            match out {
-                Some(path) => {
+            );
+
+            match (result, out) {
+                (Ok(art), Some(path)) => {
                     fs::write(&path, &art.bytes)?;
-                    let path_str = path.display().to_string();
-                    println!(
-                        "{}",
-                        crate::i18n::trf(
-                            "cli.ext.render.wrote",
-                            &[("file", path_str.as_str()), ("sha256", art.sha256.as_str()),],
-                        )
-                    );
+                    if json {
+                        let summary = serde_json::json!({
+                            "status": "ok",
+                            "filename": art.filename,
+                            "sha256": art.sha256,
+                            "bytesLen": art.bytes.len(),
+                        });
+                        println!("{summary}");
+                    } else {
+                        let path_str = path.display().to_string();
+                        println!(
+                            "{}",
+                            crate::i18n::trf(
+                                "cli.ext.render.wrote",
+                                &[("file", path_str.as_str()), ("sha256", art.sha256.as_str()),],
+                            )
+                        );
+                    }
                 }
-                None => {
+                (Ok(art), None) => {
                     std::io::stdout().write_all(&art.bytes)?;
+                }
+                (Err(e), _) => {
+                    return Err(fail_json(json, extension_error_code(&e), &e.to_string()));
                 }
             }
         }
