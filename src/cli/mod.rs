@@ -255,30 +255,60 @@ fn run_ext(args: ext::ExtArgs) -> anyhow::Result<()> {
             config,
             session,
             out,
+            json,
         } => {
-            let config_json = fs::read_to_string(&config)?;
-            let session_json = fs::read_to_string(&session)?;
-            let art = invoke_recipe(
+            if config == "-" && session == "-" {
+                return Err(render_error(
+                    json,
+                    "invalid-args",
+                    "only one of --config and --session may read from stdin",
+                ));
+            }
+
+            let config_json = read_input(&config)
+                .map_err(|e| render_error(json, "invalid-config", &e.to_string()))?;
+            let session_json = read_input(&session)
+                .map_err(|e| render_error(json, "invalid-session", &e.to_string()))?;
+
+            let result = invoke_recipe(
                 &registry,
                 &extension_id,
                 &recipe_id,
                 &config_json,
                 &session_json,
-            )?;
-            match out {
-                Some(path) => {
+            );
+
+            match (result, out) {
+                (Ok(art), Some(path)) => {
                     fs::write(&path, &art.bytes)?;
-                    let path_str = path.display().to_string();
-                    println!(
-                        "{}",
-                        crate::i18n::trf(
-                            "cli.ext.render.wrote",
-                            &[("file", path_str.as_str()), ("sha256", art.sha256.as_str()),],
-                        )
-                    );
+                    if json {
+                        let summary = serde_json::json!({
+                            "status": "ok",
+                            "filename": art.filename,
+                            "sha256": art.sha256,
+                            "bytesLen": art.bytes.len(),
+                        });
+                        println!("{summary}");
+                    } else {
+                        let path_str = path.display().to_string();
+                        println!(
+                            "{}",
+                            crate::i18n::trf(
+                                "cli.ext.render.wrote",
+                                &[("file", path_str.as_str()), ("sha256", art.sha256.as_str()),],
+                            )
+                        );
+                    }
                 }
-                None => {
+                (Ok(art), None) => {
+                    // Binary passthrough; --json with no --out is invalid.
+                    if json {
+                        return Err(render_error(json, "invalid-args", "--json requires --out"));
+                    }
                     std::io::stdout().write_all(&art.bytes)?;
+                }
+                (Err(e), _) => {
+                    return Err(render_error(json, extension_error_code(&e), &e.to_string()));
                 }
             }
         }
@@ -287,6 +317,46 @@ fn run_ext(args: ext::ExtArgs) -> anyhow::Result<()> {
         }
     }
     Ok(())
+}
+
+#[cfg(feature = "extensions")]
+fn read_input(path_or_dash: &str) -> std::io::Result<String> {
+    use std::io::Read;
+    if path_or_dash == "-" {
+        let mut buf = String::new();
+        std::io::stdin().read_to_string(&mut buf)?;
+        Ok(buf)
+    } else {
+        std::fs::read_to_string(path_or_dash)
+    }
+}
+
+#[cfg(feature = "extensions")]
+fn render_error(json: bool, code: &str, message: &str) -> anyhow::Error {
+    if json {
+        let line = serde_json::json!({
+            "status": "error",
+            "code": code,
+            "message": message,
+        });
+        println!("{line}");
+    }
+    anyhow::anyhow!("{code}: {message}")
+}
+
+#[cfg(feature = "extensions")]
+fn extension_error_code(err: &crate::ext::errors::ExtensionError) -> &'static str {
+    use crate::ext::errors::ExtensionError;
+    match err {
+        ExtensionError::NotFound(_) => "extension-not-found",
+        ExtensionError::RecipeNotFound { .. } => "recipe-not-found",
+        ExtensionError::InvalidConfig(_) => "invalid-config",
+        ExtensionError::InvalidDescriptor(_) => "invalid-descriptor",
+        ExtensionError::Conflict(_) => "conflict",
+        ExtensionError::ModeBNotImplemented => "mode-b-not-implemented",
+        ExtensionError::Io(_) => "io-error",
+        ExtensionError::Json(_) => "invalid-json",
+    }
 }
 
 #[cfg(test)]

@@ -46,15 +46,20 @@ pub enum ExtCommand {
         extension_id: String,
         /// Recipe id.
         recipe_id: String,
-        /// Path to a config JSON file.
+        /// Path to a config JSON file, or `-` to read from stdin.
         #[arg(long, value_name = "FILE")]
-        config: PathBuf,
-        /// Path to a designer session JSON file.
+        config: String,
+        /// Path to a designer session JSON file, or `-` to read from stdin.
         #[arg(long, value_name = "FILE")]
-        session: PathBuf,
+        session: String,
         /// Output file (default: stdout).
         #[arg(long, value_name = "FILE")]
         out: Option<PathBuf>,
+        /// Emit a single-line JSON summary on stdout (requires --out) and
+        /// JSON-formatted errors on non-zero exits. Off by default to preserve
+        /// the existing human-readable CLI behaviour.
+        #[arg(long)]
+        json: bool,
     },
 
     /// Print the resolved install directory.
