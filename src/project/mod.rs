@@ -334,9 +334,13 @@ pub fn resolved_output_paths(root: &Path, tenant: &str, team: Option<&str>) -> V
 }
 
 pub fn sync_project(root: &Path) -> Result<()> {
+    sync_project_with_reference_roots(root, &[])
+}
+
+pub fn sync_project_with_reference_roots(root: &Path, reference_roots: &[PathBuf]) -> Result<()> {
     ensure_layout(root)?;
     if let Ok(workspace) = read_bundle_workspace(root) {
-        materialize_workspace_dependencies(root, &workspace)?;
+        materialize_workspace_dependencies(root, &workspace, reference_roots)?;
     }
     for tenant in list_tenants(root)? {
         let teams = list_teams(root, &tenant)?;
@@ -358,6 +362,7 @@ pub fn sync_project(root: &Path) -> Result<()> {
 fn materialize_workspace_dependencies(
     root: &Path,
     workspace: &BundleWorkspaceDefinition,
+    reference_roots: &[PathBuf],
 ) -> Result<()> {
     let app_targets = app_pack_copy_targets(workspace);
     let provider_targets: Vec<_> = workspace
@@ -379,7 +384,12 @@ fn materialize_workspace_dependencies(
                 mapping.reference
             );
         }
-        materialize_reference_into(root, &mapping.reference, &mapping.destination)?;
+        materialize_reference_into(
+            root,
+            reference_roots,
+            &mapping.reference,
+            &mapping.destination,
+        )?;
     }
     for provider in &provider_targets {
         current += 1;
@@ -390,7 +400,7 @@ fn materialize_workspace_dependencies(
         } else {
             eprintln!("  [{current}/{total}] Resolving provider: {provider}");
         }
-        materialize_reference_into(root, provider, &destination)?;
+        materialize_reference_into(root, reference_roots, provider, &destination)?;
     }
     if total > 0 {
         eprintln!("  [done] Resolved {total} package(s)");
@@ -466,6 +476,7 @@ fn provider_destination_path(reference: &str) -> PathBuf {
 
 fn materialize_reference_into(
     root: &Path,
+    reference_roots: &[PathBuf],
     reference: &str,
     relative_destination: &Path,
 ) -> Result<()> {
@@ -477,7 +488,7 @@ fn materialize_reference_into(
         ensure_dir(parent)?;
     }
 
-    if let Some(local_path) = parse_local_pack_reference(root, reference) {
+    if let Some(local_path) = parse_local_pack_reference(root, reference_roots, reference) {
         if local_path.is_dir() {
             return Ok(());
         }
@@ -502,10 +513,27 @@ fn materialize_reference_into(
     Ok(())
 }
 
-fn parse_local_pack_reference(root: &Path, reference: &str) -> Option<PathBuf> {
+fn parse_local_pack_reference(
+    root: &Path,
+    reference_roots: &[PathBuf],
+    reference: &str,
+) -> Option<PathBuf> {
     if let Some(path) = reference.strip_prefix("file://") {
         let path = PathBuf::from(path.trim());
-        return path.exists().then_some(path);
+        if path.is_absolute() {
+            return path.exists().then_some(path);
+        }
+        for base in reference_roots
+            .iter()
+            .map(PathBuf::as_path)
+            .chain(std::iter::once(root))
+        {
+            let candidate = base.join(&path);
+            if candidate.exists() {
+                return Some(candidate);
+            }
+        }
+        return None;
     }
     if reference.contains("://") {
         return None;
@@ -514,8 +542,17 @@ fn parse_local_pack_reference(root: &Path, reference: &str) -> Option<PathBuf> {
     if candidate.is_absolute() {
         return candidate.exists().then_some(candidate);
     }
-    let joined = root.join(&candidate);
-    joined.exists().then_some(joined)
+    for base in reference_roots
+        .iter()
+        .map(PathBuf::as_path)
+        .chain(std::iter::once(root))
+    {
+        let joined = base.join(&candidate);
+        if joined.exists() {
+            return Some(joined);
+        }
+    }
+    None
 }
 
 fn resolve_remote_pack_path(root: &Path, reference: &str) -> Result<PathBuf> {

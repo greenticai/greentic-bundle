@@ -1083,6 +1083,133 @@ fn wizard_apply_accepts_delegated_launcher_answers() {
 }
 
 #[test]
+fn wizard_apply_materializes_relative_local_app_pack_from_answers_directory() {
+    let temp = TempDir::new().expect("tempdir");
+    let source_root = temp.path().join("source");
+    let demos_dir = source_root.join("demos");
+    let pack_path = demos_dir.join("deep-research-demo.gtpack");
+    let answers_path = source_root.join("answers.json");
+    let bundle_root = temp.path().join("bundle");
+
+    fs::create_dir_all(&demos_dir).expect("create demos dir");
+    fs::write(&pack_path, "deep-research-pack-bytes").expect("write app pack");
+    write_answers(
+        &answers_path,
+        &format!(
+            r#"{{
+  "wizard_id":"greentic-bundle.wizard.run",
+  "schema_id":"greentic-bundle.wizard.answers",
+  "schema_version":"1.0.0",
+  "locale":"en",
+  "answers":{{
+    "mode":"create",
+    "bundle_name":"Deep Research Bundle",
+    "bundle_id":"deep-research-bundle",
+    "output_dir":"{}",
+    "app_packs":["demos/deep-research-demo.gtpack"],
+    "app_pack_entries":[
+      {{
+        "reference":"demos/deep-research-demo.gtpack",
+        "detected_kind":"legacy",
+        "pack_id":"deep-research-demo",
+        "display_name":"Deep Research Demo",
+        "mapping":{{
+          "scope":"global"
+        }}
+      }}
+    ]
+  }},
+  "locks":{{}}
+}}"#,
+            bundle_root.display()
+        ),
+    );
+
+    let output = Command::new(bundle_bin())
+        .args(["wizard", "apply", "--answers"])
+        .arg(&answers_path)
+        .output()
+        .expect("run apply");
+    assert!(
+        output.status.success(),
+        "stdout={} stderr={}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+
+    let bundle_yaml = fs::read_to_string(bundle_root.join("bundle.yaml")).expect("bundle yaml");
+    assert!(bundle_yaml.contains("app_packs:\n  - demos/deep-research-demo.gtpack"));
+    assert_eq!(
+        fs::read(bundle_root.join("packs/deep-research-demo.gtpack"))
+            .expect("materialized relative app pack"),
+        b"deep-research-pack-bytes"
+    );
+}
+
+#[test]
+fn wizard_apply_materializes_relative_local_app_pack_from_current_working_directory() {
+    let temp = TempDir::new().expect("tempdir");
+    let source_root = temp.path().join("source");
+    let demos_dir = source_root.join("demos");
+    let pack_path = demos_dir.join("deep-research-demo.gtpack");
+    let answers_path = temp.path().join("answers.json");
+    let bundle_root = temp.path().join("bundle");
+
+    fs::create_dir_all(&demos_dir).expect("create demos dir");
+    fs::write(&pack_path, "deep-research-pack-bytes").expect("write app pack");
+    write_answers(
+        &answers_path,
+        &format!(
+            r#"{{
+  "wizard_id":"greentic-bundle.wizard.run",
+  "schema_id":"greentic-bundle.wizard.answers",
+  "schema_version":"1.0.0",
+  "locale":"en",
+  "answers":{{
+    "mode":"create",
+    "bundle_name":"Deep Research Bundle",
+    "bundle_id":"deep-research-bundle",
+    "output_dir":"{}",
+    "app_packs":["demos/deep-research-demo.gtpack"],
+    "app_pack_entries":[
+      {{
+        "reference":"demos/deep-research-demo.gtpack",
+        "detected_kind":"legacy",
+        "pack_id":"deep-research-demo",
+        "display_name":"Deep Research Demo",
+        "mapping":{{
+          "scope":"global"
+        }}
+      }}
+    ]
+  }},
+  "locks":{{}}
+}}"#,
+            bundle_root.display()
+        ),
+    );
+
+    let output = Command::new(bundle_bin())
+        .current_dir(&source_root)
+        .args(["wizard", "apply", "--answers"])
+        .arg(&answers_path)
+        .output()
+        .expect("run apply");
+    assert!(
+        output.status.success(),
+        "stdout={} stderr={}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+
+    assert_eq!(
+        fs::read(bundle_root.join("packs/deep-research-demo.gtpack"))
+            .expect("materialized relative app pack from cwd"),
+        b"deep-research-pack-bytes"
+    );
+}
+
+#[test]
 fn wizard_apply_replays_build_bundle_artifact_when_answers_capture_execute_lock() {
     let temp = TempDir::new().expect("tempdir");
     let bundle_root = temp.path().join("bundle");

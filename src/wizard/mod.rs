@@ -34,6 +34,7 @@ pub struct NormalizedRequest {
     pub bundle_name: String,
     pub bundle_id: String,
     pub output_dir: PathBuf,
+    pub local_reference_base_dir: Option<PathBuf>,
     pub app_pack_entries: Vec<AppPackEntry>,
     pub access_rules: Vec<AccessRuleInput>,
     pub extension_provider_entries: Vec<ExtensionProviderEntry>,
@@ -1589,6 +1590,7 @@ fn normalize_request(seed: SeedRequest) -> NormalizedRequest {
         bundle_name: seed.bundle_name.trim().to_string(),
         bundle_id,
         output_dir: normalize_output_dir(seed.output_dir),
+        local_reference_base_dir: None,
         app_pack_entries,
         access_rules,
         extension_provider_entries,
@@ -3078,11 +3080,39 @@ fn load_and_normalize_answers(
     let locks = document.locks.clone();
     let build_bundle_now = answer_document_requests_bundle_build(&document);
     let request = normalized_request_from_document(document, mode_override)?;
+    let request = NormalizedRequest {
+        local_reference_base_dir: Some(answer_reference_base_dir(path)?),
+        ..request
+    };
     Ok(LoadedRequest {
         request,
         locks,
         build_bundle_now,
     })
+}
+
+fn answer_reference_base_dir(path: &Path) -> Result<PathBuf> {
+    let base = path
+        .parent()
+        .filter(|parent| !parent.as_os_str().is_empty());
+    match base {
+        Some(parent) => parent
+            .canonicalize()
+            .with_context(|| format!("canonicalize answers parent {}", parent.display())),
+        None => std::env::current_dir().context("resolve current working directory for answers"),
+    }
+}
+
+fn reference_roots_for_apply(request: &NormalizedRequest) -> Result<Vec<PathBuf>> {
+    let mut roots = Vec::new();
+    if let Some(base_dir) = &request.local_reference_base_dir {
+        roots.push(base_dir.clone());
+    }
+    let current_dir = std::env::current_dir().context("resolve current working directory")?;
+    if !roots.iter().any(|root| root == &current_dir) {
+        roots.push(current_dir);
+    }
+    Ok(roots)
 }
 
 fn answer_document_requests_bundle_build(document: &AnswerDocument) -> bool {
@@ -3878,7 +3908,10 @@ fn apply_plan(
     let setup_result = persist_setup_state(request, ExecutionMode::Execute)?;
     crate::project::write_bundle_lock(&request.output_dir, bundle_lock)
         .with_context(|| format!("write {}", lock_file.display()))?;
-    crate::project::sync_project(&request.output_dir)?;
+    crate::project::sync_project_with_reference_roots(
+        &request.output_dir,
+        &reference_roots_for_apply(request)?,
+    )?;
 
     if request
         .capabilities
