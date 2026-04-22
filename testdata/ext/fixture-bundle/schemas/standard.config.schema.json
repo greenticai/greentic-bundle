@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["metadata", "channels"],
+  "additionalProperties": false,
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "required": ["name", "version"],
+      "properties": {
+        "name":    { "type": "string" },
+        "version": { "type": "string" }
+      }
+    },
+    "channels": {
+      "type": "array",
+      "items": { "enum": ["slack","teams","webchat","telegram","whatsapp","webex","email"] },
+      "uniqueItems": true,
+      "minItems": 1
+    },
+    "embed_ui": { "enum": ["none","webchat"], "default": "none" },
+    "i18n": {
+      "type": "object",
+      "properties": {
+        "source":  { "type": "string", "default": "en" },
+        "targets": { "type": "array", "items": { "type": "string" }, "default": [] }
+      }
+    },
+    "format": { "enum": ["gtpack-legacy"], "default": "gtpack-legacy" }
+  }
+}

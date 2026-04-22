@@ -127,15 +127,31 @@ if [ "$PACKAGE_ONLY" -eq 0 ]; then
 
   header "cargo clippy"
   cargo clippy --all-targets --all-features -- -D warnings
+  cargo clippy --features extensions --all-targets -- -D warnings
 
   header "cargo test"
   GREENTIC_BUNDLE_USE_BUNDLED_CATALOG=1 cargo test --all-features
+  GREENTIC_BUNDLE_USE_BUNDLED_CATALOG=1 cargo test --features extensions --all-targets
 
   header "cargo build"
   cargo build --all-features
 
   header "cargo doc"
   cargo doc --no-deps --all-features
+fi
+
+# Phase A compile-regression guard: extensions-off binary must stay within
+# 500 KB of the main-branch baseline. Skipped if baseline file is absent.
+if [ -f /tmp/greentic-bundle-baseline.size ]; then
+  cargo build --release --no-default-features
+  NEW=$(stat -c '%s' target/release/greentic-bundle 2>/dev/null || stat -f '%z' target/release/greentic-bundle)
+  BASE=$(cat /tmp/greentic-bundle-baseline.size)
+  DELTA=$(( (NEW - BASE) / 1024 ))
+  echo "binary size delta: ${DELTA} KB (baseline ${BASE}, new ${NEW})"
+  if [ "$DELTA" -gt 500 ]; then
+    echo "ERROR: binary grew by ${DELTA} KB (>500 KB budget)" >&2
+    exit 1
+  fi
 fi
 
 run_packaging_checks

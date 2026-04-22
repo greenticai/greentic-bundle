@@ -3,15 +3,16 @@ members = ["crates/greentic-bundle-reader"]
 resolver = "2"
 
 [workspace.package]
-version = "0.4.29"
+version = "0.5.2"
 
 [workspace.dependencies]
 anyhow = "1"
 assert_cmd = "2"
 clap = { version = "4", features = ["derive"] }
-greentic-bundle-reader = { version = "0.4", path = "crates/greentic-bundle-reader" }
-greentic-distributor-client = { version = "0.4", default-features = false, features = ["dist-client", "pack-fetch"] }
-greentic-qa-lib = "0.4"
+constant_time_eq = "=0.4.2"
+greentic-bundle-reader = { version = ">=0.5.0-0, <0.6.0-0", path = "crates/greentic-bundle-reader" }
+greentic-distributor-client = { version = ">=0.5.0-0, <0.6.0-0", default-features = false, features = ["dist-client", "pack-fetch"] }
+greentic-qa-lib = ">=0.5.0-0, <0.6.0-0"
 predicates = "3"
 rpassword = "7"
 semver = { version = "1", features = ["serde"] }
@@ -50,9 +51,31 @@ include = [
     "ci/**",
 ]
 
+[package.metadata.binstall]
+pkg-url = "{ repo }/releases/download/v{ version }/{ name }-v{ version }-{ target }.tgz"
+pkg-fmt = "tgz"
+bin-dir = "{ name }-v{ version }-{ target }/{ bin }{ binary-ext }"
+targets = [
+  "x86_64-unknown-linux-gnu",
+  "aarch64-unknown-linux-gnu",
+  "x86_64-apple-darwin",
+  "aarch64-apple-darwin",
+  "x86_64-pc-windows-msvc",
+  "aarch64-pc-windows-msvc",
+]
+
+[package.metadata.binstall.overrides.x86_64-pc-windows-msvc]
+pkg-url = "{ repo }/releases/download/v{ version }/{ name }-v{ version }-{ target }.zip"
+pkg-fmt = "zip"
+
+[package.metadata.binstall.overrides.aarch64-pc-windows-msvc]
+pkg-url = "{ repo }/releases/download/v{ version }/{ name }-v{ version }-{ target }.zip"
+pkg-fmt = "zip"
+
 [dependencies]
 anyhow.workspace = true
 clap.workspace = true
+constant_time_eq.workspace = true
 greentic-bundle-reader.workspace = true
 greentic-distributor-client.workspace = true
 greentic-qa-lib.workspace = true
@@ -68,10 +91,21 @@ tokio.workspace = true
 unic-langid.workspace = true
 zip = "8"
 
+# feature: extensions (bundle-ext Phase A).
+# Note: greentic-ext-{contract,runtime} are Phase B concerns — Mode A routes
+# render to the native builtin_bridge without invoking any WASM runtime.
+# Those git deps land when Mode B is implemented.
+jsonschema = { version = "0.18", optional = true, default-features = false }
+thiserror = { version = "2", optional = true }
+walkdir = { version = "2", optional = true }
+
 [dev-dependencies]
 assert_cmd.workspace = true
 criterion = "0.8"
 predicates.workspace = true
+sha2.workspace = true
+tempfile.workspace = true
+zip = "8"
 
 [build-dependencies]
 serde_json.workspace = true
@@ -79,3 +113,11 @@ serde_json.workspace = true
 [[bench]]
 name = "perf"
 harness = false
+
+[features]
+default = []
+extensions = [
+  "dep:jsonschema",
+  "dep:thiserror",
+  "dep:walkdir",
+]

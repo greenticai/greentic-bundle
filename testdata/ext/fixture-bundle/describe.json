@@ -1,0 +1,22 @@
+{
+  "apiVersion": "greentic.ai/v1",
+  "kind": "BundleExtension",
+  "metadata": {
+    "id": "greentic.bundle-fixture",
+    "name": "Fixture Bundle Extension",
+    "version": "0.0.1"
+  },
+  "runtime": { "component": "extension.wasm", "memoryLimitMB": 64 },
+  "execution": { "kind": "builtin", "builtinId": "standard" },
+  "contributions": {
+    "recipes": [
+      {
+        "id": "standard",
+        "displayName": "Standard",
+        "description": "Fixture — delegates to builtin",
+        "configSchema": "schemas/standard.config.schema.json",
+        "supportedCapabilities": ["greentic:flows/*"]
+      }
+    ]
+  }
+}

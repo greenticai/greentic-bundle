@@ -1,0 +1,6 @@
+{
+  "flows_json": "[{\"name\":\"main\",\"yaml\":\"schemaVersion: 2\\nname: main\"}]",
+  "contents_json": "[{\"id\":\"welcome\",\"json\":{\"type\":\"AdaptiveCard\",\"version\":\"1.5\"}}]",
+  "assets": [],
+  "capabilities_used": ["greentic:adaptive-cards/schema"]
+}

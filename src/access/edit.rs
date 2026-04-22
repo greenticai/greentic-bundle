@@ -23,7 +23,7 @@ pub fn upsert_policy(path: &Path, rule_path: &str, policy: Policy) -> anyhow::Re
 
     let mut rules = parse_str(&updated)?;
     upsert_rule(&mut rules, rule_path, policy)?;
-    rules.sort_by(|a, b| canonical_key(&a.path).cmp(&canonical_key(&b.path)));
+    rules.sort_by_key(|r| canonical_key(&r.path));
     let rendered = render_rules(&rules);
     write_file(path, &rendered)?;
     Ok(())
