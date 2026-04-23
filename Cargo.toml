@@ -30,6 +30,10 @@ sys-locale = "0.3"
 tempfile = "3"
 tokio = { version = "1", features = ["rt-multi-thread"] }
 unic-langid = "0.9"
+dirs = "5"
+greentic-ext-contract = { path = "../greentic-designer-extensions/crates/greentic-ext-contract" }
+greentic-ext-runtime = { path = "../greentic-designer-extensions/crates/greentic-ext-runtime" }
+wasmtime = { version = "43", default-features = false, features = ["component-model", "async"] }
 
 [package]
 name = "greentic-bundle"
@@ -97,6 +101,10 @@ tempfile.workspace = true
 tokio.workspace = true
 unic-langid.workspace = true
 zip = "8"
+dirs.workspace = true
+greentic-ext-contract.workspace = true
+greentic-ext-runtime.workspace = true
+wasmtime.workspace = true
 
 # feature: extensions (bundle-ext Phase A).
 # Note: greentic-ext-{contract,runtime} are Phase B concerns — Mode A routes
