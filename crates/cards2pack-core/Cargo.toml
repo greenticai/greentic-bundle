@@ -1,0 +1,20 @@
+[package]
+name = "cards2pack-core"
+version.workspace = true
+edition = "2024"
+rust-version = "1.91"
+license = "MIT"
+description = "Pure-Rust cards-to-flow YGTc converter for Greentic bundle extensions."
+repository = "https://github.com/greenticai/greentic-bundle"
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+serde_yaml_bw.workspace = true
+thiserror = "2"
+
+[dev-dependencies]
+insta = { version = "1", features = ["yaml", "json"] }

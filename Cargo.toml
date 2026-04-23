@@ -1,5 +1,8 @@
 [workspace]
-members = ["crates/greentic-bundle-reader"]
+members = [
+    "crates/greentic-bundle-reader",
+    "crates/cards2pack-core",
+]
 resolver = "2"
 
 [workspace.package]
@@ -19,6 +22,7 @@ semver = { version = "1", features = ["serde"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 serde_yaml_bw = { package = "serde_yaml_gtc", version = "2.5.2" }
+thiserror = "2"
 sha2 = "0.11"
 sys-locale = "0.3"
 tempfile = "3"
