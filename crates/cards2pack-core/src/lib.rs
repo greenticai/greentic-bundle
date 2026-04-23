@@ -13,3 +13,4 @@ mod parse;
 mod entry;
 mod routing;
 mod http_inject;
+mod emit;
