@@ -1,0 +1,23 @@
+[
+  { "id": "menu", "json": {
+      "type": "AdaptiveCard",
+      "actions": [
+        { "type": "Action.Submit", "title": "Form A", "data": { "routeToCardId": "form_a", "action_id": "go_a" } },
+        { "type": "Action.Submit", "title": "Form B", "data": { "routeToCardId": "form_b", "action_id": "go_b" } },
+        { "type": "Action.Submit", "title": "Form C", "data": { "routeToCardId": "form_c", "action_id": "go_c" } }
+      ]
+  }},
+  { "id": "form_a", "json": {
+      "type": "AdaptiveCard",
+      "actions": [{ "type": "Action.Submit", "title": "Done", "data": { "routeToCardId": "thanks", "action_id": "done_a" } }]
+  }},
+  { "id": "form_b", "json": {
+      "type": "AdaptiveCard",
+      "actions": [{ "type": "Action.Submit", "title": "Done", "data": { "routeToCardId": "thanks", "action_id": "done_b" } }]
+  }},
+  { "id": "form_c", "json": {
+      "type": "AdaptiveCard",
+      "actions": [{ "type": "Action.Submit", "title": "Done", "data": { "routeToCardId": "thanks", "action_id": "done_c" } }]
+  }},
+  { "id": "thanks", "json": { "type": "AdaptiveCard" } }
+]

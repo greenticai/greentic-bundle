@@ -1,0 +1,19 @@
+[
+  { "id": "form", "json": {
+      "type": "AdaptiveCard",
+      "actions": [
+        { "type": "Action.Submit", "title": "Submit", "data": { "routeToCardId": "submit_api", "action_id": "submit" } }
+      ]
+  }},
+  { "id": "submit_api", "json": {
+      "type": "http",
+      "config": {
+        "url": "https://api.example.com/submit",
+        "method": "POST",
+        "headers": { "Content-Type": "application/json" },
+        "body_mapping": { "name": "$.formData.name" },
+        "next_entry_id": "thanks"
+      }
+  }},
+  { "id": "thanks", "json": { "type": "AdaptiveCard" } }
+]

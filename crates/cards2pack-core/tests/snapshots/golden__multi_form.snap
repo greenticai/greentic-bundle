@@ -1,0 +1,98 @@
+---
+source: crates/cards2pack-core/tests/golden.rs
+expression: yaml
+---
+id: multi-form
+type: messaging
+schema_version: 2
+start: menu
+nodes:
+  form_a:
+    routing:
+    - to: thanks
+    card:
+      call:
+        op: render
+        metadata: []
+        payload:
+          card_source: asset
+          card_spec:
+            asset_path: assets/cards/form_a.json
+          mode: renderAndValidate
+          node_id: form_a
+          payload: {}
+          session: {}
+          state: {}
+          validation_mode: warn
+  form_b:
+    routing:
+    - to: thanks
+    card:
+      call:
+        op: render
+        metadata: []
+        payload:
+          card_source: asset
+          card_spec:
+            asset_path: assets/cards/form_b.json
+          mode: renderAndValidate
+          node_id: form_b
+          payload: {}
+          session: {}
+          state: {}
+          validation_mode: warn
+  form_c:
+    routing:
+    - to: thanks
+    card:
+      call:
+        op: render
+        metadata: []
+        payload:
+          card_source: asset
+          card_spec:
+            asset_path: assets/cards/form_c.json
+          mode: renderAndValidate
+          node_id: form_c
+          payload: {}
+          session: {}
+          state: {}
+          validation_mode: warn
+  menu:
+    routing:
+    - to: form_a
+      when: action.action_id == "go_a"
+    - to: form_b
+      when: action.action_id == "go_b"
+    - to: form_c
+      when: action.action_id == "go_c"
+    card:
+      call:
+        op: render
+        metadata: []
+        payload:
+          card_source: asset
+          card_spec:
+            asset_path: assets/cards/menu.json
+          mode: renderAndValidate
+          node_id: menu
+          payload: {}
+          session: {}
+          state: {}
+          validation_mode: warn
+  thanks:
+    routing: []
+    card:
+      call:
+        op: render
+        metadata: []
+        payload:
+          card_source: asset
+          card_spec:
+            asset_path: assets/cards/thanks.json
+          mode: renderAndValidate
+          node_id: thanks
+          payload: {}
+          session: {}
+          state: {}
+          validation_mode: warn
