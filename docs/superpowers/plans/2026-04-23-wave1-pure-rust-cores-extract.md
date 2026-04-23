@@ -1420,7 +1420,7 @@ fn noc_alert_no_duplicate_flat_fields() {
 }
 
 #[test]
-fn noc_alert_routing_uses_routeToCardId_not_alphabetical_chain() {
+fn noc_alert_routing_uses_route_to_card_id_not_alphabetical_chain() {
     let yaml = run_fixture("noc_alert");
     // welcome card has 4 menu actions → must emit 4 conditional routes.
     let when_count = yaml.matches("when: action.action_id ==").count();
