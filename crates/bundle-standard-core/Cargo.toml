@@ -1,0 +1,19 @@
+[package]
+name = "bundle-standard-core"
+version.workspace = true
+edition = "2024"
+rust-version = "1.91"
+license = "MIT"
+description = "Pure-Rust workspace+ZIP assembly for the bundle-standard recipe."
+repository = "https://github.com/greenticai/greentic-bundle"
+readme = "README.md"
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+thiserror = "2"
+zip = { version = "2", default-features = false, features = ["deflate"] }

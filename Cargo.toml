@@ -2,6 +2,7 @@
 members = [
     "crates/greentic-bundle-reader",
     "crates/cards2pack-core",
+    "crates/bundle-standard-core",
 ]
 resolver = "2"
 
