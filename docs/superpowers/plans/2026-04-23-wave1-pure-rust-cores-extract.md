@@ -168,7 +168,7 @@ thiserror = "2"
 //! and structured warnings.
 
 #![forbid(unsafe_code)]
-#![deny(rust_2024_idioms)]
+#![deny(rust_2018_idioms)]
 ```
 
 (No `mod` declarations yet. Each subsequent task adds its own `mod foo;` line as the file is created. Final re-export block lands in Task 10.)
@@ -1745,7 +1745,7 @@ zip = { version = "2", default-features = false, features = ["deflate"] }
 //! `Vec<(String, Vec<u8>)>` entries.
 
 #![forbid(unsafe_code)]
-#![deny(rust_2024_idioms)]
+#![deny(rust_2018_idioms)]
 ```
 
 (Each subsequent task adds its own `mod foo;` line. Final re-export block lands at end of Task 19.)
@@ -2207,7 +2207,7 @@ Replace `crates/bundle-standard-core/src/lib.rs` with the full re-export block:
 //! `Vec<(String, Vec<u8>)>` entries.
 
 #![forbid(unsafe_code)]
-#![deny(rust_2024_idioms)]
+#![deny(rust_2018_idioms)]
 
 mod build;
 mod errors;
