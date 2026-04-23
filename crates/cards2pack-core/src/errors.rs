@@ -43,7 +43,11 @@ mod tests {
         assert_eq!(ConvertError::NoCards.code(), "E_NO_CARDS");
         assert_eq!(ConvertError::NoEntryCard { count: 0 }.code(), "E_NO_ENTRY");
         assert_eq!(
-            ConvertError::DanglingRoute { from: "a".into(), to: "b".into() }.code(),
+            ConvertError::DanglingRoute {
+                from: "a".into(),
+                to: "b".into()
+            }
+            .code(),
             "E_DANGLING_ROUTE"
         );
     }

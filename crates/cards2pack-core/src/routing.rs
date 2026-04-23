@@ -83,18 +83,24 @@ mod tests {
     use serde_json::json;
 
     fn card(id: &str, json: serde_json::Value) -> CardEntry {
-        CardEntry { id: id.into(), kind: CardKind::AdaptiveCard(json) }
+        CardEntry {
+            id: id.into(),
+            kind: CardKind::AdaptiveCard(json),
+        }
     }
 
     #[test]
     fn edges_preserve_declaration_order() {
         let cards = vec![
-            card("welcome", json!({
-                "actions":[
-                    {"type":"Action.Submit","data":{"routeToCardId":"a","action_id":"go_a"}},
-                    {"type":"Action.Submit","data":{"routeToCardId":"b","action_id":"go_b"}}
-                ]
-            })),
+            card(
+                "welcome",
+                json!({
+                    "actions":[
+                        {"type":"Action.Submit","data":{"routeToCardId":"a","action_id":"go_a"}},
+                        {"type":"Action.Submit","data":{"routeToCardId":"b","action_id":"go_b"}}
+                    ]
+                }),
+            ),
             card("a", json!({})),
             card("b", json!({})),
         ];
@@ -109,8 +115,14 @@ mod tests {
     #[test]
     fn back_edges_preserved() {
         let cards = vec![
-            card("welcome", json!({"actions":[{"type":"Action.Submit","data":{"routeToCardId":"chat"}}]})),
-            card("chat", json!({"actions":[{"type":"Action.Submit","data":{"routeToCardId":"welcome"}}]})),
+            card(
+                "welcome",
+                json!({"actions":[{"type":"Action.Submit","data":{"routeToCardId":"chat"}}]}),
+            ),
+            card(
+                "chat",
+                json!({"actions":[{"type":"Action.Submit","data":{"routeToCardId":"welcome"}}]}),
+            ),
         ];
         let (g, _) = build_routing(&cards, false).unwrap();
         let chat_edges = g.edges.get("chat").unwrap();
@@ -119,18 +131,24 @@ mod tests {
 
     #[test]
     fn dangling_route_strict_errors() {
-        let cards = vec![card("welcome", json!({"actions":[
-            {"type":"Action.Submit","data":{"routeToCardId":"missing"}}
-        ]}))];
+        let cards = vec![card(
+            "welcome",
+            json!({"actions":[
+                {"type":"Action.Submit","data":{"routeToCardId":"missing"}}
+            ]}),
+        )];
         let err = build_routing(&cards, true).unwrap_err();
         assert_eq!(err.code(), "E_DANGLING_ROUTE");
     }
 
     #[test]
     fn dangling_route_lenient_diagnostic() {
-        let cards = vec![card("welcome", json!({"actions":[
-            {"type":"Action.Submit","data":{"routeToCardId":"missing"}}
-        ]}))];
+        let cards = vec![card(
+            "welcome",
+            json!({"actions":[
+                {"type":"Action.Submit","data":{"routeToCardId":"missing"}}
+            ]}),
+        )];
         let (g, diags) = build_routing(&cards, false).unwrap();
         assert!(g.edges.is_empty());
         assert_eq!(diags.len(), 1);
@@ -140,9 +158,12 @@ mod tests {
     #[test]
     fn synthesizes_action_id_when_missing() {
         let cards = vec![
-            card("welcome", json!({"actions":[
-                {"type":"Action.Submit","data":{"routeToCardId":"target"}}
-            ]})),
+            card(
+                "welcome",
+                json!({"actions":[
+                    {"type":"Action.Submit","data":{"routeToCardId":"target"}}
+                ]}),
+            ),
             card("target", json!({})),
         ];
         let (g, _) = build_routing(&cards, false).unwrap();

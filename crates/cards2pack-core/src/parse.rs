@@ -11,8 +11,8 @@ struct RawEntry {
 }
 
 pub fn parse_cards(contents_json: &str) -> Result<Vec<CardEntry>, ConvertError> {
-    let raw: Vec<RawEntry> = serde_json::from_str(contents_json)
-        .map_err(|e| ConvertError::Parse(e.to_string()))?;
+    let raw: Vec<RawEntry> =
+        serde_json::from_str(contents_json).map_err(|e| ConvertError::Parse(e.to_string()))?;
 
     let mut out = Vec::with_capacity(raw.len());
     for entry in raw {
@@ -23,11 +23,22 @@ pub fn parse_cards(contents_json: &str) -> Result<Vec<CardEntry>, ConvertError> 
 }
 
 fn classify(entry: &RawEntry) -> Result<CardKind, ConvertError> {
-    let ty = entry.json.get("type").and_then(|v| v.as_str()).unwrap_or("");
+    let ty = entry
+        .json
+        .get("type")
+        .and_then(|v| v.as_str())
+        .unwrap_or("");
     if ty == "http" {
-        let config_value = entry.json.get("config").cloned().unwrap_or(serde_json::json!({}));
-        let cfg: HttpConfig = serde_json::from_value(config_value)
-            .map_err(|e| ConvertError::InvalidHttp { id: entry.id.clone(), msg: e.to_string() })?;
+        let config_value = entry
+            .json
+            .get("config")
+            .cloned()
+            .unwrap_or(serde_json::json!({}));
+        let cfg: HttpConfig =
+            serde_json::from_value(config_value).map_err(|e| ConvertError::InvalidHttp {
+                id: entry.id.clone(),
+                msg: e.to_string(),
+            })?;
         Ok(CardKind::Http(cfg))
     } else {
         Ok(CardKind::AdaptiveCard(entry.json.clone()))

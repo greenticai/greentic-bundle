@@ -12,15 +12,14 @@ pub struct HttpNode {
 
 /// Append HTTP-derived nodes to the routing graph and return the list of HTTP nodes
 /// for the emitter to materialize.
-pub fn inject_http_nodes(
-    cards: &[CardEntry],
-    routing: &mut RoutingGraph,
-) -> Vec<HttpNode> {
+pub fn inject_http_nodes(cards: &[CardEntry], routing: &mut RoutingGraph) -> Vec<HttpNode> {
     let mut http_nodes = Vec::new();
     let known: std::collections::HashSet<&str> = cards.iter().map(|c| c.id.as_str()).collect();
 
     for card in cards {
-        let CardKind::Http(cfg) = &card.kind else { continue };
+        let CardKind::Http(cfg) = &card.kind else {
+            continue;
+        };
         http_nodes.push(HttpNode {
             id: card.id.clone(),
             config: cfg.clone(),
@@ -49,7 +48,10 @@ mod tests {
     use serde_json::json;
 
     fn ac_card(id: &str) -> CardEntry {
-        CardEntry { id: id.into(), kind: CardKind::AdaptiveCard(json!({})) }
+        CardEntry {
+            id: id.into(),
+            kind: CardKind::AdaptiveCard(json!({})),
+        }
     }
 
     #[test]

@@ -20,7 +20,7 @@ pub use convert::convert;
 pub use errors::ConvertError;
 pub use http_inject::HttpNode;
 pub use parse::parse_cards;
-pub use routing::{build_routing, RouteEdge, RoutingGraph};
+pub use routing::{RouteEdge, RoutingGraph, build_routing};
 pub use types::{
     CardEntry, CardKind, ConvertOptions, ConvertResult, Diagnostic, DiagnosticKind, HttpConfig,
 };

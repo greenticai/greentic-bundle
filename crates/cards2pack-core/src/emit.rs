@@ -202,15 +202,33 @@ mod tests {
     fn multi_route_emits_conditional_when() {
         use crate::routing::RouteEdge;
         let cards = vec![
-            CardEntry { id: "menu".into(), kind: CardKind::AdaptiveCard(json!({})) },
-            CardEntry { id: "a".into(), kind: CardKind::AdaptiveCard(json!({})) },
-            CardEntry { id: "b".into(), kind: CardKind::AdaptiveCard(json!({})) },
+            CardEntry {
+                id: "menu".into(),
+                kind: CardKind::AdaptiveCard(json!({})),
+            },
+            CardEntry {
+                id: "a".into(),
+                kind: CardKind::AdaptiveCard(json!({})),
+            },
+            CardEntry {
+                id: "b".into(),
+                kind: CardKind::AdaptiveCard(json!({})),
+            },
         ];
         let mut routing = RoutingGraph::default();
-        routing.edges.insert("menu".into(), vec![
-            RouteEdge { action_id: "go_a".into(), target: "a".into() },
-            RouteEdge { action_id: "go_b".into(), target: "b".into() },
-        ]);
+        routing.edges.insert(
+            "menu".into(),
+            vec![
+                RouteEdge {
+                    action_id: "go_a".into(),
+                    target: "a".into(),
+                },
+                RouteEdge {
+                    action_id: "go_b".into(),
+                    target: "b".into(),
+                },
+            ],
+        );
         let yaml = emit_ygtc(&cards, "menu", &routing, &[], "demo").unwrap();
         assert!(yaml.contains(r#"when: action.action_id == "go_a""#));
         assert!(yaml.contains(r#"when: action.action_id == "go_b""#));

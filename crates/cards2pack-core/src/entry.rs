@@ -13,7 +13,10 @@ pub fn detect_entry(cards: &[CardEntry]) -> Result<String, ConvertError> {
         return Ok(menu.id.clone());
     }
 
-    if let Some(first) = cards.iter().find(|c| matches!(c.kind, CardKind::AdaptiveCard(_))) {
+    if let Some(first) = cards
+        .iter()
+        .find(|c| matches!(c.kind, CardKind::AdaptiveCard(_)))
+    {
         return Ok(first.id.clone());
     }
 
@@ -47,20 +50,26 @@ mod tests {
     use serde_json::json;
 
     fn card(id: &str, json: serde_json::Value) -> CardEntry {
-        CardEntry { id: id.into(), kind: CardKind::AdaptiveCard(json) }
+        CardEntry {
+            id: id.into(),
+            kind: CardKind::AdaptiveCard(json),
+        }
     }
 
     #[test]
     fn picks_menu_card_over_first() {
         let cards = vec![
             card("intro", json!({"type":"AdaptiveCard"})),
-            card("welcome", json!({
-                "type":"AdaptiveCard",
-                "actions":[
-                    {"type":"Action.Submit","data":{"routeToCardId":"a"}},
-                    {"type":"Action.Submit","data":{"routeToCardId":"b"}}
-                ]
-            })),
+            card(
+                "welcome",
+                json!({
+                    "type":"AdaptiveCard",
+                    "actions":[
+                        {"type":"Action.Submit","data":{"routeToCardId":"a"}},
+                        {"type":"Action.Submit","data":{"routeToCardId":"b"}}
+                    ]
+                }),
+            ),
         ];
         assert_eq!(detect_entry(&cards).unwrap(), "welcome");
     }
@@ -77,10 +86,13 @@ mod tests {
     #[test]
     fn ignores_single_action_cards() {
         let cards = vec![
-            card("greeter", json!({
-                "type":"AdaptiveCard",
-                "actions":[{"type":"Action.Submit","data":{"routeToCardId":"next"}}]
-            })),
+            card(
+                "greeter",
+                json!({
+                    "type":"AdaptiveCard",
+                    "actions":[{"type":"Action.Submit","data":{"routeToCardId":"next"}}]
+                }),
+            ),
             card("after", json!({"type":"AdaptiveCard"})),
         ];
         // Single-action card is NOT a menu card, fallback to first.
