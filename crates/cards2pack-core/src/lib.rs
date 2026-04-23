@@ -7,6 +7,7 @@
 #![forbid(unsafe_code)]
 #![deny(rust_2018_idioms)]
 
+mod convert;
 mod types;
 mod errors;
 mod parse;
