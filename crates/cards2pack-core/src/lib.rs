@@ -10,3 +10,4 @@
 mod types;
 mod errors;
 mod parse;
+mod entry;
