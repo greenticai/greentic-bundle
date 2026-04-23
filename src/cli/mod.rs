@@ -12,6 +12,7 @@ pub mod export;
 pub mod ext;
 #[cfg(feature = "extensions")]
 mod ext_helpers;
+pub mod info;
 pub mod init;
 pub mod inspect;
 pub mod remove;
