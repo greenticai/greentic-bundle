@@ -1,0 +1,238 @@
+---
+source: crates/cards2pack-core/tests/golden.rs
+expression: yaml
+---
+id: noc-alert
+type: messaging
+schema_version: 2
+start: welcome
+nodes:
+  demo_wrapup:
+    routing: []
+    card:
+      call:
+        op: render
+        metadata: []
+        payload:
+          card_source: asset
+          card_spec:
+            asset_path: assets/cards/demo_wrapup.json
+          mode: renderAndValidate
+          node_id: demo_wrapup
+          payload: {}
+          session: {}
+          state: {}
+          validation_mode: warn
+  scene1_noc_dashboard:
+    routing:
+    - to: scene2_alert_intro
+    card:
+      call:
+        op: render
+        metadata: []
+        payload:
+          card_source: asset
+          card_spec:
+            asset_path: assets/cards/scene1_noc_dashboard.json
+          mode: renderAndValidate
+          node_id: scene1_noc_dashboard
+          payload: {}
+          session: {}
+          state: {}
+          validation_mode: warn
+  scene2_alert_intro:
+    routing:
+    - to: scene2_analysis_response
+    card:
+      call:
+        op: render
+        metadata: []
+        payload:
+          card_source: asset
+          card_spec:
+            asset_path: assets/cards/scene2_alert_intro.json
+          mode: renderAndValidate
+          node_id: scene2_alert_intro
+          payload: {}
+          session: {}
+          state: {}
+          validation_mode: warn
+  scene2_analysis_response:
+    routing:
+    - to: scene2_capability_callout
+    card:
+      call:
+        op: render
+        metadata: []
+        payload:
+          card_source: asset
+          card_spec:
+            asset_path: assets/cards/scene2_analysis_response.json
+          mode: renderAndValidate
+          node_id: scene2_analysis_response
+          payload: {}
+          session: {}
+          state: {}
+          validation_mode: warn
+  scene2_capability_callout:
+    routing:
+    - to: scene3_bgp_alert_intro
+    card:
+      call:
+        op: render
+        metadata: []
+        payload:
+          card_source: asset
+          card_spec:
+            asset_path: assets/cards/scene2_capability_callout.json
+          mode: renderAndValidate
+          node_id: scene2_capability_callout
+          payload: {}
+          session: {}
+          state: {}
+          validation_mode: warn
+  scene3_bgp_alert_intro:
+    routing:
+    - to: scene3_parallel_query_indicator
+    card:
+      call:
+        op: render
+        metadata: []
+        payload:
+          card_source: asset
+          card_spec:
+            asset_path: assets/cards/scene3_bgp_alert_intro.json
+          mode: renderAndValidate
+          node_id: scene3_bgp_alert_intro
+          payload: {}
+          session: {}
+          state: {}
+          validation_mode: warn
+  scene3_bgp_rca_response:
+    routing:
+    - to: scene3_capability_callout
+    card:
+      call:
+        op: render
+        metadata: []
+        payload:
+          card_source: asset
+          card_spec:
+            asset_path: assets/cards/scene3_bgp_rca_response.json
+          mode: renderAndValidate
+          node_id: scene3_bgp_rca_response
+          payload: {}
+          session: {}
+          state: {}
+          validation_mode: warn
+  scene3_capability_callout:
+    routing:
+    - to: scene4_explainability_intro
+    card:
+      call:
+        op: render
+        metadata: []
+        payload:
+          card_source: asset
+          card_spec:
+            asset_path: assets/cards/scene3_capability_callout.json
+          mode: renderAndValidate
+          node_id: scene3_capability_callout
+          payload: {}
+          session: {}
+          state: {}
+          validation_mode: warn
+  scene3_parallel_query_indicator:
+    routing:
+    - to: scene3_bgp_rca_response
+    card:
+      call:
+        op: render
+        metadata: []
+        payload:
+          card_source: asset
+          card_spec:
+            asset_path: assets/cards/scene3_parallel_query_indicator.json
+          mode: renderAndValidate
+          node_id: scene3_parallel_query_indicator
+          payload: {}
+          session: {}
+          state: {}
+          validation_mode: warn
+  scene4_correlation_summary:
+    routing:
+    - to: demo_wrapup
+    card:
+      call:
+        op: render
+        metadata: []
+        payload:
+          card_source: asset
+          card_spec:
+            asset_path: assets/cards/scene4_correlation_summary.json
+          mode: renderAndValidate
+          node_id: scene4_correlation_summary
+          payload: {}
+          session: {}
+          state: {}
+          validation_mode: warn
+  scene4_execution_plan:
+    routing:
+    - to: scene4_correlation_summary
+    card:
+      call:
+        op: render
+        metadata: []
+        payload:
+          card_source: asset
+          card_spec:
+            asset_path: assets/cards/scene4_execution_plan.json
+          mode: renderAndValidate
+          node_id: scene4_execution_plan
+          payload: {}
+          session: {}
+          state: {}
+          validation_mode: warn
+  scene4_explainability_intro:
+    routing:
+    - to: scene4_execution_plan
+    card:
+      call:
+        op: render
+        metadata: []
+        payload:
+          card_source: asset
+          card_spec:
+            asset_path: assets/cards/scene4_explainability_intro.json
+          mode: renderAndValidate
+          node_id: scene4_explainability_intro
+          payload: {}
+          session: {}
+          state: {}
+          validation_mode: warn
+  welcome:
+    routing:
+    - to: scene1_noc_dashboard
+      when: action.action_id == "goto_scene1_noc_dashboard"
+    - to: scene2_alert_intro
+      when: action.action_id == "goto_scene2_alert_intro"
+    - to: scene3_bgp_alert_intro
+      when: action.action_id == "goto_scene3_bgp_alert_intro"
+    - to: scene4_explainability_intro
+      when: action.action_id == "goto_scene4_explainability_intro"
+    - to: demo_wrapup
+      when: action.action_id == "goto_demo_wrapup"
+    card:
+      call:
+        op: render
+        metadata: []
+        payload:
+          card_source: asset
+          card_spec:
+            asset_path: assets/cards/welcome.json
+          mode: renderAndValidate
+          node_id: welcome
+          payload: {}
+          session: {}
+          state: {}
+          validation_mode: warn

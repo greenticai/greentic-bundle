@@ -1,0 +1,3345 @@
+[
+  {
+    "id": "demo_wrapup",
+    "json": {
+      "actions": [
+        {
+          "associatedInputs": "none",
+          "data": {},
+          "style": "positive",
+          "title": "\u2302 Back to Main Menu",
+          "type": "Action.Submit"
+        },
+        {
+          "associatedInputs": "none",
+          "data": {},
+          "title": "\u25b6 Replay from Scene 1",
+          "type": "Action.Submit"
+        }
+      ],
+      "body": [
+        {
+          "bleed": true,
+          "items": [
+            {
+              "columns": [
+                {
+                  "items": [
+                    {
+                      "altText": "3AIgent logo",
+                      "size": "Medium",
+                      "type": "Image",
+                      "url": "https://img.icons8.com/fluency/96/network.png"
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "auto"
+                },
+                {
+                  "items": [
+                    {
+                      "color": "Accent",
+                      "size": "ExtraLarge",
+                      "text": "3AIgent",
+                      "type": "TextBlock",
+                      "weight": "Bolder"
+                    },
+                    {
+                      "isSubtle": true,
+                      "size": "Small",
+                      "spacing": "None",
+                      "text": "NOC Alert Investigation Demo \u2014 Complete",
+                      "type": "TextBlock",
+                      "wrap": true
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "stretch"
+                }
+              ],
+              "type": "ColumnSet"
+            }
+          ],
+          "style": "emphasis",
+          "type": "Container"
+        },
+        {
+          "bleed": true,
+          "items": [
+            {
+              "size": "Medium",
+              "text": "\ud83c\udf89 Demo complete. All four scenes demonstrated.",
+              "type": "TextBlock",
+              "weight": "Bolder",
+              "wrap": true
+            }
+          ],
+          "style": "good",
+          "type": "Container"
+        },
+        {
+          "items": [
+            {
+              "size": "Small",
+              "text": "\u23f1\ufe0f Key Metric",
+              "type": "TextBlock",
+              "weight": "Bolder"
+            },
+            {
+              "columns": [
+                {
+                  "items": [
+                    {
+                      "isSubtle": true,
+                      "size": "Small",
+                      "text": "Manual Investigation",
+                      "type": "TextBlock",
+                      "weight": "Bolder"
+                    },
+                    {
+                      "color": "Warning",
+                      "size": "ExtraLarge",
+                      "spacing": "None",
+                      "text": "45 min \u2013 2 hrs",
+                      "type": "TextBlock",
+                      "weight": "Bolder"
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "stretch"
+                },
+                {
+                  "items": [
+                    {
+                      "size": "ExtraLarge",
+                      "spacing": "Small",
+                      "text": "\u2192",
+                      "type": "TextBlock",
+                      "weight": "Bolder"
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "auto"
+                },
+                {
+                  "items": [
+                    {
+                      "isSubtle": true,
+                      "size": "Small",
+                      "text": "3AIgent",
+                      "type": "TextBlock",
+                      "weight": "Bolder"
+                    },
+                    {
+                      "color": "Good",
+                      "size": "ExtraLarge",
+                      "spacing": "None",
+                      "text": "< 5 min",
+                      "type": "TextBlock",
+                      "weight": "Bolder"
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "stretch"
+                }
+              ],
+              "type": "ColumnSet"
+            }
+          ],
+          "spacing": "Medium",
+          "style": "warning",
+          "type": "Container"
+        },
+        {
+          "color": "Accent",
+          "size": "Medium",
+          "spacing": "Medium",
+          "text": "\ud83d\udd11 Four Capability Pillars Demonstrated",
+          "type": "TextBlock",
+          "weight": "Bolder"
+        },
+        {
+          "items": [
+            {
+              "facts": [
+                {
+                  "title": "1 \u2014 RAG",
+                  "value": "Design documents & runbooks retrieved with SharePoint source links \u2014 fully traceable. Demonstrated in Scenes 2 and 3."
+                },
+                {
+                  "title": "2 \u2014 NMS + Ticketing",
+                  "value": "Live data retrieval from network management system and ticketing platform, cross-source synthesis in the Renderer. Demonstrated in all scenes."
+                },
+                {
+                  "title": "3 \u2014 Chat2Data Parallel",
+                  "value": "Complete query plan determined upfront from input before any result is seen. 6 parallel queries in Scene 3. Peer device IP from alarm record made full plan possible."
+                },
+                {
+                  "title": "4 \u2014 Explainability",
+                  "value": "Full query plan logging with Correlation synthesis section. Permanent audit record. Every answer is traceable. Demonstrated in Scene 4."
+                }
+              ],
+              "type": "FactSet"
+            }
+          ],
+          "style": "emphasis",
+          "type": "Container"
+        },
+        {
+          "color": "Accent",
+          "size": "Medium",
+          "spacing": "Medium",
+          "text": "\ud83d\udcca Scene-by-Scene Summary",
+          "type": "TextBlock",
+          "weight": "Bolder"
+        },
+        {
+          "items": [
+            {
+              "facts": [
+                {
+                  "title": "Scene 2",
+                  "value": "HIGH utilisation \u2014 CORE-SW-LON-03 Gi0/1/4 \u00b7 4 sources \u00b7 ~2 sec \u00b7 NTA scope boundary stated"
+                },
+                {
+                  "title": "Scene 3",
+                  "value": "CRITICAL BGP flap \u2014 EDGE-RTR-LON-01 \u00b7 6 parallel queries \u00b7 3 sec \u00b7 HIGH confidence RCA \u00b7 CHG-8841 identified"
+                },
+                {
+                  "title": "Scene 4",
+                  "value": "Full execution plan log expanded \u00b7 Correlation synthesis explained \u00b7 5 evidence links traced \u00b7 Permanent audit record"
+                }
+              ],
+              "type": "FactSet"
+            }
+          ],
+          "style": "emphasis",
+          "type": "Container"
+        },
+        {
+          "items": [
+            {
+              "size": "Small",
+              "text": "\ud83d\udccc Implementation Note for Demo Team",
+              "type": "TextBlock",
+              "weight": "Bolder"
+            },
+            {
+              "isSubtle": true,
+              "size": "Small",
+              "text": "Scenes 2 and 3 are both implemented via Chat2Data \u2014 the complete query plan is determined upfront. Scene 3 is viable because the BGP alarm record carries peer_device_id (dev-004) and peer_ip (10.44.12.1), making all 6 queries schedulable at plan time. If the agentic path becomes available before the demo, Scenes 3 and 4 can revert to the stronger agentic version with the narration changes reversed.",
+              "type": "TextBlock",
+              "wrap": true
+            }
+          ],
+          "spacing": "Small",
+          "style": "good",
+          "type": "Container"
+        }
+      ],
+      "greentic": {
+        "cardId": "demo_wrapup",
+        "flow": "noc_alert_investigation"
+      },
+      "type": "AdaptiveCard",
+      "version": "1.6"
+    }
+  },
+  {
+    "id": "scene1_noc_dashboard",
+    "json": {
+      "actions": [
+        {
+          "data": {
+            "action_id": "goto_scene2_alert_intro",
+            "routeToCardId": "scene2_alert_intro"
+          },
+          "style": "positive",
+          "title": "\u25b6 Scene 2 \u2014 Alert Fires \u2192",
+          "type": "Action.Submit"
+        },
+        {
+          "associatedInputs": "none",
+          "data": {},
+          "title": "\u21a9 Back to Menu",
+          "type": "Action.Submit"
+        }
+      ],
+      "body": [
+        {
+          "bleed": true,
+          "items": [
+            {
+              "columns": [
+                {
+                  "items": [
+                    {
+                      "altText": "NOC dashboard icon",
+                      "size": "Medium",
+                      "type": "Image",
+                      "url": "https://img.icons8.com/fluency/96/control-panel.png"
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "auto"
+                },
+                {
+                  "items": [
+                    {
+                      "color": "Accent",
+                      "size": "Large",
+                      "text": "Scene 1 \u2014 Setting the Stage",
+                      "type": "TextBlock",
+                      "weight": "Bolder",
+                      "wrap": true
+                    },
+                    {
+                      "isSubtle": true,
+                      "size": "Small",
+                      "spacing": "None",
+                      "text": "NOC Monitoring Dashboard \u00b7 London Docklands Operations",
+                      "type": "TextBlock",
+                      "wrap": true
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "stretch"
+                }
+              ],
+              "type": "ColumnSet"
+            }
+          ],
+          "style": "emphasis",
+          "type": "Container"
+        },
+        {
+          "bleed": true,
+          "items": [
+            {
+              "columns": [
+                {
+                  "items": [
+                    {
+                      "color": "Light",
+                      "size": "Large",
+                      "text": "\ud83d\udd34 47 Active Alerts",
+                      "type": "TextBlock",
+                      "weight": "Bolder"
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "stretch"
+                },
+                {
+                  "items": [
+                    {
+                      "color": "Light",
+                      "isSubtle": true,
+                      "size": "Small",
+                      "text": "14:47 UTC",
+                      "type": "TextBlock"
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "auto"
+                }
+              ],
+              "type": "ColumnSet"
+            }
+          ],
+          "style": "attention",
+          "type": "Container"
+        },
+        {
+          "color": "Accent",
+          "size": "Small",
+          "spacing": "Medium",
+          "text": "\ud83d\udcca Active Alert Feed \u2014 Highest Severity First",
+          "type": "TextBlock",
+          "weight": "Bolder"
+        },
+        {
+          "items": [
+            {
+              "columns": [
+                {
+                  "items": [
+                    {
+                      "color": "Warning",
+                      "size": "Small",
+                      "text": "\u26a0\ufe0f HIGH",
+                      "type": "TextBlock",
+                      "weight": "Bolder"
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "auto"
+                },
+                {
+                  "items": [
+                    {
+                      "size": "Small",
+                      "text": "Interface Utilisation \u2014 CORE-SW-LON-03 Gi0/1/4 \u2014 84%",
+                      "type": "TextBlock",
+                      "weight": "Bolder",
+                      "wrap": true
+                    },
+                    {
+                      "isSubtle": true,
+                      "size": "Small",
+                      "spacing": "None",
+                      "text": "London Docklands \u00b7 Triggered 14:47:32 \u00b7 Duration 00:04:15",
+                      "type": "TextBlock",
+                      "wrap": true
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "stretch"
+                }
+              ],
+              "type": "ColumnSet"
+            }
+          ],
+          "style": "warning",
+          "type": "Container"
+        },
+        {
+          "items": [
+            {
+              "facts": [
+                {
+                  "title": "MEDIUM",
+                  "value": "CPU threshold \u2014 DIST-SW-LON-07 \u2014 71% \u00b7 14:39:10"
+                },
+                {
+                  "title": "MEDIUM",
+                  "value": "Interface errors \u2014 ACC-SW-LON-12 Gi0/0/8 \u00b7 14:35:44"
+                },
+                {
+                  "title": "LOW",
+                  "value": "Fan unit degraded \u2014 CORE-SW-LON-01 \u00b7 13:52:01"
+                },
+                {
+                  "title": "LOW",
+                  "value": "SNMP unreachable \u2014 ACC-SW-LON-04 \u00b7 13:19:08"
+                },
+                {
+                  "title": "LOW \u00d7 42",
+                  "value": "Various \u2014 link state, threshold, polling timeouts"
+                }
+              ],
+              "type": "FactSet"
+            }
+          ],
+          "separator": true,
+          "style": "emphasis",
+          "type": "Container"
+        },
+        {
+          "color": "Accent",
+          "size": "Small",
+          "spacing": "Medium",
+          "text": "\ud83d\udda5\ufe0f London Device Health \u2014 All Six Nodes",
+          "type": "TextBlock",
+          "weight": "Bolder"
+        },
+        {
+          "columns": [
+            {
+              "items": [
+                {
+                  "items": [
+                    {
+                      "size": "Small",
+                      "text": "\u2705 CORE-SW-LON-01",
+                      "type": "TextBlock",
+                      "weight": "Bolder"
+                    },
+                    {
+                      "isSubtle": true,
+                      "size": "Small",
+                      "spacing": "None",
+                      "text": "CPU 42% \u00b7 Mem 58% \u00b7 UP",
+                      "type": "TextBlock"
+                    }
+                  ],
+                  "style": "good",
+                  "type": "Container"
+                }
+              ],
+              "type": "Column",
+              "width": "stretch"
+            },
+            {
+              "items": [
+                {
+                  "items": [
+                    {
+                      "size": "Small",
+                      "text": "\u26a0\ufe0f CORE-SW-LON-03",
+                      "type": "TextBlock",
+                      "weight": "Bolder"
+                    },
+                    {
+                      "isSubtle": true,
+                      "size": "Small",
+                      "spacing": "None",
+                      "text": "CPU 38% \u00b7 Mem 61% \u00b7 ALERT",
+                      "type": "TextBlock"
+                    }
+                  ],
+                  "style": "warning",
+                  "type": "Container"
+                }
+              ],
+              "type": "Column",
+              "width": "stretch"
+            }
+          ],
+          "type": "ColumnSet"
+        },
+        {
+          "columns": [
+            {
+              "items": [
+                {
+                  "items": [
+                    {
+                      "size": "Small",
+                      "text": "\u2705 DIST-SW-LON-05",
+                      "type": "TextBlock",
+                      "weight": "Bolder"
+                    },
+                    {
+                      "isSubtle": true,
+                      "size": "Small",
+                      "spacing": "None",
+                      "text": "CPU 29% \u00b7 Mem 44% \u00b7 UP",
+                      "type": "TextBlock"
+                    }
+                  ],
+                  "style": "good",
+                  "type": "Container"
+                }
+              ],
+              "type": "Column",
+              "width": "stretch"
+            },
+            {
+              "items": [
+                {
+                  "items": [
+                    {
+                      "size": "Small",
+                      "text": "\u26a0\ufe0f DIST-SW-LON-07",
+                      "type": "TextBlock",
+                      "weight": "Bolder"
+                    },
+                    {
+                      "isSubtle": true,
+                      "size": "Small",
+                      "spacing": "None",
+                      "text": "CPU 71% \u00b7 Mem 68% \u00b7 WARN",
+                      "type": "TextBlock"
+                    }
+                  ],
+                  "style": "warning",
+                  "type": "Container"
+                }
+              ],
+              "type": "Column",
+              "width": "stretch"
+            }
+          ],
+          "spacing": "Small",
+          "type": "ColumnSet"
+        },
+        {
+          "columns": [
+            {
+              "items": [
+                {
+                  "items": [
+                    {
+                      "size": "Small",
+                      "text": "\u2705 EDGE-RTR-LON-01",
+                      "type": "TextBlock",
+                      "weight": "Bolder"
+                    },
+                    {
+                      "isSubtle": true,
+                      "size": "Small",
+                      "spacing": "None",
+                      "text": "CPU 34% \u00b7 Mem 62% \u00b7 UP",
+                      "type": "TextBlock"
+                    }
+                  ],
+                  "style": "good",
+                  "type": "Container"
+                }
+              ],
+              "type": "Column",
+              "width": "stretch"
+            },
+            {
+              "items": [
+                {
+                  "items": [
+                    {
+                      "size": "Small",
+                      "text": "\u2705 EDGE-RTR-LON-02",
+                      "type": "TextBlock",
+                      "weight": "Bolder"
+                    },
+                    {
+                      "isSubtle": true,
+                      "size": "Small",
+                      "spacing": "None",
+                      "text": "CPU 31% \u00b7 Mem 57% \u00b7 UP",
+                      "type": "TextBlock"
+                    }
+                  ],
+                  "style": "good",
+                  "type": "Container"
+                }
+              ],
+              "type": "Column",
+              "width": "stretch"
+            }
+          ],
+          "spacing": "Small",
+          "type": "ColumnSet"
+        },
+        {
+          "items": [
+            {
+              "color": "Accent",
+              "size": "Small",
+              "text": "\ud83c\udf99\ufe0f Presenter Narration Cue",
+              "type": "TextBlock",
+              "weight": "Bolder"
+            },
+            {
+              "isSubtle": true,
+              "size": "Small",
+              "text": "\"Network operations centre for a major telecoms operator. Forty-seven active alerts \u2014 a quiet morning. On a busy day this team handles two thousand. These engineers spend sixty percent of their time on triage: figuring out which alerts matter, what's causing them, and what the right response is. Typical time to root cause on a complex alert: forty-five minutes to two hours. Let me show what changes.\"",
+              "type": "TextBlock",
+              "wrap": true
+            }
+          ],
+          "spacing": "Medium",
+          "style": "emphasis",
+          "type": "Container"
+        }
+      ],
+      "greentic": {
+        "cardId": "scene1_noc_dashboard",
+        "flow": "noc_alert_investigation"
+      },
+      "type": "AdaptiveCard",
+      "version": "1.6"
+    }
+  },
+  {
+    "id": "scene2_alert_intro",
+    "json": {
+      "actions": [
+        {
+          "data": {
+            "action_id": "goto_scene2_analysis_response",
+            "routeToCardId": "scene2_analysis_response"
+          },
+          "style": "positive",
+          "title": "\u25b6 Show Full Analysis Response \u2192",
+          "type": "Action.Submit"
+        },
+        {
+          "associatedInputs": "none",
+          "data": {},
+          "title": "\u21a9 Back to Scene 1",
+          "type": "Action.Submit"
+        },
+        {
+          "associatedInputs": "none",
+          "data": {},
+          "title": "\u2302 Main Menu",
+          "type": "Action.Submit"
+        }
+      ],
+      "body": [
+        {
+          "bleed": true,
+          "items": [
+            {
+              "columns": [
+                {
+                  "items": [
+                    {
+                      "altText": "Alert investigation icon",
+                      "size": "Medium",
+                      "type": "Image",
+                      "url": "https://img.icons8.com/fluency/96/speed.png"
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "auto"
+                },
+                {
+                  "items": [
+                    {
+                      "color": "Accent",
+                      "size": "Large",
+                      "text": "Scene 2 \u2014 Alert Fires: Known Pattern",
+                      "type": "TextBlock",
+                      "weight": "Bolder",
+                      "wrap": true
+                    },
+                    {
+                      "isSubtle": true,
+                      "size": "Small",
+                      "spacing": "None",
+                      "text": "3AIgent Interface \u00b7 HIGH Severity Alert",
+                      "type": "TextBlock",
+                      "wrap": true
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "stretch"
+                }
+              ],
+              "type": "ColumnSet"
+            }
+          ],
+          "style": "emphasis",
+          "type": "Container"
+        },
+        {
+          "color": "Accent",
+          "size": "Medium",
+          "spacing": "Medium",
+          "text": "Step 1 of 2 \u2014 Alert Received & Query Submitted",
+          "type": "TextBlock",
+          "weight": "Bolder"
+        },
+        {
+          "isSubtle": true,
+          "size": "Small",
+          "text": "The following HIGH-severity alert appears in the 3AIgent interface alongside the NOC dashboard:",
+          "type": "TextBlock",
+          "wrap": true
+        },
+        {
+          "items": [
+            {
+              "size": "Medium",
+              "text": "\u26a0\ufe0f [HIGH] Interface GigabitEthernet0/1/4 \u2014 Utilisation 84%",
+              "type": "TextBlock",
+              "weight": "Bolder",
+              "wrap": true
+            },
+            {
+              "facts": [
+                {
+                  "title": "Device",
+                  "value": "CORE-SW-LON-03"
+                },
+                {
+                  "title": "Site",
+                  "value": "London Docklands"
+                },
+                {
+                  "title": "Triggered",
+                  "value": "14:47:32 UTC"
+                },
+                {
+                  "title": "Duration",
+                  "value": "00:04:15 and counting"
+                }
+              ],
+              "type": "FactSet"
+            }
+          ],
+          "spacing": "Small",
+          "style": "warning",
+          "type": "Container"
+        },
+        {
+          "items": [
+            {
+              "color": "Accent",
+              "size": "Small",
+              "text": "\ud83d\udcac Presenter Query \u2014 Typed into 3AIgent",
+              "type": "TextBlock",
+              "weight": "Bolder"
+            },
+            {
+              "color": "Default",
+              "size": "Medium",
+              "text": "\"Why is GigabitEthernet0/1/4 on CORE-SW-LON-03 at 84% utilisation?\"",
+              "type": "TextBlock",
+              "weight": "Bolder",
+              "wrap": true
+            }
+          ],
+          "spacing": "Medium",
+          "style": "emphasis",
+          "type": "Container"
+        },
+        {
+          "items": [
+            {
+              "columns": [
+                {
+                  "items": [
+                    {
+                      "altText": "Processing indicator",
+                      "size": "Small",
+                      "type": "Image",
+                      "url": "https://img.icons8.com/fluency/48/loading.png"
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "auto"
+                },
+                {
+                  "items": [
+                    {
+                      "size": "Small",
+                      "text": "Querying NMS \u00b7 Design docs \u00b7 Ticketing...",
+                      "type": "TextBlock",
+                      "weight": "Bolder",
+                      "wrap": true
+                    },
+                    {
+                      "isSubtle": true,
+                      "size": "Small",
+                      "spacing": "None",
+                      "text": "Response in approximately 2 seconds",
+                      "type": "TextBlock"
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "stretch"
+                }
+              ],
+              "type": "ColumnSet"
+            }
+          ],
+          "spacing": "Small",
+          "style": "good",
+          "type": "Container"
+        },
+        {
+          "items": [
+            {
+              "size": "Small",
+              "text": "\ud83d\udce1 Sources Being Queried",
+              "type": "TextBlock",
+              "weight": "Bolder"
+            },
+            {
+              "facts": [
+                {
+                  "title": "NMS",
+                  "value": "Current interface utilisation & 30-day baseline \u2014 CORE-SW-LON-03"
+                },
+                {
+                  "title": "Ticketing",
+                  "value": "Active change requests against this device"
+                },
+                {
+                  "title": "Knowledge Base",
+                  "value": "London Network Design documentation (SharePoint)"
+                }
+              ],
+              "type": "FactSet"
+            }
+          ],
+          "spacing": "Medium",
+          "style": "emphasis",
+          "type": "Container"
+        },
+        {
+          "items": [
+            {
+              "color": "Accent",
+              "size": "Small",
+              "text": "\ud83c\udf99\ufe0f Presenter Narration Cue",
+              "type": "TextBlock",
+              "weight": "Bolder"
+            },
+            {
+              "isSubtle": true,
+              "size": "Small",
+              "text": "Presenter switches to the 3AIgent interface alongside the dashboard. Types the query. Pause for ~2 seconds. Then advance to the full analysis response.",
+              "type": "TextBlock",
+              "wrap": true
+            }
+          ],
+          "spacing": "Small",
+          "style": "emphasis",
+          "type": "Container"
+        }
+      ],
+      "greentic": {
+        "cardId": "scene2_alert_intro",
+        "flow": "noc_alert_investigation"
+      },
+      "type": "AdaptiveCard",
+      "version": "1.6"
+    }
+  },
+  {
+    "id": "scene2_analysis_response",
+    "json": {
+      "actions": [
+        {
+          "data": {
+            "action": "view_util_chart"
+          },
+          "title": "\ud83d\udcca View 30-Day Utilisation Chart",
+          "type": "Action.Submit"
+        },
+        {
+          "data": {
+            "action": "check_change_tickets"
+          },
+          "title": "\ud83c\udfab Check Active Change Tickets",
+          "type": "Action.Submit"
+        },
+        {
+          "data": {
+            "action": "view_design_doc"
+          },
+          "title": "\ud83d\udcc4 View Design Document (SharePoint)",
+          "type": "Action.Submit"
+        },
+        {
+          "data": {
+            "action": "open_capacity_ticket"
+          },
+          "title": "\u2795 Open Capacity Review Ticket",
+          "type": "Action.Submit"
+        },
+        {
+          "data": {
+            "action_id": "goto_scene2_capability_callout",
+            "routeToCardId": "scene2_capability_callout"
+          },
+          "style": "positive",
+          "title": "\u25b6 Scene 2 Capability Callout \u2192",
+          "type": "Action.Submit"
+        },
+        {
+          "associatedInputs": "none",
+          "data": {},
+          "title": "\u21a9 Back to Scene 2 Intro",
+          "type": "Action.Submit"
+        }
+      ],
+      "body": [
+        {
+          "bleed": true,
+          "items": [
+            {
+              "columns": [
+                {
+                  "items": [
+                    {
+                      "altText": "Utilisation analysis chart icon",
+                      "size": "Medium",
+                      "type": "Image",
+                      "url": "https://img.icons8.com/fluency/96/combo-chart.png"
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "auto"
+                },
+                {
+                  "items": [
+                    {
+                      "color": "Accent",
+                      "size": "Large",
+                      "text": "Interface Utilisation Analysis",
+                      "type": "TextBlock",
+                      "weight": "Bolder",
+                      "wrap": true
+                    },
+                    {
+                      "isSubtle": true,
+                      "size": "Small",
+                      "spacing": "None",
+                      "text": "CORE-SW-LON-03 \u00b7 GigabitEthernet0/1/4 \u00b7 Response: ~2 sec",
+                      "type": "TextBlock",
+                      "wrap": true
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "stretch"
+                }
+              ],
+              "type": "ColumnSet"
+            }
+          ],
+          "style": "emphasis",
+          "type": "Container"
+        },
+        {
+          "bleed": true,
+          "items": [
+            {
+              "color": "Light",
+              "size": "Small",
+              "text": "\u26a0\ufe0f [HIGH] Utilisation 84% \u2014 Sustained above 80% for 4 min 22 sec",
+              "type": "TextBlock",
+              "weight": "Bolder",
+              "wrap": true
+            }
+          ],
+          "style": "attention",
+          "type": "Container"
+        },
+        {
+          "color": "Accent",
+          "size": "Medium",
+          "spacing": "Medium",
+          "text": "\ud83d\udcca Current State",
+          "type": "TextBlock",
+          "weight": "Bolder"
+        },
+        {
+          "items": [
+            {
+              "facts": [
+                {
+                  "title": "Utilisation",
+                  "value": "84.2%"
+                },
+                {
+                  "title": "Interface speed",
+                  "value": "1 Gbps"
+                },
+                {
+                  "title": "Current throughput",
+                  "value": "~842 Mbps"
+                },
+                {
+                  "title": "Traffic direction",
+                  "value": "Predominantly inbound \u2014 91% in / 9% out"
+                },
+                {
+                  "title": "Sustained above 80%",
+                  "value": "4 minutes 22 seconds"
+                }
+              ],
+              "type": "FactSet"
+            }
+          ],
+          "style": "emphasis",
+          "type": "Container"
+        },
+        {
+          "color": "Accent",
+          "size": "Medium",
+          "spacing": "Small",
+          "text": "\ud83d\udca1 Situation",
+          "type": "TextBlock",
+          "weight": "Bolder"
+        },
+        {
+          "items": [
+            {
+              "size": "Small",
+              "text": "The interface is link-saturated \u2014 inbound traffic is consuming 84% of the 1 Gbps physical capacity. The traffic breakdown by flow is not available from the network management system; identifying which applications or sources are driving the load requires flow-level data (NetFlow / IPFIX).",
+              "type": "TextBlock",
+              "wrap": true
+            },
+            {
+              "isSubtle": true,
+              "size": "Small",
+              "spacing": "Small",
+              "text": "\ud83d\udccc Scope boundary: If NTA is connected, flow-level analysis can be run as a separate query. If not connected, additional tooling would be required.",
+              "type": "TextBlock",
+              "wrap": true
+            }
+          ],
+          "style": "emphasis",
+          "type": "Container"
+        },
+        {
+          "color": "Accent",
+          "size": "Medium",
+          "spacing": "Small",
+          "text": "\ud83d\udcc8 Historical Context \u2014 30-Day Baseline (NMS)",
+          "type": "TextBlock",
+          "weight": "Bolder"
+        },
+        {
+          "items": [
+            {
+              "facts": [
+                {
+                  "title": "30-day average",
+                  "value": "61%"
+                },
+                {
+                  "title": "Previous peak",
+                  "value": "79% (07 April, Tuesday 14:30\u201316:00)"
+                },
+                {
+                  "title": "Recurring pattern",
+                  "value": "Tuesday / Wednesday afternoon peak consistently observed"
+                },
+                {
+                  "title": "Today vs. history",
+                  "value": "84.2% exceeds the previous 30-day peak by 5.2 percentage points"
+                }
+              ],
+              "type": "FactSet"
+            }
+          ],
+          "style": "emphasis",
+          "type": "Container"
+        },
+        {
+          "color": "Accent",
+          "size": "Medium",
+          "spacing": "Small",
+          "text": "\ud83d\udcc4 Design Context (Network Design Documentation)",
+          "type": "TextBlock",
+          "weight": "Bolder"
+        },
+        {
+          "items": [
+            {
+              "facts": [
+                {
+                  "title": "Connected to",
+                  "value": "DIST-SW-LON-07 \u2014 Distribution layer, Canary Wharf zone"
+                },
+                {
+                  "title": "Design capacity",
+                  "value": "1 Gbps"
+                },
+                {
+                  "title": "Documented threshold",
+                  "value": "75% sustained utilisation"
+                },
+                {
+                  "title": "Current vs. design",
+                  "value": "\u26a0\ufe0f Operating 9.2 points above documented design threshold"
+                }
+              ],
+              "type": "FactSet"
+            }
+          ],
+          "style": "emphasis",
+          "type": "Container"
+        },
+        {
+          "color": "Accent",
+          "size": "Medium",
+          "spacing": "Small",
+          "text": "\ud83c\udfaf Assessment",
+          "type": "TextBlock",
+          "weight": "Bolder"
+        },
+        {
+          "items": [
+            {
+              "size": "Small",
+              "text": "The interface is congested \u2014 physical capacity is the constraint, not a device fault. The Tuesday afternoon pattern is consistent with previous observations and suggests predictable demand growth on this segment. No active change requests or maintenance windows are open on this device or its downstream distribution switch DIST-SW-LON-07.",
+              "type": "TextBlock",
+              "wrap": true
+            }
+          ],
+          "style": "good",
+          "type": "Container"
+        },
+        {
+          "color": "Accent",
+          "size": "Medium",
+          "spacing": "Small",
+          "text": "\u2705 Recommended Actions",
+          "type": "TextBlock",
+          "weight": "Bolder"
+        },
+        {
+          "items": [
+            {
+              "facts": [
+                {
+                  "title": "1 \u2014 Monitor",
+                  "value": "If above 80% for >15 min continuously, initiate a capacity review"
+                },
+                {
+                  "title": "2 \u2014 Plan",
+                  "value": "Consider a capacity upgrade planning request for this segment"
+                },
+                {
+                  "title": "3 \u2014 Investigate",
+                  "value": "If immediate relief needed, review traffic distribution at DIST-SW-LON-07"
+                }
+              ],
+              "type": "FactSet"
+            }
+          ],
+          "style": "emphasis",
+          "type": "Container"
+        }
+      ],
+      "greentic": {
+        "cardId": "scene2_analysis_response",
+        "flow": "noc_alert_investigation"
+      },
+      "type": "AdaptiveCard",
+      "version": "1.6"
+    }
+  },
+  {
+    "id": "scene2_capability_callout",
+    "json": {
+      "actions": [
+        {
+          "data": {
+            "action_id": "goto_scene3_bgp_alert_intro",
+            "routeToCardId": "scene3_bgp_alert_intro"
+          },
+          "style": "positive",
+          "title": "\u25b6 Scene 3 \u2014 Novel Alert \u2192",
+          "type": "Action.Submit"
+        },
+        {
+          "associatedInputs": "none",
+          "data": {},
+          "title": "\u21a9 Back to Analysis Response",
+          "type": "Action.Submit"
+        },
+        {
+          "associatedInputs": "none",
+          "data": {},
+          "title": "\u2302 Main Menu",
+          "type": "Action.Submit"
+        }
+      ],
+      "body": [
+        {
+          "bleed": true,
+          "items": [
+            {
+              "columns": [
+                {
+                  "items": [
+                    {
+                      "altText": "Capability callout award icon",
+                      "size": "Medium",
+                      "type": "Image",
+                      "url": "https://img.icons8.com/fluency/96/prize.png"
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "auto"
+                },
+                {
+                  "items": [
+                    {
+                      "color": "Accent",
+                      "size": "Large",
+                      "text": "Scene 2 \u2014 Capability Callout",
+                      "type": "TextBlock",
+                      "weight": "Bolder",
+                      "wrap": true
+                    },
+                    {
+                      "isSubtle": true,
+                      "size": "Small",
+                      "spacing": "None",
+                      "text": "What this response demonstrated",
+                      "type": "TextBlock"
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "stretch"
+                }
+              ],
+              "type": "ColumnSet"
+            }
+          ],
+          "style": "emphasis",
+          "type": "Container"
+        },
+        {
+          "bleed": true,
+          "items": [
+            {
+              "size": "Medium",
+              "text": "\u23f1\ufe0f Four separate data sources. Cross-source synthesis. Two seconds.",
+              "type": "TextBlock",
+              "weight": "Bolder",
+              "wrap": true
+            }
+          ],
+          "style": "good",
+          "type": "Container"
+        },
+        {
+          "color": "Accent",
+          "size": "Medium",
+          "spacing": "Medium",
+          "text": "\ud83d\udd11 Capabilities Demonstrated",
+          "type": "TextBlock",
+          "weight": "Bolder"
+        },
+        {
+          "items": [
+            {
+              "facts": [
+                {
+                  "title": "NMS Data Retrieval",
+                  "value": "Live utilisation metrics + 30-day historical baseline pulled from network management system"
+                },
+                {
+                  "title": "RAG \u2014 Design Docs",
+                  "value": "Design intent (threshold 75%, connected to DIST-SW-LON-07) retrieved from SharePoint network design documentation"
+                },
+                {
+                  "title": "Source link",
+                  "value": "\"View Design Document\" opens the London Network Design doc in SharePoint with the relevant section visible \u2014 fully traceable"
+                },
+                {
+                  "title": "Scope honesty",
+                  "value": "NTA boundary explicitly stated: flow-level data not available from NMS. The system says what it doesn't know"
+                },
+                {
+                  "title": "Cross-source synthesis",
+                  "value": "Current state + history + design intent + change status \u2014 four sources combined in one structured answer"
+                }
+              ],
+              "type": "FactSet"
+            }
+          ],
+          "style": "emphasis",
+          "type": "Container"
+        },
+        {
+          "items": [
+            {
+              "size": "Small",
+              "text": "\ud83d\udcac Presenter Quote",
+              "type": "TextBlock",
+              "weight": "Bolder"
+            },
+            {
+              "isSubtle": true,
+              "size": "Small",
+              "text": "\"The answer is calibrated \u2014 it says what it knows, and it says what it doesn't. That's not a limitation. That's what a trustworthy system looks like.\"",
+              "type": "TextBlock",
+              "wrap": true
+            }
+          ],
+          "spacing": "Medium",
+          "style": "warning",
+          "type": "Container"
+        },
+        {
+          "items": [
+            {
+              "color": "Accent",
+              "size": "Small",
+              "text": "\ud83d\udccc Demo Note",
+              "type": "TextBlock",
+              "weight": "Bolder"
+            },
+            {
+              "isSubtle": true,
+              "size": "Small",
+              "text": "Presenter clicks [View Design Document] \u2014 the London Network Design document opens in SharePoint with the relevant section visible. This is a live source link from the RAG retrieval, not a static URL.",
+              "type": "TextBlock",
+              "wrap": true
+            }
+          ],
+          "spacing": "Small",
+          "style": "emphasis",
+          "type": "Container"
+        }
+      ],
+      "greentic": {
+        "cardId": "scene2_capability_callout",
+        "flow": "noc_alert_investigation"
+      },
+      "type": "AdaptiveCard",
+      "version": "1.6"
+    }
+  },
+  {
+    "id": "scene3_bgp_alert_intro",
+    "json": {
+      "actions": [
+        {
+          "data": {
+            "action_id": "goto_scene3_parallel_query_indicator",
+            "routeToCardId": "scene3_parallel_query_indicator"
+          },
+          "style": "positive",
+          "title": "\u25b6 Show Parallel Query Execution \u2192",
+          "type": "Action.Submit"
+        },
+        {
+          "associatedInputs": "none",
+          "data": {},
+          "title": "\u21a9 Back to Scene 2 Callout",
+          "type": "Action.Submit"
+        },
+        {
+          "associatedInputs": "none",
+          "data": {},
+          "title": "\u2302 Main Menu",
+          "type": "Action.Submit"
+        }
+      ],
+      "body": [
+        {
+          "bleed": true,
+          "items": [
+            {
+              "columns": [
+                {
+                  "items": [
+                    {
+                      "altText": "Critical alert icon",
+                      "size": "Medium",
+                      "type": "Image",
+                      "url": "https://img.icons8.com/fluency/96/warning-shield.png"
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "auto"
+                },
+                {
+                  "items": [
+                    {
+                      "color": "Accent",
+                      "size": "Large",
+                      "text": "Scene 3 \u2014 The Novel Alert",
+                      "type": "TextBlock",
+                      "weight": "Bolder",
+                      "wrap": true
+                    },
+                    {
+                      "isSubtle": true,
+                      "size": "Small",
+                      "spacing": "None",
+                      "text": "Parallel Investigation \u00b7 No precedent in 90 days",
+                      "type": "TextBlock",
+                      "wrap": true
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "stretch"
+                }
+              ],
+              "type": "ColumnSet"
+            }
+          ],
+          "style": "emphasis",
+          "type": "Container"
+        },
+        {
+          "bleed": true,
+          "items": [
+            {
+              "color": "Light",
+              "size": "Medium",
+              "text": "\ud83d\udd34 [CRITICAL] New alert appears on the dashboard",
+              "type": "TextBlock",
+              "weight": "Bolder",
+              "wrap": true
+            }
+          ],
+          "style": "attention",
+          "type": "Container"
+        },
+        {
+          "items": [
+            {
+              "size": "Medium",
+              "text": "\ud83d\udd34 [CRITICAL] BGP session flap \u2014 Peer 10.44.12.1",
+              "type": "TextBlock",
+              "weight": "Bolder",
+              "wrap": true
+            },
+            {
+              "facts": [
+                {
+                  "title": "Device",
+                  "value": "EDGE-RTR-LON-01"
+                },
+                {
+                  "title": "Site",
+                  "value": "London Docklands"
+                },
+                {
+                  "title": "Sessions affected",
+                  "value": "3 simultaneous"
+                },
+                {
+                  "title": "Triggered",
+                  "value": "14:52:01 UTC"
+                },
+                {
+                  "title": "Previous occurrence",
+                  "value": "\u26a0\ufe0f No match in last 90 days \u2014 novel pattern"
+                }
+              ],
+              "type": "FactSet"
+            }
+          ],
+          "spacing": "Small",
+          "style": "attention",
+          "type": "Container"
+        },
+        {
+          "items": [
+            {
+              "color": "Accent",
+              "size": "Small",
+              "text": "\ud83d\udcac Presenter Query \u2014 Typed into 3AIgent",
+              "type": "TextBlock",
+              "weight": "Bolder"
+            },
+            {
+              "size": "Medium",
+              "text": "\"BGP session flap on EDGE-RTR-LON-01 \u2014 three sessions affected simultaneously. What's going on?\"",
+              "type": "TextBlock",
+              "weight": "Bolder",
+              "wrap": true
+            }
+          ],
+          "spacing": "Medium",
+          "style": "emphasis",
+          "type": "Container"
+        },
+        {
+          "items": [
+            {
+              "color": "Accent",
+              "size": "Small",
+              "text": "\ud83e\udde0 Why This Is Different from Scene 2",
+              "type": "TextBlock",
+              "weight": "Bolder"
+            },
+            {
+              "isSubtle": true,
+              "size": "Small",
+              "text": "This is a CRITICAL alert with no precedent. There is no pre-built answer. The platform must pull from multiple sources simultaneously and correlate the results. The alarm record carries the peer device IP (10.44.12.1) \u2014 so the complete query plan is determinable upfront before any results are seen.",
+              "type": "TextBlock",
+              "wrap": true
+            }
+          ],
+          "spacing": "Small",
+          "style": "emphasis",
+          "type": "Container"
+        },
+        {
+          "items": [
+            {
+              "size": "Small",
+              "text": "\ud83c\udf99\ufe0f Presenter Narration Cue",
+              "type": "TextBlock",
+              "weight": "Bolder"
+            },
+            {
+              "isSubtle": true,
+              "size": "Small",
+              "text": "\"Different kind of alert. BGP session flap on an edge router \u2014 three sessions simultaneously, no precedent in ninety days. There's no pre-built answer for this combination. The platform has to pull from multiple sources and correlate the results.\"",
+              "type": "TextBlock",
+              "wrap": true
+            }
+          ],
+          "spacing": "Small",
+          "style": "warning",
+          "type": "Container"
+        }
+      ],
+      "greentic": {
+        "cardId": "scene3_bgp_alert_intro",
+        "flow": "noc_alert_investigation"
+      },
+      "type": "AdaptiveCard",
+      "version": "1.6"
+    }
+  },
+  {
+    "id": "scene3_bgp_rca_response",
+    "json": {
+      "actions": [
+        {
+          "data": {
+            "action": "view_chg_8841"
+          },
+          "title": "\ud83d\udcc4 View CHG-8841",
+          "type": "Action.Submit"
+        },
+        {
+          "data": {
+            "action": "monitor_recovery"
+          },
+          "title": "\ud83d\udce1 Monitor Session Recovery",
+          "type": "Action.Submit"
+        },
+        {
+          "data": {
+            "action": "view_bgp_runbook"
+          },
+          "title": "\ud83d\udcd6 View BGP Runbook s3.2",
+          "type": "Action.Submit"
+        },
+        {
+          "data": {
+            "action": "escalate_oncall"
+          },
+          "style": "destructive",
+          "title": "\ud83d\udea8 Escalate to On-Call",
+          "type": "Action.Submit"
+        },
+        {
+          "data": {
+            "action_id": "goto_scene3_capability_callout",
+            "routeToCardId": "scene3_capability_callout"
+          },
+          "style": "positive",
+          "title": "\u25b6 Scene 3 Capability Callout \u2192",
+          "type": "Action.Submit"
+        },
+        {
+          "associatedInputs": "none",
+          "data": {},
+          "title": "\u21a9 Back to Parallel Queries",
+          "type": "Action.Submit"
+        }
+      ],
+      "body": [
+        {
+          "bleed": true,
+          "items": [
+            {
+              "columns": [
+                {
+                  "items": [
+                    {
+                      "altText": "BGP root cause analysis icon",
+                      "size": "Medium",
+                      "type": "Image",
+                      "url": "https://img.icons8.com/fluency/96/combo-chart.png"
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "auto"
+                },
+                {
+                  "items": [
+                    {
+                      "color": "Accent",
+                      "size": "Large",
+                      "text": "BGP Session Flap \u2014 Root Cause Analysis",
+                      "type": "TextBlock",
+                      "weight": "Bolder",
+                      "wrap": true
+                    },
+                    {
+                      "isSubtle": true,
+                      "size": "Small",
+                      "spacing": "None",
+                      "text": "EDGE-RTR-LON-01 \u00b7 London Docklands \u00b7 Response: ~3 sec",
+                      "type": "TextBlock",
+                      "wrap": true
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "stretch"
+                }
+              ],
+              "type": "ColumnSet"
+            }
+          ],
+          "style": "emphasis",
+          "type": "Container"
+        },
+        {
+          "bleed": true,
+          "items": [
+            {
+              "size": "Small",
+              "text": "\u2705 All 6 parallel queries completed",
+              "type": "TextBlock",
+              "weight": "Bolder",
+              "wrap": true
+            }
+          ],
+          "style": "good",
+          "type": "Container"
+        },
+        {
+          "items": [
+            {
+              "facts": [
+                {
+                  "title": "\u2713 NMS",
+                  "value": "EDGE-RTR-LON-01 device health \u2014 complete"
+                },
+                {
+                  "title": "\u2713 Ticketing",
+                  "value": "Active changes against this device & BGP peers \u2014 complete"
+                },
+                {
+                  "title": "\u2713 Knowledge Base",
+                  "value": "BGP runbook v4.1 & London Network Design v3.2 \u2014 complete"
+                },
+                {
+                  "title": "\u2713 NMS",
+                  "value": "BGP alarm history 90-day window \u2014 complete"
+                },
+                {
+                  "title": "\u2713 NMS",
+                  "value": "Peer device interface state (EDGE-RTR-LON-02) \u2014 complete"
+                },
+                {
+                  "title": "\u2713 NMS",
+                  "value": "Active alarms on EDGE-RTR-LON-01 \u2014 complete"
+                }
+              ],
+              "type": "FactSet"
+            }
+          ],
+          "spacing": "Small",
+          "style": "good",
+          "type": "Container"
+        },
+        {
+          "color": "Accent",
+          "size": "Medium",
+          "spacing": "Medium",
+          "text": "\ud83d\udcca Findings",
+          "type": "TextBlock",
+          "weight": "Bolder"
+        },
+        {
+          "items": [
+            {
+              "size": "Small",
+              "text": "\ud83d\udda5\ufe0f Device Health \u2014 EDGE-RTR-LON-01",
+              "type": "TextBlock",
+              "weight": "Bolder"
+            },
+            {
+              "facts": [
+                {
+                  "title": "CPU",
+                  "value": "34%"
+                },
+                {
+                  "title": "Memory",
+                  "value": "62%"
+                },
+                {
+                  "title": "Hardware alarms",
+                  "value": "None"
+                },
+                {
+                  "title": "Assessment",
+                  "value": "\u2705 Local device is NOT the source of the problem"
+                }
+              ],
+              "type": "FactSet"
+            }
+          ],
+          "style": "emphasis",
+          "type": "Container"
+        },
+        {
+          "items": [
+            {
+              "size": "Small",
+              "text": "\ud83c\udfab Active Change Request",
+              "type": "TextBlock",
+              "weight": "Bolder"
+            },
+            {
+              "facts": [
+                {
+                  "title": "Ticket",
+                  "value": "CHG-8841 \u2014 OPEN"
+                },
+                {
+                  "title": "Description",
+                  "value": "Firmware upgrade \u2014 EDGE-RTR-LON-02"
+                },
+                {
+                  "title": "Window",
+                  "value": "14:00\u201316:00 today \u00b7 Status: In progress"
+                },
+                {
+                  "title": "Engineer",
+                  "value": "R. Patel"
+                }
+              ],
+              "type": "FactSet"
+            }
+          ],
+          "spacing": "Small",
+          "style": "warning",
+          "type": "Container"
+        },
+        {
+          "items": [
+            {
+              "size": "Small",
+              "text": "\ud83d\udce1 Peer Device \u2014 EDGE-RTR-LON-02 (10.44.12.1)",
+              "type": "TextBlock",
+              "weight": "Bolder"
+            },
+            {
+              "facts": [
+                {
+                  "title": "Interface",
+                  "value": "GigabitEthernet0/0/2"
+                },
+                {
+                  "title": "State",
+                  "value": "DOWN / DOWN since 14:51:44"
+                },
+                {
+                  "title": "Role",
+                  "value": "BGP peering link to EDGE-RTR-LON-01 (confirmed from design doc)"
+                },
+                {
+                  "title": "Timing delta",
+                  "value": "17 seconds before BGP flap alert fired"
+                }
+              ],
+              "type": "FactSet"
+            }
+          ],
+          "spacing": "Small",
+          "style": "attention",
+          "type": "Container"
+        },
+        {
+          "items": [
+            {
+              "size": "Medium",
+              "text": "\ud83c\udfaf Root Cause Assessment \u2014 HIGH CONFIDENCE",
+              "type": "TextBlock",
+              "weight": "Bolder"
+            },
+            {
+              "size": "Small",
+              "spacing": "Small",
+              "text": "The firmware upgrade on EDGE-RTR-LON-02 (CHG-8841) caused a planned interface bounce on Gi0/0/2, which dropped the three BGP sessions. The 17-second gap between interface going down and BGP alert firing is consistent with SNMP trap processing latency in EPNM \u2014 not a BGP timer event. This is an expected side effect of planned maintenance activity.",
+              "type": "TextBlock",
+              "wrap": true
+            }
+          ],
+          "spacing": "Small",
+          "style": "good",
+          "type": "Container"
+        },
+        {
+          "items": [
+            {
+              "color": "Accent",
+              "size": "Small",
+              "text": "\ud83d\udcd6 Expected Behaviour \u2014 BGP Session Recovery Runbook v4.1, Section 3.2",
+              "type": "TextBlock",
+              "weight": "Bolder"
+            },
+            {
+              "facts": [
+                {
+                  "title": "Auto-recovery",
+                  "value": "Sessions should re-establish automatically within 2\u20134 minutes of upgrade completing"
+                },
+                {
+                  "title": "Manual threshold",
+                  "value": "No intervention required unless sessions not recovered within 10 minutes"
+                },
+                {
+                  "title": "If not recovered",
+                  "value": "Proceed to Runbook Section 3.4 \u2014 do NOT escalate to on-call before attempting this"
+                }
+              ],
+              "type": "FactSet"
+            }
+          ],
+          "spacing": "Small",
+          "style": "emphasis",
+          "type": "Container"
+        }
+      ],
+      "greentic": {
+        "cardId": "scene3_bgp_rca_response",
+        "flow": "noc_alert_investigation"
+      },
+      "type": "AdaptiveCard",
+      "version": "1.6"
+    }
+  },
+  {
+    "id": "scene3_capability_callout",
+    "json": {
+      "actions": [
+        {
+          "data": {
+            "action_id": "goto_scene4_explainability_intro",
+            "routeToCardId": "scene4_explainability_intro"
+          },
+          "style": "positive",
+          "title": "\u25b6 Scene 4 \u2014 Explainability Moment \u2192",
+          "type": "Action.Submit"
+        },
+        {
+          "associatedInputs": "none",
+          "data": {},
+          "title": "\u21a9 Back to BGP RCA Response",
+          "type": "Action.Submit"
+        },
+        {
+          "associatedInputs": "none",
+          "data": {},
+          "title": "\u2302 Main Menu",
+          "type": "Action.Submit"
+        }
+      ],
+      "body": [
+        {
+          "bleed": true,
+          "items": [
+            {
+              "columns": [
+                {
+                  "items": [
+                    {
+                      "altText": "Scene 3 capability callout icon",
+                      "size": "Medium",
+                      "type": "Image",
+                      "url": "https://img.icons8.com/fluency/96/prize.png"
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "auto"
+                },
+                {
+                  "items": [
+                    {
+                      "color": "Accent",
+                      "size": "Large",
+                      "text": "Scene 3 \u2014 Capability Callout",
+                      "type": "TextBlock",
+                      "weight": "Bolder",
+                      "wrap": true
+                    },
+                    {
+                      "isSubtle": true,
+                      "size": "Small",
+                      "spacing": "None",
+                      "text": "Parallel execution \u00b7 Multi-source correlation \u00b7 RAG over runbook",
+                      "type": "TextBlock",
+                      "wrap": true
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "stretch"
+                }
+              ],
+              "type": "ColumnSet"
+            }
+          ],
+          "style": "emphasis",
+          "type": "Container"
+        },
+        {
+          "bleed": true,
+          "items": [
+            {
+              "columns": [
+                {
+                  "items": [
+                    {
+                      "size": "Small",
+                      "text": "\ud83e\udd1d Manual investigation: 15\u201320 minutes",
+                      "type": "TextBlock",
+                      "weight": "Bolder",
+                      "wrap": true
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "stretch"
+                },
+                {
+                  "items": [
+                    {
+                      "color": "Good",
+                      "size": "Small",
+                      "text": "\u26a1 3AIgent: 3 seconds",
+                      "type": "TextBlock",
+                      "weight": "Bolder",
+                      "wrap": true
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "stretch"
+                }
+              ],
+              "type": "ColumnSet"
+            }
+          ],
+          "style": "good",
+          "type": "Container"
+        },
+        {
+          "color": "Accent",
+          "size": "Medium",
+          "spacing": "Medium",
+          "text": "\ud83d\udd11 Capabilities Demonstrated",
+          "type": "TextBlock",
+          "weight": "Bolder"
+        },
+        {
+          "items": [
+            {
+              "facts": [
+                {
+                  "title": "Chat2Data Parallel",
+                  "value": "Complete query plan determined upfront from alarm record \u2014 peer_device_id (dev-004) and peer_ip (10.44.12.1) knowable at plan time"
+                },
+                {
+                  "title": "Multi-source correlation",
+                  "value": "3 facts from 3 separate systems (NMS interface state, ticketing change ticket, network design doc) correlated in the Renderer synthesis step"
+                },
+                {
+                  "title": "RAG over runbook",
+                  "value": "BGP Session Recovery Runbook v4.1 s3.2 retrieved and applied \u2014 recovery timeline and intervention threshold surfaced automatically"
+                },
+                {
+                  "title": "Root cause + guidance",
+                  "value": "Not just what happened \u2014 but what to do, when to intervene, and what to try before escalating"
+                }
+              ],
+              "type": "FactSet"
+            }
+          ],
+          "style": "emphasis",
+          "type": "Container"
+        },
+        {
+          "items": [
+            {
+              "size": "Small",
+              "text": "\ud83d\udcac Presenter Quote",
+              "type": "TextBlock",
+              "weight": "Bolder"
+            },
+            {
+              "isSubtle": true,
+              "size": "Small",
+              "text": "\"Three seconds, six queries, one answer. The engineer now knows: this is planned maintenance, automatic recovery is expected, here's the timeline, here's when to intervene if it doesn't happen. That answer would have taken a skilled engineer fifteen to twenty minutes to assemble manually.\"",
+              "type": "TextBlock",
+              "wrap": true
+            }
+          ],
+          "spacing": "Medium",
+          "style": "warning",
+          "type": "Container"
+        },
+        {
+          "items": [
+            {
+              "color": "Accent",
+              "size": "Small",
+              "text": "\ud83d\udccc Implementation Note",
+              "type": "TextBlock",
+              "weight": "Bolder"
+            },
+            {
+              "isSubtle": true,
+              "size": "Small",
+              "text": "This scene is implemented via Chat2Data \u2014 not agentic. The peer interface state query (Step 5) is schedulable upfront because the BGP alarm record carries the peer device IP. If the agentic path becomes available before the demo, Scenes 3 and 4 can revert to the stronger agentic version.",
+              "type": "TextBlock",
+              "wrap": true
+            }
+          ],
+          "spacing": "Small",
+          "style": "emphasis",
+          "type": "Container"
+        }
+      ],
+      "greentic": {
+        "cardId": "scene3_capability_callout",
+        "flow": "noc_alert_investigation"
+      },
+      "type": "AdaptiveCard",
+      "version": "1.6"
+    }
+  },
+  {
+    "id": "scene3_parallel_query_indicator",
+    "json": {
+      "actions": [
+        {
+          "data": {
+            "action_id": "goto_scene3_bgp_rca_response",
+            "routeToCardId": "scene3_bgp_rca_response"
+          },
+          "style": "positive",
+          "title": "\u25b6 Show Full BGP RCA Response \u2192",
+          "type": "Action.Submit"
+        },
+        {
+          "associatedInputs": "none",
+          "data": {},
+          "title": "\u21a9 Back to Scene 3 Intro",
+          "type": "Action.Submit"
+        },
+        {
+          "associatedInputs": "none",
+          "data": {},
+          "title": "\u2302 Main Menu",
+          "type": "Action.Submit"
+        }
+      ],
+      "body": [
+        {
+          "bleed": true,
+          "items": [
+            {
+              "columns": [
+                {
+                  "items": [
+                    {
+                      "altText": "Parallel execution icon",
+                      "size": "Medium",
+                      "type": "Image",
+                      "url": "https://img.icons8.com/fluency/96/parallel-tasks.png"
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "auto"
+                },
+                {
+                  "items": [
+                    {
+                      "color": "Accent",
+                      "size": "Large",
+                      "text": "Querying Multiple Sources in Parallel...",
+                      "type": "TextBlock",
+                      "weight": "Bolder",
+                      "wrap": true
+                    },
+                    {
+                      "isSubtle": true,
+                      "size": "Small",
+                      "spacing": "None",
+                      "text": "Chat2Data \u2014 complete plan determined upfront from alarm record",
+                      "type": "TextBlock",
+                      "wrap": true
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "stretch"
+                }
+              ],
+              "type": "ColumnSet"
+            }
+          ],
+          "style": "emphasis",
+          "type": "Container"
+        },
+        {
+          "bleed": true,
+          "items": [
+            {
+              "size": "Small",
+              "text": "\u23f3 Processing \u2014 approximately 3 seconds \u00b7 All 6 queries running simultaneously",
+              "type": "TextBlock",
+              "weight": "Bolder",
+              "wrap": true
+            }
+          ],
+          "style": "warning",
+          "type": "Container"
+        },
+        {
+          "color": "Accent",
+          "size": "Medium",
+          "spacing": "Medium",
+          "text": "\ud83d\udccb Plan Determined From Alarm Record",
+          "type": "TextBlock",
+          "weight": "Bolder"
+        },
+        {
+          "items": [
+            {
+              "facts": [
+                {
+                  "title": "Input",
+                  "value": "device: EDGE-RTR-LON-01"
+                },
+                {
+                  "title": "Input",
+                  "value": "peer_device_id: dev-004"
+                },
+                {
+                  "title": "Input",
+                  "value": "peer_ip: 10.44.12.1"
+                },
+                {
+                  "title": "Key insight",
+                  "value": "Peer device IP known upfront \u2014 peer interface state query schedulable without waiting for any result"
+                }
+              ],
+              "type": "FactSet"
+            }
+          ],
+          "style": "emphasis",
+          "type": "Container"
+        },
+        {
+          "color": "Accent",
+          "size": "Medium",
+          "spacing": "Small",
+          "text": "\ud83d\udd04 6 Parallel Queries \u2014 In Flight",
+          "type": "TextBlock",
+          "weight": "Bolder"
+        },
+        {
+          "items": [
+            {
+              "columns": [
+                {
+                  "items": [
+                    {
+                      "size": "Medium",
+                      "text": "\u23f3",
+                      "type": "TextBlock"
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "auto"
+                },
+                {
+                  "items": [
+                    {
+                      "size": "Small",
+                      "text": "Step 1 \u2014 NMS: Active alarms on EDGE-RTR-LON-01",
+                      "type": "TextBlock",
+                      "wrap": true
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "stretch"
+                }
+              ],
+              "type": "ColumnSet"
+            },
+            {
+              "columns": [
+                {
+                  "items": [
+                    {
+                      "size": "Medium",
+                      "text": "\u23f3",
+                      "type": "TextBlock"
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "auto"
+                },
+                {
+                  "items": [
+                    {
+                      "size": "Small",
+                      "text": "Step 2 \u2014 NMS: Device health check (CPU, memory, hardware alarms)",
+                      "type": "TextBlock",
+                      "wrap": true
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "stretch"
+                }
+              ],
+              "type": "ColumnSet"
+            },
+            {
+              "columns": [
+                {
+                  "items": [
+                    {
+                      "size": "Medium",
+                      "text": "\u23f3",
+                      "type": "TextBlock"
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "auto"
+                },
+                {
+                  "items": [
+                    {
+                      "size": "Small",
+                      "text": "Step 3 \u2014 Ticketing: Active changes against EDGE-RTR-LON-01 and its BGP peers",
+                      "type": "TextBlock",
+                      "wrap": true
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "stretch"
+                }
+              ],
+              "type": "ColumnSet"
+            },
+            {
+              "columns": [
+                {
+                  "items": [
+                    {
+                      "size": "Medium",
+                      "text": "\u23f3",
+                      "type": "TextBlock"
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "auto"
+                },
+                {
+                  "items": [
+                    {
+                      "size": "Small",
+                      "text": "Step 4 \u2014 NMS: BGP alarm history on EDGE-RTR-LON-01 (90-day window)",
+                      "type": "TextBlock",
+                      "wrap": true
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "stretch"
+                }
+              ],
+              "type": "ColumnSet"
+            },
+            {
+              "columns": [
+                {
+                  "items": [
+                    {
+                      "size": "Medium",
+                      "text": "\u23f3",
+                      "type": "TextBlock"
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "auto"
+                },
+                {
+                  "items": [
+                    {
+                      "size": "Small",
+                      "text": "Step 5 \u2014 NMS: Interface state on peer EDGE-RTR-LON-02 (10.44.12.1 / dev-004)",
+                      "type": "TextBlock",
+                      "wrap": true
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "stretch"
+                }
+              ],
+              "type": "ColumnSet"
+            },
+            {
+              "columns": [
+                {
+                  "items": [
+                    {
+                      "size": "Medium",
+                      "text": "\u23f3",
+                      "type": "TextBlock"
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "auto"
+                },
+                {
+                  "items": [
+                    {
+                      "size": "Small",
+                      "text": "Step 6 \u2014 Knowledge base: BGP Session Recovery Runbook + London Network Design v3.2",
+                      "type": "TextBlock",
+                      "wrap": true
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "stretch"
+                }
+              ],
+              "type": "ColumnSet"
+            }
+          ],
+          "style": "emphasis",
+          "type": "Container"
+        },
+        {
+          "items": [
+            {
+              "color": "Accent",
+              "size": "Small",
+              "text": "\ud83c\udf99\ufe0f Presenter Narration Cue",
+              "type": "TextBlock",
+              "weight": "Bolder"
+            },
+            {
+              "isSubtle": true,
+              "size": "Small",
+              "text": "Pause for approximately 3 seconds to let the audience observe the parallel query indicator. This visual moment is key to the Chat2Data parallel execution story. Then advance to the full BGP RCA response.",
+              "type": "TextBlock",
+              "wrap": true
+            }
+          ],
+          "spacing": "Medium",
+          "style": "emphasis",
+          "type": "Container"
+        }
+      ],
+      "greentic": {
+        "cardId": "scene3_parallel_query_indicator",
+        "flow": "noc_alert_investigation"
+      },
+      "type": "AdaptiveCard",
+      "version": "1.6"
+    }
+  },
+  {
+    "id": "scene4_correlation_summary",
+    "json": {
+      "actions": [
+        {
+          "data": {
+            "action_id": "goto_demo_wrapup",
+            "routeToCardId": "demo_wrapup"
+          },
+          "style": "positive",
+          "title": "\ud83c\udf89 Demo Wrap-Up \u2192",
+          "type": "Action.Submit"
+        },
+        {
+          "associatedInputs": "none",
+          "data": {},
+          "title": "\u21a9 Back to Execution Plan Log",
+          "type": "Action.Submit"
+        },
+        {
+          "associatedInputs": "none",
+          "data": {},
+          "title": "\u2302 Main Menu",
+          "type": "Action.Submit"
+        }
+      ],
+      "body": [
+        {
+          "bleed": true,
+          "items": [
+            {
+              "columns": [
+                {
+                  "items": [
+                    {
+                      "altText": "Correlation synthesis summary icon",
+                      "size": "Medium",
+                      "type": "Image",
+                      "url": "https://img.icons8.com/fluency/96/prize.png"
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "auto"
+                },
+                {
+                  "items": [
+                    {
+                      "color": "Accent",
+                      "size": "Large",
+                      "text": "Scene 4 \u2014 Correlation Synthesis Callout",
+                      "type": "TextBlock",
+                      "weight": "Bolder",
+                      "wrap": true
+                    },
+                    {
+                      "isSubtle": true,
+                      "size": "Small",
+                      "spacing": "None",
+                      "text": "What the Renderer concluded \u00b7 How it got there \u00b7 Why it's trustworthy",
+                      "type": "TextBlock",
+                      "wrap": true
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "stretch"
+                }
+              ],
+              "type": "ColumnSet"
+            }
+          ],
+          "style": "emphasis",
+          "type": "Container"
+        },
+        {
+          "bleed": true,
+          "items": [
+            {
+              "color": "Light",
+              "size": "Small",
+              "text": "\u26a0\ufe0f Logged query steps \u2260 Correlation section \u2014 this distinction matters",
+              "type": "TextBlock",
+              "weight": "Bolder",
+              "wrap": true
+            }
+          ],
+          "style": "attention",
+          "type": "Container"
+        },
+        {
+          "color": "Accent",
+          "size": "Medium",
+          "spacing": "Medium",
+          "text": "\ud83e\udde0 The Distinction Explained",
+          "type": "TextBlock",
+          "weight": "Bolder"
+        },
+        {
+          "items": [
+            {
+              "facts": [
+                {
+                  "title": "Query steps (1\u20136)",
+                  "value": "Logged execution record \u2014 what was queried, from which source, and what raw data was returned. These are inputs."
+                },
+                {
+                  "title": "Correlation section",
+                  "value": "The Renderer LLM's synthesis \u2014 what it concluded by combining all six results. This happened in the LLM call, not in query execution. This is the output."
+                },
+                {
+                  "title": "Key example",
+                  "value": "Gi0/0/2 as the BGP peering link came from network design doc (Step 6) \u2014 but the decision to correlate it with the interface state (Step 5) and timestamp delta happened in the synthesis, not in a query."
+                }
+              ],
+              "type": "FactSet"
+            }
+          ],
+          "style": "emphasis",
+          "type": "Container"
+        },
+        {
+          "items": [
+            {
+              "size": "Small",
+              "text": "\ud83d\uddc2\ufe0f Permanent Audit Record \u2014 Why It Matters",
+              "type": "TextBlock",
+              "weight": "Bolder"
+            },
+            {
+              "size": "Small",
+              "text": "Every investigation log is stored permanently. Any engineer can open it later and see exactly what data the system had access to and what it concluded. This is not a black box \u2014 it's a documented, reviewable reasoning chain. When the answer is wrong, the log tells you why.",
+              "type": "TextBlock",
+              "wrap": true
+            }
+          ],
+          "spacing": "Medium",
+          "style": "good",
+          "type": "Container"
+        },
+        {
+          "color": "Accent",
+          "size": "Medium",
+          "spacing": "Medium",
+          "text": "\ud83d\udd11 Scene 4 Capability Summary",
+          "type": "TextBlock",
+          "weight": "Bolder"
+        },
+        {
+          "items": [
+            {
+              "facts": [
+                {
+                  "title": "Chat2Data parallel",
+                  "value": "Complete 6-step plan determined upfront \u2014 visible in the logged execution steps"
+                },
+                {
+                  "title": "Full query plan log",
+                  "value": "Every source, every query, every result \u2014 logged for each investigation"
+                },
+                {
+                  "title": "Cross-source correlation",
+                  "value": "5 correlation links identified across NMS, ticketing, knowledge base \u2014 traced in the Correlation section"
+                },
+                {
+                  "title": "Permanent audit record",
+                  "value": "Stored permanently. Traceable. Reviewable. Not a black box."
+                }
+              ],
+              "type": "FactSet"
+            }
+          ],
+          "style": "emphasis",
+          "type": "Container"
+        },
+        {
+          "items": [
+            {
+              "size": "Small",
+              "text": "\ud83d\udcac Presenter Quote",
+              "type": "TextBlock",
+              "weight": "Bolder"
+            },
+            {
+              "isSubtle": true,
+              "size": "Small",
+              "text": "\"The log records what went in; the Correlation records what came out. When an engineer asks 'how did the system reach that conclusion?' \u2014 the inputs are here, traceable and specific.\"",
+              "type": "TextBlock",
+              "wrap": true
+            }
+          ],
+          "spacing": "Small",
+          "style": "warning",
+          "type": "Container"
+        }
+      ],
+      "greentic": {
+        "cardId": "scene4_correlation_summary",
+        "flow": "noc_alert_investigation"
+      },
+      "type": "AdaptiveCard",
+      "version": "1.6"
+    }
+  },
+  {
+    "id": "scene4_execution_plan",
+    "json": {
+      "actions": [
+        {
+          "data": {
+            "action_id": "goto_scene4_correlation_summary",
+            "routeToCardId": "scene4_correlation_summary"
+          },
+          "style": "positive",
+          "title": "\u25b6 Scene 4 Correlation Summary \u2192",
+          "type": "Action.Submit"
+        },
+        {
+          "associatedInputs": "none",
+          "data": {},
+          "title": "\u21a9 Back to Scene 4 Intro",
+          "type": "Action.Submit"
+        },
+        {
+          "associatedInputs": "none",
+          "data": {},
+          "title": "\u2302 Main Menu",
+          "type": "Action.Submit"
+        }
+      ],
+      "body": [
+        {
+          "bleed": true,
+          "items": [
+            {
+              "columns": [
+                {
+                  "items": [
+                    {
+                      "altText": "Execution plan log icon",
+                      "size": "Medium",
+                      "type": "Image",
+                      "url": "https://img.icons8.com/fluency/96/source-code.png"
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "auto"
+                },
+                {
+                  "items": [
+                    {
+                      "color": "Accent",
+                      "size": "Large",
+                      "text": "Execution Plan Log",
+                      "type": "TextBlock",
+                      "weight": "Bolder",
+                      "wrap": true
+                    },
+                    {
+                      "isSubtle": true,
+                      "size": "Small",
+                      "spacing": "None",
+                      "text": "EDGE-RTR-LON-01 BGP Investigation \u00b7 All 6 steps \u00b7 Permanent audit record",
+                      "type": "TextBlock",
+                      "wrap": true
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "stretch"
+                }
+              ],
+              "type": "ColumnSet"
+            }
+          ],
+          "style": "emphasis",
+          "type": "Container"
+        },
+        {
+          "bleed": true,
+          "items": [
+            {
+              "size": "Small",
+              "text": "Plan determined from: alarm record (device: EDGE-RTR-LON-01 \u00b7 peer_device_id: dev-004 \u00b7 peer_ip: 10.44.12.1)",
+              "type": "TextBlock",
+              "weight": "Bolder",
+              "wrap": true
+            }
+          ],
+          "style": "warning",
+          "type": "Container"
+        },
+        {
+          "color": "Accent",
+          "size": "Medium",
+          "spacing": "Medium",
+          "text": "\u26a1 Parallel Execution \u2014 Steps 1\u20136",
+          "type": "TextBlock",
+          "weight": "Bolder"
+        },
+        {
+          "items": [
+            {
+              "color": "Good",
+              "size": "Small",
+              "text": "\u2705 Step 1 (parallel) \u2014 Active Alarms",
+              "type": "TextBlock",
+              "weight": "Bolder"
+            },
+            {
+              "facts": [
+                {
+                  "title": "Source",
+                  "value": "NMS \u2014 active alarms on EDGE-RTR-LON-01"
+                },
+                {
+                  "title": "Result",
+                  "value": "BGP_SESSION_FLAP \u00b7 3 sessions \u00b7 peer: EDGE-RTR-LON-02 (10.44.12.1)"
+                },
+                {
+                  "title": "Note",
+                  "value": "Peer device ID sourced directly from alarm record"
+                }
+              ],
+              "type": "FactSet"
+            }
+          ],
+          "style": "emphasis",
+          "type": "Container"
+        },
+        {
+          "items": [
+            {
+              "color": "Good",
+              "size": "Small",
+              "text": "\u2705 Step 2 (parallel) \u2014 Device Health Check",
+              "type": "TextBlock",
+              "weight": "Bolder"
+            },
+            {
+              "facts": [
+                {
+                  "title": "Source",
+                  "value": "NMS \u2014 EDGE-RTR-LON-01 CPU, memory, hardware alarms"
+                },
+                {
+                  "title": "Result",
+                  "value": "CPU: 34% \u00b7 Memory: 62% \u00b7 Hardware alarms: none"
+                },
+                {
+                  "title": "Conclusion",
+                  "value": "Local device is not the source of the problem"
+                }
+              ],
+              "type": "FactSet"
+            }
+          ],
+          "spacing": "Small",
+          "style": "emphasis",
+          "type": "Container"
+        },
+        {
+          "items": [
+            {
+              "color": "Good",
+              "size": "Small",
+              "text": "\u2705 Step 3 (parallel) \u2014 Active Change Check",
+              "type": "TextBlock",
+              "weight": "Bolder"
+            },
+            {
+              "facts": [
+                {
+                  "title": "Source",
+                  "value": "Ticketing \u2014 open changes against EDGE-RTR-LON-01 or its BGP peers"
+                },
+                {
+                  "title": "Result",
+                  "value": "CHG-8841: firmware upgrade EDGE-RTR-LON-02 \u00b7 window active now"
+                }
+              ],
+              "type": "FactSet"
+            }
+          ],
+          "spacing": "Small",
+          "style": "emphasis",
+          "type": "Container"
+        },
+        {
+          "items": [
+            {
+              "color": "Good",
+              "size": "Small",
+              "text": "\u2705 Step 4 (parallel) \u2014 BGP Alarm History",
+              "type": "TextBlock",
+              "weight": "Bolder"
+            },
+            {
+              "facts": [
+                {
+                  "title": "Source",
+                  "value": "NMS \u2014 BGP alarm history on EDGE-RTR-LON-01 (90-day window)"
+                },
+                {
+                  "title": "Result",
+                  "value": "No prior BGP session flap events found"
+                },
+                {
+                  "title": "Conclusion",
+                  "value": "Pattern is novel \u2014 no historical precedent"
+                }
+              ],
+              "type": "FactSet"
+            }
+          ],
+          "spacing": "Small",
+          "style": "emphasis",
+          "type": "Container"
+        },
+        {
+          "items": [
+            {
+              "color": "Good",
+              "size": "Small",
+              "text": "\u2705 Step 5 (parallel) \u2014 Peer Device Interface State",
+              "type": "TextBlock",
+              "weight": "Bolder"
+            },
+            {
+              "facts": [
+                {
+                  "title": "Source",
+                  "value": "NMS \u2014 interface state on EDGE-RTR-LON-02 (dev-004)"
+                },
+                {
+                  "title": "Result",
+                  "value": "GigabitEthernet0/0/2 DOWN/DOWN since 14:51:44"
+                },
+                {
+                  "title": "Delta",
+                  "value": "Timestamp: 17 seconds before BGP alarm fired"
+                }
+              ],
+              "type": "FactSet"
+            }
+          ],
+          "spacing": "Small",
+          "style": "emphasis",
+          "type": "Container"
+        },
+        {
+          "items": [
+            {
+              "color": "Good",
+              "size": "Small",
+              "text": "\u2705 Step 6 (parallel) \u2014 Knowledge Base Retrieval",
+              "type": "TextBlock",
+              "weight": "Bolder"
+            },
+            {
+              "facts": [
+                {
+                  "title": "Source",
+                  "value": "Knowledge base RAG"
+                },
+                {
+                  "title": "Retrieved",
+                  "value": "BGP Session Recovery Runbook v4.1 \u00b7 London Network Design v3.2"
+                },
+                {
+                  "title": "Runbook s3.2",
+                  "value": "Planned maintenance impact \u2014 automatic recovery expected within 2\u20134 min"
+                },
+                {
+                  "title": "Design doc s4.2",
+                  "value": "GigabitEthernet0/0/2 confirmed as BGP peering link between EDGE-RTR-LON-01 and EDGE-RTR-LON-02"
+                }
+              ],
+              "type": "FactSet"
+            }
+          ],
+          "spacing": "Small",
+          "style": "emphasis",
+          "type": "Container"
+        },
+        {
+          "items": [
+            {
+              "color": "Default",
+              "size": "Medium",
+              "text": "\ud83e\udde0 Correlation \u2014 Renderer Synthesis",
+              "type": "TextBlock",
+              "weight": "Bolder"
+            },
+            {
+              "isSubtle": true,
+              "size": "Small",
+              "text": "This section records what the Renderer LLM concluded \u2014 not a logged query step. Synthesis happened in the LLM call after all parallel results were received.",
+              "type": "TextBlock",
+              "wrap": true
+            },
+            {
+              "facts": [
+                {
+                  "title": "Link A",
+                  "value": "Gi0/0/2 DOWN at 14:51:44 (Step 5) is the BGP peering link (Step 6 \u2014 London Network Design v3.2 s4.2)"
+                },
+                {
+                  "title": "Link B",
+                  "value": "CHG-8841 firmware upgrade window active on EDGE-RTR-LON-02 (Step 3) \u2014 planned cause identified"
+                },
+                {
+                  "title": "Link C",
+                  "value": "17-second gap consistent with SNMP trap processing latency, not a BGP timer event (Step 6 \u2014 BGP Design Standards s2)"
+                },
+                {
+                  "title": "Link D",
+                  "value": "Runbook s3.2 confirms this is expected maintenance behaviour (Step 6 \u2014 BGP Session Recovery Runbook v4.1)"
+                },
+                {
+                  "title": "Link E",
+                  "value": "No prior history (Step 4) confirms novel event \u2014 not a recurring fault pattern"
+                },
+                {
+                  "title": "Confidence",
+                  "value": "HIGH \u2014 all five correlation links consistent; no contradictory evidence across any query result"
+                }
+              ],
+              "type": "FactSet"
+            }
+          ],
+          "spacing": "Medium",
+          "style": "good",
+          "type": "Container"
+        }
+      ],
+      "greentic": {
+        "cardId": "scene4_execution_plan",
+        "flow": "noc_alert_investigation"
+      },
+      "type": "AdaptiveCard",
+      "version": "1.6"
+    }
+  },
+  {
+    "id": "scene4_explainability_intro",
+    "json": {
+      "actions": [
+        {
+          "data": {
+            "action_id": "goto_scene4_execution_plan",
+            "routeToCardId": "scene4_execution_plan"
+          },
+          "style": "positive",
+          "title": "\u25b6 Show Full Execution Plan Log \u2192",
+          "type": "Action.Submit"
+        },
+        {
+          "associatedInputs": "none",
+          "data": {},
+          "title": "\u21a9 Back to Scene 3 Callout",
+          "type": "Action.Submit"
+        },
+        {
+          "associatedInputs": "none",
+          "data": {},
+          "title": "\u2302 Main Menu",
+          "type": "Action.Submit"
+        }
+      ],
+      "body": [
+        {
+          "bleed": true,
+          "items": [
+            {
+              "columns": [
+                {
+                  "items": [
+                    {
+                      "altText": "Explainability magnifier icon",
+                      "size": "Medium",
+                      "type": "Image",
+                      "url": "https://img.icons8.com/fluency/96/search.png"
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "auto"
+                },
+                {
+                  "items": [
+                    {
+                      "color": "Accent",
+                      "size": "Large",
+                      "text": "Scene 4 \u2014 The Explainability Moment",
+                      "type": "TextBlock",
+                      "weight": "Bolder",
+                      "wrap": true
+                    },
+                    {
+                      "isSubtle": true,
+                      "size": "Small",
+                      "spacing": "None",
+                      "text": "Full query plan logging \u00b7 Permanent audit record \u00b7 Traceable synthesis",
+                      "type": "TextBlock",
+                      "wrap": true
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "stretch"
+                }
+              ],
+              "type": "ColumnSet"
+            }
+          ],
+          "style": "emphasis",
+          "type": "Container"
+        },
+        {
+          "bleed": true,
+          "items": [
+            {
+              "size": "Small",
+              "text": "\ud83c\udfac Setup: Presenter clicks \"Show execution plan\" toggle on the Scene 3 BGP response",
+              "type": "TextBlock",
+              "weight": "Bolder",
+              "wrap": true
+            }
+          ],
+          "style": "warning",
+          "type": "Container"
+        },
+        {
+          "color": "Accent",
+          "size": "Medium",
+          "spacing": "Medium",
+          "text": "What the Execution Plan Log Reveals",
+          "type": "TextBlock",
+          "weight": "Bolder"
+        },
+        {
+          "items": [
+            {
+              "facts": [
+                {
+                  "title": "What was queried",
+                  "value": "All 6 parallel query steps, each with the specific data source and parameters used"
+                },
+                {
+                  "title": "Which sources",
+                  "value": "NMS (\u00d74 queries), Ticketing (\u00d71), Knowledge Base RAG (\u00d71)"
+                },
+                {
+                  "title": "What each contributed",
+                  "value": "The actual result returned from each query \u2014 not a summary, the data that flowed into synthesis"
+                },
+                {
+                  "title": "Correlation section",
+                  "value": "A separate section showing how the Renderer LLM combined all inputs to reach the HIGH CONFIDENCE conclusion"
+                }
+              ],
+              "type": "FactSet"
+            }
+          ],
+          "style": "emphasis",
+          "type": "Container"
+        },
+        {
+          "items": [
+            {
+              "size": "Small",
+              "text": "\u26a0\ufe0f Key Distinction \u2014 Log Steps vs. Correlation Section",
+              "type": "TextBlock",
+              "weight": "Bolder"
+            },
+            {
+              "isSubtle": true,
+              "size": "Small",
+              "text": "The 6 logged query steps show the inputs \u2014 what went in to the system. The Correlation section is different: it records what the Renderer LLM concluded by combining those results. The synthesis itself happened in the LLM call, not in query execution. The log records inputs; the Correlation records the reasoning output.",
+              "type": "TextBlock",
+              "wrap": true
+            }
+          ],
+          "spacing": "Medium",
+          "style": "attention",
+          "type": "Container"
+        },
+        {
+          "items": [
+            {
+              "size": "Small",
+              "text": "\ud83d\uddc2\ufe0f Permanent Audit Record",
+              "type": "TextBlock",
+              "weight": "Bolder"
+            },
+            {
+              "size": "Small",
+              "text": "This log is stored permanently. When an engineer asks 'how did the system reach that conclusion?' \u2014 the inputs are here, traceable and specific. Not a black box: a documented reasoning chain.",
+              "type": "TextBlock",
+              "wrap": true
+            }
+          ],
+          "spacing": "Small",
+          "style": "good",
+          "type": "Container"
+        },
+        {
+          "items": [
+            {
+              "color": "Accent",
+              "size": "Small",
+              "text": "\ud83c\udf99\ufe0f Presenter Narration Cue",
+              "type": "TextBlock",
+              "weight": "Bolder"
+            },
+            {
+              "isSubtle": true,
+              "size": "Small",
+              "text": "Presenter clicks the toggle on the Scene 3 response. The query plan log expands below the answer. Walk through each step pointing out what was queried and what came back, then draw attention to the Correlation section and the distinction between logged query steps and synthesised reasoning.",
+              "type": "TextBlock",
+              "wrap": true
+            }
+          ],
+          "spacing": "Small",
+          "style": "emphasis",
+          "type": "Container"
+        }
+      ],
+      "greentic": {
+        "cardId": "scene4_explainability_intro",
+        "flow": "noc_alert_investigation"
+      },
+      "type": "AdaptiveCard",
+      "version": "1.6"
+    }
+  },
+  {
+    "id": "welcome",
+    "json": {
+      "actions": [
+        {
+          "data": {
+            "action_id": "goto_scene1_noc_dashboard",
+            "routeToCardId": "scene1_noc_dashboard"
+          },
+          "style": "positive",
+          "title": "\u25b6 Scene 1 \u2014 Setting the Stage (1 min)",
+          "type": "Action.Submit"
+        },
+        {
+          "data": {
+            "action_id": "goto_scene2_alert_intro",
+            "routeToCardId": "scene2_alert_intro"
+          },
+          "title": "\u26a1 Scene 2 \u2014 Known Pattern Alert (2 min)",
+          "type": "Action.Submit"
+        },
+        {
+          "data": {
+            "action_id": "goto_scene3_bgp_alert_intro",
+            "routeToCardId": "scene3_bgp_alert_intro"
+          },
+          "title": "\ud83d\udd00 Scene 3 \u2014 Novel Alert: Parallel Investigation (3 min)",
+          "type": "Action.Submit"
+        },
+        {
+          "data": {
+            "action_id": "goto_scene4_explainability_intro",
+            "routeToCardId": "scene4_explainability_intro"
+          },
+          "title": "\ud83d\udd0d Scene 4 \u2014 The Explainability Moment (1 min)",
+          "type": "Action.Submit"
+        },
+        {
+          "data": {
+            "action_id": "goto_demo_wrapup",
+            "routeToCardId": "demo_wrapup"
+          },
+          "title": "\ud83c\udf89 Demo Wrap-Up & Summary",
+          "type": "Action.Submit"
+        }
+      ],
+      "body": [
+        {
+          "bleed": true,
+          "items": [
+            {
+              "columns": [
+                {
+                  "items": [
+                    {
+                      "altText": "3AIgent network intelligence logo",
+                      "size": "Medium",
+                      "type": "Image",
+                      "url": "https://img.icons8.com/fluency/96/network.png"
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "auto"
+                },
+                {
+                  "items": [
+                    {
+                      "color": "Accent",
+                      "size": "ExtraLarge",
+                      "text": "3AIgent",
+                      "type": "TextBlock",
+                      "weight": "Bolder"
+                    },
+                    {
+                      "isSubtle": true,
+                      "size": "Small",
+                      "spacing": "None",
+                      "text": "NOC Alert Investigation \u2014 Demo Storyboard v3",
+                      "type": "TextBlock",
+                      "wrap": true
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "stretch"
+                }
+              ],
+              "type": "ColumnSet"
+            }
+          ],
+          "style": "emphasis",
+          "type": "Container"
+        },
+        {
+          "bleed": true,
+          "items": [
+            {
+              "color": "Dark",
+              "size": "Medium",
+              "text": "\"From forty-five minutes of manual investigation to a structured answer in under five minutes.\"",
+              "type": "TextBlock",
+              "weight": "Bolder",
+              "wrap": true
+            }
+          ],
+          "style": "warning",
+          "type": "Container"
+        },
+        {
+          "columns": [
+            {
+              "items": [
+                {
+                  "isSubtle": true,
+                  "size": "Small",
+                  "text": "\u23f1\ufe0f Estimated runtime: 10\u201312 minutes",
+                  "type": "TextBlock",
+                  "wrap": true
+                }
+              ],
+              "type": "Column",
+              "width": "stretch"
+            },
+            {
+              "items": [
+                {
+                  "color": "Good",
+                  "size": "Small",
+                  "text": "\ud83d\udfe2 Status: Active",
+                  "type": "TextBlock",
+                  "weight": "Bolder"
+                }
+              ],
+              "type": "Column",
+              "width": "auto"
+            }
+          ],
+          "spacing": "Medium",
+          "type": "ColumnSet"
+        },
+        {
+          "items": [
+            {
+              "color": "Accent",
+              "size": "Small",
+              "text": "\ud83d\udd11 Capabilities Showcased",
+              "type": "TextBlock",
+              "weight": "Bolder"
+            },
+            {
+              "facts": [
+                {
+                  "title": "RAG",
+                  "value": "Design documents & runbooks \u2014 strong throughout all scenes"
+                },
+                {
+                  "title": "Chat2Data",
+                  "value": "Parallel plan execution \u2014 Scenes 2 & 3"
+                },
+                {
+                  "title": "Synthesis",
+                  "value": "Cross-source correlation across NMS, ticketing & knowledge base"
+                },
+                {
+                  "title": "Explainability",
+                  "value": "Full query plan logging with permanent audit record"
+                },
+                {
+                  "title": "Scope honesty",
+                  "value": "Calibrated answers \u2014 states what is and isn't knowable"
+                }
+              ],
+              "type": "FactSet"
+            }
+          ],
+          "spacing": "Small",
+          "style": "emphasis",
+          "type": "Container"
+        },
+        {
+          "color": "Accent",
+          "size": "Medium",
+          "spacing": "Medium",
+          "text": "\ud83d\udccb Navigate to a Scene",
+          "type": "TextBlock",
+          "weight": "Bolder"
+        }
+      ],
+      "greentic": {
+        "cardId": "welcome",
+        "flow": "noc_alert_investigation"
+      },
+      "type": "AdaptiveCard",
+      "version": "1.6"
+    }
+  }
+]
