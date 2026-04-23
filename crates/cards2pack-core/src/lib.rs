@@ -8,10 +8,19 @@
 #![deny(rust_2018_idioms)]
 
 mod convert;
-mod types;
-mod errors;
-mod parse;
-mod entry;
-mod routing;
-mod http_inject;
 mod emit;
+mod entry;
+mod errors;
+mod http_inject;
+mod parse;
+mod routing;
+mod types;
+
+pub use convert::convert;
+pub use errors::ConvertError;
+pub use http_inject::HttpNode;
+pub use parse::parse_cards;
+pub use routing::{build_routing, RouteEdge, RoutingGraph};
+pub use types::{
+    CardEntry, CardKind, ConvertOptions, ConvertResult, Diagnostic, DiagnosticKind, HttpConfig,
+};
