@@ -1,0 +1,85 @@
+---
+source: crates/cards2pack-core/tests/golden.rs
+expression: yaml
+---
+id: chatbot-loop
+type: messaging
+schema_version: 2
+start: welcome
+nodes:
+  bye:
+    routing: []
+    card:
+      call:
+        op: render
+        metadata: []
+        payload:
+          card_source: asset
+          card_spec:
+            asset_path: assets/cards/bye.json
+          mode: renderAndValidate
+          node_id: bye
+          payload: {}
+          session: {}
+          state: {}
+          validation_mode: warn
+  chat_input:
+    routing:
+    - to: chat_reply
+      when: action.action_id == "send"
+    - to: welcome
+      when: action.action_id == "home"
+    card:
+      call:
+        op: render
+        metadata: []
+        payload:
+          card_source: asset
+          card_spec:
+            asset_path: assets/cards/chat_input.json
+          mode: renderAndValidate
+          node_id: chat_input
+          payload: {}
+          session: {}
+          state: {}
+          validation_mode: warn
+  chat_reply:
+    routing:
+    - to: chat_input
+      when: action.action_id == "continue"
+    - to: bye
+      when: action.action_id == "done"
+    card:
+      call:
+        op: render
+        metadata: []
+        payload:
+          card_source: asset
+          card_spec:
+            asset_path: assets/cards/chat_reply.json
+          mode: renderAndValidate
+          node_id: chat_reply
+          payload: {}
+          session: {}
+          state: {}
+          validation_mode: warn
+  welcome:
+    routing:
+    - to: chat_input
+      when: action.action_id == "go_chat"
+    - to: bye
+      when: action.action_id == "go_bye"
+    card:
+      call:
+        op: render
+        metadata: []
+        payload:
+          card_source: asset
+          card_spec:
+            asset_path: assets/cards/welcome.json
+          mode: renderAndValidate
+          node_id: welcome
+          payload: {}
+          session: {}
+          state: {}
+          validation_mode: warn

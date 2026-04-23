@@ -1,0 +1,24 @@
+[
+  { "id": "welcome", "json": {
+      "type": "AdaptiveCard",
+      "actions": [
+        { "type": "Action.Submit", "title": "Start", "data": { "routeToCardId": "chat_input", "action_id": "go_chat" } },
+        { "type": "Action.Submit", "title": "Quit", "data": { "routeToCardId": "bye", "action_id": "go_bye" } }
+      ]
+  }},
+  { "id": "chat_input", "json": {
+      "type": "AdaptiveCard",
+      "actions": [
+        { "type": "Action.Submit", "title": "Send", "data": { "routeToCardId": "chat_reply", "action_id": "send" } },
+        { "type": "Action.Submit", "title": "Home", "data": { "routeToCardId": "welcome", "action_id": "home" } }
+      ]
+  }},
+  { "id": "chat_reply", "json": {
+      "type": "AdaptiveCard",
+      "actions": [
+        { "type": "Action.Submit", "title": "Continue", "data": { "routeToCardId": "chat_input", "action_id": "continue" } },
+        { "type": "Action.Submit", "title": "Done", "data": { "routeToCardId": "bye", "action_id": "done" } }
+      ]
+  }},
+  { "id": "bye", "json": { "type": "AdaptiveCard" } }
+]

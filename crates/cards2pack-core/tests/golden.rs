@@ -41,3 +41,44 @@ fn noc_alert_routing_uses_routeToCardId_not_alphabetical_chain() {
     let when_count = yaml.matches("when: action.action_id ==").count();
     assert!(when_count >= 4, "expected >=4 conditional routes from welcome menu; got {when_count}");
 }
+
+#[test]
+fn chatbot_loop_golden() {
+    let yaml = run_fixture("chatbot_loop");
+    insta::assert_snapshot!("chatbot_loop", yaml);
+}
+
+#[test]
+fn chatbot_loop_back_edges_preserved() {
+    let yaml = run_fixture("chatbot_loop");
+    // chat_reply → chat_input is a back-edge; must NOT be stripped.
+    assert!(yaml.contains(r#"to: chat_input"#));
+    // chat_input → welcome is also a back-edge.
+    assert!(yaml.contains(r#"to: welcome"#));
+}
+
+#[test]
+fn http_form_golden() {
+    let yaml = run_fixture("http_form");
+    insta::assert_snapshot!("http_form", yaml);
+}
+
+#[test]
+fn http_form_emits_component_exec() {
+    let yaml = run_fixture("http_form");
+    assert!(yaml.contains("component-http"));
+    assert!(yaml.contains("https://api.example.com/submit"));
+}
+
+#[test]
+fn multi_form_golden() {
+    let yaml = run_fixture("multi_form");
+    insta::assert_snapshot!("multi_form", yaml);
+}
+
+#[test]
+fn multi_form_three_conditional_routes() {
+    let yaml = run_fixture("multi_form");
+    let when_count = yaml.matches("when: action.action_id ==").count();
+    assert!(when_count >= 3, "expected >=3 conditional routes from menu; got {when_count}");
+}

@@ -1,0 +1,55 @@
+---
+source: crates/cards2pack-core/tests/golden.rs
+expression: yaml
+---
+id: http-form
+type: messaging
+schema_version: 2
+start: form
+nodes:
+  form:
+    routing:
+    - to: submit_api
+    card:
+      call:
+        op: render
+        metadata: []
+        payload:
+          card_source: asset
+          card_spec:
+            asset_path: assets/cards/form.json
+          mode: renderAndValidate
+          node_id: form
+          payload: {}
+          session: {}
+          state: {}
+          validation_mode: warn
+  submit_api:
+    routing:
+    - to: thanks
+    component:
+      exec:
+        source: oci://ghcr.io/greenticai/components/component-http:latest
+        bindings:
+          body_mapping:
+            name: $.formData.name
+          headers:
+            Content-Type: application/json
+          method: POST
+          url: https://api.example.com/submit
+  thanks:
+    routing: []
+    card:
+      call:
+        op: render
+        metadata: []
+        payload:
+          card_source: asset
+          card_spec:
+            asset_path: assets/cards/thanks.json
+          mode: renderAndValidate
+          node_id: thanks
+          payload: {}
+          session: {}
+          state: {}
+          validation_mode: warn
