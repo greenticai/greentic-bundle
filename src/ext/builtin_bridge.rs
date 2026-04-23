@@ -1,9 +1,6 @@
-//! Builtin bridge: `BuiltinRecipeId::Standard` → ephemeral workspace + ZIP output.
-
-use std::path::Path;
+//! Builtin bridge: `BuiltinRecipeId::Standard` → thin wrapper calling `bundle_standard_core`.
 
 use serde::Deserialize;
-use sha2::{Digest, Sha256};
 
 use crate::ext::errors::ExtensionError;
 use crate::ext::wasm::RenderedArtifact;
@@ -60,192 +57,50 @@ pub fn handle_standard(
     config_json: &str,
     session_json: &str,
 ) -> Result<RenderedArtifact, ExtensionError> {
-    let config: StandardConfig = serde_json::from_str(config_json)?;
+    use bundle_standard_core::{
+        build_pack, CardContentEntry, FlowEntry, PackInputs, StandardConfig as BSConfig,
+    };
+
+    // Parse old-shape inputs (preserves backward-compat for callers).
     let session: DesignerSession = serde_json::from_str(session_json)?;
+    // bundle-standard-core owns StandardConfig now; parse once, use for validation + build.
+    let bs_config: BSConfig = serde_json::from_str(config_json)?;
 
-    if config.format != "gtpack-legacy" {
-        return Err(ExtensionError::InvalidConfig(format!(
-            "format '{}' not supported in Phase A (only 'gtpack-legacy')",
-            config.format,
-        )));
-    }
-
-    let session_id = compute_session_id(&session, config_json);
-    let tmp_root = tempfile::Builder::new()
-        .prefix(&format!("ext-render-{session_id}-"))
-        .tempdir()?;
-
-    write_ephemeral_workspace(tmp_root.path(), &session, &config)?;
-    let bytes = zip_workspace(tmp_root.path())?;
-
-    let sha256 = hex_sha256(&bytes);
-    let filename = format!(
-        "{}-{}.gtpack",
-        config.metadata.name, config.metadata.version
-    );
-    Ok(RenderedArtifact {
-        filename,
-        bytes,
-        sha256,
-    })
-}
-
-/// Deterministic 16-hex-char session id.
-fn compute_session_id(session: &DesignerSession, config_json: &str) -> String {
-    let mut h = Sha256::new();
-    h.update(session.flows_json.as_bytes());
-    h.update(b"\x00");
-    h.update(session.contents_json.as_bytes());
-    h.update(b"\x00");
-    let mut assets = session.assets.clone();
-    assets.sort_by(|a, b| a.0.cmp(&b.0));
-    for (k, v) in &assets {
-        h.update(k.as_bytes());
-        h.update(b"\x00");
-        h.update(v);
-        h.update(b"\x00");
-    }
-    h.update(config_json.as_bytes());
-    let out = h.finalize();
-    hex_encode(&out[..8])
-}
-
-fn hex_sha256(bytes: &[u8]) -> String {
-    let mut h = Sha256::new();
-    h.update(bytes);
-    hex_encode(&h.finalize())
-}
-
-fn hex_encode(bytes: &[u8]) -> String {
-    const HEX: &[u8; 16] = b"0123456789abcdef";
-    let mut out = String::with_capacity(bytes.len() * 2);
-    for b in bytes {
-        out.push(HEX[(b >> 4) as usize] as char);
-        out.push(HEX[(b & 0x0f) as usize] as char);
-    }
-    out
-}
-
-fn write_ephemeral_workspace(
-    root: &Path,
-    session: &DesignerSession,
-    config: &StandardConfig,
-) -> Result<(), ExtensionError> {
-    use std::fs;
-    fs::create_dir_all(root.join("flows"))?;
-    fs::create_dir_all(root.join("assets").join("cards"))?;
-    fs::create_dir_all(root.join("tenants").join("default"))?;
-
-    // flows — session.flows_json is a JSON array of { "name": ..., "yaml": ... }.
-    let flows: Vec<serde_json::Value> = serde_json::from_str(&session.flows_json)?;
-    for (i, f) in flows.iter().enumerate() {
-        let name = f
-            .get("name")
-            .and_then(|v| v.as_str())
-            .map(str::to_owned)
-            .unwrap_or_else(|| format!("flow-{i:03}"));
-        let yaml = f.get("yaml").and_then(|v| v.as_str()).ok_or_else(|| {
-            ExtensionError::InvalidConfig(format!("flow '{name}' missing 'yaml'"))
-        })?;
-        fs::write(root.join("flows").join(format!("{name}.ygtc")), yaml)?;
-    }
-
-    // contents — array of { "id": ..., "json": ... }.
-    let contents: Vec<serde_json::Value> = serde_json::from_str(&session.contents_json)?;
-    for c in contents.iter() {
-        let id = c
-            .get("id")
-            .and_then(|v| v.as_str())
-            .ok_or_else(|| ExtensionError::InvalidConfig("content missing 'id'".into()))?;
-        let json = c.get("json").ok_or_else(|| {
-            ExtensionError::InvalidConfig(format!("content '{id}' missing 'json'"))
-        })?;
-        fs::write(
-            root.join("assets").join("cards").join(format!("{id}.json")),
-            serde_json::to_vec_pretty(json)?,
-        )?;
-    }
-
-    // raw assets.
-    for (rel, bytes) in &session.assets {
-        let dst = root.join("assets").join(rel);
-        if let Some(parent) = dst.parent() {
-            fs::create_dir_all(parent)?;
-        }
-        fs::write(dst, bytes)?;
-    }
-
-    // synthesize bundle.yaml.
-    let channels_yaml: String = config
-        .channels
-        .iter()
-        .map(|c| format!("  - {c}\n"))
-        .collect();
-    let bundle_yaml = format!(
-        "apiVersion: greentic.ai/v1\nkind: BundleWorkspace\nmetadata:\n  name: {}\n  version: {}\nchannels:\n{}",
-        config.metadata.name, config.metadata.version, channels_yaml,
-    );
-    fs::write(root.join("bundle.yaml"), bundle_yaml)?;
-
-    // synthesize tenant.gmap.
-    let caps_yaml: String = session
-        .capabilities_used
-        .iter()
-        .map(|c| format!("  - {c}\n"))
-        .collect();
-    let tenant_gmap =
-        format!("# generated by ext bridge\ntenant: default\ncapabilities:\n{caps_yaml}",);
-    fs::write(
-        root.join("tenants").join("default").join("tenant.gmap"),
-        tenant_gmap,
-    )?;
-
-    Ok(())
-}
-
-/// Walk the workspace directory and produce a ZIP in memory (Deflated, sorted entries for determinism).
-fn zip_workspace(workspace_root: &Path) -> Result<Vec<u8>, ExtensionError> {
-    use std::fs;
-    use std::io::Write;
-
-    // Collect + sort paths for deterministic ZIP ordering.
-    let entries: Vec<_> = walkdir::WalkDir::new(workspace_root)
-        .sort_by_file_name()
+    let flows: Vec<FlowEntry> = serde_json::from_str::<Vec<serde_json::Value>>(&session.flows_json)?
         .into_iter()
-        .collect::<Result<Vec<_>, _>>()
-        .map_err(|e| ExtensionError::Io(std::io::Error::other(e)))?;
+        .enumerate()
+        .map(|(i, v)| FlowEntry {
+            name: v.get("name").and_then(|x| x.as_str()).map(str::to_owned).unwrap_or_else(|| format!("flow-{i:03}")),
+            yaml: v.get("yaml").and_then(|x| x.as_str()).unwrap_or("").to_owned(),
+        })
+        .collect();
 
-    let mut buf: Vec<u8> = Vec::new();
-    {
-        let mut zip = zip::ZipWriter::new(std::io::Cursor::new(&mut buf));
-        let options = zip::write::FileOptions::<()>::default()
-            .compression_method(zip::CompressionMethod::Deflated);
+    let cards: Vec<CardContentEntry> = serde_json::from_str::<Vec<serde_json::Value>>(&session.contents_json)?
+        .into_iter()
+        .filter_map(|v| Some(CardContentEntry {
+            id: v.get("id").and_then(|x| x.as_str())?.to_owned(),
+            json: v.get("json")?.clone(),
+        }))
+        .collect();
 
-        for entry in entries {
-            let path = entry.path();
-            let rel = path.strip_prefix(workspace_root).unwrap_or(path);
-            if rel.as_os_str().is_empty() {
-                continue;
-            }
-            if entry.file_type().is_dir() {
-                zip.add_directory(rel.to_string_lossy(), options)
-                    .map_err(zip_io)?;
-                continue;
-            }
-            if entry.file_type().is_file() {
-                zip.start_file(rel.to_string_lossy(), options)
-                    .map_err(zip_io)?;
-                let bytes = fs::read(path)?;
-                zip.write_all(&bytes)?;
-            }
-        }
-        zip.finish().map_err(zip_io)?;
-    }
-    Ok(buf)
-}
+    let inputs = PackInputs {
+        config: &bs_config,
+        flows: &flows,
+        cards: &cards,
+        assets: &session.assets,
+        capabilities: &session.capabilities_used,
+    };
 
-fn zip_io(e: zip::result::ZipError) -> ExtensionError {
-    ExtensionError::Io(std::io::Error::other(e))
+    let pack = build_pack(&inputs).map_err(|e| match e.code() {
+        "E_INVALID_FORMAT" => ExtensionError::InvalidConfig(e.to_string()),
+        _ => ExtensionError::Io(std::io::Error::other(e.to_string())),
+    })?;
+
+    Ok(RenderedArtifact {
+        filename: pack.filename,
+        bytes: pack.bytes,
+        sha256: pack.sha256,
+    })
 }
 
 #[cfg(test)]
@@ -264,34 +119,6 @@ mod tests {
       "assets": [],
       "capabilities_used": ["greentic:adaptive-cards/schema"]
     }"#;
-
-    #[test]
-    fn session_id_deterministic() {
-        let a = compute_session_id(
-            &serde_json::from_str::<DesignerSession>(MIN_SESSION).unwrap(),
-            MIN_CONFIG,
-        );
-        let b = compute_session_id(
-            &serde_json::from_str::<DesignerSession>(MIN_SESSION).unwrap(),
-            MIN_CONFIG,
-        );
-        assert_eq!(a, b);
-        assert_eq!(a.len(), 16);
-    }
-
-    #[test]
-    fn session_id_differs_on_different_inputs() {
-        let a = compute_session_id(
-            &serde_json::from_str::<DesignerSession>(MIN_SESSION).unwrap(),
-            MIN_CONFIG,
-        );
-        let other_cfg = MIN_CONFIG.replace("demo", "other");
-        let b = compute_session_id(
-            &serde_json::from_str::<DesignerSession>(MIN_SESSION).unwrap(),
-            &other_cfg,
-        );
-        assert_ne!(a, b);
-    }
 
     #[test]
     fn rejects_unsupported_format() {
