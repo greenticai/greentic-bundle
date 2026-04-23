@@ -12,7 +12,8 @@ pub fn zip_entries(entries: &[(String, Vec<u8>)]) -> Result<Vec<u8>, PackError> 
 
         for (name, bytes) in entries {
             zip.start_file(name, options).map_err(zip_err)?;
-            zip.write_all(bytes).map_err(|e| PackError::Zip(e.to_string()))?;
+            zip.write_all(bytes)
+                .map_err(|e| PackError::Zip(e.to_string()))?;
         }
         zip.finish().map_err(zip_err)?;
     }

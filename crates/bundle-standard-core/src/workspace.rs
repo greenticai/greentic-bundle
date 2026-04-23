@@ -11,7 +11,10 @@ pub fn synthesize_workspace(inputs: &PackInputs<'_>) -> Result<Vec<(String, Vec<
     let mut entries: Vec<(String, Vec<u8>)> = Vec::new();
 
     // bundle.yaml
-    entries.push(("bundle.yaml".into(), bundle_yaml(inputs.config).into_bytes()));
+    entries.push((
+        "bundle.yaml".into(),
+        bundle_yaml(inputs.config).into_bytes(),
+    ));
 
     // flows/<name>.ygtc
     for flow in inputs.flows {
@@ -45,7 +48,11 @@ pub fn synthesize_workspace(inputs: &PackInputs<'_>) -> Result<Vec<(String, Vec<
 }
 
 fn bundle_yaml(config: &StandardConfig) -> String {
-    let channels: String = config.channels.iter().map(|c| format!("  - {c}\n")).collect();
+    let channels: String = config
+        .channels
+        .iter()
+        .map(|c| format!("  - {c}\n"))
+        .collect();
     format!(
         "apiVersion: greentic.ai/v1\nkind: BundleWorkspace\nmetadata:\n  name: {}\n  version: {}\nchannels:\n{}",
         config.metadata.name, config.metadata.version, channels,

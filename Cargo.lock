@@ -1357,6 +1357,7 @@ version = "0.5.2"
 dependencies = [
  "anyhow",
  "assert_cmd",
+ "bundle-standard-core",
  "clap",
  "constant_time_eq",
  "criterion",

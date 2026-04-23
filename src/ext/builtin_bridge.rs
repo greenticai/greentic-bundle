@@ -58,7 +58,7 @@ pub fn handle_standard(
     session_json: &str,
 ) -> Result<RenderedArtifact, ExtensionError> {
     use bundle_standard_core::{
-        build_pack, CardContentEntry, FlowEntry, PackInputs, StandardConfig as BSConfig,
+        CardContentEntry, FlowEntry, PackInputs, StandardConfig as BSConfig, build_pack,
     };
 
     // Parse old-shape inputs (preserves backward-compat for callers).
@@ -66,22 +66,34 @@ pub fn handle_standard(
     // bundle-standard-core owns StandardConfig now; parse once, use for validation + build.
     let bs_config: BSConfig = serde_json::from_str(config_json)?;
 
-    let flows: Vec<FlowEntry> = serde_json::from_str::<Vec<serde_json::Value>>(&session.flows_json)?
-        .into_iter()
-        .enumerate()
-        .map(|(i, v)| FlowEntry {
-            name: v.get("name").and_then(|x| x.as_str()).map(str::to_owned).unwrap_or_else(|| format!("flow-{i:03}")),
-            yaml: v.get("yaml").and_then(|x| x.as_str()).unwrap_or("").to_owned(),
-        })
-        .collect();
+    let flows: Vec<FlowEntry> =
+        serde_json::from_str::<Vec<serde_json::Value>>(&session.flows_json)?
+            .into_iter()
+            .enumerate()
+            .map(|(i, v)| FlowEntry {
+                name: v
+                    .get("name")
+                    .and_then(|x| x.as_str())
+                    .map(str::to_owned)
+                    .unwrap_or_else(|| format!("flow-{i:03}")),
+                yaml: v
+                    .get("yaml")
+                    .and_then(|x| x.as_str())
+                    .unwrap_or("")
+                    .to_owned(),
+            })
+            .collect();
 
-    let cards: Vec<CardContentEntry> = serde_json::from_str::<Vec<serde_json::Value>>(&session.contents_json)?
-        .into_iter()
-        .filter_map(|v| Some(CardContentEntry {
-            id: v.get("id").and_then(|x| x.as_str())?.to_owned(),
-            json: v.get("json")?.clone(),
-        }))
-        .collect();
+    let cards: Vec<CardContentEntry> =
+        serde_json::from_str::<Vec<serde_json::Value>>(&session.contents_json)?
+            .into_iter()
+            .filter_map(|v| {
+                Some(CardContentEntry {
+                    id: v.get("id").and_then(|x| x.as_str())?.to_owned(),
+                    json: v.get("json")?.clone(),
+                })
+            })
+            .collect();
 
     let inputs = PackInputs {
         config: &bs_config,

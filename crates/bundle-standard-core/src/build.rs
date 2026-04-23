@@ -14,7 +14,11 @@ pub fn build_pack(inputs: &PackInputs<'_>) -> Result<PackOutput, PackError> {
         "{}-{}.gtpack",
         inputs.config.metadata.name, inputs.config.metadata.version
     );
-    Ok(PackOutput { filename, bytes, sha256 })
+    Ok(PackOutput {
+        filename,
+        bytes,
+        sha256,
+    })
 }
 
 fn hex_sha256(bytes: &[u8]) -> String {

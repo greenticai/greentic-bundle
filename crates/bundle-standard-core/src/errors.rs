@@ -36,6 +36,9 @@ mod tests {
     use super::*;
     #[test]
     fn codes_stable() {
-        assert_eq!(PackError::InvalidFormat("x".into()).code(), "E_INVALID_FORMAT");
+        assert_eq!(
+            PackError::InvalidFormat("x".into()).code(),
+            "E_INVALID_FORMAT"
+        );
     }
 }
