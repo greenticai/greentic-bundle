@@ -7,7 +7,15 @@
 #![forbid(unsafe_code)]
 #![deny(rust_2018_idioms)]
 
-pub mod errors;
-pub mod types;
+mod build;
+mod errors;
+mod types;
 mod workspace;
 mod zip_writer;
+
+pub use build::build_pack;
+pub use errors::PackError;
+pub use types::{
+    CardContentEntry, FlowEntry, I18nConfig, PackInputs, PackOutput, StandardConfig,
+    StandardMetadata,
+};
