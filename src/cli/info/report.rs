@@ -122,9 +122,7 @@ fn access_summary(targets: &[BundleResolvedTargetView]) -> AccessSummary {
     use std::collections::BTreeMap;
     let mut per_tenant: BTreeMap<String, (u32, Option<String>)> = BTreeMap::new();
     for t in targets {
-        let entry = per_tenant
-            .entry(t.tenant.clone())
-            .or_insert((0, None));
+        let entry = per_tenant.entry(t.tenant.clone()).or_insert((0, None));
         if t.team.is_some() {
             entry.0 += 1;
         }
@@ -164,7 +162,11 @@ mod tests {
             app_packs: vec![],
             extension_providers: vec![],
             catalogs: vec![],
-            access: AccessSummary { tenants: 0, teams: 0, targets: vec![] },
+            access: AccessSummary {
+                tenants: 0,
+                teams: 0,
+                targets: vec![],
+            },
             capabilities: vec![],
             hooks: vec![],
             subscriptions: vec![],
