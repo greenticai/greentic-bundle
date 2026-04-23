@@ -10,3 +10,4 @@
 pub mod errors;
 pub mod types;
 mod workspace;
+mod zip_writer;
