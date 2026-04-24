@@ -1,0 +1,24 @@
+[workspace]
+
+[package]
+name = "dummy-bundle-ext"
+version = "0.0.1"
+edition = "2024"
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+wit-bindgen-rt = { version = "0.41", features = ["bitflags"] }
+
+[package.metadata.component]
+package = "greentic:dummy-bundle-ext"
+
+[package.metadata.component.target]
+path = "../../../wit"
+world = "greentic:extension-bundle/bundle-extension"
+
+[package.metadata.component.target.dependencies]
+"greentic:extension-base" = { path = "../../../wit/deps/extension-base" }
+"greentic:extension-host" = { path = "../../../wit/deps/extension-host" }

@@ -1,0 +1,63 @@
+// Vendored from greentic-biz/greentic-designer-extensions
+// Pinned commit: 13cde45e554e9aa7734ff83f57cd3548c4c3e50d
+// Do not edit locally — sync via a tools/sync-wit.sh helper (added later).
+
+package greentic:extension-base@0.1.0;
+
+interface types {
+  record extension-identity {
+    id: string,
+    version: string,
+    kind: kind,
+  }
+
+  enum kind {
+    design,
+    bundle,
+    deploy,
+  }
+
+  record capability-ref {
+    id: string,
+    version: string,
+  }
+
+  record diagnostic {
+    severity: severity,
+    code: string,
+    message: string,
+    path: option<string>,
+  }
+
+  enum severity {
+    error,
+    warning,
+    info,
+    hint,
+  }
+
+  variant extension-error {
+    invalid-input(string),
+    missing-capability(string),
+    permission-denied(string),
+    internal(string),
+  }
+}
+
+interface manifest {
+  use types.{extension-identity, capability-ref};
+  get-identity: func() -> extension-identity;
+  get-offered: func() -> list<capability-ref>;
+  get-required: func() -> list<capability-ref>;
+}
+
+interface lifecycle {
+  use types.{extension-error};
+  init: func(config-json: string) -> result<_, extension-error>;
+  shutdown: func();
+}
+
+world extension-base-world {
+  export manifest;
+  export lifecycle;
+}
