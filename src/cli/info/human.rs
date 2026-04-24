@@ -87,7 +87,20 @@ fn render_pack(s: &mut String, p: &PackRef) {
         Some(d) => d.clone(),
         None => "(no digest)".into(),
     };
-    let _ = writeln!(s, "  {:<18} {}", p.reference, digest_display);
+    // Three-column layout: reference, version, digest.
+    // Version is blank when unknown (workspace input, external ref, or
+    // unreadable pack manifest) — users get the info we have.
+    //
+    // Column widths are tuned for short pack slugs (typical case). Long
+    // references (full OCI URLs, HTTP URLs) overflow the reference column
+    // but the trailing columns still line up relative to themselves, which
+    // is the important readability property when skimming versions.
+    let version_display: &str = p.version.as_deref().unwrap_or("-");
+    let _ = writeln!(
+        s,
+        "  {:<24} {:<10} {}",
+        p.reference, version_display, digest_display
+    );
 }
 
 #[cfg(test)]
@@ -200,5 +213,37 @@ mod tests {
         r.version = Some("0.3.0".into());
         let out = render(&r);
         assert!(out.contains("acme-demo 0.3.0 · production"));
+    }
+
+    #[test]
+    fn renders_pack_version_when_present() {
+        let mut r = sample();
+        r.extension_providers = vec![PackRef {
+            reference: "messaging-webchat-gui".into(),
+            version: Some("0.4.86".into()),
+            digest: Some("sha256:deadbeefcafef00d".into()),
+        }];
+        let out = render(&r);
+        assert!(
+            out.contains("messaging-webchat-gui"),
+            "pack reference missing: {out}"
+        );
+        assert!(out.contains("0.4.86"), "pack version missing: {out}");
+    }
+
+    #[test]
+    fn renders_placeholder_when_pack_version_missing() {
+        let mut r = sample();
+        r.extension_providers = vec![PackRef {
+            reference: "unbundled-pack".into(),
+            version: None,
+            digest: None,
+        }];
+        let out = render(&r);
+        // Placeholder dash keeps columns aligned when version is unknown.
+        assert!(
+            out.contains("unbundled-pack") && out.contains("-"),
+            "expected placeholder dash for unknown version, got: {out}"
+        );
     }
 }

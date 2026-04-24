@@ -129,6 +129,47 @@ fn missing_file_exits_2() {
     );
 }
 
+/// Exercises pack-version probing against a real, pre-built `.gtbundle`
+/// artifact that has inlined packs. The fixture lives outside this crate
+/// (in a sibling demo repo) and is only present on developer machines, so
+/// the test skips cleanly when the fixture is absent.
+#[test]
+fn artifact_info_surfaces_pack_versions_when_fixture_present() {
+    let fixture = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../hr-onboarding-demo-bundle/dist/hr-onboarding-demo.gtbundle");
+    if !fixture.exists() {
+        eprintln!(
+            "skipping: fixture bundle not found at {}",
+            fixture.display()
+        );
+        return;
+    }
+
+    let out = cargo_bin()
+        .args(["info", fixture.to_str().expect("utf8 fixture"), "--json"])
+        .env("GREENTIC_BUNDLE_USE_BUNDLED_CATALOG", "1")
+        .output()
+        .expect("run info --json on fixture");
+
+    assert!(
+        out.status.success(),
+        "info --json on fixture failed. stderr: {}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+    let v: Value = serde_json::from_slice(&out.stdout).expect("json");
+    // At least one extension provider should have a non-null version once
+    // probing succeeds — the fixture inlines several messaging provider
+    // packs and their `manifest.cbor` carries a semver `version`.
+    let providers = v["extension_providers"]
+        .as_array()
+        .expect("extension_providers array");
+    let any_versioned = providers.iter().any(|p| !p["version"].is_null());
+    assert!(
+        any_versioned,
+        "expected at least one extension_provider to have a non-null version, got: {providers:?}"
+    );
+}
+
 #[test]
 fn wrong_extension_exits_2() {
     // Use Cargo.toml from CARGO_MANIFEST_DIR as a file that exists but has the wrong extension.

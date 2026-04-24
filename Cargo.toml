@@ -12,6 +12,7 @@ version = "0.5.3"
 [workspace.dependencies]
 anyhow = "1"
 assert_cmd = "2"
+ciborium = "0.2"
 clap = { version = "4", features = ["derive"] }
 constant_time_eq = "=0.4.2"
 bundle-standard-core = { path = "crates/bundle-standard-core" }
@@ -86,6 +87,7 @@ pkg-fmt = "zip"
 [dependencies]
 anyhow.workspace = true
 bundle-standard-core.workspace = true
+ciborium.workspace = true
 clap.workspace = true
 constant_time_eq.workspace = true
 greentic-bundle-reader.workspace = true
