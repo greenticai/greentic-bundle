@@ -1,9 +1,13 @@
 use anyhow::{Context, Result};
 use greentic_bundle_reader::{
-    BundleLock, BundleManifest, BundleResolvedTargetView, DependencyLock, OpenedBundle,
+    BundleLock, BundleManifest, BundleResolvedTargetView, BundleSourceKind, DependencyLock,
+    OpenedBundle,
 };
 use serde::{Deserialize, Serialize};
-use std::path::Path;
+use std::collections::BTreeMap;
+use std::path::{Path, PathBuf};
+
+use super::pack_probe::{self, PackMetaSlim};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct InfoReport {
@@ -52,19 +56,50 @@ pub struct AccessTarget {
 
 impl InfoReport {
     /// Project a `.gtbundle` artifact's opened bundle into the info report shape.
+    ///
+    /// When the bundle was opened from an artifact (`.gtbundle` SquashFS), we
+    /// additionally probe each inlined `.gtpack` file for its `manifest.cbor`
+    /// and populate the per-pack `version` column. Probing is best-effort:
+    /// missing or unreadable pack manifests leave `version = None` rather than
+    /// failing the whole command.
     pub fn from_opened_bundle(opened: &OpenedBundle) -> Self {
-        project(&opened.manifest, &opened.lock)
+        let meta = pack_metadata_for(opened);
+        project(&opened.manifest, &opened.lock, &meta)
     }
 
     /// Read a bundle workspace directory and produce the same `InfoReport`.
+    ///
+    /// Workspace inputs don't have inlined packs, so `version` stays None for
+    /// every pack. Users see versions once they build to a `.gtbundle`.
     pub fn from_workspace(path: &Path) -> Result<Self> {
         let report = crate::build::inspect_target(Some(path), None)
             .with_context(|| format!("reading bundle workspace at {}", path.display()))?;
-        Ok(project(&report.manifest, &report.lock))
+        Ok(project(&report.manifest, &report.lock, &BTreeMap::new()))
     }
 }
 
-fn project(manifest: &BundleManifest, lock: &BundleLock) -> InfoReport {
+/// Gather `{ reference -> PackMetaSlim }` for packs referenced by an opened
+/// artifact bundle. Returns empty for non-artifact sources.
+fn pack_metadata_for(opened: &OpenedBundle) -> BTreeMap<String, PackMetaSlim> {
+    if !matches!(opened.source_kind, BundleSourceKind::Artifact) {
+        return BTreeMap::new();
+    }
+    let artifact_path = PathBuf::from(&opened.source_path);
+    let mut refs: Vec<&str> = Vec::new();
+    for lock in &opened.lock.app_packs {
+        refs.push(lock.reference.as_str());
+    }
+    for lock in &opened.lock.extension_providers {
+        refs.push(lock.reference.as_str());
+    }
+    pack_probe::probe_inlined_packs(&artifact_path, &refs)
+}
+
+fn project(
+    manifest: &BundleManifest,
+    lock: &BundleLock,
+    pack_meta: &BTreeMap<String, PackMetaSlim>,
+) -> InfoReport {
     InfoReport {
         info_schema_version: 1,
         bundle_id: manifest.bundle_id.clone(),
@@ -73,10 +108,11 @@ fn project(manifest: &BundleManifest, lock: &BundleLock) -> InfoReport {
         description: None,
         mode: manifest.requested_mode.clone(),
         locale: manifest.locale.clone(),
-        app_packs: project_packs(&manifest.app_packs, &lock.app_packs),
+        app_packs: project_packs(&manifest.app_packs, &lock.app_packs, pack_meta),
         extension_providers: project_packs(
             &manifest.extension_providers,
             &lock.extension_providers,
+            pack_meta,
         ),
         catalogs: lock
             .catalogs
@@ -93,7 +129,11 @@ fn project(manifest: &BundleManifest, lock: &BundleLock) -> InfoReport {
     }
 }
 
-fn project_packs(names: &[String], locks: &[DependencyLock]) -> Vec<PackRef> {
+fn project_packs(
+    names: &[String],
+    locks: &[DependencyLock],
+    pack_meta: &BTreeMap<String, PackMetaSlim>,
+) -> Vec<PackRef> {
     names
         .iter()
         .map(|name| {
@@ -101,9 +141,12 @@ fn project_packs(names: &[String], locks: &[DependencyLock]) -> Vec<PackRef> {
                 .iter()
                 .find(|l| l.reference == *name)
                 .and_then(|l| l.digest.clone());
+            // Look up probed metadata by the manifest-declared reference
+            // (matches the key used in `pack_metadata_for`).
+            let version = pack_meta.get(name).and_then(|m| m.version.clone());
             PackRef {
                 reference: name.clone(),
-                version: None,
+                version,
                 digest,
             }
         })
