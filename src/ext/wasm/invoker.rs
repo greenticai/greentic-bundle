@@ -41,7 +41,9 @@ impl WasmtimeBundleInvoker {
         })
     }
 
-    /// Internal accessor used in tests.
+    /// Internal accessor for tests that need direct access to the runtime.
+    #[cfg(test)]
+    #[allow(dead_code)]
     pub(crate) fn runtime(&self) -> &Arc<greentic_ext_runtime::ExtensionRuntime> {
         &self.runtime
     }
