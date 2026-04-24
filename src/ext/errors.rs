@@ -22,6 +22,9 @@ pub enum ExtensionError {
     #[error("Mode B (full WASM) not implemented in Phase A")]
     ModeBNotImplemented,
 
+    #[error("internal error: {0}")]
+    Internal(String),
+
     #[error("io: {0}")]
     Io(#[from] io::Error),
 

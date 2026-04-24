@@ -43,6 +43,7 @@ pub(crate) fn extension_error_code(err: &ExtensionError) -> &'static str {
         InvalidDescriptor(_) => "invalid-descriptor",
         Conflict(_) => "conflict",
         ModeBNotImplemented => "mode-b-not-implemented",
+        Internal(_) => "internal-error",
         Io(_) => "io-error",
         Json(_) => "invalid-json",
     }

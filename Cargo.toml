@@ -1,15 +1,21 @@
 [workspace]
-members = ["crates/greentic-bundle-reader"]
+members = [
+    "crates/greentic-bundle-reader",
+    "crates/cards2pack-core",
+    "crates/bundle-standard-core",
+]
 resolver = "2"
 
 [workspace.package]
-version = "0.5.2"
+version = "0.5.4"
 
 [workspace.dependencies]
 anyhow = "1"
 assert_cmd = "2"
+ciborium = "0.2"
 clap = { version = "4", features = ["derive"] }
 constant_time_eq = "=0.4.2"
+bundle-standard-core = { path = "crates/bundle-standard-core" }
 greentic-bundle-reader = { version = ">=0.5.0-0, <0.6.0-0", path = "crates/greentic-bundle-reader" }
 greentic-distributor-client = { version = ">=0.5.0-0, <0.6.0-0", default-features = false, features = ["dist-client", "pack-fetch"] }
 greentic-qa-lib = ">=0.5.0-0, <0.6.0-0"
@@ -19,11 +25,17 @@ semver = { version = "1", features = ["serde"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 serde_yaml_bw = { package = "serde_yaml_gtc", version = "2.5.2" }
+thiserror = "2"
 sha2 = "0.11"
 sys-locale = "0.3"
 tempfile = "3"
 tokio = { version = "1", features = ["rt-multi-thread"] }
 unic-langid = "0.9"
+dirs = "5"
+tracing = "0.1"
+greentic-ext-contract = { git = "https://github.com/greentic-biz/greentic-designer-extensions", rev = "fcde1c1bdb40986b9c08c26c8d8e770037d2cc46", package = "greentic-ext-contract" }
+greentic-ext-runtime = { git = "https://github.com/greentic-biz/greentic-designer-extensions", rev = "fcde1c1bdb40986b9c08c26c8d8e770037d2cc46", package = "greentic-ext-runtime" }
+wasmtime = { version = "43", default-features = false, features = ["component-model", "async"] }
 
 [package]
 name = "greentic-bundle"
@@ -74,6 +86,8 @@ pkg-fmt = "zip"
 
 [dependencies]
 anyhow.workspace = true
+bundle-standard-core.workspace = true
+ciborium.workspace = true
 clap.workspace = true
 constant_time_eq.workspace = true
 greentic-bundle-reader.workspace = true
@@ -90,6 +104,11 @@ tempfile.workspace = true
 tokio.workspace = true
 unic-langid.workspace = true
 zip = "8"
+dirs.workspace = true
+tracing.workspace = true
+greentic-ext-contract.workspace = true
+greentic-ext-runtime.workspace = true
+wasmtime.workspace = true
 
 # feature: extensions (bundle-ext Phase A).
 # Note: greentic-ext-{contract,runtime} are Phase B concerns — Mode A routes
