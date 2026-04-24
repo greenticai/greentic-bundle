@@ -1,9 +1,9 @@
 //! BundleWasmInvoker trait + WasmtimeBundleInvoker production impl.
 
 use crate::ext::errors::ExtensionError;
-use crate::ext::wasm::{RenderedArtifact, WasmInvocation};
-use crate::ext::wasm::bindings::exports::greentic::extension_bundle::bundling::DesignerSession;
 use crate::ext::wasm::bindings::BundleExtension;
+use crate::ext::wasm::bindings::exports::greentic::extension_bundle::bundling::DesignerSession;
+use crate::ext::wasm::{RenderedArtifact, WasmInvocation};
 use std::path::PathBuf;
 use std::sync::Arc;
 
@@ -55,10 +55,7 @@ impl BundleWasmInvoker for WasmtimeBundleInvoker {
         let loaded_map = self.runtime.loaded();
         let ext_id = greentic_ext_runtime::ExtensionId::from(call.extension_id.to_string());
         let loaded = loaded_map.get(&ext_id).ok_or_else(|| {
-            ExtensionError::Internal(format!(
-                "extension not loaded: {}",
-                call.extension_id
-            ))
+            ExtensionError::Internal(format!("extension not loaded: {}", call.extension_id))
         })?;
 
         // 2. Build store + instance via ext-runtime's LoadedExtension.
@@ -77,12 +74,7 @@ impl BundleWasmInvoker for WasmtimeBundleInvoker {
         // 5. Call render.
         let bundling = bindings.greentic_extension_bundle_bundling();
         let render_result = bundling
-            .call_render(
-                &mut store,
-                call.recipe_id,
-                call.config_json,
-                &session,
-            )
+            .call_render(&mut store, call.recipe_id, call.config_json, &session)
             .map_err(|e| ExtensionError::Internal(format!("call_render trap: {e}")))?;
 
         // 6. Map WIT result to domain types.
@@ -127,7 +119,9 @@ fn map_wit_error(
     use crate::ext::wasm::bindings::greentic::extension_base::types::ExtensionError as Wit;
     match wit_err {
         Wit::InvalidInput(msg) => ExtensionError::InvalidConfig(msg),
-        Wit::MissingCapability(msg) => ExtensionError::Internal(format!("missing-capability: {msg}")),
+        Wit::MissingCapability(msg) => {
+            ExtensionError::Internal(format!("missing-capability: {msg}"))
+        }
         Wit::PermissionDenied(msg) => ExtensionError::Internal(format!("permission-denied: {msg}")),
         Wit::Internal(msg) => ExtensionError::Internal(msg),
     }

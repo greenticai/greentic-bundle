@@ -1,8 +1,8 @@
 //! MockBundleInvoker for unit/integration tests.
 
 use crate::ext::errors::ExtensionError;
-use crate::ext::wasm::{RenderedArtifact, WasmInvocation};
 use crate::ext::wasm::BundleWasmInvoker;
+use crate::ext::wasm::{RenderedArtifact, WasmInvocation};
 use std::collections::HashMap;
 use std::sync::Mutex;
 

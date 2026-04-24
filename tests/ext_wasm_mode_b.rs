@@ -7,8 +7,7 @@ use greentic_bundle::ext::wasm::BundleWasmInvoker;
 use std::path::PathBuf;
 
 fn fixture_dir() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("tests/fixtures/dummy-bundle-ext")
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/dummy-bundle-ext")
 }
 
 #[test]
@@ -57,7 +56,10 @@ fn invoke_unknown_extension_id() {
         .unwrap_err();
 
     assert!(
-        !matches!(err, greentic_bundle::ext::errors::ExtensionError::ModeBNotImplemented),
+        !matches!(
+            err,
+            greentic_bundle::ext::errors::ExtensionError::ModeBNotImplemented
+        ),
         "got ModeBNotImplemented — implementation regressed"
     );
 }
