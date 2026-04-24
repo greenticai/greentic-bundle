@@ -113,7 +113,9 @@ fn bundle_standard_0_2_0_end_to_end_render() {
         "missing flows/main.ygtc: {names:?}"
     );
     assert!(
-        names.iter().any(|n| n.contains("assets/cards/welcome.json")),
+        names
+            .iter()
+            .any(|n| n.contains("assets/cards/welcome.json")),
         "missing welcome.json: {names:?}"
     );
 }
