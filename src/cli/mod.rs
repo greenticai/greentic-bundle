@@ -12,6 +12,7 @@ pub mod export;
 pub mod ext;
 #[cfg(feature = "extensions")]
 mod ext_helpers;
+pub mod info;
 pub mod init;
 pub mod inspect;
 pub mod remove;
@@ -59,6 +60,8 @@ enum Commands {
     Export(export::ExportArgs),
     #[command(about = "cli.inspect.about")]
     Inspect(inspect::InspectArgs),
+    #[command(about = "cli.info.about")]
+    Info(info::InfoArgs),
     #[command(about = "cli.unbundle.about")]
     Unbundle(unbundle::UnbundleArgs),
     #[command(about = "cli.add.about")]
@@ -101,6 +104,7 @@ impl Cli {
             Commands::Build(args) => build::run(args),
             Commands::Export(args) => export::run(args),
             Commands::Inspect(args) => inspect::run(args),
+            Commands::Info(args) => info::run(args),
             Commands::Unbundle(args) => unbundle::run(args),
             Commands::Add(args) => add::run(args),
             Commands::Remove(args) => remove::run(args),
