@@ -1,7 +1,7 @@
 # Extension test fixtures
 
 `fixture-bundle/` is the minimal bundle extension used by integration tests in
-`tests/ext_*.rs`. It declares `execution.kind="builtin"`, so the runtime never
+`tests/ext_*.rs`. It declares `execution.kind="wasm"`, so the runtime never
 instantiates the WASM binary — the 8-byte stub here is a placeholder magic
 header only.
 

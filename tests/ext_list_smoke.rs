@@ -12,7 +12,7 @@ fn ext_list_finds_fixture() {
         .success()
         .stdout(predicate::str::contains("greentic.bundle-fixture"))
         .stdout(predicate::str::contains("recipe=standard"))
-        .stdout(predicate::str::contains("Builtin"));
+        .stdout(predicate::str::contains("Wasm"));
 }
 
 #[test]

@@ -7,7 +7,7 @@
     "version": "0.0.1"
   },
   "runtime": { "component": "extension.wasm", "memoryLimitMB": 64 },
-  "execution": { "kind": "builtin", "builtinId": "standard" },
+  "execution": { "kind": "wasm" },
   "contributions": {
     "recipes": [
       {

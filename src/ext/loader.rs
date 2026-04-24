@@ -58,14 +58,10 @@ mod tests {
     use std::fs;
     use tempfile::TempDir;
 
-    fn write_fixture(root: &Path, id: &str, builtin: bool) {
+    fn write_fixture(root: &Path, id: &str) {
         let dir = root.join(id);
         fs::create_dir_all(&dir).unwrap();
-        let exec = if builtin {
-            r#"{ "kind": "builtin", "builtinId": "standard" }"#
-        } else {
-            r#"{ "kind": "wasm" }"#
-        };
+        let exec = r#"{ "kind": "wasm" }"#;
         let describe = format!(
             r#"{{
               "apiVersion": "greentic.ai/v1",
@@ -101,8 +97,8 @@ mod tests {
     #[test]
     fn loads_multiple_sorted_by_id() {
         let tmp = TempDir::new().unwrap();
-        write_fixture(tmp.path(), "greentic.bundle-beta", true);
-        write_fixture(tmp.path(), "greentic.bundle-alpha", false);
+        write_fixture(tmp.path(), "greentic.bundle-beta");
+        write_fixture(tmp.path(), "greentic.bundle-alpha");
         let out = load_from_dir(tmp.path()).unwrap();
         assert_eq!(out.len(), 2);
         assert_eq!(out[0].descriptor.metadata.id, "greentic.bundle-alpha");
@@ -113,7 +109,7 @@ mod tests {
     fn skips_child_dirs_without_describe() {
         let tmp = TempDir::new().unwrap();
         fs::create_dir_all(tmp.path().join("junk")).unwrap();
-        write_fixture(tmp.path(), "greentic.bundle-ok", true);
+        write_fixture(tmp.path(), "greentic.bundle-ok");
         let out = load_from_dir(tmp.path()).unwrap();
         assert_eq!(out.len(), 1);
     }
