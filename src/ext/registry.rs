@@ -1,32 +1,10 @@
-//! Unified registry: built-in recipes + discovered WASM extensions.
+//! Unified registry for WASM bundle extensions.
 
 use std::collections::BTreeMap;
 
 use crate::ext::describe::{BundleRecipeContribution, Descriptor, Execution};
 use crate::ext::errors::ExtensionError;
 use crate::ext::loader::DiscoveredExtension;
-
-/// Strongly-typed identifier for built-in recipes. Phase A has one: Standard.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum BuiltinRecipeId {
-    Standard,
-}
-
-impl BuiltinRecipeId {
-    #[allow(clippy::should_implement_trait)]
-    pub fn from_str(s: &str) -> Option<Self> {
-        match s {
-            "standard" => Some(Self::Standard),
-            _ => None,
-        }
-    }
-
-    pub fn as_str(&self) -> &'static str {
-        match self {
-            Self::Standard => "standard",
-        }
-    }
-}
 
 #[derive(Debug, Clone)]
 pub struct RecipeEntry {
@@ -116,7 +94,7 @@ mod tests {
               "kind": "BundleExtension",
               "metadata": {{ "id": "{id}", "name": "x", "version": "0.1.0" }},
               "runtime": {{ "component": "extension.wasm" }},
-              "execution": {{ "kind": "builtin", "builtinId": "standard" }},
+              "execution": {{ "kind": "wasm" }},
               "contributions": {{
                 "recipes": [
                   {{ "id": "{recipe_id}", "displayName": "x", "description": "x",
@@ -162,15 +140,5 @@ mod tests {
         r.add_descriptor(desc1, root1).unwrap();
         r.add_descriptor(desc2, root2).unwrap();
         assert_eq!(r.list().count(), 2);
-    }
-
-    #[test]
-    fn builtin_recipe_id_round_trip() {
-        assert_eq!(
-            BuiltinRecipeId::from_str("standard"),
-            Some(BuiltinRecipeId::Standard)
-        );
-        assert_eq!(BuiltinRecipeId::Standard.as_str(), "standard");
-        assert_eq!(BuiltinRecipeId::from_str("unknown"), None);
     }
 }
