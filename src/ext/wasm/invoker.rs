@@ -2,8 +2,8 @@
 
 use crate::ext::errors::ExtensionError;
 use crate::ext::wasm::{RenderedArtifact, WasmInvocation};
-use crate::ext::wasm_b::bindings::exports::greentic::extension_bundle::bundling::DesignerSession;
-use crate::ext::wasm_b::bindings::BundleExtension;
+use crate::ext::wasm::bindings::exports::greentic::extension_bundle::bundling::DesignerSession;
+use crate::ext::wasm::bindings::BundleExtension;
 use std::path::PathBuf;
 use std::sync::Arc;
 
@@ -120,9 +120,9 @@ fn parse_designer_session(json: &str) -> Result<DesignerSession, serde_json::Err
 
 /// Map the WIT `ExtensionError` variant to the domain `ExtensionError`.
 fn map_wit_error(
-    wit_err: crate::ext::wasm_b::bindings::greentic::extension_base::types::ExtensionError,
+    wit_err: crate::ext::wasm::bindings::greentic::extension_base::types::ExtensionError,
 ) -> ExtensionError {
-    use crate::ext::wasm_b::bindings::greentic::extension_base::types::ExtensionError as Wit;
+    use crate::ext::wasm::bindings::greentic::extension_base::types::ExtensionError as Wit;
     match wit_err {
         Wit::InvalidInput(msg) => ExtensionError::InvalidConfig(msg),
         Wit::MissingCapability(msg) => ExtensionError::Internal(format!("missing-capability: {msg}")),

@@ -2,7 +2,7 @@
 
 use crate::ext::errors::ExtensionError;
 use crate::ext::wasm::{RenderedArtifact, WasmInvocation};
-use crate::ext::wasm_b::BundleWasmInvoker;
+use crate::ext::wasm::BundleWasmInvoker;
 use std::collections::HashMap;
 use std::sync::Mutex;
 

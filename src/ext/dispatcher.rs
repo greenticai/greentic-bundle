@@ -68,11 +68,20 @@ mod tests {
     }
 
     #[test]
-    fn wasm_path_returns_mode_b_error() {
+    fn wasm_path_routes_to_invoker() {
         let mut reg = ExtensionRegistry::new();
         register(&mut reg, r#"{ "kind": "wasm" }"#);
         let err = invoke_recipe(&reg, "x.test", "standard", "{}", "{}").unwrap_err();
-        assert!(matches!(err, ExtensionError::ModeBNotImplemented));
+        // The singleton WasmtimeBundleInvoker is initialized on first call; since no
+        // extension is loaded, it returns Internal("not loaded") — NOT ModeBNotImplemented.
+        assert!(
+            !matches!(err, ExtensionError::ModeBNotImplemented),
+            "expected invoker error, not mode-B stub"
+        );
+        assert!(
+            matches!(&err, ExtensionError::Internal(msg) if msg.contains("not loaded")),
+            "expected Internal(not loaded), got {err:?}"
+        );
     }
 
     #[test]

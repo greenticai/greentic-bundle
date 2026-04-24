@@ -31,6 +31,7 @@ tempfile = "3"
 tokio = { version = "1", features = ["rt-multi-thread"] }
 unic-langid = "0.9"
 dirs = "5"
+tracing = "0.1"
 greentic-ext-contract = { path = "../greentic-designer-extensions/crates/greentic-ext-contract" }
 greentic-ext-runtime = { path = "../greentic-designer-extensions/crates/greentic-ext-runtime" }
 wasmtime = { version = "43", default-features = false, features = ["component-model", "async"] }
@@ -102,6 +103,7 @@ tokio.workspace = true
 unic-langid.workspace = true
 zip = "8"
 dirs.workspace = true
+tracing.workspace = true
 greentic-ext-contract.workspace = true
 greentic-ext-runtime.workspace = true
 wasmtime.workspace = true

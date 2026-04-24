@@ -10,6 +10,5 @@ pub mod errors;
 pub mod loader;
 pub mod registry;
 pub mod wasm;
-pub mod wasm_b;
 
 pub use errors::ExtensionError;
