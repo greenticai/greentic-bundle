@@ -32,7 +32,7 @@ jobs:
     uses: greenticai/.github/.github/workflows/dev-publish.yml@main
     with:
       version: ${{ needs.dev-prepare.outputs.version }}
-      crates: "greentic-bundle-reader greentic-bundle"
+      crates: "bundle-standard-core greentic-bundle-reader greentic-bundle"
       binary-crates: "greentic-bundle"
       dual-role-binary-crates: "greentic-bundle"
     secrets: inherit
