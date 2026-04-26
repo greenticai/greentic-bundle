@@ -15,7 +15,7 @@ assert_cmd = "2"
 ciborium = "0.2"
 clap = { version = "4", features = ["derive"] }
 constant_time_eq = "=0.4.2"
-bundle-standard-core = { path = "crates/bundle-standard-core" }
+bundle-standard-core = { version = ">=0.6.0-0, <0.7.0-0", path = "crates/bundle-standard-core" }
 greentic-bundle-reader = { version = ">=0.6.0-0, <0.7.0-0", path = "crates/greentic-bundle-reader" }
 greentic-distributor-client = { version = ">=0.5.0-0, <0.6.0-0", default-features = false, features = ["dist-client", "pack-fetch"] }
 greentic-qa-lib = ">=0.5.0-0, <0.6.0-0"
@@ -33,8 +33,8 @@ tokio = { version = "1", features = ["rt-multi-thread"] }
 unic-langid = "0.9"
 dirs = "5"
 tracing = "0.1"
-greentic-ext-contract = { git = "https://github.com/greentic-biz/greentic-designer-extensions", rev = "fcde1c1bdb40986b9c08c26c8d8e770037d2cc46", package = "greentic-ext-contract" }
-greentic-ext-runtime = { git = "https://github.com/greentic-biz/greentic-designer-extensions", rev = "fcde1c1bdb40986b9c08c26c8d8e770037d2cc46", package = "greentic-ext-runtime" }
+greentic-ext-contract = { version = "0.4", git = "https://github.com/greentic-biz/greentic-designer-extensions", rev = "fcde1c1bdb40986b9c08c26c8d8e770037d2cc46", package = "greentic-ext-contract" }
+greentic-ext-runtime = { version = "0.4", git = "https://github.com/greentic-biz/greentic-designer-extensions", rev = "fcde1c1bdb40986b9c08c26c8d8e770037d2cc46", package = "greentic-ext-runtime" }
 wasmtime = { version = "43", default-features = false, features = ["component-model", "async"] }
 
 [package]
@@ -106,9 +106,9 @@ unic-langid.workspace = true
 zip = "8"
 dirs.workspace = true
 tracing.workspace = true
-greentic-ext-contract.workspace = true
-greentic-ext-runtime.workspace = true
-wasmtime.workspace = true
+greentic-ext-contract = { workspace = true, optional = true }
+greentic-ext-runtime = { workspace = true, optional = true }
+wasmtime = { workspace = true, optional = true }
 
 # feature: extensions (bundle-ext Phase A).
 # Note: greentic-ext-{contract,runtime} are Phase B concerns — Mode A routes
@@ -139,4 +139,7 @@ extensions = [
   "dep:jsonschema",
   "dep:thiserror",
   "dep:walkdir",
+  "dep:greentic-ext-contract",
+  "dep:greentic-ext-runtime",
+  "dep:wasmtime",
 ]
