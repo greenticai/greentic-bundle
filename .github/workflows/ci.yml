@@ -14,9 +14,9 @@ concurrency:
 
 jobs:
   ci:
-    uses: greenticai/.github/.github/workflows/host-crate-ci.yml@main
+    uses: greenticai/.github/.github/workflows/pr-ci.yml@main
     with:
-      run-semver-checks: true
+      variant: host
       setup-script: "sudo apt-get update && sudo apt-get install -y squashfs-tools"
 
   i18n:
