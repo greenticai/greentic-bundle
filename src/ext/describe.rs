@@ -26,10 +26,6 @@ pub struct Author {
 #[derive(Debug, Deserialize, Clone, PartialEq, Eq)]
 #[serde(tag = "kind", rename_all = "lowercase")]
 pub enum Execution {
-    Builtin {
-        #[serde(rename = "builtinId")]
-        builtin_id: String,
-    },
     Wasm,
 }
 
@@ -100,10 +96,10 @@ mod tests {
       "metadata": {
         "id": "greentic.bundle-standard",
         "name": "Standard Bundle Recipe",
-        "version": "0.1.0"
+        "version": "0.2.0"
       },
       "runtime": { "component": "extension.wasm" },
-      "execution": { "kind": "builtin", "builtinId": "standard" },
+      "execution": { "kind": "wasm" },
       "contributions": {
         "recipes": [
           {
@@ -117,24 +113,11 @@ mod tests {
     }"#;
 
     #[test]
-    fn parse_valid_builtin() {
+    fn parse_valid_wasm() {
         let d = Descriptor::from_json(VALID).unwrap();
         assert_eq!(d.metadata.id, "greentic.bundle-standard");
-        match &d.execution {
-            Execution::Builtin { builtin_id } => assert_eq!(builtin_id, "standard"),
-            _ => panic!("expected builtin"),
-        }
-        assert_eq!(d.contributions.recipes.len(), 1);
-    }
-
-    #[test]
-    fn parse_wasm_execution() {
-        let raw = VALID.replace(
-            r#"{ "kind": "builtin", "builtinId": "standard" }"#,
-            r#"{ "kind": "wasm" }"#,
-        );
-        let d = Descriptor::from_json(&raw).unwrap();
         assert!(matches!(d.execution, Execution::Wasm));
+        assert_eq!(d.contributions.recipes.len(), 1);
     }
 
     #[test]
@@ -169,7 +152,19 @@ mod tests {
 
     #[test]
     fn reject_unknown_execution_kind() {
-        let raw = VALID.replace(r#""kind": "builtin""#, r#""kind": "sandboxed""#);
+        let raw = VALID.replace(r#""kind": "wasm""#, r#""kind": "sandboxed""#);
+        let err = Descriptor::from_json(&raw).unwrap_err();
+        assert!(matches!(err, ExtensionError::Json(_)));
+    }
+
+    #[test]
+    fn reject_legacy_builtin_kind() {
+        // Wave 5: builtin dispatch removed entirely. Any describe.json still
+        // declaring execution.kind="builtin" must fail to parse cleanly.
+        let raw = VALID.replace(
+            r#""execution": { "kind": "wasm" }"#,
+            r#""execution": { "kind": "builtin", "builtinId": "standard" }"#,
+        );
         let err = Descriptor::from_json(&raw).unwrap_err();
         assert!(matches!(err, ExtensionError::Json(_)));
     }
