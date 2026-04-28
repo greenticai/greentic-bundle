@@ -83,6 +83,7 @@
   "cli.option.locale": "CLI chaymanta wizard willakuykunapaq llamk'asqa locale",
   "cli.option.migrate": "Machu AnswerDocument schema versionkunata migrayta saqiy",
   "cli.option.offline": "Llika-mast'arisqa ruwaykunata wañuchiy imaymana qhipa kamachikuna yanapasqanpi",
+  "cli.option.refresh": "Force re-download of pack and provider references, ignoring locally materialized files",
   "cli.option.schema": "Kunan answers.json schema nisqata qillqay hinaspa lluqsiy",
   "cli.option.schema.long": "Kunan answers.json schema nisqata qillqay hinaspa lluqsiy.\n\nCodex hinallataq Claude hina agentic coding tools nisqakuna kayta ñawpaqta waqyayta tiyan kunan answer schema apamunankupaq, answers.json hunt'achinankupaq, hinaspa wizard nisqata mana rimanakuspa kutichinankupaq.",
   "cli.option.schema_version": "Lluqsichisqa utaq migrasqa kutichiykunapaq target schema version",

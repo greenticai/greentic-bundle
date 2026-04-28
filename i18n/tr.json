@@ -83,6 +83,7 @@
   "cli.option.locale": "CLI ve sihirbaz iletileri için kullanılan yerel ayar",
   "cli.option.migrate": "Eski AnswerDocument şema sürümlerinin taşınmasına izin ver",
   "cli.option.offline": "Gelecekteki komutlar desteklediğinde ağa bağlı işlemleri devre dışı bırak",
+  "cli.option.refresh": "Force re-download of pack and provider references, ignoring locally materialized files",
   "cli.option.schema": "Geçerli answers.json şemasını yazdır ve çık",
   "cli.option.schema.long": "Geçerli answers.json şemasını yazdır ve çık.\n\nCodex ve Claude gibi aracı tabanlı kodlama araçları, geçerli yanıt şemasını almak, answers.json dosyasını doldurmak ve sihirbazı etkileşimsiz olarak yeniden çalıştırmak için önce bunu çağırmalıdır.",
   "cli.option.schema_version": "Üretilen veya taşınan yanıtlar için hedef şema sürümü",

@@ -83,6 +83,7 @@
   "cli.option.locale": "Språkversion som används för CLI- och wizard-meddelanden",
   "cli.option.migrate": "Tillåt migrering av äldre AnswerDocument-schemaversioner",
   "cli.option.offline": "Inaktivera nätverksberoende operationer när framtida kommandon stöder det",
+  "cli.option.refresh": "Force re-download of pack and provider references, ignoring locally materialized files",
   "cli.option.schema": "Skriv ut den aktuella answers.json-schemat och avsluta",
   "cli.option.schema.long": "Skriv ut det aktuella answers.json-schemat och avsluta.\n\nAgentiska kodningsverktyg som Codex och Claude bör anropa detta först för att hämta det aktuella svarsschemat, fylla i answers.json och köra guiden igen utan interaktion.",
   "cli.option.schema_version": "Målschemaversion för genererade eller migrerade svar",

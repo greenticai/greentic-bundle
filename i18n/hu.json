@@ -83,6 +83,7 @@
   "cli.option.locale": "A CLI-hez és a varázslóüzenetekhez használt területi beállítás",
   "cli.option.migrate": "Régebbi AnswerDocument séma-verziók migrálásának engedélyezése",
   "cli.option.offline": "A hálózatfüggő műveletek letiltása, amikor a jövőbeli parancsok támogatják",
+  "cli.option.refresh": "Force re-download of pack and provider references, ignoring locally materialized files",
   "cli.option.schema": "Kiírja az aktuális answers.json sémát, majd kilép",
   "cli.option.schema.long": "Kiírja az aktuális answers.json sémát, majd kilép.\n\nAz olyan agentikus kódoló eszközöknek, mint a Codex és a Claude, ezt kell először meghívniuk, hogy lekérjék az aktuális válaszsémát, kitöltsék az answers.json fájlt, és nem interaktív módon újrajátsszák a varázslót.",
   "cli.option.schema_version": "A kiadott vagy migrált válaszok cél séma-verziója",

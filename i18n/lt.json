@@ -83,6 +83,7 @@
   "cli.option.locale": "Lokalė, naudojama CLI ir vedlio pranešimams",
   "cli.option.migrate": "Leisti migruoti senesnes AnswerDocument schemos versijas",
   "cli.option.offline": "Išjungti nuo tinklo priklausančias operacijas, kai būsimos komandos tai palaikys",
+  "cli.option.refresh": "Force re-download of pack and provider references, ignoring locally materialized files",
   "cli.option.schema": "Išspausdinti dabartinę answers.json schemą ir išeiti",
   "cli.option.schema.long": "Išspausdinti dabartinę answers.json schemą ir išeiti.\n\nAgentiniai programavimo įrankiai, tokie kaip Codex ir Claude, pirmiausia turėtų iškviesti tai, kad gautų dabartinę atsakymų schemą, užpildytų answers.json ir pakartotų vedlį neinteraktyviai.",
   "cli.option.schema_version": "Tikslinė schemos versija generuojamiems arba migruojamiems atsakymams",

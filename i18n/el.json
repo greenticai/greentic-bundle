@@ -83,6 +83,7 @@
   "cli.option.locale": "Τοπική ρύθμιση που χρησιμοποιείται για μηνύματα CLI και wizard",
   "cli.option.migrate": "Να επιτρέπεται η μετεγκατάσταση παλαιότερων εκδόσεων σχήματος AnswerDocument",
   "cli.option.offline": "Απενεργοποίηση λειτουργιών που εξαρτώνται από δίκτυο όταν οι μελλοντικές εντολές το υποστηρίζουν",
+  "cli.option.refresh": "Force re-download of pack and provider references, ignoring locally materialized files",
   "cli.option.schema": "Εκτύπωση του τρέχοντος σχήματος answers.json και έξοδος",
   "cli.option.schema.long": "Εκτύπωση του τρέχοντος σχήματος answers.json και έξοδος.\n\nΕργαλεία agentic προγραμματισμού όπως τα Codex και Claude θα πρέπει να καλέσουν πρώτα αυτό για να ανακτήσουν το τρέχον σχήμα απαντήσεων, να συμπληρώσουν το answers.json και να επαναλάβουν τον οδηγό χωρίς αλληλεπίδραση.",
   "cli.option.schema_version": "Έκδοση σχήματος στόχος για παραγόμενες ή μετεγκατεστημένες απαντήσεις",

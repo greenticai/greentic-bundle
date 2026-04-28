@@ -83,6 +83,7 @@
   "cli.option.locale": "Locale mochihua para CLI ihuan wizard messages",
   "cli.option.migrate": "Xikcahuili migrating older AnswerDocument schema versions",
   "cli.option.offline": "Xiktzacua network-dependent operations cuix future commands quiselisej",
+  "cli.option.refresh": "Force re-download of pack and provider references, ignoring locally materialized files",
   "cli.option.schema": "Xikihkuilo in schema achto answers.json wan xikisā",
   "cli.option.schema.long": "Xikihkuilo in schema achto answers.json wan xikisā.\n\nAgentic coding tools ken Codex wan Claude moneki kichiwaske inin achto para kikuitiske in schema tlen axkan answers.json, kimitemitiske answers.json, wan okseppa kiyolitiske in wizard ahmo non-interactively.",
   "cli.option.schema_version": "Target schema version para emitted noso migrated answers",

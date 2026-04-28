@@ -83,6 +83,7 @@
   "cli.option.locale": "Locale ທີ່ໃຊ້ສຳລັບຂໍ້ຄວາມ CLI ແລະ wizard",
   "cli.option.migrate": "ອະນຸຍາດໃຫ້ migrate ເວີຊັນ schema ເກົ່າຂອງ AnswerDocument",
   "cli.option.offline": "ປິດການດຳເນີນງານທີ່ພຶ່ງພາເຄືອຂ່າຍເມື່ອຄຳສັ່ງໃນອະນາຄົດຮອງຮັບ",
+  "cli.option.refresh": "Force re-download of pack and provider references, ignoring locally materialized files",
   "cli.option.schema": "ພິມ schema ປັດຈຸບັນຂອງ answers.json ແລະອອກ",
   "cli.option.schema.long": "ພິມ schema ປັດຈຸບັນຂອງ answers.json ແລະອອກ.\n\nເຄື່ອງມືຂຽນໂຄ້ດແບບ agentic ເຊັ່ນ Codex ແລະ Claude ຄວນເອີ້ນໃຊ້ອັນນີ້ກ່ອນ ເພື່ອດຶງ schema ຄໍາຕອບປັດຈຸບັນ, ຕື່ມ answers.json, ແລະຫຼິ້ນຊ້ຳ wizard ແບບບໍ່ໂຕ້ຕອບ.",
   "cli.option.schema_version": "ເວີຊັນ schema ເປົ້າໝາຍສຳລັບຄຳຕອບທີ່ຖືກສົ່ງອອກ ຫຼື migrate",

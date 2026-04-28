@@ -83,6 +83,7 @@
   "cli.option.locale": "Locale, използван за CLI и съобщенията на wizard",
   "cli.option.migrate": "Разрешаване на миграция на по-стари версии на схемата на AnswerDocument",
   "cli.option.offline": "Деактивиране на зависещи от мрежата операции, когато бъдещи команди го поддържат",
+  "cli.option.refresh": "Force re-download of pack and provider references, ignoring locally materialized files",
   "cli.option.schema": "Отпечатва текущата схема на answers.json и излиза",
   "cli.option.schema.long": "Отпечатва текущата схема на answers.json и излиза.\n\nАгентни инструменти за програмиране като Codex и Claude трябва първо да извикат това, за да извлекат текущата схема за отговори, да попълнят answers.json и да възпроизведат съветника в неинтерактивен режим.",
   "cli.option.schema_version": "Целева версия на схемата за изведени или мигрирани отговори",

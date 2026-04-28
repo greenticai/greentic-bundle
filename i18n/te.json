@@ -83,6 +83,7 @@
   "cli.option.locale": "CLI మరియు wizard సందేశాలకు ఉపయోగించే locale",
   "cli.option.migrate": "పాత AnswerDocument schema సంస్కరణలను మార్చడానికి అనుమతించండి",
   "cli.option.offline": "భవిష్యత్తు కమాండ్లు మద్దతు ఇచ్చినప్పుడు నెట్‌వర్క్‌పై ఆధారపడే ఆపరేషన్‌లను నిలిపివేయండి",
+  "cli.option.refresh": "Force re-download of pack and provider references, ignoring locally materialized files",
   "cli.option.schema": "ప్రస్తుత answers.json స్కీమాను ముద్రించి నిష్క్రమించండి",
   "cli.option.schema.long": "ప్రస్తుత answers.json స్కీమాను ముద్రించి నిష్క్రమించండి.\n\nCodex మరియు Claude వంటి ఏజెంటిక్ కోడింగ్ సాధనాలు ప్రస్తుత సమాధాన స్కీమాను పొందడానికి, answers.json ను పూరించడానికి, మరియు విజార్డ్‌ను నాన్-ఇంటరాక్టివ్‌గా మళ్లీ నడపడానికి ముందుగా దీన్ని పిలవాలి.",
   "cli.option.schema_version": "ఉత్పత్తి చేయబడిన లేదా మార్చబడిన answers కోసం లక్ష్య schema సంస్కరణ",

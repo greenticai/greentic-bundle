@@ -83,6 +83,7 @@
   "cli.option.locale": "Locale yang digunakan untuk mesej CLI dan wizard",
   "cli.option.migrate": "Benarkan pemindahan versi skema AnswerDocument yang lebih lama",
   "cli.option.offline": "Lumpuhkan operasi yang bergantung pada rangkaian apabila perintah masa hadapan menyokongnya",
+  "cli.option.refresh": "Force re-download of pack and provider references, ignoring locally materialized files",
   "cli.option.schema": "Cetak skema answers.json semasa dan keluar",
   "cli.option.schema.long": "Cetak skema answers.json semasa dan keluar.\n\nAlat pengekodan agentik seperti Codex dan Claude harus memanggil ini terlebih dahulu untuk mendapatkan skema jawapan semasa, mengisi answers.json, dan memainkan semula wizard secara bukan interaktif.",
   "cli.option.schema_version": "Versi skema sasaran untuk jawapan yang dikeluarkan atau dipindahkan",

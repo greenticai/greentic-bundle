@@ -83,6 +83,7 @@
   "cli.option.locale": "Ustawienie regionalne używane dla komunikatów CLI i kreatora",
   "cli.option.migrate": "Zezwól na migrację starszych wersji schematu AnswerDocument",
   "cli.option.offline": "Wyłącz operacje zależne od sieci, gdy przyszłe polecenia będą to obsługiwać",
+  "cli.option.refresh": "Force re-download of pack and provider references, ignoring locally materialized files",
   "cli.option.schema": "Wyświetl bieżący schemat answers.json i zakończ",
   "cli.option.schema.long": "Wyświetl bieżący schemat answers.json i zakończ.\n\nAgentowe narzędzia do kodowania, takie jak Codex i Claude, powinny najpierw wywołać to polecenie, aby pobrać bieżący schemat odpowiedzi, wypełnić answers.json i ponownie odtworzyć kreator w trybie nieinteraktywnym.",
   "cli.option.schema_version": "Docelowa wersja schematu dla emitowanych lub migrowanych odpowiedzi",
