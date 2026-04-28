@@ -83,6 +83,7 @@
   "cli.option.locale": "Locale na ginagamit para sa CLI at mga mensahe ng wizard",
   "cli.option.migrate": "Payagan ang pag-migrate ng mas lumang bersyon ng schema ng AnswerDocument",
   "cli.option.offline": "Huwag paganahin ang mga operasyong nakadepende sa network kapag sinuportahan ito ng mga susunod na command",
+  "cli.option.refresh": "Force re-download of pack and provider references, ignoring locally materialized files",
   "cli.option.schema": "I-print ang kasalukuyang schema ng answers.json at lumabas",
   "cli.option.schema.long": "I-print ang kasalukuyang schema ng answers.json at lumabas.\n\nAng mga agentic coding tool tulad ng Codex at Claude ay dapat tawagin muna ito upang kunin ang kasalukuyang schema ng sagot, punan ang answers.json, at ulitin ang wizard nang hindi interaktibo.",
   "cli.option.schema_version": "Target na bersyon ng schema para sa inilabas o inilipat na mga sagot",

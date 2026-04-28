@@ -83,6 +83,7 @@
   "cli.option.locale": "CLI ukhamarak wizard yatiyäwinakataki apnaqata locale",
   "cli.option.migrate": "nayra AnswerDocument schema versiones migración jaytaña",
   "cli.option.offline": "red-munayiri luräwinaka sayt'ayaña kunapachatix qhipa kamachinakax yanapt'ki ukhaxa",
+  "cli.option.refresh": "Force re-download of pack and provider references, ignoring locally materialized files",
   "cli.option.schema": "Jichha answers.json esquema uñt'ayaña ukat mistuña",
   "cli.option.schema.long": "Jichha answers.json esquema uñt'ayaña ukat mistuña.\n\nCodex ukhamarak Claude ukanakjam agentic coding herramientas ukanakax nayraqat aka jawsapxañapawa jichha respuesta esquema apthapiñataki, answers.json phuqhachañataki, ukat asistente jan interactivoki mayampi sarayañataki.",
   "cli.option.schema_version": "mistut jan ukax migrat jaysäwinakataki schema versión amta",

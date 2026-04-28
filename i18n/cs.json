@@ -83,6 +83,7 @@
   "cli.option.locale": "Locale použité pro zprávy CLI a průvodce",
   "cli.option.migrate": "Povolit migraci starších verzí schématu AnswerDocument",
   "cli.option.offline": "Zakázat operace závislé na síti, až je budoucí příkazy budou podporovat",
+  "cli.option.refresh": "Force re-download of pack and provider references, ignoring locally materialized files",
   "cli.option.schema": "Vypíše aktuální schéma answers.json a ukončí se",
   "cli.option.schema.long": "Vypíše aktuální schéma answers.json a ukončí se.\n\nAgentické nástroje pro programování, jako jsou Codex a Claude, by měly toto nejprve zavolat, aby získaly aktuální schéma odpovědí, vyplnily answers.json a znovu přehrály průvodce neinteraktivně.",
   "cli.option.schema_version": "Cílová verze schématu pro zapsané nebo migrované odpovědi",

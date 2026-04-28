@@ -83,6 +83,7 @@
   "cli.option.locale": "الإعداد المحلي المستخدم لرسائل CLI والمعالج",
   "cli.option.migrate": "السماح بترحيل إصدارات مخطط AnswerDocument الأقدم",
   "cli.option.offline": "تعطيل العمليات المعتمدة على الشبكة عندما تدعمها الأوامر المستقبلية",
+  "cli.option.refresh": "Force re-download of pack and provider references, ignoring locally materialized files",
   "cli.option.schema": "اطبع مخطط answers.json الحالي ثم اخرج",
   "cli.option.schema.long": "اطبع مخطط answers.json الحالي ثم اخرج.\n\nيجب على أدوات البرمجة الوكيلة مثل Codex وClaude استدعاء هذا أولاً لجلب مخطط الإجابات الحالي، وملء answers.json، ثم إعادة تشغيل المعالج بشكل غير تفاعلي.",
   "cli.option.schema_version": "إصدار المخطط المستهدف للإجابات المُخرجة أو المُرحَّلة",

@@ -83,6 +83,7 @@
   "cli.option.locale": "CLI 및 마법사 메시지에 사용되는 로케일",
   "cli.option.migrate": "이전 AnswerDocument 스키마 버전 마이그레이션 허용",
   "cli.option.offline": "향후 명령이 지원할 때 네트워크 의존 작업 비활성화",
+  "cli.option.refresh": "Force re-download of pack and provider references, ignoring locally materialized files",
   "cli.option.schema": "현재 answers.json 스키마를 출력하고 종료합니다",
   "cli.option.schema.long": "현재 answers.json 스키마를 출력하고 종료합니다.\n\nCodex 및 Claude와 같은 에이전트형 코딩 도구는 현재 답변 스키마를 가져오고, answers.json을 작성한 뒤, 마법사를 비대화형으로 다시 실행하기 위해 먼저 이를 호출해야 합니다.",
   "cli.option.schema_version": "출력되거나 마이그레이션된 응답의 대상 스키마 버전",

@@ -83,6 +83,7 @@
   "cli.option.locale": "Für CLI- und Wizard-Nachrichten verwendete Locale",
   "cli.option.migrate": "Migration älterer AnswerDocument-Schemaversionen erlauben",
   "cli.option.offline": "Netzwerkabhängige Operationen deaktivieren, wenn zukünftige Befehle dies unterstützen",
+  "cli.option.refresh": "Force re-download of pack and provider references, ignoring locally materialized files",
   "cli.option.schema": "Das aktuelle answers.json-Schema ausgeben und beenden",
   "cli.option.schema.long": "Das aktuelle answers.json-Schema ausgeben und beenden.\n\nAgentische Coding-Tools wie Codex und Claude sollten dies zuerst aufrufen, um das aktuelle Antwortschema abzurufen, answers.json auszufüllen und den Assistenten nicht interaktiv erneut abzuspielen.",
   "cli.option.schema_version": "Ziel-Schemaversion für ausgegebene oder migrierte Antworten",

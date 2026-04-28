@@ -83,6 +83,7 @@
   "cli.option.locale": "CLI ja viisardi sõnumites kasutatav locale",
   "cli.option.migrate": "Luba vanemate AnswerDocument skeemiversioonide migreerimine",
   "cli.option.offline": "Keela võrgust sõltuvad toimingud, kui tulevased käsud seda toetavad",
+  "cli.option.refresh": "Force re-download of pack and provider references, ignoring locally materialized files",
   "cli.option.schema": "Prindi praegune answers.json skeem ja välju",
   "cli.option.schema.long": "Prindi praegune answers.json skeem ja välju.\n\nAgentipõhised kodeerimistööriistad nagu Codex ja Claude peaksid selle esmalt käivitama, et hankida praegune vastuste skeem, täita answers.json ja esitada viisard mitteinteraktiivselt uuesti.",
   "cli.option.schema_version": "Väljastatavate või migreeritud vastuste sihtskeemiversioon",

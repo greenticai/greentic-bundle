@@ -83,6 +83,7 @@
   "cli.option.locale": "CLI နှင့် wizard messages များအတွက် အသုံးပြုမည့် locale",
   "cli.option.migrate": "အဟောင်း AnswerDocument schema versions များကို migrate လုပ်ခွင့်ပြုရန်",
   "cli.option.offline": "အနာဂတ် commands များက support လုပ်သောအခါ network-dependent operations များကို ပိတ်ရန်",
+  "cli.option.refresh": "Force re-download of pack and provider references, ignoring locally materialized files",
   "cli.option.schema": "လက်ရှိ answers.json schema ကို ပုံနှိပ်ပြီး ထွက်ပါ",
   "cli.option.schema.long": "လက်ရှိ answers.json schema ကို ပုံနှိပ်ပြီး ထွက်ပါ။\n\nCodex နှင့် Claude ကဲ့သို့ agentic coding tools များသည် လက်ရှိ answer schema ကို ရယူရန် ဤအရာကို အရင်ခေါ်သင့်ပြီး၊ answers.json ကို ဖြည့်သွင်းကာ wizard ကို အပြန်အလှန်မလိုဘဲ ပြန်လည်လုပ်ဆောင်သင့်သည်။",
   "cli.option.schema_version": "ထုတ်ပေးမည့် သို့မဟုတ် migrate လုပ်မည့် answers အတွက် target schema version",

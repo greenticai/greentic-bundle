@@ -83,6 +83,7 @@
   "cli.option.locale": "Lokalizacija koja se koristi za CLI i poruke čarobnjaka",
   "cli.option.migrate": "Dopusti migraciju starijih verzija sheme AnswerDocumenta",
   "cli.option.offline": "Onemogući operacije ovisne o mreži kada ih buduće naredbe podrže",
+  "cli.option.refresh": "Force re-download of pack and provider references, ignoring locally materialized files",
   "cli.option.schema": "Ispiši trenutačnu shemu answers.json i izađi",
   "cli.option.schema.long": "Ispiši trenutačnu shemu answers.json i izađi.\n\nAgentski alati za programiranje kao što su Codex i Claude trebaju prvo pozvati ovo kako bi dohvatili trenutačnu shemu odgovora, ispunili answers.json i ponovno pokrenuli čarobnjak bez interakcije.",
   "cli.option.schema_version": "Ciljna verzija sheme za emitirane ili migrirane odgovore",

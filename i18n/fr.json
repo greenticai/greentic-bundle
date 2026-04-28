@@ -83,6 +83,7 @@
   "cli.option.locale": "Paramètre régional utilisé pour les messages CLI et de l'assistant",
   "cli.option.migrate": "Autoriser la migration des anciennes versions du schéma AnswerDocument",
   "cli.option.offline": "Désactiver les opérations dépendant du réseau quand de futures commandes le prendront en charge",
+  "cli.option.refresh": "Force re-download of pack and provider references, ignoring locally materialized files",
   "cli.option.schema": "Afficher le schéma actuel de answers.json et quitter",
   "cli.option.schema.long": "Afficher le schéma actuel de answers.json et quitter.\n\nLes outils de codage agentiques tels que Codex et Claude doivent d'abord appeler ceci pour récupérer le schéma de réponse actuel, remplir answers.json et rejouer l'assistant de manière non interactive.",
   "cli.option.schema_version": "Version cible du schéma pour les réponses émises ou migrées",

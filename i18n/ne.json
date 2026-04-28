@@ -83,6 +83,7 @@
   "cli.option.locale": "CLI र wizard सन्देशहरूमा प्रयोग हुने Locale",
   "cli.option.migrate": "पुराना AnswerDocument schema संस्करणहरू migrate गर्न अनुमति दिनुहोस्",
   "cli.option.offline": "भविष्यका आदेशहरूले समर्थन गर्दा network-dependent operations असक्षम गर्नुहोस्",
+  "cli.option.refresh": "Force re-download of pack and provider references, ignoring locally materialized files",
   "cli.option.schema": "हालको answers.json स्किमा प्रिन्ट गरेर बाहिर निस्कनुहोस्",
   "cli.option.schema.long": "हालको answers.json स्किमा प्रिन्ट गरेर बाहिर निस्कनुहोस्।\n\nCodex र Claude जस्ता एजेन्टिक कोडिङ उपकरणहरूले हालको answer स्किमा प्राप्त गर्न, answers.json भर्न, र विजार्डलाई non-interactively पुन: चलाउन पहिले यही कल गर्नुपर्छ।",
   "cli.option.schema_version": "उत्पन्न वा migrate गरिएका answers का लागि target schema version",

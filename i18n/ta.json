@@ -83,6 +83,7 @@
   "cli.option.locale": "CLI மற்றும் wizard செய்திகளுக்குப் பயன்படுத்தப்படும் locale",
   "cli.option.migrate": "பழைய AnswerDocument schema பதிப்புகளை மாற்ற அனுமதி",
   "cli.option.offline": "எதிர்கால கட்டளைகள் ஆதரிக்கும் போது நெட்வொர்க் சார்ந்த செயல்பாடுகளை முடக்கு",
+  "cli.option.refresh": "Force re-download of pack and provider references, ignoring locally materialized files",
   "cli.option.schema": "தற்போதைய answers.json ஸ்கீமாவை அச்சிட்டு வெளியேறு",
   "cli.option.schema.long": "தற்போதைய answers.json ஸ்கீமாவை அச்சிட்டு வெளியேறு.\n\nCodex மற்றும் Claude போன்ற ஏஜென்டிக் கோடிங் கருவிகள் தற்போதைய பதில் ஸ்கீமாவைப் பெற, answers.json-ஐ நிரப்ப, மற்றும் விஸார்டை இடையூறு இல்லாமல் மீண்டும் இயக்க இதை முதலில் அழைக்க வேண்டும்.",
   "cli.option.schema_version": "வெளியிடப்பட்ட அல்லது மாற்றப்பட்ட பதில்களுக்கான இலக்கு schema பதிப்பு",

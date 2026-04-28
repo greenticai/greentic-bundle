@@ -83,6 +83,7 @@
   "cli.option.locale": "CLI ਅਤੇ wizard ਸੁਨੇਹਿਆਂ ਲਈ ਵਰਤਿਆ ਜਾਣ ਵਾਲਾ locale",
   "cli.option.migrate": "ਪੁਰਾਣੀਆਂ AnswerDocument schema ਵਰਜਨਾਂ ਨੂੰ migrate ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਦਿਓ",
   "cli.option.offline": "ਜਦੋਂ ਭਵਿੱਖ ਦੀਆਂ ਕਮਾਂਡਾਂ ਇਸਦਾ ਸਮਰਥਨ ਕਰਨ, network-dependent ਕਾਰਵਾਈਆਂ ਅਯੋਗ ਕਰੋ",
+  "cli.option.refresh": "Force re-download of pack and provider references, ignoring locally materialized files",
   "cli.option.schema": "ਮੌਜੂਦਾ answers.json ਸਕੀਮਾ ਪ੍ਰਿੰਟ ਕਰੋ ਅਤੇ ਬਾਹਰ ਨਿਕਲੋ",
   "cli.option.schema.long": "ਮੌਜੂਦਾ answers.json ਸਕੀਮਾ ਪ੍ਰਿੰਟ ਕਰੋ ਅਤੇ ਬਾਹਰ ਨਿਕਲੋ।\n\nCodex ਅਤੇ Claude ਵਰਗੇ ਏਜੈਂਟਿਕ ਕੋਡਿੰਗ ਟੂਲਜ਼ ਨੂੰ ਮੌਜੂਦਾ answer schema ਪ੍ਰਾਪਤ ਕਰਨ ਲਈ ਪਹਿਲਾਂ ਇਹ ਕਾਲ ਕਰਨੀ ਚਾਹੀਦੀ ਹੈ, answers.json ਭਰਨਾ ਚਾਹੀਦਾ ਹੈ, ਅਤੇ ਵਿਜ਼ਾਰਡ ਨੂੰ ਬਿਨਾਂ ਇੰਟਰਐਕਟਿਵ ਤਰੀਕੇ ਨਾਲ ਮੁੜ ਚਲਾਉਣਾ ਚਾਹੀਦਾ ਹੈ।",
   "cli.option.schema_version": "ਨਿਕਾਲੇ ਜਾਂ migrate ਕੀਤੇ ਜਵਾਬਾਂ ਲਈ target schema ਵਰਜਨ",

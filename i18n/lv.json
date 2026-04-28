@@ -83,6 +83,7 @@
   "cli.option.locale": "Lokalizācija CLI un vedņa ziņojumiem",
   "cli.option.migrate": "Atļaut migrēt vecākas AnswerDocument shēmas versijas",
   "cli.option.offline": "Atspējot no tīkla atkarīgas darbības, kad nākotnes komandas to atbalstīs",
+  "cli.option.refresh": "Force re-download of pack and provider references, ignoring locally materialized files",
   "cli.option.schema": "Izdrukāt pašreizējo answers.json shēmu un iziet",
   "cli.option.schema.long": "Izdrukāt pašreizējo answers.json shēmu un iziet.\n\nAģentiskas kodēšanas rīkiem, piemēram, Codex un Claude, vispirms vajadzētu izsaukt šo, lai iegūtu pašreizējo atbilžu shēmu, aizpildītu answers.json un atkārtoti izpildītu vedni neinteraktīvā režīmā.",
   "cli.option.schema_version": "Mērķa shēmas versija izvadītajām vai migrētajām atbildēm",

@@ -44,6 +44,14 @@ pub struct Cli {
     )]
     offline: bool,
 
+    #[arg(
+        long = "refresh",
+        global = true,
+        default_value_t = false,
+        help = "cli.option.refresh"
+    )]
+    refresh: bool,
+
     #[command(subcommand)]
     command: Commands,
 }
@@ -89,6 +97,7 @@ pub fn run() -> Result<()> {
     let cli = Cli::from_arg_matches(&matches)?;
     crate::i18n::init(cli.locale.clone());
     crate::runtime::set_offline(cli.offline);
+    crate::runtime::set_refresh(cli.refresh);
     cli.dispatch()
 }
 

@@ -83,6 +83,7 @@
   "cli.option.locale": "Локаль, используемая для CLI и сообщений мастера",
   "cli.option.migrate": "Разрешить миграцию старых версий схемы AnswerDocument",
   "cli.option.offline": "Отключить операции, зависящие от сети, когда будущие команды будут это поддерживать",
+  "cli.option.refresh": "Force re-download of pack and provider references, ignoring locally materialized files",
   "cli.option.schema": "Вывести текущую схему answers.json и выйти",
   "cli.option.schema.long": "Вывести текущую схему answers.json и выйти.\n\nАгентные инструменты для программирования, такие как Codex и Claude, должны сначала вызвать это, чтобы получить текущую схему ответов, заполнить answers.json и повторно воспроизвести мастер в неинтерактивном режиме.",
   "cli.option.schema_version": "Целевая версия схемы для выводимых или мигрируемых ответов",

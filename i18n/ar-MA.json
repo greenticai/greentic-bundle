@@ -83,6 +83,7 @@
   "cli.option.locale": "الـ locale المستعملة فالـ CLI ورسائل wizard",
   "cli.option.migrate": "اسمح بترحيل إصدارات schema القديمة ديال AnswerDocument",
   "cli.option.offline": "عطّل العمليات اللي كتعتمد على الشبكة ملي الأوامر المستقبلية تدعم هاد الشي",
+  "cli.option.refresh": "Force re-download of pack and provider references, ignoring locally materialized files",
   "cli.option.schema": "طبع مخطط answers.json الحالي والخروج",
   "cli.option.schema.long": "طبع مخطط answers.json الحالي والخروج.\n\nخص أدوات البرمجة الوكيلة مثل Codex وClaude خاصها تعيط لهاد الشي اللول باش تجيب مخطط الأجوبة الحالي، تعمر answers.json، وتعاود تشغيل المعالج بشكل غير تفاعلي.",
   "cli.option.schema_version": "إصدار schema المستهدف للأجوبة المخرجة أو المُرحَّلة",

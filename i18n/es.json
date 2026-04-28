@@ -83,6 +83,7 @@
   "cli.option.locale": "Configuración regional usada para los mensajes de CLI y del asistente",
   "cli.option.migrate": "Permitir migrar versiones antiguas del esquema de AnswerDocument",
   "cli.option.offline": "Deshabilitar operaciones dependientes de la red cuando los futuros comandos lo admitan",
+  "cli.option.refresh": "Force re-download of pack and provider references, ignoring locally materialized files",
   "cli.option.schema": "Imprime el esquema actual de answers.json y sale",
   "cli.option.schema.long": "Imprime el esquema actual de answers.json y sale.\n\nLas herramientas de programación agéntica como Codex y Claude deben llamar esto primero para obtener el esquema de respuesta actual, completar answers.json y volver a ejecutar el asistente de forma no interactiva.",
   "cli.option.schema_version": "Versión de esquema objetivo para las respuestas emitidas o migradas",

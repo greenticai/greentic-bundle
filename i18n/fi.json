@@ -83,6 +83,7 @@
   "cli.option.locale": "CLI:ssä ja ohjatussa toiminnossa käytettävä locale",
   "cli.option.migrate": "Salli vanhempien AnswerDocument-skeemaversioiden migrointi",
   "cli.option.offline": "Poista verkkoriippuvaiset toiminnot käytöstä, kun tulevat komennot tukevat sitä",
+  "cli.option.refresh": "Force re-download of pack and provider references, ignoring locally materialized files",
   "cli.option.schema": "Tulosta nykyinen answers.json-skeema ja poistu",
   "cli.option.schema.long": "Tulosta nykyinen answers.json-skeema ja poistu.\n\nAgenttipohjaisten koodaustyökalujen, kuten Codexin ja Clauden, tulee kutsua tätä ensin hakeakseen nykyisen vastausskeeman, täyttääkseen answers.json-tiedoston ja suorittaakseen ohjatun toiminnon uudelleen ilman vuorovaikutusta.",
   "cli.option.schema_version": "Kohdeskeemaversio tuotetuille tai migroiduille vastauksille",

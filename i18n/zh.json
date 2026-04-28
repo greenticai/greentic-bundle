@@ -83,6 +83,7 @@
   "cli.option.locale": "用于 CLI 和向导消息的语言区域",
   "cli.option.migrate": "允许迁移旧版 AnswerDocument 架构版本",
   "cli.option.offline": "当未来命令支持时，禁用依赖网络的操作",
+  "cli.option.refresh": "Force re-download of pack and provider references, ignoring locally materialized files",
   "cli.option.schema": "打印当前的 answers.json 架构并退出",
   "cli.option.schema.long": "打印当前的 answers.json 架构并退出。\n\nCodex 和 Claude 等智能体编程工具应首先调用此命令以获取当前答案架构，填写 answers.json，并以非交互方式重新运行向导。",
   "cli.option.schema_version": "用于输出或迁移答案的目标架构版本",

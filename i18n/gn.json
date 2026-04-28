@@ -83,6 +83,7 @@
   "cli.option.locale": "Locale ojeporúva CLI ha wizard marandupe",
   "cli.option.migrate": "Emoneĩ ymaguare AnswerDocument esquema hag̃ua ñemiguasu",
   "cli.option.offline": "Embogue red rehe odependeva apopyrã tenonderãite umi tembiapoukapy oipytyvõvo",
+  "cli.option.refresh": "Force re-download of pack and provider references, ignoring locally materialized files",
   "cli.option.schema": "Ehechauka pe esquema ko'ág̃agua answers.json rehegua ha esẽ",
   "cli.option.schema.long": "Ehechauka pe esquema ko'ág̃agua answers.json rehegua ha esẽ.\n\nTembipuru kuatia'apo agente rehegua, Codex ha Claude-icha, ohenói va'erã kóva raẽ ogueru hag̃ua pe esquema ko'ág̃agua ñembohovái rehegua, omyenyhẽ hag̃ua answers.json, ha ombohasajey hag̃ua pe asisténte jeporandu'ỹre.",
   "cli.option.schema_version": "Esquema versión objetivo respuestas osẽva térã oñemiguasúva hag̃ua",

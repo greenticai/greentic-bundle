@@ -83,6 +83,7 @@
   "cli.option.locale": "Locale usato per i messaggi della CLI e della procedura guidata",
   "cli.option.migrate": "Consenti la migrazione di versioni precedenti dello schema AnswerDocument",
   "cli.option.offline": "Disabilita le operazioni dipendenti dalla rete quando i comandi futuri lo supporteranno",
+  "cli.option.refresh": "Force re-download of pack and provider references, ignoring locally materialized files",
   "cli.option.schema": "Stampa lo schema corrente di answers.json ed esci",
   "cli.option.schema.long": "Stampa lo schema corrente di answers.json ed esci.\n\nStrumenti di programmazione agentica come Codex e Claude dovrebbero chiamare prima questo comando per recuperare lo schema corrente delle risposte, compilare answers.json e rieseguire la procedura guidata in modalità non interattiva.",
   "cli.option.schema_version": "Versione dello schema di destinazione per le risposte emesse o migrate",

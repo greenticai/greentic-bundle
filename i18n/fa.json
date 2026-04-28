@@ -83,6 +83,7 @@
   "cli.option.locale": "Locale مورد استفاده برای پیام‌های CLI و wizard",
   "cli.option.migrate": "اجازه مهاجرت نسخه‌های قدیمی‌تر شِمای AnswerDocument",
   "cli.option.offline": "غیرفعال کردن عملیات وابسته به شبکه وقتی دستورات آینده از آن پشتیبانی کنند",
+  "cli.option.refresh": "Force re-download of pack and provider references, ignoring locally materialized files",
   "cli.option.schema": "طرح‌وارهٔ فعلی answers.json را چاپ کن و خارج شو",
   "cli.option.schema.long": "طرح‌وارهٔ فعلی answers.json را چاپ کن و خارج شو.\n\nابزارهای کدنویسی عامل‌محور مانند Codex و Claude باید ابتدا این را فراخوانی کنند تا طرح‌وارهٔ فعلی پاسخ را دریافت کنند، answers.json را پر کنند و ویزارد را به‌صورت غیرتعاملی دوباره اجرا کنند.",
   "cli.option.schema_version": "نسخه شِمای هدف برای پاسخ‌های تولیدشده یا مهاجرت‌داده‌شده",

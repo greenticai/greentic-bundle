@@ -83,6 +83,7 @@
   "cli.option.locale": "Locale dùng cho thông báo CLI và wizard",
   "cli.option.migrate": "Cho phép di chuyển các phiên bản schema AnswerDocument cũ hơn",
   "cli.option.offline": "Tắt các thao tác phụ thuộc mạng khi các lệnh tương lai hỗ trợ",
+  "cli.option.refresh": "Force re-download of pack and provider references, ignoring locally materialized files",
   "cli.option.schema": "In lược đồ answers.json hiện tại và thoát",
   "cli.option.schema.long": "In lược đồ answers.json hiện tại và thoát.\n\nCác công cụ lập trình tác tử như Codex và Claude nên gọi lệnh này trước để lấy lược đồ câu trả lời hiện tại, điền answers.json, và chạy lại trình hướng dẫn mà không cần tương tác.",
   "cli.option.schema_version": "Phiên bản schema đích cho câu trả lời được xuất hoặc di chuyển",
