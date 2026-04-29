@@ -32,9 +32,6 @@ tokio = { version = "1", features = ["rt-multi-thread"] }
 unic-langid = "0.9"
 dirs = "5"
 tracing = "0.1"
-greentic-ext-contract = { git = "https://github.com/greentic-biz/greentic-designer-extensions", rev = "fcde1c1bdb40986b9c08c26c8d8e770037d2cc46", package = "greentic-ext-contract" }
-greentic-ext-runtime = { git = "https://github.com/greentic-biz/greentic-designer-extensions", rev = "fcde1c1bdb40986b9c08c26c8d8e770037d2cc46", package = "greentic-ext-runtime" }
-wasmtime = { version = "43", default-features = false, features = ["component-model", "async"] }
 
 [package]
 name = "greentic-bundle"
@@ -104,14 +101,10 @@ unic-langid.workspace = true
 zip = "8"
 dirs.workspace = true
 tracing.workspace = true
-greentic-ext-contract.workspace = true
-greentic-ext-runtime.workspace = true
-wasmtime.workspace = true
 
-# feature: extensions (bundle-ext Phase A).
-# Note: greentic-ext-{contract,runtime} are Phase B concerns — Mode A routes
-# render to the native builtin_bridge without invoking any WASM runtime.
-# Those git deps land when Mode B is implemented.
+# feature: extensions (bundle-ext Phase A — host-side schema/registry only).
+# WASM execution path was removed pending crates.io-publishable runtime crates;
+# tracked in https://github.com/greenticai/greentic/issues/175.
 jsonschema = { version = "0.18", optional = true, default-features = false }
 thiserror = { version = "2", optional = true }
 walkdir = { version = "2", optional = true }
