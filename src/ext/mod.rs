@@ -1,13 +1,13 @@
-//! Bundle extension host module (Phase A).
+//! Bundle extension host module.
 //!
-//! Feature-gated by `extensions`. See
-//! `docs/superpowers/specs/2026-04-17-bundle-extension-migration-design.md`.
+//! Feature-gated by `extensions`. Provides discovery, descriptor parsing,
+//! registry, and dispatch for bundle extensions. WASM execution backend is
+//! currently disabled — see `dispatcher.rs` for context.
 
 pub mod describe;
 pub mod dispatcher;
 pub mod errors;
 pub mod loader;
 pub mod registry;
-pub mod wasm;
 
 pub use errors::ExtensionError;

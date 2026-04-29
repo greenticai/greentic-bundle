@@ -1,32 +1,35 @@
-//! Route `render` calls to the WASM execution backend based on
-//! `describe.json` `execution.kind`.
+//! Route `render` calls based on `describe.json` `execution.kind`.
 //!
-//! Post-Wave-5 the only execution path is Mode B WASM. The former builtin
-//! bridge (Mode A) was deleted after `bundle-standard@0.2.0` flipped to
-//! `execution.kind="wasm"` and greentic-designer stopped shipping the 0.1.0
-//! builtin-backed artifact.
+//! WASM execution (Mode B) is currently disabled in the OSS build because the
+//! `greentic-ext-runtime` / `greentic-ext-contract` crates are not yet
+//! published to crates.io (tracked in
+//! https://github.com/greenticai/greentic/issues/175). Until those land, every
+//! dispatch returns `ExtensionError::ModeBNotImplemented`. The host-side
+//! pieces of the extension surface (discovery, validation, CLI plumbing) keep
+//! working and stay shipped.
 
 use crate::ext::describe::Execution;
 use crate::ext::errors::ExtensionError;
 use crate::ext::registry::ExtensionRegistry;
-use crate::ext::wasm;
-use crate::ext::wasm::RenderedArtifact;
+
+/// The artifact returned by `bundling.render`.
+#[derive(Debug, Clone)]
+pub struct RenderedArtifact {
+    pub filename: String,
+    pub bytes: Vec<u8>,
+    pub sha256: String,
+}
 
 pub fn invoke_recipe(
     registry: &ExtensionRegistry,
     extension_id: &str,
     recipe_id: &str,
-    config_json: &str,
-    session_json: &str,
+    _config_json: &str,
+    _session_json: &str,
 ) -> Result<RenderedArtifact, ExtensionError> {
     let entry = registry.resolve(extension_id, recipe_id)?;
     match &entry.execution {
-        Execution::Wasm => wasm::invoke_wasm(wasm::WasmInvocation {
-            extension_id,
-            recipe_id,
-            config_json,
-            session_json,
-        }),
+        Execution::Wasm => Err(ExtensionError::ModeBNotImplemented),
     }
 }
 
@@ -62,17 +65,14 @@ mod tests {
     }
 
     #[test]
-    fn wasm_path_routes_to_invoker() {
-        // Structural assertion: the only execution branch after Wave 5 is
-        // `Execution::Wasm → wasm::invoke_wasm(...)`. The exact error depends on
-        // the ambient state of `~/.greentic/extensions/bundle/` (stub fallback
-        // fires if ext-runtime init fails, e.g. unsigned local install), so we
-        // accept any error — the key invariant is that dispatch happens and
-        // returns structured failure rather than invoking a deleted builtin
-        // branch.
+    fn wasm_dispatch_returns_not_implemented() {
         let mut reg = ExtensionRegistry::new();
         register(&mut reg, r#"{ "kind": "wasm" }"#);
-        let _err = invoke_recipe(&reg, "x.test", "standard", "{}", "{}").unwrap_err();
+        let err = invoke_recipe(&reg, "x.test", "standard", "{}", "{}").unwrap_err();
+        assert!(
+            matches!(err, ExtensionError::ModeBNotImplemented),
+            "expected ModeBNotImplemented, got {err:?}"
+        );
     }
 
     #[test]
