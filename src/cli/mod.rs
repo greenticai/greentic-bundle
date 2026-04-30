@@ -177,7 +177,6 @@ fn localize_help(mut command: clap::Command, is_root: bool) -> clap::Command {
     command
 }
 
-
 #[cfg(test)]
 mod tests {
     use clap::Parser;
