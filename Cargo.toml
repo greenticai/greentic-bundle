@@ -103,13 +103,6 @@ zip = "8"
 dirs.workspace = true
 tracing.workspace = true
 
-# feature: extensions (bundle-ext Phase A — host-side schema/registry only).
-# WASM execution path was removed pending crates.io-publishable runtime crates;
-# tracked in https://github.com/greenticai/greentic/issues/175.
-jsonschema = { version = "0.18", optional = true, default-features = false }
-thiserror = { version = "2", optional = true }
-walkdir = { version = "2", optional = true }
-
 [dev-dependencies]
 assert_cmd.workspace = true
 criterion = "0.8"
@@ -127,8 +120,3 @@ harness = false
 
 [features]
 default = []
-extensions = [
-  "dep:jsonschema",
-  "dep:thiserror",
-  "dep:walkdir",
-]
