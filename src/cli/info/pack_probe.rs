@@ -232,7 +232,74 @@ fn match_pack_file<'a>(files: &'a [String], slug: &str) -> Option<&'a str> {
 
 #[cfg(test)]
 mod tests {
+    use std::ffi::OsString;
+    use std::fs;
+    use std::io::Write;
+    use std::os::unix::fs::PermissionsExt;
+    use std::path::{Path, PathBuf};
+    use std::sync::{Mutex, OnceLock};
+
     use super::*;
+
+    static PATH_LOCK: OnceLock<Mutex<()>> = OnceLock::new();
+
+    struct PathGuard(Option<OsString>);
+
+    impl Drop for PathGuard {
+        fn drop(&mut self) {
+            if let Some(path) = self.0.take() {
+                unsafe {
+                    std::env::set_var("PATH", path);
+                }
+            } else {
+                unsafe {
+                    std::env::remove_var("PATH");
+                }
+            }
+        }
+    }
+
+    fn prepend_path(dir: &Path) -> PathGuard {
+        let original = std::env::var_os("PATH");
+        let joined = match &original {
+            Some(path) => std::env::join_paths(
+                std::iter::once(dir.to_path_buf()).chain(std::env::split_paths(path)),
+            )
+            .expect("join PATH entries"),
+            None => OsString::from(dir.as_os_str()),
+        };
+        unsafe {
+            std::env::set_var("PATH", joined);
+        }
+        PathGuard(original)
+    }
+
+    fn install_fake_unsquashfs(tempdir: &Path, script: &str) -> PathBuf {
+        let path = tempdir.join("unsquashfs");
+        fs::write(&path, script).expect("write fake unsquashfs");
+        let mut permissions = fs::metadata(&path)
+            .expect("stat fake unsquashfs")
+            .permissions();
+        permissions.set_mode(0o755);
+        fs::set_permissions(&path, permissions).expect("chmod fake unsquashfs");
+        path
+    }
+
+    fn make_gtpack_with_manifest(version: Option<&str>) -> Vec<u8> {
+        #[derive(serde::Serialize)]
+        struct Manifest<'a> {
+            version: Option<&'a str>,
+        }
+
+        let mut writer = zip::ZipWriter::new(std::io::Cursor::new(Vec::new()));
+        writer
+            .start_file("manifest.cbor", zip::write::FileOptions::<()>::default())
+            .expect("create manifest entry");
+        let mut cbor = Vec::new();
+        ciborium::ser::into_writer(&Manifest { version }, &mut cbor).expect("encode manifest");
+        writer.write_all(&cbor).expect("write manifest bytes");
+        writer.finish().expect("finish zip").into_inner()
+    }
 
     #[test]
     fn slug_strips_oci_scheme_and_tag() {
@@ -299,5 +366,153 @@ mod tests {
     fn match_pack_file_returns_none_for_empty_slug() {
         let files = vec!["packs/foo.gtpack".to_string()];
         assert_eq!(match_pack_file(&files, ""), None);
+    }
+
+    #[test]
+    fn probe_inlined_packs_returns_empty_when_no_references_are_requested() {
+        assert!(probe_inlined_packs(Path::new("ignored.gtbundle"), &[]).is_empty());
+    }
+
+    #[test]
+    fn list_gtpack_files_filters_non_gtpacks_and_strips_squashfs_prefix() {
+        let _lock = PATH_LOCK
+            .get_or_init(|| Mutex::new(()))
+            .lock()
+            .expect("lock PATH");
+        let tempdir = tempfile::tempdir().expect("create temp dir");
+        install_fake_unsquashfs(
+            tempdir.path(),
+            r#"#!/bin/sh
+if [ "$1" = "-l" ]; then
+  cat <<'EOF'
+squashfs-root/providers/messaging/messaging-webchat-gui.gtpack
+squashfs-root/providers/state/state-memory.gtpack
+squashfs-root/notes.txt
+EOF
+else
+  echo "unexpected args: $@" >&2
+  exit 1
+fi
+"#,
+        );
+        let _path_guard = prepend_path(tempdir.path());
+
+        let files = list_gtpack_files(Path::new("demo.gtbundle")).expect("list .gtpack files");
+
+        assert_eq!(
+            files,
+            vec![
+                "providers/messaging/messaging-webchat-gui.gtpack".to_string(),
+                "providers/state/state-memory.gtpack".to_string(),
+            ]
+        );
+    }
+
+    #[test]
+    fn probe_inlined_packs_reads_manifest_versions_via_unsquashfs() {
+        let _lock = PATH_LOCK
+            .get_or_init(|| Mutex::new(()))
+            .lock()
+            .expect("lock PATH");
+        let tempdir = tempfile::tempdir().expect("create temp dir");
+        let pack_path = tempdir.path().join("messaging-webchat-gui.gtpack");
+        fs::write(&pack_path, make_gtpack_with_manifest(Some("1.2.3"))).expect("write .gtpack");
+        install_fake_unsquashfs(
+            tempdir.path(),
+            &format!(
+                r#"#!/bin/sh
+if [ "$1" = "-l" ]; then
+  cat <<'EOF'
+squashfs-root/providers/messaging/messaging-webchat-gui.gtpack
+EOF
+elif [ "$1" = "-cat" ]; then
+  cat "{pack_path}"
+else
+  echo "unexpected args: $@" >&2
+  exit 1
+fi
+"#,
+                pack_path = pack_path.display()
+            ),
+        );
+        let _path_guard = prepend_path(tempdir.path());
+
+        let refs = ["oci://ghcr.io/greenticai/packs/messaging/messaging-webchat-gui:latest"];
+        let meta = probe_inlined_packs(Path::new("demo.gtbundle"), &refs);
+
+        assert_eq!(meta.len(), 1);
+        assert_eq!(
+            meta.get(refs[0]).and_then(|entry| entry.version.as_deref()),
+            Some("1.2.3")
+        );
+    }
+
+    #[test]
+    fn extract_pack_metadata_returns_none_when_manifest_is_missing() {
+        let mut writer = zip::ZipWriter::new(std::io::Cursor::new(Vec::new()));
+        writer
+            .start_file("readme.txt", zip::write::FileOptions::<()>::default())
+            .expect("create readme entry");
+        writer.write_all(b"hello").expect("write readme");
+        let bytes = writer.finish().expect("finish zip").into_inner();
+
+        let _lock = PATH_LOCK
+            .get_or_init(|| Mutex::new(()))
+            .lock()
+            .expect("lock PATH");
+        let tempdir = tempfile::tempdir().expect("create temp dir");
+        let pack_path = tempdir.path().join("missing-manifest.gtpack");
+        fs::write(&pack_path, bytes).expect("write .gtpack");
+        install_fake_unsquashfs(
+            tempdir.path(),
+            &format!(
+                r#"#!/bin/sh
+if [ "$1" = "-cat" ]; then
+  cat "{pack_path}"
+else
+  echo "unexpected args: $@" >&2
+  exit 1
+fi
+"#,
+                pack_path = pack_path.display()
+            ),
+        );
+        let _path_guard = prepend_path(tempdir.path());
+
+        assert!(
+            extract_pack_metadata(Path::new("demo.gtbundle"), "packs/missing-manifest.gtpack")
+                .expect("missing manifest is non-fatal")
+                .is_none()
+        );
+    }
+
+    #[test]
+    fn extract_pack_metadata_reports_decode_errors() {
+        let _lock = PATH_LOCK
+            .get_or_init(|| Mutex::new(()))
+            .lock()
+            .expect("lock PATH");
+        let tempdir = tempfile::tempdir().expect("create temp dir");
+        let pack_path = tempdir.path().join("broken.gtpack");
+        fs::write(&pack_path, b"not-a-zip").expect("write invalid .gtpack");
+        install_fake_unsquashfs(
+            tempdir.path(),
+            &format!(
+                r#"#!/bin/sh
+if [ "$1" = "-cat" ]; then
+  cat "{pack_path}"
+else
+  echo "unexpected args: $@" >&2
+  exit 1
+fi
+"#,
+                pack_path = pack_path.display()
+            ),
+        );
+        let _path_guard = prepend_path(tempdir.path());
+
+        let err = extract_pack_metadata(Path::new("demo.gtbundle"), "packs/broken.gtpack")
+            .expect_err("invalid zip should fail");
+        assert!(err.to_string().contains("open .gtpack zip"));
     }
 }
