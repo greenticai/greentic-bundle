@@ -8,10 +8,6 @@ pub mod add;
 pub mod build;
 pub mod doctor;
 pub mod export;
-#[cfg(feature = "extensions")]
-pub mod ext;
-#[cfg(feature = "extensions")]
-mod ext_helpers;
 pub mod info;
 pub mod init;
 pub mod inspect;
@@ -80,9 +76,6 @@ enum Commands {
     Access(access::AccessArgs),
     #[command(about = "cli.init.about")]
     Init(init::InitArgs),
-    #[cfg(feature = "extensions")]
-    #[command(about = "cli.ext.about")]
-    Ext(ext::ExtArgs),
 }
 
 pub fn run() -> Result<()> {
@@ -119,8 +112,6 @@ impl Cli {
             Commands::Remove(args) => remove::run(args),
             Commands::Access(args) => access::run(args),
             Commands::Init(args) => init::run(args),
-            #[cfg(feature = "extensions")]
-            Commands::Ext(args) => run_ext(args),
         }
     }
 }
@@ -184,156 +175,6 @@ fn localize_help(mut command: clap::Command, is_root: bool) -> clap::Command {
         command = command.mut_subcommand(name, |sub| localize_help(sub, false));
     }
     command
-}
-
-#[cfg(feature = "extensions")]
-#[allow(clippy::too_many_lines)]
-fn run_ext(args: ext::ExtArgs) -> anyhow::Result<()> {
-    use std::fs;
-    use std::io::Write;
-    use std::path::PathBuf;
-
-    use crate::ext::dispatcher::invoke_recipe;
-    use crate::ext::loader::load_from_dir;
-    use crate::ext::registry::ExtensionRegistry;
-
-    let install_dir = args
-        .extension_dir
-        .clone()
-        .unwrap_or_else(|| PathBuf::from("state").join("ext"));
-
-    let mut registry = ExtensionRegistry::new();
-    let discovered = load_from_dir(&install_dir)?;
-    registry.register_discovered(discovered)?;
-
-    match args.command {
-        ext::ExtCommand::List => {
-            for e in registry.list() {
-                println!(
-                    "{ext} {ver} recipe={recipe} kind={kind:?}",
-                    ext = e.extension_id,
-                    ver = e.extension_version,
-                    recipe = e.recipe.id,
-                    kind = e.execution,
-                );
-            }
-        }
-        ext::ExtCommand::Info { extension_id } => {
-            let mut any = false;
-            for e in registry.list().filter(|e| e.extension_id == extension_id) {
-                any = true;
-                println!(
-                    "{ext} {ver}\n  recipe: {rid} — {display}\n  schema: {schema}\n  capabilities: {caps}",
-                    ext = e.extension_id,
-                    ver = e.extension_version,
-                    rid = e.recipe.id,
-                    display = e.recipe.display_name,
-                    schema = e.recipe.config_schema,
-                    caps = e.recipe.supported_capabilities.join(", "),
-                );
-            }
-            if !any {
-                return Err(anyhow::anyhow!(crate::i18n::trf(
-                    "cli.ext.info.not_found",
-                    &[("id", extension_id.as_str())]
-                )));
-            }
-        }
-        ext::ExtCommand::Validate {
-            extension_id,
-            recipe_id,
-            config,
-        } => {
-            let entry = registry.resolve(&extension_id, &recipe_id)?;
-            let schema_path = entry.descriptor_root.join(&entry.recipe.config_schema);
-            let schema_raw = fs::read_to_string(&schema_path)?;
-            let schema_json: serde_json::Value = serde_json::from_str(&schema_raw)?;
-            let config_raw = fs::read_to_string(&config)?;
-            let config_json: serde_json::Value = serde_json::from_str(&config_raw)?;
-            let compiled = jsonschema::JSONSchema::compile(&schema_json)
-                .map_err(|e| anyhow::anyhow!("schema load error: {e}"))?;
-            match compiled.validate(&config_json) {
-                Ok(()) => {
-                    println!("{}", crate::i18n::tr("cli.ext.validate.ok"));
-                }
-                Err(errs) => {
-                    for e in errs {
-                        eprintln!("{}: {e}", e.instance_path);
-                    }
-                    return Err(anyhow::anyhow!(crate::i18n::tr("cli.ext.validate.failed")));
-                }
-            }
-        }
-        ext::ExtCommand::Render {
-            extension_id,
-            recipe_id,
-            config,
-            session,
-            out,
-            json,
-        } => {
-            use ext_helpers::{extension_error_code, fail_json, read_input};
-
-            // Can't multiplex a single stdin between two --config and --session reads.
-            if config == "-" && session == "-" {
-                return Err(fail_json(
-                    json,
-                    "invalid-args",
-                    "only one of --config and --session may read from stdin",
-                ));
-            }
-            if json && out.is_none() {
-                return Err(fail_json(json, "invalid-args", "--json requires --out"));
-            }
-
-            let config_json = read_input(&config)
-                .map_err(|e| fail_json(json, "invalid-config", &e.to_string()))?;
-            let session_json = read_input(&session)
-                .map_err(|e| fail_json(json, "invalid-session", &e.to_string()))?;
-
-            let result = invoke_recipe(
-                &registry,
-                &extension_id,
-                &recipe_id,
-                &config_json,
-                &session_json,
-            );
-
-            match (result, out) {
-                (Ok(art), Some(path)) => {
-                    fs::write(&path, &art.bytes)?;
-                    if json {
-                        let summary = serde_json::json!({
-                            "status": "ok",
-                            "filename": art.filename,
-                            "sha256": art.sha256,
-                            "bytesLen": art.bytes.len(),
-                        });
-                        println!("{summary}");
-                    } else {
-                        let path_str = path.display().to_string();
-                        println!(
-                            "{}",
-                            crate::i18n::trf(
-                                "cli.ext.render.wrote",
-                                &[("file", path_str.as_str()), ("sha256", art.sha256.as_str()),],
-                            )
-                        );
-                    }
-                }
-                (Ok(art), None) => {
-                    std::io::stdout().write_all(&art.bytes)?;
-                }
-                (Err(e), _) => {
-                    return Err(fail_json(json, extension_error_code(&e), &e.to_string()));
-                }
-            }
-        }
-        ext::ExtCommand::InstallDir => {
-            println!("{}", install_dir.display());
-        }
-    }
-    Ok(())
 }
 
 #[cfg(test)]
