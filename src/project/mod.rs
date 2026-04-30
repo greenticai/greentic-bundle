@@ -372,12 +372,23 @@ fn materialize_workspace_dependencies(
         .collect();
     let total = app_targets.len() + provider_targets.len();
     let mut current = 0usize;
+    let force_refresh = crate::runtime::refresh();
 
     for mapping in &app_targets {
         current += 1;
         let dest = root.join(&mapping.destination);
         if dest.exists() {
-            eprintln!("  [{current}/{total}] Cached: {}", mapping.reference);
+            if force_refresh {
+                eprintln!(
+                    "  [{current}/{total}] Refreshing app pack: {}",
+                    mapping.reference
+                );
+            } else {
+                eprintln!(
+                    "  [{current}/{total}] Reused (local file exists): {}",
+                    mapping.reference
+                );
+            }
         } else {
             eprintln!(
                 "  [{current}/{total}] Resolving app pack: {}",
@@ -396,7 +407,11 @@ fn materialize_workspace_dependencies(
         let destination = provider_destination_path(provider);
         let dest = root.join(&destination);
         if dest.exists() {
-            eprintln!("  [{current}/{total}] Cached: {provider}");
+            if force_refresh {
+                eprintln!("  [{current}/{total}] Refreshing provider: {provider}");
+            } else {
+                eprintln!("  [{current}/{total}] Reused (local file exists): {provider}");
+            }
         } else {
             eprintln!("  [{current}/{total}] Resolving provider: {provider}");
         }
@@ -482,7 +497,11 @@ fn materialize_reference_into(
 ) -> Result<()> {
     let destination = root.join(relative_destination);
     if destination.exists() {
-        return Ok(());
+        if !crate::runtime::refresh() {
+            return Ok(());
+        }
+        std::fs::remove_file(&destination)
+            .with_context(|| format!("remove existing {} before refresh", destination.display()))?;
     }
     if let Some(parent) = destination.parent() {
         ensure_dir(parent)?;

@@ -7,7 +7,7 @@ members = [
 resolver = "2"
 
 [workspace.package]
-version = "0.5.4"
+version = "0.6.0-dev.0"
 
 [workspace.dependencies]
 anyhow = "1"
@@ -15,7 +15,8 @@ assert_cmd = "2"
 ciborium = "0.2"
 clap = { version = "4", features = ["derive"] }
 constant_time_eq = "=0.4.2"
-greentic-bundle-reader = { version = ">=0.5.0-0, <0.6.0-0", path = "crates/greentic-bundle-reader" }
+bundle-standard-core = { version = ">=0.6.0-0, <0.7.0-0", path = "crates/bundle-standard-core" }
+greentic-bundle-reader = { version = ">=0.6.0-0, <0.7.0-0", path = "crates/greentic-bundle-reader" }
 greentic-distributor-client = { version = ">=0.5.0-0, <0.6.0-0", default-features = false, features = ["dist-client", "pack-fetch"] }
 greentic-qa-lib = ">=0.5.0-0, <0.6.0-0"
 predicates = "3"
@@ -102,13 +103,6 @@ zip = "8"
 dirs.workspace = true
 tracing.workspace = true
 
-# feature: extensions (bundle-ext Phase A — host-side schema/registry only).
-# WASM execution path was removed pending crates.io-publishable runtime crates;
-# tracked in https://github.com/greenticai/greentic/issues/175.
-jsonschema = { version = "0.18", optional = true, default-features = false }
-thiserror = { version = "2", optional = true }
-walkdir = { version = "2", optional = true }
-
 [dev-dependencies]
 assert_cmd.workspace = true
 criterion = "0.8"
@@ -126,8 +120,3 @@ harness = false
 
 [features]
 default = []
-extensions = [
-  "dep:jsonschema",
-  "dep:thiserror",
-  "dep:walkdir",
-]
