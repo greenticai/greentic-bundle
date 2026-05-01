@@ -86,7 +86,8 @@ mod tests {
         let cfg = StandardConfig {
             metadata: StandardMetadata {
                 name: "x".into(),
-                version: "1".into(),
+                // semver — `manifest.cbor` encoder rejects bare "1".
+                version: "1.0.0".into(),
                 author: None,
             },
             channels: vec![],
@@ -97,5 +98,38 @@ mod tests {
         let a = build_pack(&min_inputs(&cfg, &[], &[])).unwrap();
         let b = build_pack(&min_inputs(&cfg, &[], &[])).unwrap();
         assert_eq!(a.sha256, b.sha256);
+    }
+
+    #[test]
+    fn pack_includes_manifest_cbor() {
+        // Verify the new `manifest.cbor` entry decodes back into a
+        // PackManifest greentic-start would accept.
+        use greentic_types::{PackKind, decode_pack_manifest};
+        use std::io::Read;
+        let cfg = StandardConfig {
+            metadata: StandardMetadata {
+                name: "demo".into(),
+                version: "0.1.0".into(),
+                author: Some("Acme".into()),
+            },
+            channels: vec!["webchat".into()],
+            embed_ui: "webchat".into(),
+            i18n: I18nConfig::default(),
+            format: "gtpack-legacy".into(),
+        };
+        let out = build_pack(&min_inputs(&cfg, &[], &[])).unwrap();
+        let cursor = std::io::Cursor::new(&out.bytes);
+        let mut zip = zip::ZipArchive::new(cursor).unwrap();
+        let mut entry = zip.by_name("manifest.cbor").unwrap();
+        let mut buf = Vec::new();
+        entry.read_to_end(&mut buf).unwrap();
+        let m = decode_pack_manifest(&buf).unwrap();
+        assert_eq!(m.pack_id.as_str(), "demo");
+        assert_eq!(m.version.to_string(), "0.1.0");
+        assert!(matches!(m.kind, PackKind::Application));
+        assert_eq!(m.publisher, "Acme");
+        assert_eq!(m.schema_version, "pack-v1");
+        assert!(m.components.is_empty());
+        assert!(m.flows.is_empty());
     }
 }

@@ -12,6 +12,8 @@ readme = "README.md"
 path = "src/lib.rs"
 
 [dependencies]
+greentic-types = { version = "0.5", default-features = false, features = ["std", "serde"] }
+semver = { version = "1", default-features = false }
 serde.workspace = true
 serde_json.workspace = true
 sha2.workspace = true

@@ -2,6 +2,8 @@
 
 use crate::errors::PackError;
 use crate::types::{PackInputs, StandardConfig};
+use greentic_types::{PackId, PackKind, PackManifest, PackSignatures, encode_pack_manifest};
+use semver::Version;
 
 pub fn synthesize_workspace(inputs: &PackInputs<'_>) -> Result<Vec<(String, Vec<u8>)>, PackError> {
     if inputs.config.format != "gtpack-legacy" {
@@ -9,6 +11,15 @@ pub fn synthesize_workspace(inputs: &PackInputs<'_>) -> Result<Vec<(String, Vec<
     }
 
     let mut entries: Vec<(String, Vec<u8>)> = Vec::new();
+
+    // manifest.cbor — minimum-viable PackManifest so greentic-start's
+    // bundle inspector (which requires this entry on every pack —
+    // see `greentic-start::startup_contract::pack_declares_static_routes`)
+    // can decode the descriptor and proceed. Card-only packs don't
+    // ship WASM components or a structured Flow graph; we keep
+    // `components` / `flows` empty and let the runtime read the
+    // YGTc + AdaptiveCard JSON straight from the workspace tree.
+    entries.push(("manifest.cbor".into(), build_manifest_cbor(inputs.config)?));
 
     // bundle.yaml
     entries.push((
@@ -45,6 +56,48 @@ pub fn synthesize_workspace(inputs: &PackInputs<'_>) -> Result<Vec<(String, Vec<
     entries.sort_by(|a, b| a.0.cmp(&b.0));
 
     Ok(entries)
+}
+
+/// Build a minimum-viable `manifest.cbor` payload for a card-only
+/// pack. Required fields use real values from the recipe config;
+/// everything else (components, flows, dependencies, capabilities,
+/// secret_requirements, signatures) ships empty so the canonical
+/// CBOR encoder is happy.
+fn build_manifest_cbor(config: &StandardConfig) -> Result<Vec<u8>, PackError> {
+    let pack_id: PackId =
+        config
+            .metadata
+            .name
+            .parse()
+            .map_err(|e: greentic_types::GreenticError| {
+                PackError::InvalidConfig(format!("metadata.name as PackId: {e}"))
+            })?;
+    let version = Version::parse(&config.metadata.version)
+        .map_err(|e| PackError::InvalidConfig(format!("metadata.version as semver: {e}")))?;
+    let publisher = config
+        .metadata
+        .author
+        .as_deref()
+        .unwrap_or("Greentic")
+        .to_string();
+    let manifest = PackManifest {
+        schema_version: "pack-v1".into(),
+        pack_id,
+        name: Some(config.metadata.name.clone()),
+        version,
+        kind: PackKind::Application,
+        publisher,
+        components: Vec::new(),
+        flows: Vec::new(),
+        dependencies: Vec::new(),
+        capabilities: Vec::new(),
+        secret_requirements: Vec::new(),
+        signatures: PackSignatures::default(),
+        bootstrap: None,
+        extensions: None,
+    };
+    encode_pack_manifest(&manifest)
+        .map_err(|e| PackError::ManifestCbor(format!("encode_pack_manifest: {e}")))
 }
 
 fn bundle_yaml(config: &StandardConfig) -> String {
