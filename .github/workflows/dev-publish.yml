@@ -37,7 +37,7 @@ jobs:
     uses: greenticai/.github/.github/workflows/dev-publish.yml@main
     with:
       version: ${{ needs.dev-prepare.outputs.version }}
-      crates: "bundle-standard-core greentic-bundle-reader greentic-bundle"
+      crates: "bundle-standard-core cards2pack-core greentic-bundle-reader greentic-bundle"
       binary-version: ${{ needs.dev-prepare.outputs.binary-version }}
       binary-crates: "greentic-bundle"
       dual-role-binary-crates: "greentic-bundle"
