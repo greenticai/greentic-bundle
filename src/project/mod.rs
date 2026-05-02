@@ -1077,6 +1077,11 @@ fn inferred_provider_filename(reference: &str) -> String {
         .next()
         .unwrap_or(reference)
         .trim_end_matches(".gtpack");
+    if let Some(deployer_target) = cleaned.strip_prefix("greentic.deploy.")
+        && !deployer_target.trim().is_empty()
+    {
+        return deployer_target.trim().to_string();
+    }
     if cleaned.is_empty() {
         inferred_access_pack_id(reference)
     } else {
@@ -1185,7 +1190,9 @@ fn extract_pack_assets(root: &Path, pack_path: &Path) -> Result<Vec<PathBuf>> {
 
 #[cfg(test)]
 mod tests {
-    use super::should_skip_extension_provider_materialization;
+    use std::path::PathBuf;
+
+    use super::{provider_destination_path, should_skip_extension_provider_materialization};
 
     #[test]
     fn bundled_catalog_mode_skips_https_provider_materialization() {
@@ -1198,5 +1205,15 @@ mod tests {
         unsafe {
             std::env::remove_var("GREENTIC_BUNDLE_USE_BUNDLED_CATALOG");
         }
+    }
+
+    #[test]
+    fn deployer_provider_destination_uses_canonical_filename() {
+        assert_eq!(
+            provider_destination_path(
+                "oci://ghcr.io/greenticai/packs/deployer/greentic.deploy.aws.gtpack:latest"
+            ),
+            PathBuf::from("providers/deployer/aws.gtpack")
+        );
     }
 }
