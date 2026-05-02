@@ -4957,7 +4957,7 @@ mod tests {
         assert_eq!(entries[0].provider_id, "deployer-aws");
         assert_eq!(
             entries[0].reference,
-            "oci://ghcr.io/greenticai/packs/deployer/greentic.deploy.aws.gtpack:latest"
+            "oci://ghcr.io/greenticai/packs/deployer/greentic.deploy.aws:latest"
         );
     }
 
