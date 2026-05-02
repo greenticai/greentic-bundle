@@ -306,6 +306,33 @@
       "ref": "oci://ghcr.io/greenticai/packs/secret/greentic.secrets.vault-kv.gtpack:latest"
     },
     {
+      "id": "deployer-aws",
+      "category": "deployer",
+      "label": {
+        "i18n_key": "provider.deployer.aws",
+        "fallback": "AWS"
+      },
+      "ref": "oci://ghcr.io/greenticai/packs/deployer/greentic.deploy.aws.gtpack:latest"
+    },
+    {
+      "id": "deployer-azure",
+      "category": "deployer",
+      "label": {
+        "i18n_key": "provider.deployer.azure",
+        "fallback": "Azure"
+      },
+      "ref": "oci://ghcr.io/greenticai/packs/deployer/greentic.deploy.azure.gtpack:latest"
+    },
+    {
+      "id": "deployer-gcp",
+      "category": "deployer",
+      "label": {
+        "i18n_key": "provider.deployer.gcp",
+        "fallback": "GCP"
+      },
+      "ref": "oci://ghcr.io/greenticai/packs/deployer/greentic.deploy.gcp.gtpack:latest"
+    },
+    {
       "id": "deployer-serverless",
       "category": "deployer",
       "label": {
