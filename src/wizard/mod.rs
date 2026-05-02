@@ -19,12 +19,10 @@ pub const WIZARD_ID: &str = "greentic-bundle.wizard.run";
 pub const ANSWER_SCHEMA_ID: &str = "greentic-bundle.wizard.answers";
 pub const DEFAULT_PROVIDER_REGISTRY: &str =
     "oci://ghcr.io/greenticai/greentic-bundle/providers:latest";
-const DEPLOYER_AWS_REF: &str =
-    "oci://ghcr.io/greenticai/packs/deployer/greentic.deploy.aws.gtpack:latest";
+const DEPLOYER_AWS_REF: &str = "oci://ghcr.io/greenticai/packs/deployer/greentic.deploy.aws:latest";
 const DEPLOYER_AZURE_REF: &str =
-    "oci://ghcr.io/greenticai/packs/deployer/greentic.deploy.azure.gtpack:latest";
-const DEPLOYER_GCP_REF: &str =
-    "oci://ghcr.io/greenticai/packs/deployer/greentic.deploy.gcp.gtpack:latest";
+    "oci://ghcr.io/greenticai/packs/deployer/greentic.deploy.azure:latest";
+const DEPLOYER_GCP_REF: &str = "oci://ghcr.io/greenticai/packs/deployer/greentic.deploy.gcp:latest";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "snake_case")]
