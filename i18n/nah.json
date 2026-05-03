@@ -143,6 +143,7 @@
   "wizard.error.bundle_target_missing": "Bundle target amo onca",
   "wizard.error.empty_answer": "Wizard prompt quinequi se valor.",
   "wizard.error.empty_catalog": "Amo omonextij extension providers ipan catalog.",
+  "wizard.error.input_ended": "Wizard tlahtlanilistli otlanki achto ihcuac amo huelic motemacac ce cuali tlapehpeniliztli.",
   "wizard.error.invalid_choice": "Amo cuali choice. Xikijkuilo 1, 2, 3, noso 0.",
   "wizard.exit.message": "Wizard oquis san ajsic answers.",
   "wizard.label.name": "Toca",

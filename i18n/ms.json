@@ -143,6 +143,7 @@
   "wizard.error.bundle_target_missing": "Sasaran bundle tidak wujud",
   "wizard.error.empty_answer": "Prompt wizard memerlukan nilai.",
   "wizard.error.empty_catalog": "Tiada extension provider ditemui dalam katalog.",
+  "wizard.error.input_ended": "Input wizard tamat sebelum pilihan yang sah diberikan.",
   "wizard.error.invalid_choice": "Pilihan tidak sah. Masukkan 1, 2, 3, atau 0.",
   "wizard.exit.message": "Wizard ditutup tanpa mengumpulkan jawapan.",
   "wizard.label.name": "Nama",

@@ -143,6 +143,7 @@
   "wizard.error.bundle_target_missing": "El destino del bundle no existe",
   "wizard.error.empty_answer": "La solicitud del asistente requiere un valor.",
   "wizard.error.empty_catalog": "No se encontraron proveedores de extensiones en el catálogo.",
+  "wizard.error.input_ended": "La entrada del asistente terminó antes de que se proporcionara una opción válida.",
   "wizard.error.invalid_choice": "Opción no válida. Introduzca 1, 2, 3 o 0.",
   "wizard.exit.message": "El asistente salió sin recopilar respuestas.",
   "wizard.label.name": "Nombre",

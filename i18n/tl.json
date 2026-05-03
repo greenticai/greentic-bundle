@@ -143,6 +143,7 @@
   "wizard.error.bundle_target_missing": "Hindi umiiral ang target na bundle",
   "wizard.error.empty_answer": "Nangangailangan ng halaga ang prompt ng wizard.",
   "wizard.error.empty_catalog": "Walang nahanap na extension provider sa catalog.",
+  "wizard.error.input_ended": "Natapos ang input ng wizard bago maibigay ang wastong pagpipilian.",
   "wizard.error.invalid_choice": "Hindi wastong pagpili. Ilagay ang 1, 2, 3, o 0.",
   "wizard.exit.message": "Lumabas ang wizard nang walang nakolektang mga sagot.",
   "wizard.label.name": "Pangalan",

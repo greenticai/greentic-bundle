@@ -143,6 +143,7 @@
   "wizard.error.bundle_target_missing": "Bundle tikslas neegzistuoja",
   "wizard.error.empty_answer": "Vedlio užklausa reikalauja reikšmės.",
   "wizard.error.empty_catalog": "Kataloge nerasta jokių extension provider.",
+  "wizard.error.input_ended": "Vedlio įvestis baigėsi prieš pateikiant galiojantį pasirinkimą.",
   "wizard.error.invalid_choice": "Neteisingas pasirinkimas. Įveskite 1, 2, 3 arba 0.",
   "wizard.exit.message": "Vedlys uždarytas nesurinkus atsakymų.",
   "wizard.label.name": "Pavadinimas",

@@ -241,18 +241,16 @@ fn run_ext(args: ext::ExtArgs) -> anyhow::Result<()> {
             let schema_json: serde_json::Value = serde_json::from_str(&schema_raw)?;
             let config_raw = fs::read_to_string(&config)?;
             let config_json: serde_json::Value = serde_json::from_str(&config_raw)?;
-            let compiled = jsonschema::JSONSchema::compile(&schema_json)
+            let compiled = jsonschema::validator_for(&schema_json)
                 .map_err(|e| anyhow::anyhow!("schema load error: {e}"))?;
-            match compiled.validate(&config_json) {
-                Ok(()) => {
-                    println!("{}", crate::i18n::tr("cli.ext.validate.ok"));
+            let mut errors = compiled.iter_errors(&config_json).peekable();
+            if errors.peek().is_none() {
+                println!("{}", crate::i18n::tr("cli.ext.validate.ok"));
+            } else {
+                for e in errors {
+                    eprintln!("{}: {e}", e.instance_path());
                 }
-                Err(errs) => {
-                    for e in errs {
-                        eprintln!("{}: {e}", e.instance_path);
-                    }
-                    return Err(anyhow::anyhow!(crate::i18n::tr("cli.ext.validate.failed")));
-                }
+                return Err(anyhow::anyhow!(crate::i18n::tr("cli.ext.validate.failed")));
             }
         }
         ext::ExtCommand::Render {

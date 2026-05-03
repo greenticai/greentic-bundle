@@ -143,6 +143,7 @@
   "wizard.error.bundle_target_missing": "Cíl bundle neexistuje",
   "wizard.error.empty_answer": "Výzva průvodce vyžaduje hodnotu.",
   "wizard.error.empty_catalog": "V katalogu nebyli nalezeni žádní poskytovatelé rozšíření.",
+  "wizard.error.input_ended": "Vstup průvodce skončil dříve, než byla poskytnuta platná volba.",
   "wizard.error.invalid_choice": "Neplatná volba. Zadejte 1, 2, 3 nebo 0.",
   "wizard.exit.message": "Průvodce byl ukončen bez shromáždění odpovědí.",
   "wizard.label.name": "Název",

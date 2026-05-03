@@ -143,6 +143,7 @@
   "wizard.error.bundle_target_missing": "Bundle-doel bestaat niet",
   "wizard.error.empty_answer": "Wizard-prompt vereist een waarde.",
   "wizard.error.empty_catalog": "Er zijn geen extension-providers gevonden in de catalogus.",
+  "wizard.error.input_ended": "Wizard-invoer eindigde voordat er een geldige keuze was opgegeven.",
   "wizard.error.invalid_choice": "Ongeldige keuze. Voer 1, 2, 3 of 0 in.",
   "wizard.exit.message": "Wizard afgesloten zonder antwoorden te verzamelen.",
   "wizard.label.name": "Naam",

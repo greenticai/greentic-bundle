@@ -143,6 +143,7 @@
   "wizard.error.bundle_target_missing": "Ținta bundle nu există",
   "wizard.error.empty_answer": "Promptul asistentului necesită o valoare.",
   "wizard.error.empty_catalog": "Nu au fost găsiți furnizori de extensii în catalog.",
+  "wizard.error.input_ended": "Introducerea pentru asistent s-a încheiat înainte de a fi furnizată o alegere validă.",
   "wizard.error.invalid_choice": "Alegere invalidă. Introdu 1, 2, 3 sau 0.",
   "wizard.exit.message": "Asistentul s-a închis fără a colecta răspunsuri.",
   "wizard.label.name": "Nume",

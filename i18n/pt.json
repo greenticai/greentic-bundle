@@ -143,6 +143,7 @@
   "wizard.error.bundle_target_missing": "O destino do bundle não existe",
   "wizard.error.empty_answer": "O prompt do wizard requer um valor.",
   "wizard.error.empty_catalog": "Nenhum provedor de extensão foi encontrado no catálogo.",
+  "wizard.error.input_ended": "A entrada do assistente terminou antes que uma escolha válida fosse fornecida.",
   "wizard.error.invalid_choice": "Escolha inválida. Digite 1, 2, 3 ou 0.",
   "wizard.exit.message": "O wizard foi encerrado sem coletar respostas.",
   "wizard.label.name": "Nome",

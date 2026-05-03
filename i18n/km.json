@@ -143,6 +143,7 @@
   "wizard.error.bundle_target_missing": "មិនមាន bundle target ទេ",
   "wizard.error.empty_answer": "Prompt របស់ wizard ត្រូវការតម្លៃមួយ។",
   "wizard.error.empty_catalog": "រកមិនឃើញ extension providers នៅក្នុង catalog ទេ។",
+  "wizard.error.input_ended": "ការបញ្ចូលរបស់អ្នកជំនួយការបានបញ្ចប់ មុនពេលផ្តល់ជម្រើសត្រឹមត្រូវ។",
   "wizard.error.invalid_choice": "ជម្រើសមិនត្រឹមត្រូវ។ បញ្ចូល 1, 2, 3, ឬ 0។",
   "wizard.exit.message": "Wizard បានបិទដោយមិនបានប្រមូល answers ទេ។",
   "wizard.label.name": "ឈ្មោះ",

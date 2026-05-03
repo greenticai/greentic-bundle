@@ -143,6 +143,7 @@
   "wizard.error.bundle_target_missing": "La destinazione del bundle non esiste",
   "wizard.error.empty_answer": "Il prompt della procedura guidata richiede un valore.",
   "wizard.error.empty_catalog": "Nessun extension provider trovato nel catalogo.",
+  "wizard.error.input_ended": "L'input della procedura guidata è terminato prima che venisse fornita una scelta valida.",
   "wizard.error.invalid_choice": "Scelta non valida. Inserisci 1, 2, 3 oppure 0.",
   "wizard.exit.message": "La procedura guidata è terminata senza raccogliere risposte.",
   "wizard.label.name": "Nome",

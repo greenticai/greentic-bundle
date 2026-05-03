@@ -143,6 +143,7 @@
   "wizard.error.bundle_target_missing": "هدف bundle وجود ندارد",
   "wizard.error.empty_answer": "پرامپت wizard به یک مقدار نیاز دارد.",
   "wizard.error.empty_catalog": "هیچ extension providerی در کاتالوگ پیدا نشد.",
+  "wizard.error.input_ended": "ورودی ویزارد پیش از ارائه یک انتخاب معتبر به پایان رسید.",
   "wizard.error.invalid_choice": "انتخاب نامعتبر. 1، 2، 3 یا 0 را وارد کنید.",
   "wizard.exit.message": "wizard بدون جمع‌آوری پاسخ‌ها خارج شد.",
   "wizard.label.name": "نام",

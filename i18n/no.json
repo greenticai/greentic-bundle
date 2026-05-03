@@ -143,6 +143,7 @@
   "wizard.error.bundle_target_missing": "Bundle-målet finnes ikke",
   "wizard.error.empty_answer": "Wizard-ledeteksten krever en verdi.",
   "wizard.error.empty_catalog": "Ingen extension providers ble funnet i katalogen.",
+  "wizard.error.input_ended": "Veiviserinndata ble avsluttet før et gyldig valg ble oppgitt.",
   "wizard.error.invalid_choice": "Ugyldig valg. Skriv inn 1, 2, 3 eller 0.",
   "wizard.exit.message": "Wizard ble avsluttet uten å samle inn svar.",
   "wizard.label.name": "Navn",

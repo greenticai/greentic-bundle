@@ -143,6 +143,7 @@
   "wizard.error.bundle_target_missing": "번들 대상이 존재하지 않습니다",
   "wizard.error.empty_answer": "마법사 프롬프트에는 값이 필요합니다.",
   "wizard.error.empty_catalog": "카탈로그에서 확장 제공자를 찾지 못했습니다.",
+  "wizard.error.input_ended": "유효한 선택이 제공되기 전에 마법사 입력이 종료되었습니다.",
   "wizard.error.invalid_choice": "잘못된 선택입니다. 1, 2, 3 또는 0을 입력하세요.",
   "wizard.exit.message": "응답을 수집하지 않고 마법사를 종료했습니다.",
   "wizard.label.name": "이름",

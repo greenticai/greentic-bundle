@@ -18,11 +18,11 @@ pub mod i18n;
 pub const WIZARD_ID: &str = "greentic-bundle.wizard.run";
 pub const ANSWER_SCHEMA_ID: &str = "greentic-bundle.wizard.answers";
 pub const DEFAULT_PROVIDER_REGISTRY: &str =
-    "oci://ghcr.io/greenticai/greentic-bundle/providers:latest";
-const DEPLOYER_AWS_REF: &str = "oci://ghcr.io/greenticai/packs/deployer/greentic.deploy.aws:latest";
+    "oci://ghcr.io/greenticai/greentic-bundle/providers:stable";
+const DEPLOYER_AWS_REF: &str = "oci://ghcr.io/greenticai/packs/deployer/greentic.deploy.aws:stable";
 const DEPLOYER_AZURE_REF: &str =
-    "oci://ghcr.io/greenticai/packs/deployer/greentic.deploy.azure:latest";
-const DEPLOYER_GCP_REF: &str = "oci://ghcr.io/greenticai/packs/deployer/greentic.deploy.gcp:latest";
+    "oci://ghcr.io/greenticai/packs/deployer/greentic.deploy.azure:stable";
+const DEPLOYER_GCP_REF: &str = "oci://ghcr.io/greenticai/packs/deployer/greentic.deploy.gcp:stable";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "snake_case")]
@@ -622,7 +622,9 @@ fn choose_interactive_menu<R: BufRead, W: Write>(
         write!(output, "{} ", crate::i18n::tr("wizard.setup.enum_prompt"))?;
         output.flush()?;
         let mut line = String::new();
-        input.read_line(&mut line)?;
+        if input.read_line(&mut line)? == 0 {
+            bail!("{}", crate::i18n::tr("wizard.error.input_ended"));
+        }
         match line.trim() {
             "0" => match zero_action {
                 RootMenuZeroAction::Exit => bail!("{}", crate::i18n::tr("wizard.exit.message")),
@@ -1219,7 +1221,9 @@ fn prompt_compact_enum<R: BufRead, W: Write>(
         output.flush()?;
 
         let mut line = String::new();
-        input.read_line(&mut line)?;
+        if input.read_line(&mut line)? == 0 {
+            bail!("{}", crate::i18n::tr("wizard.error.input_ended"));
+        }
         let trimmed = line.trim();
         if trimmed.is_empty() {
             if let Some(default) = &default_value {
@@ -2044,7 +2048,9 @@ fn prompt_menu_value<R: BufRead, W: Write>(input: &mut R, output: &mut W) -> Res
     write!(output, "{} ", crate::i18n::tr("wizard.setup.enum_prompt"))?;
     output.flush()?;
     let mut line = String::new();
-    input.read_line(&mut line)?;
+    if input.read_line(&mut line)? == 0 {
+        bail!("{}", crate::i18n::tr("wizard.error.input_ended"));
+    }
     Ok(line.trim().to_string())
 }
 
@@ -4610,7 +4616,9 @@ fn prompt_qa_string_like<R: BufRead, W: Write>(
         )?;
         output.flush()?;
         let mut line = String::new();
-        input.read_line(&mut line)?;
+        if input.read_line(&mut line)? == 0 {
+            bail!("{}", crate::i18n::tr("wizard.error.input_ended"));
+        }
         let trimmed = line.trim();
         if trimmed.is_empty() {
             if let Some(default) = &default_value {
@@ -4642,7 +4650,9 @@ fn prompt_qa_boolean<R: BufRead, W: Write>(
         )?;
         output.flush()?;
         let mut line = String::new();
-        input.read_line(&mut line)?;
+        if input.read_line(&mut line)? == 0 {
+            bail!("{}", crate::i18n::tr("wizard.error.input_ended"));
+        }
         let trimmed = line.trim().to_ascii_lowercase();
         if trimmed.is_empty() {
             if let Some(default) = &default_value {
@@ -4734,7 +4744,9 @@ fn prompt_qa_enum<R: BufRead, W: Write>(
         output.flush()?;
 
         let mut line = String::new();
-        input.read_line(&mut line)?;
+        if input.read_line(&mut line)? == 0 {
+            bail!("{}", crate::i18n::tr("wizard.error.input_ended"));
+        }
         let trimmed = line.trim();
         if trimmed.is_empty() {
             if let Some(default) = &default_value {
@@ -4879,7 +4891,7 @@ mod tests {
             category_description: None,
             label: Some("Greentic Secrets AWS SM".to_string()),
             reference:
-                "oci://ghcr.io/greenticai/packs/secret/greentic.secrets.aws-sm.gtpack:latest"
+                "oci://ghcr.io/greenticai/packs/secret/greentic.secrets.aws-sm.gtpack:stable"
                     .to_string(),
             setup: None,
         };
@@ -4903,7 +4915,7 @@ mod tests {
             category_label: None,
             category_description: None,
             label: Some("Greentic Secrets AWS SM (latest)".to_string()),
-            reference: "oci://ghcr.io/example/secrets:latest".to_string(),
+            reference: "oci://ghcr.io/example/secrets:stable".to_string(),
             setup: None,
         };
         let semver = CatalogEntry {
@@ -4957,7 +4969,7 @@ mod tests {
         assert_eq!(entries[0].provider_id, "deployer-aws");
         assert_eq!(
             entries[0].reference,
-            "oci://ghcr.io/greenticai/packs/deployer/greentic.deploy.aws:latest"
+            "oci://ghcr.io/greenticai/packs/deployer/greentic.deploy.aws:stable"
         );
     }
 

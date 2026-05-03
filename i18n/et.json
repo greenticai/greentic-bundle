@@ -143,6 +143,7 @@
   "wizard.error.bundle_target_missing": "Bundle'i sihtkoht ei eksisteeri",
   "wizard.error.empty_answer": "Viisardi küsimus nõuab väärtust.",
   "wizard.error.empty_catalog": "Kataloogist ei leitud extension providereid.",
+  "wizard.error.input_ended": "Viisardi sisestus lõppes enne, kui esitati kehtiv valik.",
   "wizard.error.invalid_choice": "Vigane valik. Sisesta 1, 2, 3 või 0.",
   "wizard.exit.message": "Viisard väljus vastuseid kogumata.",
   "wizard.label.name": "Nimi",

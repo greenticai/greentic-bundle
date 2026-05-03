@@ -143,6 +143,7 @@
   "wizard.error.bundle_target_missing": "Bundle amta utjki uka janiw utjkiti",
   "wizard.error.empty_answer": "Wizard jiskt'äwix mä chimpu munasi.",
   "wizard.error.empty_catalog": "janiw catálogo taypin extension providers jikxataskänti.",
+  "wizard.error.input_ended": "Wizard ukan mantañaxa tukusxiwa janïra mä chiqapa ajlliwi churatäkana.",
   "wizard.error.invalid_choice": "Jan wal ajlliwi. 1, 2, 3, jan ukax 0 qillqt'am.",
   "wizard.exit.message": "Wizard ukax janiw jaysäwinak apthapisa mistunkiti.",
   "wizard.label.name": "Suti",

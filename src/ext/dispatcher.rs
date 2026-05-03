@@ -3,7 +3,7 @@
 //! WASM execution (Mode B) is currently disabled in the OSS build because the
 //! `greentic-ext-runtime` / `greentic-ext-contract` crates are not yet
 //! published to crates.io (tracked in
-//! https://github.com/greenticai/greentic/issues/175). Until those land, every
+//! <https://github.com/greenticai/greentic/issues/175>). Until those land, every
 //! dispatch returns `ExtensionError::ModeBNotImplemented`. The host-side
 //! pieces of the extension surface (discovery, validation, CLI plumbing) keep
 //! working and stay shipped.
