@@ -143,6 +143,7 @@
   "wizard.error.bundle_target_missing": "Bundle objetivo ndaipóri",
   "wizard.error.empty_answer": "Wizard porandu oikotevẽ peteĩ valor.",
   "wizard.error.empty_catalog": "Ndojejuhúi extension provider catálogo-pe.",
+  "wizard.error.input_ended": "Pe jeikeha pytyvõhára opa oñeme'ẽ mboyve peteĩ jeporavo añetegua.",
   "wizard.error.invalid_choice": "Jeporavo ndoikói. Eike 1, 2, 3, térã 0.",
   "wizard.exit.message": "Wizard osẽ oñembyaty'ỹre mbohovái.",
   "wizard.label.name": "Téra",

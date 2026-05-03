@@ -389,19 +389,19 @@ mod tests {
       "id": "messaging-teams",
       "category": "messaging",
       "label": { "fallback": "MS-Teams" },
-      "ref": "oci://ghcr.io/greenticai/packs/messaging/messaging-teams:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/messaging/messaging-teams:stable"
     },
     {
       "id": "messaging-telegram",
       "category": "messaging",
       "label": { "fallback": "Telegram" },
-      "ref": "oci://ghcr.io/greenticai/packs/messaging/messaging-telegram:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/messaging/messaging-telegram:stable"
     },
     {
       "id": "events-webhook",
       "category": "events",
       "label": { "fallback": "Webhook" },
-      "ref": "oci://ghcr.io/greenticai/packs/events/events-webhook:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/events/events-webhook:stable"
     }
   ]
 }"#,
@@ -417,7 +417,7 @@ mod tests {
         assert_eq!(entries[0].label.as_deref(), Some("MS-Teams"));
         assert_eq!(
             entries[0].reference,
-            "oci://ghcr.io/greenticai/packs/messaging/messaging-teams:latest"
+            "oci://ghcr.io/greenticai/packs/messaging/messaging-teams:stable"
         );
         assert_eq!(
             entries[0].category_description.as_deref(),
@@ -445,7 +445,7 @@ mod tests {
         assert_eq!(entries[0].id, "messaging-teams");
         assert_eq!(
             entries[0].reference,
-            "oci://ghcr.io/greenticai/packs/messaging/messaging-teams:latest"
+            "oci://ghcr.io/greenticai/packs/messaging/messaging-teams:stable"
         );
     }
 

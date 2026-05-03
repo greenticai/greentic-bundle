@@ -143,6 +143,7 @@
   "wizard.error.bundle_target_missing": "ບໍ່ພົບເປົ້າໝາຍ bundle",
   "wizard.error.empty_answer": "prompt ຂອງ wizard ຕ້ອງການຄ່າໜຶ່ງ.",
   "wizard.error.empty_catalog": "ບໍ່ພົບ extension provider ໃນ catalog.",
+  "wizard.error.input_ended": "ຂໍ້ມູນປ້ອນເຂົ້າຂອງຕົວຊ່ວຍສ້າງສິ້ນສຸດລົງກ່ອນທີ່ຈະໄດ້ລະບຸຕົວເລືອກທີ່ຖືກຕ້ອງ.",
   "wizard.error.invalid_choice": "ຕົວເລືອກບໍ່ຖືກຕ້ອງ. ປ້ອນ 1, 2, 3, ຫຼື 0.",
   "wizard.exit.message": "Wizard ອອກໂດຍບໍ່ໄດ້ເກັບຄຳຕອບ.",
   "wizard.label.name": "ຊື່",

@@ -178,7 +178,7 @@ fn unsquashfs_cat_bytes(artifact: &Path, inner_path: &str) -> anyhow::Result<Vec
 /// inlined SquashFS filename.
 ///
 /// Handles:
-/// - OCI refs: `oci://ghcr.io/org/packs/messaging/foo:latest` → `foo`
+/// - OCI refs: `oci://ghcr.io/org/packs/messaging/foo:stable` → `foo`
 /// - HTTP(S) URLs: `https://.../foo.gtpack` → `foo`
 /// - Bare names: `foo` → `foo`
 /// - Path-like refs: `./foo.gtpack` → `foo`
@@ -238,7 +238,7 @@ mod tests {
     fn slug_strips_oci_scheme_and_tag() {
         assert_eq!(
             slug_for_reference(
-                "oci://ghcr.io/greenticai/packs/messaging/messaging-webchat-gui:latest"
+                "oci://ghcr.io/greenticai/packs/messaging/messaging-webchat-gui:stable"
             ),
             "messaging-webchat-gui"
         );

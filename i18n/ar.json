@@ -143,6 +143,7 @@
   "wizard.error.bundle_target_missing": "هدف الحزمة غير موجود",
   "wizard.error.empty_answer": "يتطلب طلب المعالج قيمة.",
   "wizard.error.empty_catalog": "لم يتم العثور على أي موفّري extension في الدليل.",
+  "wizard.error.input_ended": "انتهى إدخال المعالج قبل تقديم خيار صالح.",
   "wizard.error.invalid_choice": "خيار غير صالح. أدخل 1 أو 2 أو 3 أو 0.",
   "wizard.exit.message": "تم الخروج من المعالج دون جمع إجابات.",
   "wizard.label.name": "الاسم",

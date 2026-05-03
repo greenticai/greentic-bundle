@@ -7,17 +7,19 @@ members = [
 resolver = "2"
 
 [workspace.package]
-version = "0.5.5"
+version = "0.5.6"
 
 [workspace.dependencies]
 anyhow = "1"
 assert_cmd = "2"
 ciborium = "0.2"
 clap = { version = "4", features = ["derive"] }
-constant_time_eq = "=0.4.2"
+constant_time_eq = "0.5"
+criterion = "0.8"
 greentic-bundle-reader = { version = ">=0.5.0-0, <0.6.0-0", path = "crates/greentic-bundle-reader" }
 greentic-distributor-client = { version = ">=0.5.0-0, <0.6.0-0", default-features = false, features = ["dist-client", "pack-fetch"] }
 greentic-qa-lib = ">=0.5.0-0, <0.6.0-0"
+jsonschema = { version = "0.46", default-features = false }
 predicates = "3"
 rpassword = "7"
 semver = { version = "1", features = ["serde"] }
@@ -30,8 +32,10 @@ sys-locale = "0.3"
 tempfile = "3"
 tokio = { version = "1", features = ["rt-multi-thread"] }
 unic-langid = "0.9"
-dirs = "5"
+dirs = "6"
 tracing = "0.1"
+walkdir = "2"
+zip = { version = "8", default-features = false, features = ["deflate"] }
 
 [package]
 name = "greentic-bundle"
@@ -98,24 +102,24 @@ sys-locale.workspace = true
 tempfile.workspace = true
 tokio.workspace = true
 unic-langid.workspace = true
-zip = "8"
+zip.workspace = true
 dirs.workspace = true
 tracing.workspace = true
 
 # feature: extensions (bundle-ext Phase A — host-side schema/registry only).
 # WASM execution path was removed pending crates.io-publishable runtime crates;
 # tracked in https://github.com/greenticai/greentic/issues/175.
-jsonschema = { version = "0.18", optional = true, default-features = false }
-thiserror = { version = "2", optional = true }
-walkdir = { version = "2", optional = true }
+jsonschema = { workspace = true, optional = true, default-features = false }
+thiserror = { workspace = true, optional = true }
+walkdir = { workspace = true, optional = true }
 
 [dev-dependencies]
 assert_cmd.workspace = true
-criterion = "0.8"
+criterion.workspace = true
 predicates.workspace = true
 sha2.workspace = true
 tempfile.workspace = true
-zip = "8"
+zip.workspace = true
 
 [build-dependencies]
 serde_json.workspace = true

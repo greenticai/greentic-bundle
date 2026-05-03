@@ -143,6 +143,7 @@
   "wizard.error.bundle_target_missing": "ไม่มี bundle เป้าหมายอยู่",
   "wizard.error.empty_answer": "พรอมป์ต์ของวิซาร์ดต้องมีค่า",
   "wizard.error.empty_catalog": "ไม่พบ extension providers ในแคตตาล็อก",
+  "wizard.error.input_ended": "อินพุตของวิซาร์ดสิ้นสุดลงก่อนที่จะมีการระบุตัวเลือกที่ถูกต้อง",
   "wizard.error.invalid_choice": "ตัวเลือกไม่ถูกต้อง ป้อน 1, 2, 3 หรือ 0",
   "wizard.exit.message": "ออกจากวิซาร์ดโดยไม่ได้เก็บ answers",
   "wizard.label.name": "ชื่อ",

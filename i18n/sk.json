@@ -143,6 +143,7 @@
   "wizard.error.bundle_target_missing": "Cieľ bundla neexistuje",
   "wizard.error.empty_answer": "Výzva sprievodcu vyžaduje hodnotu.",
   "wizard.error.empty_catalog": "V katalógu sa nenašli žiadni extension provideri.",
+  "wizard.error.input_ended": "Vstup sprievodcu sa skončil skôr, ako bola poskytnutá platná voľba.",
   "wizard.error.invalid_choice": "Neplatná voľba. Zadajte 1, 2, 3 alebo 0.",
   "wizard.exit.message": "Sprievodca skončil bez zhromaždenia odpovedí.",
   "wizard.label.name": "Názov",

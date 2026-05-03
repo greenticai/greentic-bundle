@@ -143,6 +143,7 @@
   "wizard.error.bundle_target_missing": "Цель bundle не существует",
   "wizard.error.empty_answer": "Запрос мастера требует значение.",
   "wizard.error.empty_catalog": "В каталоге не найдено extension providers.",
+  "wizard.error.input_ended": "Ввод мастера завершился до того, как был предоставлен допустимый выбор.",
   "wizard.error.invalid_choice": "Недопустимый выбор. Введите 1, 2, 3 или 0.",
   "wizard.exit.message": "Мастер завершен без сбора ответов.",
   "wizard.label.name": "Имя",

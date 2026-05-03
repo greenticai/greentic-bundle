@@ -143,6 +143,7 @@
   "wizard.error.bundle_target_missing": "Bundle target বিদ্যমান নয়",
   "wizard.error.empty_answer": "Wizard prompt-এর জন্য একটি মান প্রয়োজন।",
   "wizard.error.empty_catalog": "catalog-এ কোনো extension provider পাওয়া যায়নি।",
+  "wizard.error.input_ended": "একটি বৈধ পছন্দ দেওয়ার আগেই উইজার্ড ইনপুট শেষ হয়েছে।",
   "wizard.error.invalid_choice": "অবৈধ নির্বাচন। 1, 2, 3, বা 0 লিখুন।",
   "wizard.exit.message": "উত্তর সংগ্রহ না করেই wizard থেকে বের হওয়া হয়েছে।",
   "wizard.label.name": "নাম",

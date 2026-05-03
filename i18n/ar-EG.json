@@ -143,6 +143,7 @@
   "wizard.error.bundle_target_missing": "هدف الحزمة غير موجود",
   "wizard.error.empty_answer": "تتطلب مطالبة المعالج قيمة.",
   "wizard.error.empty_catalog": "لم يتم العثور على موفري extension في الفهرس.",
+  "wizard.error.input_ended": "انتهى إدخال المعالج قبل تقديم اختيار صالح.",
   "wizard.error.invalid_choice": "اختيار غير صالح. أدخل 1 أو 2 أو 3 أو 0.",
   "wizard.exit.message": "تم إنهاء المعالج دون جمع إجابات.",
   "wizard.label.name": "الاسم",

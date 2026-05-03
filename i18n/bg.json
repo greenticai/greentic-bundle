@@ -143,6 +143,7 @@
   "wizard.error.bundle_target_missing": "Целта на bundle не съществува",
   "wizard.error.empty_answer": "Подканата на wizard изисква стойност.",
   "wizard.error.empty_catalog": "Не бяха намерени extension providers в каталога.",
+  "wizard.error.input_ended": "Въвеждането в съветника приключи, преди да бъде предоставен валиден избор.",
   "wizard.error.invalid_choice": "Невалиден избор. Въведете 1, 2, 3 или 0.",
   "wizard.exit.message": "Wizard беше затворен без събиране на отговори.",
   "wizard.label.name": "Име",

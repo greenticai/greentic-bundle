@@ -1211,7 +1211,7 @@ mod tests {
     fn deployer_provider_destination_uses_canonical_filename() {
         assert_eq!(
             provider_destination_path(
-                "oci://ghcr.io/greenticai/packs/deployer/greentic.deploy.aws.gtpack:latest"
+                "oci://ghcr.io/greenticai/packs/deployer/greentic.deploy.aws:stable"
             ),
             PathBuf::from("providers/deployer/aws.gtpack")
         );

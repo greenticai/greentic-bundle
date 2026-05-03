@@ -143,6 +143,7 @@
   "wizard.error.bundle_target_missing": "bundle ターゲットが存在しません",
   "wizard.error.empty_answer": "ウィザードのプロンプトには値が必要です。",
   "wizard.error.empty_catalog": "カタログ内に extension provider が見つかりませんでした。",
+  "wizard.error.input_ended": "有効な選択肢が指定される前にウィザードの入力が終了しました。",
   "wizard.error.invalid_choice": "無効な選択です。1、2、3、または 0 を入力してください。",
   "wizard.exit.message": "回答を収集せずにウィザードを終了しました。",
   "wizard.label.name": "名前",
