@@ -133,6 +133,7 @@
   "wizard.error.bundle_target_missing": "Bundle target မရှိပါ",
   "wizard.error.empty_answer": "Wizard prompt အတွက် တန်ဖိုးတစ်ခု လိုအပ်သည်။",
   "wizard.error.empty_catalog": "catalog တွင် extension providers မတွေ့ပါ။",
+  "wizard.error.input_ended": "ဝစ်ဇာ့ဒ် ထည့်သွင်းမှုသည် မှန်ကန်သော ရွေးချယ်မှု မပေးမီ ပြီးဆုံးသွားသည်။",
   "wizard.error.invalid_choice": "မမှန်ကန်သော ရွေးချယ်မှု။ 1, 2, 3, သို့မဟုတ် 0 ကို ရိုက်ထည့်ပါ။",
   "wizard.exit.message": "Wizard သည် answers များ မစုဆောင်းဘဲ ထွက်သွားခဲ့သည်။",
   "wizard.label.name": "အမည်",

@@ -133,6 +133,7 @@
   "wizard.error.bundle_target_missing": "Bundle లక్ష్యం లేదు",
   "wizard.error.empty_answer": "Wizard prompt కు ఒక విలువ అవసరం.",
   "wizard.error.empty_catalog": "catalog లో extension providers ఏవీ కనుగొనబడలేదు.",
+  "wizard.error.input_ended": "చెల్లుబాటు అయ్యే ఎంపిక ఇవ్వకముందే విజార్డ్ ఇన్‌పుట్ ముగిసింది.",
   "wizard.error.invalid_choice": "చెల్లని ఎంపిక. 1, 2, 3 లేదా 0 ను నమోదు చేయండి.",
   "wizard.exit.message": "Wizard సమాధానాలు సేకరించకుండా నిష్క్రమించింది.",
   "wizard.label.name": "పేరు",

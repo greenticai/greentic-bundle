@@ -133,6 +133,7 @@
   "wizard.error.bundle_target_missing": "La cible du bundle n'existe pas",
   "wizard.error.empty_answer": "L'invite de l'assistant requiert une valeur.",
   "wizard.error.empty_catalog": "Aucun fournisseur d'extensions n'a été trouvé dans le catalogue.",
+  "wizard.error.input_ended": "La saisie de l’assistant s’est terminée avant qu’un choix valide ne soit fourni.",
   "wizard.error.invalid_choice": "Choix invalide. Saisissez 1, 2, 3 ou 0.",
   "wizard.exit.message": "L'assistant a quitté sans collecter de réponses.",
   "wizard.label.name": "Nom",

@@ -133,6 +133,7 @@
   "wizard.error.bundle_target_missing": "Bundle target mana kanchu",
   "wizard.error.empty_answer": "Wizard tapuyqa huk chaninta munan.",
   "wizard.error.empty_catalog": "Catalogopi mana extension providerkuna tarikurqanchu.",
+  "wizard.error.input_ended": "Wizard yaykuchiyqa tukurqan manaraq allin akllay qusqa kachkaptin.",
   "wizard.error.invalid_choice": "Mana allin akllay. Qillqay 1, 2, 3, utaq 0.",
   "wizard.exit.message": "Wizard lluqsirqan mana kutichiykunata huñuspa.",
   "wizard.label.name": "Suti",

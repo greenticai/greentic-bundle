@@ -133,6 +133,7 @@
   "wizard.error.bundle_target_missing": "Bundle target නොපවතී",
   "wizard.error.empty_answer": "Wizard prompt සඳහා අගයක් අවශ්‍යයි.",
   "wizard.error.empty_catalog": "catalog තුළ extension providers කිසිවක් හමු නොවීය.",
+  "wizard.error.input_ended": "වලංගු තේරීමක් ලබා දීමට පෙර Wizard ආදානය අවසන් විය.",
   "wizard.error.invalid_choice": "වලංගු නොවන තේරීමක්. 1, 2, 3, හෝ 0 ඇතුල් කරන්න.",
   "wizard.exit.message": "answers රැස් නොකර wizard එකෙන් පිටවුණි.",
   "wizard.label.name": "නම",

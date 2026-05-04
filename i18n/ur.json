@@ -133,6 +133,7 @@
   "wizard.error.bundle_target_missing": "Bundle target موجود نہیں",
   "wizard.error.empty_answer": "Wizard prompt کے لیے ایک قدر ضروری ہے۔",
   "wizard.error.empty_catalog": "catalog میں کوئی extension providers نہیں ملے۔",
+  "wizard.error.input_ended": "درست انتخاب فراہم کیے جانے سے پہلے وزرڈ ان پٹ ختم ہو گیا۔",
   "wizard.error.invalid_choice": "غلط انتخاب۔ 1، 2، 3، یا 0 درج کریں۔",
   "wizard.exit.message": "Wizard جوابات جمع کیے بغیر بند ہو گیا۔",
   "wizard.label.name": "نام",

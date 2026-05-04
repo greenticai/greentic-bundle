@@ -133,6 +133,7 @@
   "wizard.error.bundle_target_missing": "Bundle-kohdetta ei ole olemassa",
   "wizard.error.empty_answer": "Ohjatun toiminnon kehote vaatii arvon.",
   "wizard.error.empty_catalog": "Katalogista ei löytynyt extension providereita.",
+  "wizard.error.input_ended": "Ohjatun toiminnon syöte päättyi ennen kuin kelvollinen valinta annettiin.",
   "wizard.error.invalid_choice": "Virheellinen valinta. Syötä 1, 2, 3 tai 0.",
   "wizard.exit.message": "Ohjattu toiminto poistui keräämättä vastauksia.",
   "wizard.label.name": "Nimi",

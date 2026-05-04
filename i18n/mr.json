@@ -133,6 +133,7 @@
   "wizard.error.bundle_target_missing": "bundle target अस्तित्वात नाही",
   "wizard.error.empty_answer": "wizard prompt ला मूल्य आवश्यक आहे.",
   "wizard.error.empty_catalog": "catalog मध्ये कोणतेही extension providers आढळले नाहीत.",
+  "wizard.error.input_ended": "वैध निवड दिली जाण्यापूर्वी विझार्ड इनपुट समाप्त झाले.",
   "wizard.error.invalid_choice": "अवैध निवड. 1, 2, 3, किंवा 0 प्रविष्ट करा.",
   "wizard.exit.message": "answers गोळा न करता wizard मधून बाहेर पडले.",
   "wizard.label.name": "नाव",

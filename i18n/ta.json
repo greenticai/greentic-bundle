@@ -133,6 +133,7 @@
   "wizard.error.bundle_target_missing": "bundle இலக்கு இல்லை",
   "wizard.error.empty_answer": "Wizard prompt-க்கு ஒரு மதிப்பு தேவை.",
   "wizard.error.empty_catalog": "catalog-இல் எந்த extension provider-களும் காணப்படவில்லை.",
+  "wizard.error.input_ended": "சரியான தேர்வு வழங்கப்படுவதற்கு முன் வழிகாட்டி உள்ளீடு முடிவடைந்தது.",
   "wizard.error.invalid_choice": "தவறான தேர்வு. 1, 2, 3, அல்லது 0 ஐ உள்ளிடவும்.",
   "wizard.exit.message": "பதில்கள் சேகரிக்காமல் wizard வெளியேறியது.",
   "wizard.label.name": "பெயர்",

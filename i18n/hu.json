@@ -133,6 +133,7 @@
   "wizard.error.bundle_target_missing": "A bundle cél nem létezik",
   "wizard.error.empty_answer": "A varázsló kérdése értéket igényel.",
   "wizard.error.empty_catalog": "Nem találhatók extension providerek a katalógusban.",
+  "wizard.error.input_ended": "A varázsló bemenete véget ért, mielőtt érvényes választás lett volna megadva.",
   "wizard.error.invalid_choice": "Érvénytelen választás. Add meg: 1, 2, 3 vagy 0.",
   "wizard.exit.message": "A varázsló válaszok gyűjtése nélkül kilépett.",
   "wizard.label.name": "Név",

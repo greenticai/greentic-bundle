@@ -133,6 +133,7 @@
   "wizard.error.bundle_target_missing": "Sib bundle la pa egziste",
   "wizard.error.empty_answer": "Prompt wizard la mande yon valè.",
   "wizard.error.empty_catalog": "Pa gen extension provider ki te jwenn nan katalòg la.",
+  "wizard.error.input_ended": "Antre sòsye a te fini anvan yo te bay yon chwa ki valab.",
   "wizard.error.invalid_choice": "Chwa pa valab. Antre 1, 2, 3, oswa 0.",
   "wizard.exit.message": "Wizard la sòti san li pa ranmase repons.",
   "wizard.label.name": "Non",
