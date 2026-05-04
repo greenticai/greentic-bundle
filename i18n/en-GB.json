@@ -133,6 +133,7 @@
   "wizard.error.bundle_target_missing": "Bundle target does not exist",
   "wizard.error.empty_answer": "Wizard prompt requires a value.",
   "wizard.error.empty_catalog": "No extension providers were found in the catalogue.",
+  "wizard.error.input_ended": "Wizard input ended before a valid choice was provided.",
   "wizard.error.invalid_choice": "Invalid choice. Enter 1, 2, 3, or 0.",
   "wizard.exit.message": "Wizard exited without collecting answers.",
   "wizard.label.name": "Name",

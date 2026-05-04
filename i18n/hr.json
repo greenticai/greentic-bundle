@@ -133,6 +133,7 @@
   "wizard.error.bundle_target_missing": "Cilj bundlea ne postoji",
   "wizard.error.empty_answer": "Upit čarobnjaka zahtijeva vrijednost.",
   "wizard.error.empty_catalog": "U katalogu nisu pronađeni pružatelji proširenja.",
+  "wizard.error.input_ended": "Unos čarobnjaka završio je prije nego što je odabran valjan izbor.",
   "wizard.error.invalid_choice": "Nevažeći odabir. Unesi 1, 2, 3 ili 0.",
   "wizard.exit.message": "Čarobnjak je izašao bez prikupljenih odgovora.",
   "wizard.label.name": "Naziv",

@@ -133,6 +133,7 @@
   "wizard.error.bundle_target_missing": "Bundle 目标不存在",
   "wizard.error.empty_answer": "向导提示需要一个值。",
   "wizard.error.empty_catalog": "目录中未找到 extension provider。",
+  "wizard.error.input_ended": "向导输入在提供有效选择之前已结束。",
   "wizard.error.invalid_choice": "无效选择。请输入 1、2、3 或 0。",
   "wizard.exit.message": "向导已退出，未收集答案。",
   "wizard.label.name": "名称",

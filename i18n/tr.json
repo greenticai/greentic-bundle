@@ -133,6 +133,7 @@
   "wizard.error.bundle_target_missing": "Bundle hedefi mevcut değil",
   "wizard.error.empty_answer": "Sihirbaz istemi bir değer gerektirir.",
   "wizard.error.empty_catalog": "Katalogda hiç extension provider bulunamadı.",
+  "wizard.error.input_ended": "Geçerli bir seçim sağlanmadan önce sihirbaz girdisi sona erdi.",
   "wizard.error.invalid_choice": "Geçersiz seçim. 1, 2, 3 veya 0 girin.",
   "wizard.exit.message": "Sihirbaz yanıt toplamadan çıktı.",
   "wizard.label.name": "Ad",

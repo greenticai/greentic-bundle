@@ -133,6 +133,7 @@
   "wizard.error.bundle_target_missing": "Đích bundle không tồn tại",
   "wizard.error.empty_answer": "Lời nhắc của wizard yêu cầu một giá trị.",
   "wizard.error.empty_catalog": "Không tìm thấy extension provider nào trong danh mục.",
+  "wizard.error.input_ended": "Đầu vào trình hướng dẫn đã kết thúc trước khi cung cấp một lựa chọn hợp lệ.",
   "wizard.error.invalid_choice": "Lựa chọn không hợp lệ. Nhập 1, 2, 3 hoặc 0.",
   "wizard.exit.message": "Wizard đã thoát mà không thu thập câu trả lời.",
   "wizard.label.name": "Tên",

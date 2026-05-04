@@ -169,6 +169,7 @@
   "wizard.setup.optional": "optional",
   "wizard.setup.enum_prompt": "Select number or value:",
   "wizard.error.invalid_choice": "Invalid choice. Enter 1, 2, 3, or 0.",
+  "wizard.error.input_ended": "Wizard input ended before a valid choice was provided.",
   "wizard.error.bundle_target_missing": "Bundle target does not exist",
   "wizard.error.bundle_artifact_required": "A valid .gtbundle path is required",
   "wizard.error.empty_answer": "Wizard prompt requires a value.",

@@ -18,7 +18,11 @@ pub mod i18n;
 pub const WIZARD_ID: &str = "greentic-bundle.wizard.run";
 pub const ANSWER_SCHEMA_ID: &str = "greentic-bundle.wizard.answers";
 pub const DEFAULT_PROVIDER_REGISTRY: &str =
-    "oci://ghcr.io/greenticai/greentic-bundle/providers:latest";
+    "oci://ghcr.io/greenticai/greentic-bundle/providers:stable";
+const DEPLOYER_AWS_REF: &str = "oci://ghcr.io/greenticai/packs/deployer/greentic.deploy.aws:stable";
+const DEPLOYER_AZURE_REF: &str =
+    "oci://ghcr.io/greenticai/packs/deployer/greentic.deploy.azure:stable";
+const DEPLOYER_GCP_REF: &str = "oci://ghcr.io/greenticai/packs/deployer/greentic.deploy.gcp:stable";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "snake_case")]
@@ -279,6 +283,10 @@ pub fn answer_document_schema(
                     },
                     "app_packs": string_array_schema("App-pack references or local paths."),
                     "extension_providers": string_array_schema("Extension provider references or local paths."),
+                    "cloud_deployer_target": {
+                        "type": "string",
+                        "enum": ["aws", "azure", "gcp"]
+                    },
                     "remote_catalogs": string_array_schema("Additional remote catalog references."),
                     "setup_specs": {
                         "type": "object",
@@ -614,7 +622,9 @@ fn choose_interactive_menu<R: BufRead, W: Write>(
         write!(output, "{} ", crate::i18n::tr("wizard.setup.enum_prompt"))?;
         output.flush()?;
         let mut line = String::new();
-        input.read_line(&mut line)?;
+        if input.read_line(&mut line)? == 0 {
+            bail!("{}", crate::i18n::tr("wizard.error.input_ended"));
+        }
         match line.trim() {
             "0" => match zero_action {
                 RootMenuZeroAction::Exit => bail!("{}", crate::i18n::tr("wizard.exit.message")),
@@ -673,6 +683,7 @@ fn collect_create_flow<R: BufRead, W: Write>(
         app_pack_entries: Vec::new(),
         access_rules: Vec::new(),
         extension_provider_entries: Vec::new(),
+        cloud_deployer_target: None,
         advanced_setup: false,
         app_packs: Vec::new(),
         extension_providers: Vec::new(),
@@ -685,6 +696,7 @@ fn collect_create_flow<R: BufRead, W: Write>(
     });
     state = edit_app_packs(input, output, state, false)?;
     state = edit_extension_providers(input, output, state, false)?;
+    state = edit_cloud_deployer_target(input, output, state)?;
     state = edit_bundle_capabilities(input, output, state)?;
     let review_action = review_summary(input, output, &state, false)?;
     Ok(InteractiveRequest {
@@ -727,6 +739,7 @@ fn collect_update_flow<R: BufRead, W: Write>(
     if !validate_only {
         state = edit_app_packs(input, output, state, true)?;
         state = edit_extension_providers(input, output, state, true)?;
+        state = edit_cloud_deployer_target(input, output, state)?;
         state = edit_bundle_capabilities(input, output, state)?;
         let review_action = review_summary(input, output, &state, true)?;
         Ok(InteractiveRequest {
@@ -1208,7 +1221,9 @@ fn prompt_compact_enum<R: BufRead, W: Write>(
         output.flush()?;
 
         let mut line = String::new();
-        input.read_line(&mut line)?;
+        if input.read_line(&mut line)? == 0 {
+            bail!("{}", crate::i18n::tr("wizard.error.input_ended"));
+        }
         let trimmed = line.trim();
         if trimmed.is_empty() {
             if let Some(default) = &default_value {
@@ -1298,6 +1313,7 @@ fn request_defaults_from_workspace(
         advanced_setup: Some(workspace.advanced_setup.to_string()),
         app_packs: Some(workspace.app_packs.join(", ")),
         extension_providers: Some(workspace.extension_providers.join(", ")),
+        cloud_deployer_target: detect_cloud_deployer_target(&workspace.extension_providers),
         remote_catalogs: Some(workspace.remote_catalogs.join(", ")),
         setup_execution_intent: Some(workspace.setup_execution_intent.to_string()),
         export_intent: Some(workspace.export_intent.to_string()),
@@ -1384,6 +1400,7 @@ struct RequestDefaults {
     advanced_setup: Option<String>,
     app_packs: Option<String>,
     extension_providers: Option<String>,
+    cloud_deployer_target: Option<String>,
     remote_catalogs: Option<String>,
     setup_execution_intent: Option<String>,
     export_intent: Option<String>,
@@ -1464,6 +1481,16 @@ fn wizard_request_form_spec_json(
                 "visible_if": { "op": "var", "path": "/advanced_setup" }
             },
             {
+                "id": "cloud_deployer_target",
+                "type": "string",
+                "title": "Cloud deployer target",
+                "required": false,
+                "default_value": defaults.cloud_deployer_target,
+                "enum": ["", "aws", "azure", "gcp"],
+                "enum_labels": ["None", "AWS", "Azure", "GCP"],
+                "visible_if": { "op": "var", "path": "/advanced_setup" }
+            },
+            {
                 "id": "remote_catalogs",
                 "type": "string",
                 "title": crate::i18n::tr("wizard.prompt.remote_catalogs"),
@@ -1504,6 +1531,7 @@ struct SeedRequest {
     app_pack_entries: Vec<AppPackEntry>,
     access_rules: Vec<AccessRuleInput>,
     extension_provider_entries: Vec<ExtensionProviderEntry>,
+    cloud_deployer_target: Option<String>,
     advanced_setup: bool,
     app_packs: Vec<String>,
     extension_providers: Vec<String>,
@@ -1547,6 +1575,9 @@ fn normalize_request(seed: SeedRequest) -> NormalizedRequest {
     app_packs.extend(app_pack_entries.iter().map(|entry| entry.reference.clone()));
 
     let mut extension_provider_entries = seed.extension_provider_entries;
+    if let Some(target) = seed.cloud_deployer_target.as_deref() {
+        apply_cloud_deployer_target_to_entries(&mut extension_provider_entries, target);
+    }
     if extension_provider_entries.is_empty() {
         extension_provider_entries = seed
             .extension_providers
@@ -1693,6 +1724,7 @@ fn request_from_workspace(
         app_pack_entries,
         access_rules,
         extension_provider_entries,
+        cloud_deployer_target: detect_cloud_deployer_target(&workspace.extension_providers),
         advanced_setup: false,
         app_packs: workspace.app_packs.clone(),
         extension_providers: workspace.extension_providers.clone(),
@@ -2016,7 +2048,9 @@ fn prompt_menu_value<R: BufRead, W: Write>(input: &mut R, output: &mut W) -> Res
     write!(output, "{} ", crate::i18n::tr("wizard.setup.enum_prompt"))?;
     output.flush()?;
     let mut line = String::new();
-    input.read_line(&mut line)?;
+    if input.read_line(&mut line)? == 0 {
+        bail!("{}", crate::i18n::tr("wizard.error.input_ended"));
+    }
     Ok(line.trim().to_string())
 }
 
@@ -2130,6 +2164,7 @@ fn rebuild_request(request: NormalizedRequest) -> NormalizedRequest {
         app_pack_entries: request.app_pack_entries,
         access_rules: request.access_rules,
         extension_provider_entries: request.extension_provider_entries,
+        cloud_deployer_target: detect_cloud_deployer_target(&request.extension_providers),
         advanced_setup: false,
         app_packs: Vec::new(),
         extension_providers: Vec::new(),
@@ -2140,6 +2175,83 @@ fn rebuild_request(request: NormalizedRequest) -> NormalizedRequest {
         export_intent: false,
         capabilities: request.capabilities,
     })
+}
+
+fn edit_cloud_deployer_target<R: BufRead, W: Write>(
+    input: &mut R,
+    output: &mut W,
+    mut state: NormalizedRequest,
+) -> Result<NormalizedRequest> {
+    let current = detect_cloud_deployer_target(&state.extension_providers);
+    let labels = vec![
+        "None".to_string(),
+        "AWS".to_string(),
+        "Azure".to_string(),
+        "GCP".to_string(),
+    ];
+    let prompt = format!(
+        "Choose cloud deployer target (current: {})",
+        current.as_deref().unwrap_or("none")
+    );
+    let Some(index) = choose_named_index(input, output, &prompt, &labels)? else {
+        return Ok(state);
+    };
+    let target = match index {
+        1 => "aws",
+        2 => "azure",
+        3 => "gcp",
+        _ => "",
+    };
+    apply_cloud_deployer_target_to_entries(&mut state.extension_provider_entries, target);
+    Ok(rebuild_request(state))
+}
+
+fn apply_cloud_deployer_target_to_entries(entries: &mut Vec<ExtensionProviderEntry>, target: &str) {
+    entries.retain(|entry| !is_cloud_deployer_entry(entry));
+    if let Some(entry) = cloud_deployer_entry_for_target(target) {
+        entries.push(entry);
+    }
+}
+
+fn cloud_deployer_entry_for_target(target: &str) -> Option<ExtensionProviderEntry> {
+    let (provider_id, display_name, reference) = match target.trim() {
+        "aws" => ("deployer-aws", "AWS Deployer", DEPLOYER_AWS_REF),
+        "azure" => ("deployer-azure", "Azure Deployer", DEPLOYER_AZURE_REF),
+        "gcp" => ("deployer-gcp", "GCP Deployer", DEPLOYER_GCP_REF),
+        _ => return None,
+    };
+    Some(ExtensionProviderEntry {
+        reference: reference.to_string(),
+        detected_kind: "catalog".to_string(),
+        provider_id: provider_id.to_string(),
+        display_name: display_name.to_string(),
+        version: inferred_reference_version(reference),
+        source_catalog: Some(DEFAULT_PROVIDER_REGISTRY.to_string()),
+        group: Some("deployer".to_string()),
+    })
+}
+
+fn is_cloud_deployer_entry(entry: &ExtensionProviderEntry) -> bool {
+    matches!(
+        entry.provider_id.as_str(),
+        "deployer-aws" | "deployer-azure" | "deployer-gcp"
+    ) || detect_cloud_deployer_target(std::slice::from_ref(&entry.reference)).is_some()
+}
+
+fn detect_cloud_deployer_target(references: &[String]) -> Option<String> {
+    for reference in references {
+        let normalized = reference.trim().to_ascii_lowercase();
+        if normalized.contains("greentic.deploy.aws") || normalized.ends_with("/aws.gtpack") {
+            return Some("aws".to_string());
+        }
+        if normalized.contains("greentic.deploy.azure") || normalized.ends_with("/azure.gtpack") {
+            return Some("azure".to_string());
+        }
+        if normalized.contains("greentic.deploy.gcp") || normalized.ends_with("/gcp.gtpack") {
+            return Some("gcp".to_string());
+        }
+    }
+    None
 }
 
 fn format_mapping(mapping: &AppPackMappingInput) -> String {
@@ -3222,6 +3334,7 @@ fn normalized_request_from_document(
             &answers,
             "extension_provider_entries",
         )?,
+        cloud_deployer_target: optional_string(&answers, "cloud_deployer_target")?,
         advanced_setup: optional_bool(&answers, "advanced_setup")?,
         app_packs: optional_string_list(&answers, "app_packs")?,
         extension_providers: optional_string_list(&answers, "extension_providers")?,
@@ -3377,6 +3490,12 @@ fn normalized_request_from_qa_answers(
         app_pack_entries: Vec::new(),
         access_rules: Vec::new(),
         extension_provider_entries: Vec::new(),
+        cloud_deployer_target: object
+            .get("cloud_deployer_target")
+            .and_then(Value::as_str)
+            .map(str::trim)
+            .filter(|value| !value.is_empty())
+            .map(ToOwned::to_owned),
         advanced_setup: object
             .get("advanced_setup")
             .and_then(Value::as_bool)
@@ -3448,6 +3567,21 @@ fn optional_bool(answers: &BTreeMap<String, Value>, key: &str) -> Result<bool> {
     match answers.get(key) {
         None => Ok(false),
         Some(Value::Bool(value)) => Ok(*value),
+        Some(_) => Err(invalid_answer_field(key)),
+    }
+}
+
+fn optional_string(answers: &BTreeMap<String, Value>, key: &str) -> Result<Option<String>> {
+    match answers.get(key) {
+        None => Ok(None),
+        Some(Value::String(value)) => {
+            let trimmed = value.trim();
+            if trimmed.is_empty() {
+                Ok(None)
+            } else {
+                Ok(Some(trimmed.to_string()))
+            }
+        }
         Some(_) => Err(invalid_answer_field(key)),
     }
 }
@@ -4482,7 +4616,9 @@ fn prompt_qa_string_like<R: BufRead, W: Write>(
         )?;
         output.flush()?;
         let mut line = String::new();
-        input.read_line(&mut line)?;
+        if input.read_line(&mut line)? == 0 {
+            bail!("{}", crate::i18n::tr("wizard.error.input_ended"));
+        }
         let trimmed = line.trim();
         if trimmed.is_empty() {
             if let Some(default) = &default_value {
@@ -4514,7 +4650,9 @@ fn prompt_qa_boolean<R: BufRead, W: Write>(
         )?;
         output.flush()?;
         let mut line = String::new();
-        input.read_line(&mut line)?;
+        if input.read_line(&mut line)? == 0 {
+            bail!("{}", crate::i18n::tr("wizard.error.input_ended"));
+        }
         let trimmed = line.trim().to_ascii_lowercase();
         if trimmed.is_empty() {
             if let Some(default) = &default_value {
@@ -4606,7 +4744,9 @@ fn prompt_qa_enum<R: BufRead, W: Write>(
         output.flush()?;
 
         let mut line = String::new();
-        input.read_line(&mut line)?;
+        if input.read_line(&mut line)? == 0 {
+            bail!("{}", crate::i18n::tr("wizard.error.input_ended"));
+        }
         let trimmed = line.trim();
         if trimmed.is_empty() {
             if let Some(default) = &default_value {
@@ -4711,8 +4851,9 @@ mod tests {
     use crate::catalog::registry::CatalogEntry;
 
     use super::{
-        RootMenuZeroAction, build_extension_provider_options, choose_interactive_menu,
-        clean_extension_provider_label, detected_reference_kind,
+        RootMenuZeroAction, apply_cloud_deployer_target_to_entries,
+        build_extension_provider_options, choose_interactive_menu, clean_extension_provider_label,
+        detect_cloud_deployer_target, detected_reference_kind,
     };
 
     #[test]
@@ -4750,7 +4891,7 @@ mod tests {
             category_description: None,
             label: Some("Greentic Secrets AWS SM".to_string()),
             reference:
-                "oci://ghcr.io/greenticai/packs/secret/greentic.secrets.aws-sm.gtpack:latest"
+                "oci://ghcr.io/greenticai/packs/secret/greentic.secrets.aws-sm.gtpack:stable"
                     .to_string(),
             setup: None,
         };
@@ -4774,7 +4915,7 @@ mod tests {
             category_label: None,
             category_description: None,
             label: Some("Greentic Secrets AWS SM (latest)".to_string()),
-            reference: "oci://ghcr.io/example/secrets:latest".to_string(),
+            reference: "oci://ghcr.io/example/secrets:stable".to_string(),
             setup: None,
         };
         let semver = CatalogEntry {
@@ -4816,6 +4957,33 @@ mod tests {
         assert_eq!(
             detected_reference_kind(root, "https://example.com/packs/cards-demo.gtpack"),
             "https"
+        );
+    }
+
+    #[test]
+    fn cloud_deployer_target_adds_provider_entry() {
+        let mut entries = Vec::new();
+        apply_cloud_deployer_target_to_entries(&mut entries, "aws");
+
+        assert_eq!(entries.len(), 1);
+        assert_eq!(entries[0].provider_id, "deployer-aws");
+        assert_eq!(
+            entries[0].reference,
+            "oci://ghcr.io/greenticai/packs/deployer/greentic.deploy.aws:stable"
+        );
+    }
+
+    #[test]
+    fn cloud_deployer_target_replaces_existing_cloud_deployer_entry() {
+        let mut entries = Vec::new();
+        apply_cloud_deployer_target_to_entries(&mut entries, "aws");
+        apply_cloud_deployer_target_to_entries(&mut entries, "gcp");
+
+        assert_eq!(entries.len(), 1);
+        assert_eq!(entries[0].provider_id, "deployer-gcp");
+        assert_eq!(
+            detect_cloud_deployer_target(&[entries[0].reference.clone()]),
+            Some("gcp".to_string())
         );
     }
 }

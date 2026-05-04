@@ -133,6 +133,7 @@
   "wizard.error.bundle_target_missing": "Bundle target अवस्थित छैन",
   "wizard.error.empty_answer": "Wizard prompt लाई मान आवश्यक छ।",
   "wizard.error.empty_catalog": "catalog मा कुनै extension providers फेला परेनन्।",
+  "wizard.error.input_ended": "वैध विकल्प प्रदान गर्नु अघि नै विजार्ड इनपुट समाप्त भयो।",
   "wizard.error.invalid_choice": "अवैध छनोट। 1, 2, 3, वा 0 प्रविष्ट गर्नुहोस्।",
   "wizard.exit.message": "answers सङ्कलन नगरी wizard बन्द भयो।",
   "wizard.label.name": "नाम",

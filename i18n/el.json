@@ -133,6 +133,7 @@
   "wizard.error.bundle_target_missing": "Ο στόχος bundle δεν υπάρχει",
   "wizard.error.empty_answer": "Η προτροπή του wizard απαιτεί τιμή.",
   "wizard.error.empty_catalog": "Δεν βρέθηκαν extension providers στον κατάλογο.",
+  "wizard.error.input_ended": "Η εισαγωγή στον οδηγό τερματίστηκε πριν δοθεί μια έγκυρη επιλογή.",
   "wizard.error.invalid_choice": "Μη έγκυρη επιλογή. Εισαγάγετε 1, 2, 3 ή 0.",
   "wizard.exit.message": "Ο wizard τερματίστηκε χωρίς να συλλέξει απαντήσεις.",
   "wizard.label.name": "Όνομα",
