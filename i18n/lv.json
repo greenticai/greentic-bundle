@@ -133,6 +133,7 @@
   "wizard.error.bundle_target_missing": "Bundle mērķis neeksistē",
   "wizard.error.empty_answer": "Vedņa uzvednei ir nepieciešama vērtība.",
   "wizard.error.empty_catalog": "Katalogā netika atrasti extension provider.",
+  "wizard.error.input_ended": "Vedņa ievade beidzās, pirms tika sniegta derīga izvēle.",
   "wizard.error.invalid_choice": "Nederīga izvēle. Ievadiet 1, 2, 3 vai 0.",
   "wizard.exit.message": "Vednis tika aizvērts, nesavācot atbildes.",
   "wizard.label.name": "Nosaukums",

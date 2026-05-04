@@ -867,6 +867,12 @@
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367032
         },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "709adf63a08ff5402de9dba0ce595d1a8462cd816792197e47faa65525fd4bcf",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795133
+        },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
           "last_bot_translation_hash": "fcec3446cafe1c534996b10d03dcf507a4f68b90e7c982c97fa1fb09b90b5739",
@@ -2202,6 +2208,12 @@
           "last_bot_translation_hash": "059e86f60c1bec9242f61f74529fb92de5740da700e99cb619cd17d0261c8def",
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367033
+        },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "709adf63a08ff5402de9dba0ce595d1a8462cd816792197e47faa65525fd4bcf",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795138
         },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
@@ -3539,6 +3551,12 @@
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367034
         },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "ea5d476e7e1326e81f10740a8bf164d5e08c22fa542124babd72248996dbb9a1",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795145
+        },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
           "last_bot_translation_hash": "fcec3446cafe1c534996b10d03dcf507a4f68b90e7c982c97fa1fb09b90b5739",
@@ -4874,6 +4892,12 @@
           "last_bot_translation_hash": "ff3eca1f0ade7c0cdeb64315d45ec8a15c9d0af254a031a6915ed307aa0fc599",
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367035
+        },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "ea5d476e7e1326e81f10740a8bf164d5e08c22fa542124babd72248996dbb9a1",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795152
         },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
@@ -6211,6 +6235,12 @@
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367036
         },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "ea5d476e7e1326e81f10740a8bf164d5e08c22fa542124babd72248996dbb9a1",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795159
+        },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
           "last_bot_translation_hash": "fcec3446cafe1c534996b10d03dcf507a4f68b90e7c982c97fa1fb09b90b5739",
@@ -7546,6 +7576,12 @@
           "last_bot_translation_hash": "0159af218148a2bde87fbe014cd6328a85e2f7e2fe8cfb98013a54db0ca6c5df",
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367037
+        },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "318b1898308b5f183c59e28fdaaa57339786d5a0de000e4ae7506b06e53cf374",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795163
         },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
@@ -8883,6 +8919,12 @@
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367038
         },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "709adf63a08ff5402de9dba0ce595d1a8462cd816792197e47faa65525fd4bcf",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795169
+        },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
           "last_bot_translation_hash": "fcec3446cafe1c534996b10d03dcf507a4f68b90e7c982c97fa1fb09b90b5739",
@@ -10218,6 +10260,12 @@
           "last_bot_translation_hash": "c23fd3a696303e1e793047c7f69c99ec35af4437d5a33784e1312318d66fc41e",
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367039
+        },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "ea5d476e7e1326e81f10740a8bf164d5e08c22fa542124babd72248996dbb9a1",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795176
         },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
@@ -11555,6 +11603,12 @@
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367040
         },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "709adf63a08ff5402de9dba0ce595d1a8462cd816792197e47faa65525fd4bcf",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795181
+        },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
           "last_bot_translation_hash": "fcec3446cafe1c534996b10d03dcf507a4f68b90e7c982c97fa1fb09b90b5739",
@@ -12890,6 +12944,12 @@
           "last_bot_translation_hash": "24b7d19f7b66ec37c1ad144b702048a94aed924a5433bee3503146f31dde9864",
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367042
+        },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "34b7cd7b92827c8e6a38c66b7f0d7309c51fff2fe1ad69ad637ba579827b5f6c",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795186
         },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
@@ -14227,6 +14287,12 @@
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367044
         },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "19e47d2b1530a92912eda1cf5ba390b3fea68975009802b8e2790ae4422f31ce",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795194
+        },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
           "last_bot_translation_hash": "8163882509326153046b9fd2c6e6fe5c431c9509633bf4029bd15d89037546be",
@@ -15562,6 +15628,12 @@
           "last_bot_translation_hash": "0e7cc3c44752c70234dd58e9eb17597d2de1f3769d6657ffdd0a2c5bcd5a242b",
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367049
+        },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "9ecfc293fe2905cb82398f8bba4b250bbd85fa9e83190c600c1de974ac3c8f91",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795200
         },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
@@ -16899,6 +16971,12 @@
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367051
         },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "14d5b0d03ea38686bbc0137166d34c47c91367077b81ac03b2d892342316b90b",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795206
+        },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
           "last_bot_translation_hash": "e31eedced5d3daea707e7c83d935124b5c6f766f39a0f93c8e0248fb45664aec",
@@ -18234,6 +18312,12 @@
           "last_bot_translation_hash": "07808c7763a45f08f11d49bbc2ec3db0d26693ac7df9011fdc362c90f96916c9",
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367052
+        },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "828725af21f041cf8c07c0a5eda61db29ce92f89a7834b45b3cdcb68338a4559",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795210
         },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
@@ -19571,6 +19655,12 @@
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367053
         },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "fdf48b55ae593105f513b13bce32f8c28c1d12f8ff621b35a200c5aff8fed96e",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795217
+        },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
           "last_bot_translation_hash": "612143dc5e3e94d1144433ed919acfb7287af0c7860c83a0165db8bfcdcae3fe",
@@ -20906,6 +20996,12 @@
           "last_bot_translation_hash": "a0248e52ee19f9d0df0710e2fe5fe2ecb96e0a4956e8ce573383fa9eeb964ae3",
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367054
+        },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "ad4ae3627b3e3085ccc3b1c2c4d6467bad874815dafe1118aedf0ca37dd04d71",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795221
         },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
@@ -22243,6 +22339,12 @@
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367055
         },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "c571646e3515c248f357d0d994523e03dc5cfef97afe95b6b6ff570f1414f763",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795227
+        },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
           "last_bot_translation_hash": "df0d3a825649842712c7cc933d9f187eeb6551118ef8fe2ca349b72fcdcc03a8",
@@ -23578,6 +23680,12 @@
           "last_bot_translation_hash": "b3cd7d5866468bbda1deb4f4fcb7f3d79c209d41796d76f0a777ee0996f6d8a4",
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367056
+        },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795233
         },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
@@ -24915,6 +25023,12 @@
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367057
         },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "2ff394aaf8be09e06235a8b315ede408d741e286e34f2c0ddef454c60a9e3c40",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795239
+        },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
           "last_bot_translation_hash": "6f449c7a3fb2c34de214d9b1678a0721bd9ed3ea7a6b782d726cafcc216495cd",
@@ -26250,6 +26364,12 @@
           "last_bot_translation_hash": "4182f4ebfcdfb537d149d4b1f66ad94e42b0f0e12b01e04311bbb3aa5732345c",
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367058
+        },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "69b945f08a242b7cfdd01a2577bfded1e5b549459a97985ceb0d9b79ad7ffdb0",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795248
         },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
@@ -27587,6 +27707,12 @@
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367058
         },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "356ad865fc46320599fc928e2ffec1042e9f26fb34eaada6bb846d8bb729f14e",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795255
+        },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
           "last_bot_translation_hash": "6e85d8e5b7b47e8a08796bc79027990ca381317b57515e420b3ad6c7ce7944ad",
@@ -28922,6 +29048,12 @@
           "last_bot_translation_hash": "d1ea14bad2b864876780af8d0bf6db7515780d208848b7bb6269b6c9b0c8077c",
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367059
+        },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "b37d5b3b6c58a49a78fe43af2663e613612d9b3cd7234ff79bebb9271895c8a8",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795259
         },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
@@ -30259,6 +30391,12 @@
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367060
         },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "b4c04086f1a4327d5ec88431b1193a8347d6c03fd1be73bb50080c583d0d56d6",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795264
+        },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
           "last_bot_translation_hash": "807c8c3673477142d6e6e7cffa3df24e808d169ffdce93b0d43d66a9cfbe980c",
@@ -31594,6 +31732,12 @@
           "last_bot_translation_hash": "c43fe3bb62b69a28430c84b67037de0421eae37ed66f970bf98cdc4abed46079",
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367061
+        },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "810b193d3b7c81e6fbaf4886fc137b6a19387820db718e547a06e33d66cd16e1",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795271
         },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
@@ -32931,6 +33075,12 @@
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367061
         },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "82f7b43d062207a97fab6f8c168c8873ffba7e9b98a8524e48463790cb39694c",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795277
+        },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
           "last_bot_translation_hash": "1116881a72ed15a2c095e4575ce63c2b15ee12f7a72e68c2c57d8481621a75e9",
@@ -34266,6 +34416,12 @@
           "last_bot_translation_hash": "8f7d6ab8b50383b44d3b132178752e9f0f8b6ea8818afa2243c097930f8c55f0",
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367062
+        },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "5757c9a509bc19235d050d69b68ceebe0df809e1d24986f3e583e6edc0eb8a92",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795283
         },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
@@ -35603,6 +35759,12 @@
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367063
         },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "be6f5af221829e1e0ed994556ab4fbd45aa112803662d3576ca79a1d83f3f060",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795287
+        },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
           "last_bot_translation_hash": "611875aafa6b23f36ebcebdc78e4065a6b8b99d0fac9d3ffab4bae3c5ac7ca42",
@@ -36938,6 +37100,12 @@
           "last_bot_translation_hash": "79312ace07d3a359fbcf35ca52952255981e2ef6a8a6a9a53a317340709a3fe6",
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367063
+        },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "112ced926e239eb5fd6a766e8a3846e9be7f88f1233258366dfb184b69c79c6e",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795294
         },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
@@ -38275,6 +38443,12 @@
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367064
         },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "b7bc8b507819476e7913807cce5d3b8ff03a3298796573aeabf1686f05a803f5",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795299
+        },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
           "last_bot_translation_hash": "8975838252620498b5c0c5f74d0f91705dd7f2919ebbb2c1c7f4d877ef757b39",
@@ -39610,6 +39784,12 @@
           "last_bot_translation_hash": "3352895206dacce4aa60a53689e3f6312d5fcb83cc6c70b96a5dad13602bd835",
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367064
+        },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "58605cd3077f6c4049a1a83d269e51307277ea3c9e611a8e85088cf8e98be99b",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795305
         },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
@@ -40947,6 +41127,12 @@
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367065
         },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "e7cf02d72554ef9e778407002eb7cf8c1fa23341938c60d4ed3315e031e26f15",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795316
+        },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
           "last_bot_translation_hash": "eecda35b78aeeeb9423cf62e4aa4d9f1ac0f93bdc186f0f6d0559bbbba8d0150",
@@ -42282,6 +42468,12 @@
           "last_bot_translation_hash": "afb68c2b73c79c53c450d6364b2fadf9d26ed6d6bfd0cb784418bdc3d0e865d1",
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367065
+        },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "cf004902bdf49a4fd9a7dbaf4b2f32ea1ca3fdc5c0ffe66328d9a328215fd1c6",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795325
         },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
@@ -43619,6 +43811,12 @@
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367066
         },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "d532e027116c4e9df5a422867f36d3a91742565c0dc341b865c860f236734927",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795332
+        },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
           "last_bot_translation_hash": "be0465db92c1fd74d201e1ba02650b3a163b1694645209f479dea46a6718b111",
@@ -44954,6 +45152,12 @@
           "last_bot_translation_hash": "40247bbbba272e3032dbe7d7b89f24de33616f877ebf2a0b70357e3f4a9b5a5d",
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367066
+        },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "c1b46fe9a6194a94089362499f5f6ec9b1dbf6efc7bb7c19f684a4c563e0075d",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795338
         },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
@@ -46291,6 +46495,12 @@
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367067
         },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "632c699cfa988ccbba1cf48856147fb1416dc314e58396779b446e214bc7ce8e",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795343
+        },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
           "last_bot_translation_hash": "72e90ec1481a503f4d62b03fc0e52f0eab0ddffcebc1e8b1559afa8a38f53eaf",
@@ -47626,6 +47836,12 @@
           "last_bot_translation_hash": "00e6d28bd40bb9b32f44a7ebd1501ac22d8e57005e9fbd8dfc0dc38fdcfdba14",
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367067
+        },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "ed0841d51e9e15087266f1635b6bab0179792f06cd75f92d05e30e43bfc29c48",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795350
         },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
@@ -48963,6 +49179,12 @@
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367204
         },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "de4b6f8e61779109c4781a6fb3956fea10e162a064a7721716b6da95132ab0d5",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795356
+        },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
           "last_bot_translation_hash": "f8232b9b5a855177ab9849190e935515d10f8506c9406e73dfe48333ca27b12e",
@@ -50298,6 +50520,12 @@
           "last_bot_translation_hash": "a3900fabd0ab40d55cb8b6027044e41632bee3eb8dbb6c23eb96c2bea3b29e4b",
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367274
+        },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "e0c609ee8b2fc72d6bdbaad171b127f1e8cccd50d4de695044e0bfc642fae929",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795363
         },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
@@ -51635,6 +51863,12 @@
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367344
         },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "d470bfeb83c812937b947d4242433c755ec6f63ed375543c9d016d4b385b078d",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795371
+        },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
           "last_bot_translation_hash": "6d2fbf71f914235d81559ff6a4008d37959b3292a897288336aba1ebedeb2f5e",
@@ -52970,6 +53204,12 @@
           "last_bot_translation_hash": "e86637665f2626823e681bc7b2470213e8175c16f1f825edb440d0478d6707c9",
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367395
+        },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "3cb728dcf4e487762f5303a8c2de86f844a72a419c88d997aa71b0cc600473e3",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795376
         },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
@@ -54307,6 +54547,12 @@
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367456
         },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "5fb47486789cb64c574691e6da01f67bb3e4d42c34ce4463c364f6f831cdde3b",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795383
+        },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
           "last_bot_translation_hash": "868f133f6bc918723a2cbbf970f65611ac532737484f6aeebf22779c3b083ca4",
@@ -55642,6 +55888,12 @@
           "last_bot_translation_hash": "6d6729e7fca45fcf3ad0d2cb39bcb3517a9dd4730ff9240cf0d01848c2b96c00",
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367524
+        },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "4b9de9a9d1ee7b257c84b733e43032fbd80954709b272b7d84f8b825101cf636",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795390
         },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
@@ -56979,6 +57231,12 @@
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367649
         },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "26a3c0e02452ec5560b6bfdd6de62ca05b558eaca3a5f8cb3b1d405794899ea9",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795396
+        },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
           "last_bot_translation_hash": "9cb50c26b3c7fc2b4323cd87573b5003de78fffd64cdd3da840a68a8e9ec1390",
@@ -58314,6 +58572,12 @@
           "last_bot_translation_hash": "b4bc2b93e3ba796f5b73928f6e9d8c5f60193cface0258fec64d0c42a640ac0f",
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367700
+        },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "f123f24a901bcb1656f2d4a8549f11a9eacde60cac1eea35ddbfbc1654623b90",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795404
         },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
@@ -59651,6 +59915,12 @@
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367749
         },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "b8213683539d6a275423f23abb853704448cb3f6c19e1ca332690c907addfdbe",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795409
+        },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
           "last_bot_translation_hash": "aa676cf8de06b14cdf8d191e630bc84e8be6ae270915f03de661843dc8d3a3a7",
@@ -60986,6 +61256,12 @@
           "last_bot_translation_hash": "61b8907c9c003428341ab328fd70c125d821884ecfc8e3fc9c9b5d11478f8648",
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367813
+        },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "3eae1bf1bd82856bba41624cd75cab27ad42d059cfebc8d9c514ff13333cd795",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795413
         },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
@@ -62323,6 +62599,12 @@
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774367882
         },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "5d008ef4671ea2e1304cfaa6718f06e25e87802bfcb595ccbabf37c80ac28d81",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795421
+        },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
           "last_bot_translation_hash": "9623e849dd212ed614d804d506964713bbd0205c0ac50c759db4cf832a48863b",
@@ -63658,6 +63940,12 @@
           "last_bot_translation_hash": "b79564f9011b9ad01d3ff79a01eec6112d0f4ebf286d6b5eb98d0592cea7de50",
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774368008
+        },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "a21f04725dde6b0b58b2592d0a91741a22e47d97ebf3933593927a5b2786e58b",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795426
         },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
@@ -64995,6 +65283,12 @@
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774368058
         },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "bfadf55022161b60b3b4a03da5d7090f8df874457f537ffbabc914394ae5aeac",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795433
+        },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
           "last_bot_translation_hash": "84c834278f26b3fd0008c4583712ca92ab9e87746de0db056d208bb051efa541",
@@ -66330,6 +66624,12 @@
           "last_bot_translation_hash": "f9917c0540bf6a28cd3a67aa3e84314b96f74d15a86dc15081e261065990e942",
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774368135
+        },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "8376ea92fe29f4d4172e658a54dd639e6cd4728a9606e1cee852e05874a08468",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795441
         },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
@@ -67667,6 +67967,12 @@
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774368206
         },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "2edf05b2c55aefaa10ce7f3fa6492047363737103c4f00506ba0bcf14481467e",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795447
+        },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
           "last_bot_translation_hash": "83fd766d659670f8555d994d48acd837433221269828780f0efb8f70d545a9d7",
@@ -69002,6 +69308,12 @@
           "last_bot_translation_hash": "74b3d4909f3471acf854fb73b35a3ea2a89360219b41cb4f10cb7254f9ce0147",
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774368269
+        },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "8cc52739fcee1eed2f910e9f9d87773a18c423f8d42b12d46e0b37f549ce2ef2",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795452
         },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
@@ -70339,6 +70651,12 @@
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774368325
         },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "45f9348dc6542740e2d58b3d05111a0792804000f927fab99bf2053a0c3da1fa",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795459
+        },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
           "last_bot_translation_hash": "9f049aa48acd2a6080d70f2c0f7b9d79b7594c079f5c8cc1d0319cf114cd328d",
@@ -71674,6 +71992,12 @@
           "last_bot_translation_hash": "5b459d30977ae34d30e22b683f0f587a5f27f28b983173c2e32e445f9a0074d9",
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774368383
+        },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "578af9f3c4466271add7ffd9bc62c725caed06fcf683354ae4ddd63fcb590cf3",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795465
         },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
@@ -73011,6 +73335,12 @@
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774368441
         },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "f1cab0e672ed8bf8cde446cbf45e02487166ab4cdad94a0a74c47140e4d8beb4",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795473
+        },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
           "last_bot_translation_hash": "952311cd21c7704b92337071aa884271b32c6da8ea02f3981c5ecd28a96451ac",
@@ -74346,6 +74676,12 @@
           "last_bot_translation_hash": "a6a6d509f1f97cdb3c6924e2f8953178c00d9e9fa2f821b76384f9fad5090419",
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774368504
+        },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "734e61210224d649a1a4f7a6754ea516ecd31af570919db59b031abf0c19c42b",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795479
         },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
@@ -75683,6 +76019,12 @@
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774368565
         },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "c4fea171bad218410b2866c2fab9343c221cf2cacd5842d62310160231ab4553",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795485
+        },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
           "last_bot_translation_hash": "29a33f8fa2e13df2daac4d41aa97075178ae069c77215b6d9d2774f9793c267f",
@@ -77018,6 +77360,12 @@
           "last_bot_translation_hash": "123e3ef6ab4f9bc0570284129f0aa2ff91f20e992b606d473f32efed28aec864",
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774368638
+        },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "d5bc1336e28c0b45093915b7672b46387e165707babfb61f0eb0b6a9890257ed",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795490
         },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
@@ -78355,6 +78703,12 @@
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774368706
         },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "f901d08eda72742bd6a85263068a2e4798ddc3844923e430a07273b0c6afbdfb",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795496
+        },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
           "last_bot_translation_hash": "24ff70c6d43e018582875a7941a1ffd6e2631af6da57c163e8947737ccda5284",
@@ -79690,6 +80044,12 @@
           "last_bot_translation_hash": "a76e3bad7f9a3eef4e5b5a301aa9d3b61f6f0891a8e995fc6faa5fac62fafdd1",
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774368760
+        },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "1c6f28d759eb4c34939fcf9df7bd7b4143cc67e93f6cf9b66e82f433efd5d5be",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795502
         },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
@@ -81027,6 +81387,12 @@
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774368813
         },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "e1856fff82366c070ee769515342eaa35bd3c9f16d768871b8b74ab4cc40734a",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795506
+        },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
           "last_bot_translation_hash": "adec106052cd35f8fc792fbb5cab9061776c086b2c3486581b72e1b829d5ba14",
@@ -82362,6 +82728,12 @@
           "last_bot_translation_hash": "1ffbf6c47c992d3de3ac29ff356c2317163b6b2e0d7c6515c393ba0e45e9788d",
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774368878
+        },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "8bd2ed928f8ba502d6e172a469c02c8624fcb0e571d5d04574e5399199dbd139",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795511
         },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
@@ -83699,6 +84071,12 @@
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774368943
         },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "7df2b059312def815fe2c3548ed72dd2cea3623a8d4c20a50506ecb58ff73186",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795516
+        },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
           "last_bot_translation_hash": "6866b754254a33f6a8df16dc33749da20243777e1d6257b239e07caa735e8404",
@@ -85035,6 +85413,12 @@
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774368997
         },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "84cc09336c4907aed15e76d3e137938a0b4ad26b66a01a9e36db91c949a0fb49",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795522
+        },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",
           "last_bot_translation_hash": "10b399b70071481f690faa873cd584e8e5dbc4ad80254f16d1286ceddd865105",
@@ -86370,6 +86754,12 @@
           "last_bot_translation_hash": "ece344eafe65c702fb123dd5a8ad9dfebbc75f2c86fdf966c07e32c0db3a4553",
           "engine": "codex-cli",
           "timestamp_epoch_secs": 1774369045
+        },
+        "wizard.error.input_ended": {
+          "last_english_hash": "aa619038a131e9c5c7afed34a92366e122bea6d95cdb320e10aed4a7d330ca2f",
+          "last_bot_translation_hash": "52cc0170a5dc5480485ffbc4bfb674457b434ccb574f9e1c92b16f0fe746d995",
+          "engine": "codex-cli",
+          "timestamp_epoch_secs": 1777795527
         },
         "wizard.error.invalid_choice": {
           "last_english_hash": "6d2ecf197433360356399680aa37a90128f15db4152b38abcf71a713954d3eb1",

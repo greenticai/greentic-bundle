@@ -7,7 +7,7 @@ use crate::types::CardEntry;
 use serde::Serialize;
 use std::collections::BTreeMap;
 
-const HTTP_COMPONENT_REF: &str = "oci://ghcr.io/greenticai/components/component-http:latest";
+const HTTP_COMPONENT_REF: &str = "oci://ghcr.io/greenticai/component/component-http:stable";
 
 #[derive(Debug, Serialize)]
 struct FlowYaml {

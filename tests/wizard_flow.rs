@@ -51,7 +51,7 @@ fn seed_workspace_with_artifact(root: &std::path::Path, artifact: &std::path::Pa
     let output = run_with_stdin(
         &["wizard"],
         &format!(
-            "1\nDemo Bundle\ndemo-bundle\n{}\n1\npack-a\n1\n1\n4\n4\nn\n1\n0\n",
+            "1\nDemo Bundle\ndemo-bundle\n{}\n1\npack-a\n1\n1\n4\n4\n1\nn\n1\n0\n",
             root.display()
         ),
     );
@@ -99,7 +99,7 @@ fn bare_wizard_executes_create_flow_by_default() {
     let output = run_with_stdin(
         &["wizard"],
         &format!(
-            "1\nDemo Bundle\ndemo-bundle\n{}\n1\npack-a\n1\n1\n4\n4\nn\n1\n0\n",
+            "1\nDemo Bundle\ndemo-bundle\n{}\n1\npack-a\n1\n1\n4\n4\n1\nn\n1\n0\n",
             bundle_root.display()
         ),
     );
@@ -138,7 +138,7 @@ fn bare_wizard_root_form_hides_verbose_qa_status_block() {
     let output = run_with_stdin(
         &["wizard", "run", "--dry-run"],
         &format!(
-            "1\nDemo Bundle\ndemo-bundle\n{}\n1\npack-a\n1\n1\n4\n4\nn\n1\n",
+            "1\nDemo Bundle\ndemo-bundle\n{}\n1\npack-a\n1\n1\n4\n4\n1\nn\n1\n",
             bundle_root.display()
         ),
     );
@@ -161,7 +161,7 @@ fn bare_wizard_update_accepts_gtbundle_path() {
     let output = run_with_stdin(
         &["wizard"],
         &format!(
-            "2\n{}\n{}\n\n\n4\n4\nn\n2\n0\n",
+            "2\n{}\n{}\n\n\n4\n4\n1\nn\n2\n0\n",
             artifact.display(),
             edited.display(),
         ),
@@ -287,7 +287,7 @@ fn bare_wizard_update_reprompts_after_missing_bundle_target() {
     let output = run_with_stdin(
         &["wizard"],
         &format!(
-            "2\n{}\n{}\n{}\n\n\n4\n4\nn\n2\n0\n",
+            "2\n{}\n{}\n{}\n\n\n4\n4\n1\nn\n2\n0\n",
             missing.display(),
             artifact.display(),
             edited.display(),
@@ -345,7 +345,7 @@ fn create_flow_requires_app_pack_before_continue() {
     let output = run_with_stdin(
         &["wizard", "run", "--dry-run"],
         &format!(
-            "1\nDemo Bundle\ndemo-bundle\n{}\n4\n1\npack-a\n1\n1\n4\n4\nn\n2\n",
+            "1\nDemo Bundle\ndemo-bundle\n{}\n4\n1\npack-a\n1\n1\n4\n4\n1\nn\n2\n",
             bundle_root.display()
         ),
     );
@@ -376,7 +376,7 @@ fn bare_wizard_create_flow_skips_provider_setup_prompts() {
     let output = run_with_stdin(
         &["wizard"],
         &format!(
-            "1\nDemo Bundle\ndemo-bundle\n{}\n1\npack-a\n1\n1\n4\n2\n{}\n4\nn\n1\n0\n",
+            "1\nDemo Bundle\ndemo-bundle\n{}\n1\npack-a\n1\n1\n4\n2\n{}\n4\n1\nn\n1\n0\n",
             bundle_root.display(),
             provider_source.display(),
         ),
@@ -419,7 +419,7 @@ fn common_extension_provider_menu_uses_bundled_well_known_catalog() {
     if grouped_categories.len() > 1 {
         stdin.push_str(&format!("{}\n", selected_category_index + 1));
     }
-    stdin.push_str("1\n4\nn\n2\n");
+    stdin.push_str("1\n4\n1\nn\n2\n");
 
     let output = run_with_stdin(&["wizard", "run", "--dry-run"], &stdin);
     assert!(output.status.success());
@@ -460,7 +460,7 @@ fn bundled_common_extension_provider_is_not_persisted_to_remote_catalogs() {
     let output = run_with_stdin_and_env(
         &["wizard"],
         &format!(
-            "1\nDemo Bundle\ndemo-bundle\n{}\n1\npack-a\n1\n1\n4\n1\n2\n5\n4\nn\n1\n0\n",
+            "1\nDemo Bundle\ndemo-bundle\n{}\n1\npack-a\n1\n1\n4\n1\n2\n5\n4\n1\nn\n1\n0\n",
             bundle_root.display()
         ),
         &[("GREENTIC_BUNDLE_USE_BUNDLED_CATALOG", "1")],
@@ -477,7 +477,7 @@ fn bundled_common_extension_provider_is_not_persisted_to_remote_catalogs() {
         bundle_yaml.contains("extension_providers:\n  - oci://ghcr.io/greenticai/packs/"),
         "bundle_yaml should contain OCI ref from greenticai/packs registry"
     );
-    assert!(bundle_yaml.contains(":latest"));
+    assert!(bundle_yaml.contains(":stable"));
     assert!(bundle_yaml.contains("remote_catalogs: []"));
     assert!(!bundle_yaml.contains("registries/providers.json"));
 }
@@ -492,7 +492,7 @@ fn create_flow_uses_pack_id_for_access_rules_and_resolved_policy() {
     let output = run_with_stdin(
         &["wizard"],
         &format!(
-            "1\nDemo Bundle\ndemo-bundle\n{}\n1\n{}\n1\n1\n4\n4\nn\n1\n0\n",
+            "1\nDemo Bundle\ndemo-bundle\n{}\n1\n{}\n1\n1\n4\n4\n1\nn\n1\n0\n",
             bundle_root.display(),
             pack_path.display(),
         ),
@@ -524,7 +524,7 @@ fn create_flow_reprompts_for_missing_local_app_pack_gtpack() {
     let output = run_with_stdin(
         &["wizard", "run", "--dry-run"],
         &format!(
-            "1\nDemo Bundle\ndemo-bundle\n{}\n1\nfake.gtpack\n{}\n1\n1\n4\n4\nn\n2\n",
+            "1\nDemo Bundle\ndemo-bundle\n{}\n1\nfake.gtpack\n{}\n1\n1\n4\n4\n1\nn\n2\n",
             bundle_root.display(),
             pack_path.display(),
         ),
@@ -561,7 +561,7 @@ fn create_flow_materializes_pack_and_provider_gtpacks_into_bundle_layout() {
     let output = run_with_stdin(
         &["wizard"],
         &format!(
-            "1\nDemo Bundle\ndemo-bundle\n{}\n1\n{}\n1\n1\n4\n2\n{}\n4\nn\n1\n0\n",
+            "1\nDemo Bundle\ndemo-bundle\n{}\n1\n{}\n1\n1\n4\n2\n{}\n4\n1\nn\n1\n0\n",
             bundle_root.display(),
             pack_path.display(),
             provider_source.display(),
@@ -595,7 +595,7 @@ fn common_extension_provider_latest_entry_skips_version_prompt_before_build() {
     let output = run_with_stdin_and_env(
         &["wizard", "run", "--dry-run"],
         &format!(
-            "1\nDemo Bundle\ndemo-bundle\n{}\n1\n{}\n1\n1\n4\n1\n1\n1\n4\nn\n2\n",
+            "1\nDemo Bundle\ndemo-bundle\n{}\n1\n{}\n1\n1\n4\n1\n1\n1\n4\n1\nn\n2\n",
             bundle_root.display(),
             pack_path.display(),
         ),
@@ -610,7 +610,7 @@ fn common_extension_provider_latest_entry_skips_version_prompt_before_build() {
 
     let stdout = String::from_utf8(output.stdout).expect("stdout");
     assert!(!stdout.contains("PR version or tag"));
-    assert!(stdout.contains("oci://ghcr.io/greenticai/packs/messaging/messaging-teams:latest"));
+    assert!(stdout.contains("oci://ghcr.io/greenticai/packs/messaging/messaging-teams:stable"));
     assert!(stdout.contains("\"execution\": \"dry_run\""));
 }
 
@@ -624,7 +624,7 @@ fn create_flow_fails_when_remote_provider_cannot_be_materialized() {
     let output = run_with_stdin_and_env(
         &["wizard", "--offline"],
         &format!(
-            "1\nDemo Bundle\ndemo-bundle\n{}\n1\n{}\n1\n1\n4\n2\noci://ghcr.io/greenticai/packs/deployer/greentic.fixture.k8s.raw.gtpack:latest\n4\nn\n1\n",
+            "1\nDemo Bundle\ndemo-bundle\n{}\n1\n{}\n1\n1\n4\n2\noci://ghcr.io/greenticai/packs/deployer/greentic.fixture.k8s.raw.gtpack:stable\n4\n1\nn\n1\n",
             bundle_root.display(),
             pack_path.display(),
         ),
@@ -702,7 +702,7 @@ export_intent: false\n",
     let output = run_with_stdin(
         &["wizard", "run", "--mode", "update"],
         &format!(
-            "{}\nUpdated Bundle\nupdated-bundle\n1\npack-b\n1\n2\ndefault\n4\n4\nn\n1\n",
+            "{}\nUpdated Bundle\nupdated-bundle\n1\npack-b\n1\n2\ndefault\n4\n4\n1\nn\n1\n",
             bundle_root.display()
         ),
     );
@@ -737,7 +737,7 @@ fn wizard_run_emit_answers_writes_envelope() {
             "--dry-run",
         ],
         &format!(
-            "1\nDemo Bundle\ndemo-bundle\n{}\n1\npack-a\n1\n1\n4\n4\nn\n1\n",
+            "1\nDemo Bundle\ndemo-bundle\n{}\n1\npack-a\n1\n1\n4\n4\n1\nn\n1\n",
             bundle_root.display()
         ),
     );
@@ -1479,7 +1479,7 @@ fn locale_aware_wizard_rendering_uses_embedded_prompts() {
     let output = run_with_stdin(
         &["--locale", "en-US", "wizard", "run", "--dry-run"],
         &format!(
-            "1\nDemo Bundle\ndemo-bundle\n{}\n1\npack-a\n1\n1\n4\n5\n4\nn\n2\n",
+            "1\nDemo Bundle\ndemo-bundle\n{}\n1\npack-a\n1\n1\n4\n5\n4\n1\nn\n2\n",
             bundle_root.display()
         ),
     );

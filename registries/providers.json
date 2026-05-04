@@ -87,7 +87,7 @@
         "i18n_key": "provider.messaging.teams",
         "fallback": "MS-Teams"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/messaging/messaging-teams:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/messaging/messaging-teams:stable"
     },
     {
       "id": "messaging-slack",
@@ -96,7 +96,7 @@
         "i18n_key": "provider.messaging.slack",
         "fallback": "Slack"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/messaging/messaging-slack:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/messaging/messaging-slack:stable"
     },
     {
       "id": "messaging-webex",
@@ -105,7 +105,7 @@
         "i18n_key": "provider.messaging.webex",
         "fallback": "WebEx"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/messaging/messaging-webex:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/messaging/messaging-webex:stable"
     },
     {
       "id": "messaging-webchat",
@@ -114,7 +114,7 @@
         "i18n_key": "provider.messaging.webchat",
         "fallback": "WebChat"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/messaging/messaging-webchat:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/messaging/messaging-webchat:stable"
     },
     {
       "id": "messaging-webchat-gui",
@@ -123,7 +123,7 @@
         "i18n_key": "provider.messaging.webchat-gui",
         "fallback": "WebChat (GUI)"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/messaging/messaging-webchat-gui:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/messaging/messaging-webchat-gui:stable"
     },
     {
       "id": "messaging-whatsapp",
@@ -132,7 +132,7 @@
         "i18n_key": "provider.messaging.whatsapp",
         "fallback": "WhatsApp"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/messaging/messaging-whatsapp:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/messaging/messaging-whatsapp:stable"
     },
     {
       "id": "messaging-telegram",
@@ -141,7 +141,7 @@
         "i18n_key": "provider.messaging.telegram",
         "fallback": "Telegram"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/messaging/messaging-telegram:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/messaging/messaging-telegram:stable"
     },
     {
       "id": "messaging-email",
@@ -150,7 +150,7 @@
         "i18n_key": "provider.messaging.email",
         "fallback": "Email"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/messaging/messaging-email:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/messaging/messaging-email:stable"
     },
     {
       "id": "events-webhook",
@@ -159,7 +159,7 @@
         "i18n_key": "provider.events.webhook",
         "fallback": "Webhook"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/events/events-webhook:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/events/events-webhook:stable"
     },
     {
       "id": "events-email",
@@ -168,7 +168,7 @@
         "i18n_key": "provider.events.email",
         "fallback": "Email"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/events/events-email:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/events/events-email:stable"
     },
     {
       "id": "events-email-sendgrid",
@@ -177,7 +177,7 @@
         "i18n_key": "provider.events.email.sendgrid",
         "fallback": "Email (SendGrid)"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/events/events-email-sendgrid:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/events/events-email-sendgrid:stable"
     },
     {
       "id": "events-sms",
@@ -186,7 +186,7 @@
         "i18n_key": "provider.events.sms",
         "fallback": "SMS"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/events/events-sms:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/events/events-sms:stable"
     },
     {
       "id": "events-sms-twilio",
@@ -195,7 +195,7 @@
         "i18n_key": "provider.events.sms.twilio",
         "fallback": "SMS (Twilio)"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/events/events-sms-twilio:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/events/events-sms-twilio:stable"
     },
     {
       "id": "events-timer",
@@ -204,7 +204,7 @@
         "i18n_key": "provider.events.timer",
         "fallback": "Timer/Scheduler"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/events/events-timer:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/events/events-timer:stable"
     },
     {
       "id": "oauth-github",
@@ -213,7 +213,7 @@
         "i18n_key": "provider.oauth.github",
         "fallback": "GitHub"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/oauth/oauth-github:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/oauth/oauth-github:stable"
     },
     {
       "id": "oauth-google",
@@ -222,7 +222,7 @@
         "i18n_key": "provider.oauth.google",
         "fallback": "Google"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/oauth/oauth-google:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/oauth/oauth-google:stable"
     },
     {
       "id": "oauth-microsoft",
@@ -231,7 +231,7 @@
         "i18n_key": "provider.oauth.microsoft",
         "fallback": "Microsoft"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/oauth/oauth-microsoft-graph:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/oauth/oauth-microsoft-graph:stable"
     },
     {
       "id": "oauth-oidc",
@@ -240,7 +240,7 @@
         "i18n_key": "provider.oauth.oidc",
         "fallback": "Generic OIDC"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/oauth/oauth-oidc-generic:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/oauth/oauth-oidc-generic:stable"
     },
     {
       "id": "oauth-slack",
@@ -249,7 +249,7 @@
         "i18n_key": "provider.oauth.slack",
         "fallback": "Slack"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/oauth/oauth-slack:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/oauth/oauth-slack:stable"
     },
     {
       "id": "secrets-aws-sm",
@@ -258,7 +258,7 @@
         "i18n_key": "provider.secrets.aws-sm",
         "fallback": "AWS Secrets Manager"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/secret/greentic.secrets.aws-sm.gtpack:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/secret/greentic.secrets.aws-sm.gtpack:stable"
     },
     {
       "id": "secrets-azure-kv",
@@ -267,7 +267,7 @@
         "i18n_key": "provider.secrets.azure-kv",
         "fallback": "Azure Key Vault"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/secret/greentic.secrets.azure-kv.gtpack:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/secret/greentic.secrets.azure-kv.gtpack:stable"
     },
     {
       "id": "secrets-gcp-sm",
@@ -276,7 +276,7 @@
         "i18n_key": "provider.secrets.gcp-sm",
         "fallback": "GCP Secret Manager"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/secret/greentic.secrets.gcp-sm.gtpack:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/secret/greentic.secrets.gcp-sm.gtpack:stable"
     },
     {
       "id": "secrets-k8s",
@@ -285,7 +285,7 @@
         "i18n_key": "provider.secrets.k8s",
         "fallback": "Kubernetes Secrets"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/secret/greentic.secrets.k8s.gtpack:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/secret/greentic.secrets.k8s.gtpack:stable"
     },
     {
       "id": "secrets-providers",
@@ -294,7 +294,7 @@
         "i18n_key": "provider.secrets.providers",
         "fallback": "Secrets Providers"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/secret/greentic.secrets.providers.gtpack:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/secret/greentic.secrets.providers.gtpack:stable"
     },
     {
       "id": "secrets-vault",
@@ -303,7 +303,34 @@
         "i18n_key": "provider.secrets.vault",
         "fallback": "HashiCorp Vault"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/secret/greentic.secrets.vault-kv.gtpack:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/secret/greentic.secrets.vault-kv.gtpack:stable"
+    },
+    {
+      "id": "deployer-aws",
+      "category": "deployer",
+      "label": {
+        "i18n_key": "provider.deployer.aws",
+        "fallback": "AWS"
+      },
+      "ref": "oci://ghcr.io/greenticai/packs/deployer/greentic.deploy.aws:stable"
+    },
+    {
+      "id": "deployer-azure",
+      "category": "deployer",
+      "label": {
+        "i18n_key": "provider.deployer.azure",
+        "fallback": "Azure"
+      },
+      "ref": "oci://ghcr.io/greenticai/packs/deployer/greentic.deploy.azure:stable"
+    },
+    {
+      "id": "deployer-gcp",
+      "category": "deployer",
+      "label": {
+        "i18n_key": "provider.deployer.gcp",
+        "fallback": "GCP"
+      },
+      "ref": "oci://ghcr.io/greenticai/packs/deployer/greentic.deploy.gcp:stable"
     },
     {
       "id": "deployer-serverless",
@@ -312,7 +339,7 @@
         "i18n_key": "provider.deployer.serverless",
         "fallback": "Serverless"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.serverless.gtpack:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.serverless.gtpack:stable"
     },
     {
       "id": "deployer-juju-machine",
@@ -321,7 +348,7 @@
         "i18n_key": "provider.deployer.juju-machine",
         "fallback": "Juju (Machine)"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.juju.machine.gtpack:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.juju.machine.gtpack:stable"
     },
     {
       "id": "deployer-juju-k8s",
@@ -330,7 +357,7 @@
         "i18n_key": "provider.deployer.juju-k8s",
         "fallback": "Juju (K8s)"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.juju.k8s.gtpack:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.juju.k8s.gtpack:stable"
     },
     {
       "id": "deployer-snap",
@@ -339,7 +366,7 @@
         "i18n_key": "provider.deployer.snap",
         "fallback": "Snap"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.snap.gtpack:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.snap.gtpack:stable"
     },
     {
       "id": "deployer-k8s",
@@ -348,7 +375,7 @@
         "i18n_key": "provider.deployer.k8s",
         "fallback": "Kubernetes (Raw)"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.k8s.raw.gtpack:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.k8s.raw.gtpack:stable"
     },
     {
       "id": "deployer-helm",
@@ -357,7 +384,7 @@
         "i18n_key": "provider.deployer.helm",
         "fallback": "Helm"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.helm.gtpack:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.helm.gtpack:stable"
     },
     {
       "id": "deployer-terraform",
@@ -366,7 +393,7 @@
         "i18n_key": "provider.deployer.terraform",
         "fallback": "Terraform"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.terraform.gtpack:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/deployer/greentic.fixture.terraform.gtpack:stable"
     },
     {
       "id": "state-memory",
@@ -375,7 +402,7 @@
         "i18n_key": "provider.state.memory",
         "fallback": "In-Memory State"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/state/state-memory:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/state/state-memory:stable"
     },
     {
       "id": "state-redis",
@@ -384,7 +411,7 @@
         "i18n_key": "provider.state.redis",
         "fallback": "Redis State"
       },
-      "ref": "oci://ghcr.io/greenticai/packs/state/state-redis:latest"
+      "ref": "oci://ghcr.io/greenticai/packs/state/state-redis:stable"
     },
     {
       "id": "component-pack2flow",

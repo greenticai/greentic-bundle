@@ -133,6 +133,7 @@
   "wizard.error.bundle_target_missing": "Bundle-mål findes ikke",
   "wizard.error.empty_answer": "Wizard-prompt kræver en værdi.",
   "wizard.error.empty_catalog": "Der blev ikke fundet nogen extension providers i kataloget.",
+  "wizard.error.input_ended": "Guidens input sluttede, før der blev angivet et gyldigt valg.",
   "wizard.error.invalid_choice": "Ugyldigt valg. Indtast 1, 2, 3 eller 0.",
   "wizard.exit.message": "Wizard afsluttede uden at indsamle svar.",
   "wizard.label.name": "Navn",
