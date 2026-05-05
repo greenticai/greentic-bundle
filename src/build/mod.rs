@@ -3,6 +3,7 @@ pub mod lock;
 pub mod manifest;
 pub mod plan;
 pub mod squashfs;
+pub mod warmup;
 
 use std::path::{Path, PathBuf};
 
@@ -56,7 +57,12 @@ pub struct UnbundleResult {
     pub output_dir: String,
 }
 
-pub fn build_workspace(root: &Path, output: Option<&Path>, dry_run: bool) -> Result<BuildResult> {
+pub fn build_workspace(
+    root: &Path,
+    output: Option<&Path>,
+    dry_run: bool,
+    warmup: bool,
+) -> Result<BuildResult> {
     let state = plan::build_state(root)?;
     let artifact = output
         .map(|path| path.to_path_buf())
@@ -69,10 +75,15 @@ pub fn build_workspace(root: &Path, output: Option<&Path>, dry_run: bool) -> Res
             manifest_path: export_plan.manifest_path,
         });
     }
-    export::write_build_outputs(&state, &artifact)
+    export::write_build_outputs(&state, &artifact, warmup)
 }
 
-pub fn export_build_dir(build_dir: &Path, output: &Path, dry_run: bool) -> Result<BuildResult> {
+pub fn export_build_dir(
+    build_dir: &Path,
+    output: &Path,
+    dry_run: bool,
+    warmup: bool,
+) -> Result<BuildResult> {
     let state = plan::load_build_state(build_dir)?;
     let export_plan = export::export_plan(&state, output);
     if dry_run {
@@ -82,7 +93,7 @@ pub fn export_build_dir(build_dir: &Path, output: &Path, dry_run: bool) -> Resul
             manifest_path: export_plan.manifest_path,
         });
     }
-    export::write_build_outputs(&state, output)
+    export::write_build_outputs(&state, output, warmup)
 }
 
 pub fn inspect_target(root: Option<&Path>, artifact: Option<&Path>) -> Result<InspectReport> {
