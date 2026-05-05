@@ -122,8 +122,10 @@ fn build_produces_byte_stable_artifact() {
 
     let artifact_one = root.join("one.gtbundle");
     let artifact_two = root.join("two.gtbundle");
-    greentic_bundle::build::build_workspace(&root, Some(&artifact_one), false).expect("build one");
-    greentic_bundle::build::build_workspace(&root, Some(&artifact_two), false).expect("build two");
+    greentic_bundle::build::build_workspace(&root, Some(&artifact_one), false, false)
+        .expect("build one");
+    greentic_bundle::build::build_workspace(&root, Some(&artifact_two), false, false)
+        .expect("build two");
 
     assert_eq!(
         fs::read(&artifact_one).expect("artifact one"),
@@ -155,7 +157,7 @@ fn build_normalized_dir_includes_materialized_pack_and_provider_files() {
     seed_workspace(&root);
 
     let build_dir = root.join("state/build/demo-bundle/normalized");
-    greentic_bundle::build::build_workspace(&root, None, false).expect("build workspace");
+    greentic_bundle::build::build_workspace(&root, None, false, false).expect("build workspace");
 
     assert_eq!(
         fs::read(build_dir.join("packs/pack-a.gtpack")).expect("built pack"),
@@ -173,7 +175,7 @@ fn build_defaults_artifact_path_to_dist_directory() {
     let root = temp.path().join("bundle");
     seed_workspace(&root);
 
-    let result = greentic_bundle::build::build_workspace(&root, None, false).expect("build");
+    let result = greentic_bundle::build::build_workspace(&root, None, false, false).expect("build");
     let expected = root.join("dist/demo-bundle.gtbundle");
 
     assert_eq!(result.artifact_path, expected.display().to_string());
@@ -200,7 +202,7 @@ fn doctor_validates_workspace_and_artifact() {
     let root = temp.path().join("bundle");
     seed_workspace(&root);
     let artifact = root.join("demo.gtbundle");
-    greentic_bundle::build::build_workspace(&root, Some(&artifact), false).expect("build");
+    greentic_bundle::build::build_workspace(&root, Some(&artifact), false, false).expect("build");
 
     let workspace_report =
         greentic_bundle::build::doctor_target(Some(&root), None).expect("doctor workspace");
@@ -216,7 +218,7 @@ fn inspect_artifact_includes_content_listing() {
     let root = temp.path().join("bundle");
     seed_workspace(&root);
     let artifact = root.join("demo.gtbundle");
-    greentic_bundle::build::build_workspace(&root, Some(&artifact), false).expect("build");
+    greentic_bundle::build::build_workspace(&root, Some(&artifact), false, false).expect("build");
 
     let report = greentic_bundle::build::inspect_target(None, Some(&artifact)).expect("inspect");
     let contents = report.contents.expect("artifact contents");
@@ -238,8 +240,8 @@ fn dry_run_export_computes_plan_without_writing_artifact() {
     let build_dir = root.join("state/build/demo-bundle/normalized");
     let artifact = root.join("dry-run.gtbundle");
 
-    greentic_bundle::build::build_workspace(&root, None, false).expect("seed build dir");
-    let result = greentic_bundle::build::export_build_dir(&build_dir, &artifact, true)
+    greentic_bundle::build::build_workspace(&root, None, false, false).expect("seed build dir");
+    let result = greentic_bundle::build::export_build_dir(&build_dir, &artifact, true, false)
         .expect("dry-run export");
     assert_eq!(result.artifact_path, artifact.display().to_string());
     assert!(!artifact.exists());
@@ -320,7 +322,7 @@ fn inspect_artifact_reads_embedded_manifest() {
     let root = temp.path().join("bundle");
     seed_workspace(&root);
     let artifact = root.join("demo.gtbundle");
-    greentic_bundle::build::build_workspace(&root, Some(&artifact), false).expect("build");
+    greentic_bundle::build::build_workspace(&root, Some(&artifact), false, false).expect("build");
 
     let report =
         greentic_bundle::build::inspect_target(None, Some(&artifact)).expect("inspect artifact");
@@ -336,7 +338,7 @@ fn reader_opens_normalized_build_directory() {
     let temp = TempDir::new().expect("tempdir");
     let root = temp.path().join("bundle");
     seed_workspace(&root);
-    let result = greentic_bundle::build::build_workspace(&root, None, false).expect("build");
+    let result = greentic_bundle::build::build_workspace(&root, None, false, false).expect("build");
 
     let opened = greentic_bundle_reader::open_build_dir(Path::new(&result.build_dir))
         .expect("open build dir");
@@ -359,7 +361,7 @@ fn reader_opens_artifact_and_exposes_runtime_surface() {
     let root = temp.path().join("bundle");
     seed_workspace(&root);
     let artifact = root.join("demo.gtbundle");
-    greentic_bundle::build::build_workspace(&root, Some(&artifact), false).expect("build");
+    greentic_bundle::build::build_workspace(&root, Some(&artifact), false, false).expect("build");
 
     let opened = greentic_bundle_reader::open_artifact(&artifact).expect("open artifact");
     assert_eq!(opened.source_kind.as_str(), "artifact");
@@ -380,7 +382,7 @@ fn reader_runtime_surface_exposes_catalogs_and_file_views() {
     let root = temp.path().join("bundle");
     seed_workspace(&root);
     let artifact = root.join("demo.gtbundle");
-    greentic_bundle::build::build_workspace(&root, Some(&artifact), false).expect("build");
+    greentic_bundle::build::build_workspace(&root, Some(&artifact), false, false).expect("build");
 
     let surface = greentic_bundle_reader::open_artifact(&artifact)
         .expect("open artifact")
@@ -442,7 +444,7 @@ export_intent: false
     )
     .expect("rewrite bundle yaml");
 
-    let report = greentic_bundle::build::build_workspace(&root, None, false).expect("build");
+    let report = greentic_bundle::build::build_workspace(&root, None, false, false).expect("build");
     let opened = greentic_bundle_reader::open_build_dir(Path::new(&report.build_dir))
         .expect("open build dir");
     let surface = opened.runtime_surface();
@@ -522,7 +524,7 @@ app_packs:
     )
     .expect("rewrite resolved");
 
-    let report = greentic_bundle::build::build_workspace(&root, None, false).expect("build");
+    let report = greentic_bundle::build::build_workspace(&root, None, false, false).expect("build");
     let target = greentic_bundle_reader::open_build_dir(Path::new(&report.build_dir))
         .expect("open build dir")
         .runtime_surface()
@@ -696,7 +698,7 @@ fn reader_rejects_artifact_with_missing_listed_file() {
     fs::write(build_dir.join("bundle.yaml"), "bundle_id: demo-bundle\n").expect("bundle yaml");
     let artifact = temp.path().join("broken.gtbundle");
 
-    greentic_bundle::build::export_build_dir(&build_dir, &artifact, false).expect("export");
+    greentic_bundle::build::export_build_dir(&build_dir, &artifact, false, false).expect("export");
     let error =
         greentic_bundle_reader::open_artifact(&artifact).expect_err("missing artifact file");
     assert!(error.details.contains("unsquashfs failed"));

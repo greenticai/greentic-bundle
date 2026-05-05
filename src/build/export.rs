@@ -25,8 +25,12 @@ pub fn export_plan(state: &crate::build::plan::BuildState, artifact: &Path) -> E
 pub fn write_build_outputs(
     state: &crate::build::plan::BuildState,
     artifact: &Path,
+    warmup: bool,
 ) -> Result<crate::build::BuildResult> {
     write_normalized_build_dir(state, &state.build_dir)?;
+    if warmup {
+        crate::build::warmup::warmup_build_dir(&state.build_dir)?;
+    }
     crate::build::squashfs::build_artifact(&state.build_dir, artifact)?;
     Ok(crate::build::BuildResult {
         artifact_path: artifact.display().to_string(),
