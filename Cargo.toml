@@ -1,3 +1,7 @@
+bench = [
+    { name = "perf", harness = false },
+]
+
 [workspace]
 members = [
     "crates/greentic-bundle-reader",
@@ -7,36 +11,81 @@ members = [
 resolver = "2"
 
 [workspace.package]
-version = "0.6.0-dev.0"
+version = "1.1.0-dev.0"
 
 [workspace.dependencies]
 anyhow = "1"
 assert_cmd = "2"
 ciborium = "0.2"
-clap = { version = "4", features = ["derive"] }
 constant_time_eq = "0.5"
 criterion = "0.8"
-bundle-standard-core = { version = ">=0.6.0-0, <0.7.0-0", path = "crates/bundle-standard-core" }
-greentic-bundle-reader = { version = ">=0.6.0-0, <0.7.0-0", path = "crates/greentic-bundle-reader" }
-greentic-distributor-client = { version = ">=0.5.0-0, <0.6.0-0", default-features = false, features = ["dist-client", "pack-fetch"] }
-greentic-qa-lib = ">=0.5.0-0, <0.6.0-0"
-jsonschema = { version = "0.46", default-features = false }
+greentic-qa-lib = ">=1.1.0-dev, <1.2.0-0"
 predicates = "3"
 rpassword = "7"
-semver = { version = "1", features = ["serde"] }
-serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-serde_yaml_bw = { package = "serde_yaml_gtc", version = "2.5.2" }
 thiserror = "2"
 sha2 = "0.11"
 sys-locale = "0.3"
 tempfile = "3"
-tokio = { version = "1", features = ["rt-multi-thread"] }
 unic-langid = "0.9"
 dirs = "6"
 tracing = "0.1"
 walkdir = "2"
-zip = { version = "8", default-features = false, features = ["deflate"] }
+
+[workspace.dependencies.clap]
+version = "4"
+features = [
+    "derive",
+]
+
+[workspace.dependencies.bundle-standard-core]
+version = ">=0.6.0-0, <0.7.0-0"
+path = "crates/bundle-standard-core"
+
+[workspace.dependencies.greentic-bundle-reader]
+version = ">=1.1.0-dev, <1.2.0-0"
+path = "crates/greentic-bundle-reader"
+
+[workspace.dependencies.greentic-distributor-client]
+version = ">=1.1.0-dev, <1.2.0-0"
+default-features = false
+features = [
+    "dist-client",
+    "pack-fetch",
+]
+
+[workspace.dependencies.jsonschema]
+version = "0.46"
+default-features = false
+
+[workspace.dependencies.semver]
+version = "1"
+features = [
+    "serde",
+]
+
+[workspace.dependencies.serde]
+version = "1"
+features = [
+    "derive",
+]
+
+[workspace.dependencies.serde_yaml_bw]
+package = "serde_yaml_gtc"
+version = "2.5.2"
+
+[workspace.dependencies.tokio]
+version = "1"
+features = [
+    "rt-multi-thread",
+]
+
+[workspace.dependencies.zip]
+version = "8"
+default-features = false
+features = [
+    "deflate",
+]
 
 [package]
 name = "greentic-bundle"
@@ -47,8 +96,15 @@ license = "MIT"
 description = "Greentic bundle authoring CLI scaffold with embedded i18n and answer-document contracts."
 readme = "README.md"
 repository = "https://github.com/greenticai/greentic-bundle"
-keywords = ["greentic", "bundle", "cli"]
-categories = ["command-line-utilities", "development-tools"]
+keywords = [
+    "greentic",
+    "bundle",
+    "cli",
+]
+categories = [
+    "command-line-utilities",
+    "development-tools",
+]
 include = [
     "Cargo.toml",
     "Cargo.lock",
@@ -69,12 +125,12 @@ pkg-url = "{ repo }/releases/download/v{ version }/{ name }-v{ version }-{ targe
 pkg-fmt = "tgz"
 bin-dir = "{ name }-v{ version }-{ target }/{ bin }{ binary-ext }"
 targets = [
-  "x86_64-unknown-linux-gnu",
-  "aarch64-unknown-linux-gnu",
-  "x86_64-apple-darwin",
-  "aarch64-apple-darwin",
-  "x86_64-pc-windows-msvc",
-  "aarch64-pc-windows-msvc",
+    "x86_64-unknown-linux-gnu",
+    "aarch64-unknown-linux-gnu",
+    "x86_64-apple-darwin",
+    "aarch64-apple-darwin",
+    "x86_64-pc-windows-msvc",
+    "aarch64-pc-windows-msvc",
 ]
 
 [package.metadata.binstall.overrides.x86_64-pc-windows-msvc]
@@ -85,42 +141,86 @@ pkg-fmt = "zip"
 pkg-url = "{ repo }/releases/download/v{ version }/{ name }-v{ version }-{ target }.zip"
 pkg-fmt = "zip"
 
-[dependencies]
-anyhow.workspace = true
-ciborium.workspace = true
-clap.workspace = true
-constant_time_eq.workspace = true
-greentic-bundle-reader.workspace = true
-greentic-distributor-client.workspace = true
-greentic-qa-lib.workspace = true
-rpassword.workspace = true
-semver.workspace = true
-serde.workspace = true
-serde_json.workspace = true
-serde_yaml_bw.workspace = true
-sha2.workspace = true
-sys-locale.workspace = true
-tempfile.workspace = true
-tokio.workspace = true
-unic-langid.workspace = true
-zip.workspace = true
-dirs.workspace = true
-tracing.workspace = true
+[dependencies.anyhow]
+workspace = true
 
-[dev-dependencies]
-assert_cmd.workspace = true
-criterion.workspace = true
-predicates.workspace = true
-sha2.workspace = true
-tempfile.workspace = true
-zip.workspace = true
+[dependencies.ciborium]
+workspace = true
 
-[build-dependencies]
-serde_json.workspace = true
+[dependencies.clap]
+workspace = true
 
-[[bench]]
-name = "perf"
-harness = false
+[dependencies.constant_time_eq]
+workspace = true
+
+[dependencies.greentic-bundle-reader]
+workspace = true
+
+[dependencies.greentic-distributor-client]
+workspace = true
+
+[dependencies.greentic-qa-lib]
+workspace = true
+
+[dependencies.rpassword]
+workspace = true
+
+[dependencies.semver]
+workspace = true
+
+[dependencies.serde]
+workspace = true
+
+[dependencies.serde_json]
+workspace = true
+
+[dependencies.serde_yaml_bw]
+workspace = true
+
+[dependencies.sha2]
+workspace = true
+
+[dependencies.sys-locale]
+workspace = true
+
+[dependencies.tempfile]
+workspace = true
+
+[dependencies.tokio]
+workspace = true
+
+[dependencies.unic-langid]
+workspace = true
+
+[dependencies.zip]
+workspace = true
+
+[dependencies.dirs]
+workspace = true
+
+[dependencies.tracing]
+workspace = true
+
+[dev-dependencies.assert_cmd]
+workspace = true
+
+[dev-dependencies.criterion]
+workspace = true
+
+[dev-dependencies.predicates]
+workspace = true
+
+[dev-dependencies.sha2]
+workspace = true
+
+[dev-dependencies.tempfile]
+workspace = true
+
+[dev-dependencies.zip]
+workspace = true
+
+[build-dependencies.serde_json]
+workspace = true
 
 [features]
 default = []
