@@ -43,7 +43,12 @@ jobs:
             --artifact-type application/vnd.greentic.registry.v1+json \
             providers.json:application/json
           echo "✓ Published to ghcr.io/${{ github.repository }}/providers:latest"
+          oras push ghcr.io/${{ github.repository }}/providers:stable \
+            --artifact-type application/vnd.greentic.registry.v1+json \
+            providers.json:application/json
+          echo "✓ Published to ghcr.io/${{ github.repository }}/providers:stable"
 
       - name: Verify push
         run: |
           oras manifest fetch ghcr.io/${{ github.repository }}/providers:latest --pretty
+          oras manifest fetch ghcr.io/${{ github.repository }}/providers:stable --pretty
