@@ -85,7 +85,7 @@ mod tests {
         let json_err: ExtensionError = serde_json::from_str::<serde_json::Value>("{nope")
             .unwrap_err()
             .into();
-        let io_err: ExtensionError = std::io::Error::new(std::io::ErrorKind::Other, "boom").into();
+        let io_err: ExtensionError = std::io::Error::other("boom").into();
         let cases: &[(ExtensionError, &str)] = &[
             (
                 ExtensionError::NotFound("ext".into()),
