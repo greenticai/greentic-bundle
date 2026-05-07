@@ -101,3 +101,29 @@ fn multi_form_three_conditional_routes() {
         "expected >=3 conditional routes from menu; got {when_count}"
     );
 }
+
+// Empirical regression for the gtbundle empty-routing bug. The fixture
+// is welcome + 4 menu targets pulled verbatim from a designer-generated
+// .gtbundle (testing-automation), so every Action.Submit carries
+// `data.nextCardId` and not `data.routeToCardId`. Before the tolerant-
+// read patch, build_routing dropped every edge and the emitted .ygtc
+// had `routing: []` per node — flow stops after the welcome render and
+// the runtime never publishes an outbound activity. Entry detection
+// is exercised by the unit test `picks_menu_card_using_next_card_id`
+// in src/entry.rs against a clean 2-card fixture; this integration
+// test focuses on edge generation against real-world card shapes.
+
+#[test]
+fn designer_dsl_nextcardid_emits_four_conditional_routes_on_welcome() {
+    // Welcome carries 4 Action.Submit entries each with a distinct
+    // nextCardId. After the tolerant-read patch, build_routing
+    // resolves all 4 → emit_ygtc writes 4 conditional routes under
+    // welcome's routing block. Pre-fix this assertion fails with 0
+    // matches because every edge gets dropped.
+    let yaml = run_fixture("designer_dsl_nextcardid");
+    let when_count = yaml.matches("when: action.action_id ==").count();
+    assert!(
+        when_count >= 4,
+        "expected >=4 conditional routes from welcome's nextCardId actions; got {when_count}\n{yaml}"
+    );
+}

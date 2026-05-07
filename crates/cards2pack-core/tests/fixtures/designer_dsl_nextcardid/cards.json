@@ -1,0 +1,289 @@
+[
+  {
+    "id": "customer_size",
+    "json": {
+      "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+      "actions": [
+        {
+          "data": {
+            "nextCardId": "customer_problems"
+          },
+          "style": "positive",
+          "title": "Continue",
+          "type": "Action.Submit"
+        },
+        {
+          "data": {
+            "nextCardId": "welcome"
+          },
+          "title": "Back",
+          "type": "Action.Submit"
+        }
+      ],
+      "body": [
+        {
+          "size": "Large",
+          "text": "What best describes your company?",
+          "type": "TextBlock",
+          "weight": "Bolder",
+          "wrap": true
+        },
+        {
+          "isSubtle": true,
+          "text": "This helps us tailor the right solution for you.",
+          "type": "TextBlock",
+          "wrap": true
+        },
+        {
+          "choices": [
+            {
+              "title": "Startup (1\u201310)",
+              "value": "Startup (1\u201310)"
+            },
+            {
+              "title": "Small (11\u201350)",
+              "value": "Small (11\u201350)"
+            },
+            {
+              "title": "Mid-size (51\u2013250)",
+              "value": "Mid-size (51\u2013250)"
+            },
+            {
+              "title": "Enterprise (250+)",
+              "value": "Enterprise (250+)"
+            }
+          ],
+          "errorMessage": "Required",
+          "id": "company_size",
+          "isRequired": true,
+          "label": "Company size",
+          "type": "Input.ChoiceSet"
+        }
+      ],
+      "id": "customer_size",
+      "type": "AdaptiveCard",
+      "version": "1.6"
+    }
+  },
+  {
+    "id": "partner_type",
+    "json": {
+      "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+      "actions": [
+        {
+          "data": {
+            "nextCardId": "partner_segments"
+          },
+          "style": "positive",
+          "title": "Continue",
+          "type": "Action.Submit"
+        },
+        {
+          "data": {
+            "nextCardId": "welcome"
+          },
+          "title": "Back",
+          "type": "Action.Submit"
+        }
+      ],
+      "body": [
+        {
+          "size": "Large",
+          "text": "What type of partner are you?",
+          "type": "TextBlock",
+          "weight": "Bolder",
+          "wrap": true
+        },
+        {
+          "isSubtle": true,
+          "text": "We'll tailor our partnership programme to your model.",
+          "type": "TextBlock",
+          "wrap": true
+        },
+        {
+          "choices": [
+            {
+              "title": "Consultancy / SI",
+              "value": "Consultancy / SI"
+            },
+            {
+              "title": "SaaS Provider",
+              "value": "SaaS Provider"
+            },
+            {
+              "title": "Agency",
+              "value": "Agency"
+            },
+            {
+              "title": "Freelancer",
+              "value": "Freelancer"
+            },
+            {
+              "title": "Other",
+              "value": "Other"
+            }
+          ],
+          "errorMessage": "Required",
+          "id": "partner_type",
+          "isRequired": true,
+          "label": "Partner type",
+          "type": "Input.ChoiceSet"
+        }
+      ],
+      "id": "partner_type",
+      "type": "AdaptiveCard",
+      "version": "1.6"
+    }
+  },
+  {
+    "id": "developer_hub",
+    "json": {
+      "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+      "actions": [
+        {
+          "data": {
+            "nextCardId": "developer_signup"
+          },
+          "title": "Get developer updates",
+          "type": "Action.Submit"
+        },
+        {
+          "data": {
+            "nextCardId": "welcome"
+          },
+          "title": "Back to Start",
+          "type": "Action.Submit"
+        }
+      ],
+      "body": [
+        {
+          "size": "Large",
+          "text": "Build with Greentic",
+          "type": "TextBlock",
+          "weight": "Bolder",
+          "wrap": true
+        },
+        {
+          "text": "Greentic is open-source and API-first. Explore our GitHub repository and full documentation to start building digital workers today. Drop your email below if you'd like to receive release notes and developer updates.",
+          "type": "TextBlock",
+          "wrap": true
+        }
+      ],
+      "id": "developer_hub",
+      "type": "AdaptiveCard",
+      "version": "1.6"
+    }
+  },
+  {
+    "id": "explorer_info",
+    "json": {
+      "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+      "actions": [
+        {
+          "data": {
+            "nextCardId": "welcome"
+          },
+          "title": "I'm ready \u2014 show me options",
+          "type": "Action.Submit"
+        }
+      ],
+      "body": [
+        {
+          "size": "Large",
+          "text": "Exploring Greentic",
+          "type": "TextBlock",
+          "weight": "Bolder",
+          "wrap": true
+        },
+        {
+          "isSubtle": true,
+          "text": "Here's a quick overview of what Greentic does and how to get started.",
+          "type": "TextBlock",
+          "wrap": true
+        },
+        {
+          "facts": [
+            {
+              "title": "Q: What is Greentic?",
+              "value": "Greentic is a platform for building and deploying intelligent digital workers \u2014 automated agents that handle business processes end-to-end using AI and workflow orchestration."
+            },
+            {
+              "title": "Q: Who uses Greentic?",
+              "value": "Teams across operations, customer support, sales, and engineering use Greentic to automate repetitive tasks, reduce manual effort, and ship AI-powered products faster."
+            },
+            {
+              "title": "Q: How do I get started?",
+              "value": "You can explore our open-source repository on GitHub or read through the full documentation at docs.greentic.ai to understand the architecture and quickstart guides."
+            },
+            {
+              "title": "Q: Is Greentic free to use?",
+              "value": "Greentic has an open-source core. Commercial plans with managed hosting, enterprise support, and SLA guarantees are available \u2014 speak to our team for details."
+            }
+          ],
+          "type": "FactSet"
+        }
+      ],
+      "id": "explorer_info",
+      "type": "AdaptiveCard",
+      "version": "1.6"
+    }
+  },
+  {
+    "id": "welcome",
+    "json": {
+      "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+      "actions": [
+        {
+          "data": {
+            "intent": "customer",
+            "nextCardId": "customer_size"
+          },
+          "title": "Use Greentic (Customer)",
+          "type": "Action.Submit"
+        },
+        {
+          "data": {
+            "intent": "partner",
+            "nextCardId": "partner_type"
+          },
+          "title": "Resell Greentic (Partner)",
+          "type": "Action.Submit"
+        },
+        {
+          "data": {
+            "intent": "developer",
+            "nextCardId": "developer_hub"
+          },
+          "title": "Build with Greentic (Developer)",
+          "type": "Action.Submit"
+        },
+        {
+          "data": {
+            "intent": "explorer",
+            "nextCardId": "explorer_info"
+          },
+          "title": "Just Exploring",
+          "type": "Action.Submit"
+        }
+      ],
+      "body": [
+        {
+          "size": "Large",
+          "text": "Welcome to Greentic",
+          "type": "TextBlock",
+          "weight": "Bolder",
+          "wrap": true
+        },
+        {
+          "isSubtle": true,
+          "text": "Intelligent digital workers, shipped fast. How can we help you today?",
+          "type": "TextBlock",
+          "wrap": true
+        }
+      ],
+      "id": "welcome",
+      "type": "AdaptiveCard",
+      "version": "1.6"
+    }
+  }
+]

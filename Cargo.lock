@@ -268,7 +268,7 @@ dependencies = [
 
 [[package]]
 name = "bundle-standard-core"
-version = "1.1.0-dev.0"
+version = "1.2.0-dev.0"
 dependencies = [
  "greentic-types 1.1.0-dev.25376259391",
  "semver",
@@ -287,7 +287,7 @@ checksum = "1e748733b7cbc798e1434b6ac524f0c1ff2ab456fe201501e6497c8417a4fc33"
 
 [[package]]
 name = "cards2pack-core"
-version = "1.1.0-dev.0"
+version = "1.2.0-dev.0"
 dependencies = [
  "insta",
  "serde",
@@ -1267,7 +1267,7 @@ dependencies = [
 
 [[package]]
 name = "greentic-bundle"
-version = "1.1.0-dev.0"
+version = "1.2.0-dev.0"
 dependencies = [
  "anyhow",
  "assert_cmd",
@@ -1296,7 +1296,7 @@ dependencies = [
 
 [[package]]
 name = "greentic-bundle-reader"
-version = "1.1.0-dev.0"
+version = "1.2.0-dev.0"
 dependencies = [
  "serde",
  "serde_json",

@@ -31,12 +31,15 @@ fn is_menu_card(card: &CardEntry) -> bool {
         Some(arr) => arr,
         None => return false,
     };
+    // Match both the AC extension's `nextCardId` (emitted by current
+    // role compilers) and the legacy `routeToCardId` (older fixtures /
+    // hand-authored cards). Mirrors the tolerant read in `routing.rs`.
     let route_count = actions
         .iter()
         .filter(|a| {
             a.get("type").and_then(|v| v.as_str()) == Some("Action.Submit")
                 && a.get("data")
-                    .and_then(|d| d.get("routeToCardId"))
+                    .and_then(|d| d.get("nextCardId").or_else(|| d.get("routeToCardId")))
                     .and_then(|v| v.as_str())
                     .is_some_and(|s| !s.is_empty())
         })
@@ -107,5 +110,29 @@ mod tests {
         }];
         let err = detect_entry(&cards).unwrap_err();
         assert_eq!(err.code(), "E_NO_ENTRY");
+    }
+
+    #[test]
+    fn picks_menu_card_using_next_card_id() {
+        // Cards emitted by the AC extension carry `data.nextCardId`,
+        // not `data.routeToCardId`. is_menu_card must recognise the
+        // newer key — without this every welcome-style menu falls
+        // through to the alphabetical first-card fallback, which
+        // selects the wrong entry on bundles whose menu happens not
+        // to sort first.
+        let cards = vec![
+            card("intro", json!({"type":"AdaptiveCard"})),
+            card(
+                "welcome",
+                json!({
+                    "type":"AdaptiveCard",
+                    "actions":[
+                        {"type":"Action.Submit","data":{"nextCardId":"a"}},
+                        {"type":"Action.Submit","data":{"nextCardId":"b"}}
+                    ]
+                }),
+            ),
+        ];
+        assert_eq!(detect_entry(&cards).unwrap(), "welcome");
     }
 }
