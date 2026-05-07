@@ -1027,7 +1027,8 @@ fn execute_request(
     let applied_files = if execution == ExecutionMode::Execute {
         let mut applied_files = apply_plan(&request, &bundle_lock)?;
         if build_bundle_now {
-            let build_result = crate::build::build_workspace(&request.output_dir, None, false)?;
+            let build_result =
+                crate::build::build_workspace(&request.output_dir, None, false, false)?;
             applied_files.push(PathBuf::from(build_result.artifact_path));
         }
         applied_files.sort();
