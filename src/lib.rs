@@ -9,9 +9,6 @@ pub mod runtime;
 pub mod setup;
 pub mod wizard;
 
-#[cfg(feature = "extensions")]
-pub mod ext;
-
 pub fn main_entry() -> anyhow::Result<()> {
     cli::run()
 }
