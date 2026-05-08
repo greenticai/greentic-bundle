@@ -168,9 +168,7 @@ mod tests {
         let tool = dir.path().join("fake-warmup.sh");
         fs::write(
             &tool,
-            format!(
-                "#!/usr/bin/env bash\nset -e\nbundle=\"$2\"\nif [ -d \"$bundle/providers/deployer\" ]; then echo visible >&2; exit 42; fi\nif [ -d \"$bundle/.greentic-warmup-hidden-deployer\" ]; then echo hidden-visible >&2; exit 43; fi\n"
-            ),
+            "#!/usr/bin/env bash\nset -e\nbundle=\"$2\"\nif [ -d \"$bundle/providers/deployer\" ]; then echo visible >&2; exit 42; fi\nif [ -d \"$bundle/.greentic-warmup-hidden-deployer\" ]; then echo hidden-visible >&2; exit 43; fi\n",
         )
         .expect("write tool");
         let mut perms = fs::metadata(&tool).expect("metadata").permissions();
