@@ -51,7 +51,7 @@ fn noc_alert_no_duplicate_flat_fields() {
 fn noc_alert_routing_uses_route_to_card_id_not_alphabetical_chain() {
     let yaml = run_fixture("noc_alert");
     // welcome card has 4 menu actions → must emit 4 conditional routes.
-    let when_count = yaml.matches("when: action.action_id ==").count();
+    let when_count = yaml.matches("condition: action.action_id ==").count();
     assert!(
         when_count >= 4,
         "expected >=4 conditional routes from welcome menu; got {when_count}"
@@ -95,7 +95,7 @@ fn multi_form_golden() {
 #[test]
 fn multi_form_three_conditional_routes() {
     let yaml = run_fixture("multi_form");
-    let when_count = yaml.matches("when: action.action_id ==").count();
+    let when_count = yaml.matches("condition: action.action_id ==").count();
     assert!(
         when_count >= 3,
         "expected >=3 conditional routes from menu; got {when_count}"
@@ -121,7 +121,7 @@ fn designer_dsl_nextcardid_emits_four_conditional_routes_on_welcome() {
     // welcome's routing block. Pre-fix this assertion fails with 0
     // matches because every edge gets dropped.
     let yaml = run_fixture("designer_dsl_nextcardid");
-    let when_count = yaml.matches("when: action.action_id ==").count();
+    let when_count = yaml.matches("condition: action.action_id ==").count();
     assert!(
         when_count >= 4,
         "expected >=4 conditional routes from welcome's nextCardId actions; got {when_count}\n{yaml}"
