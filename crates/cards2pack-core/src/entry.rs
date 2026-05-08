@@ -1,4 +1,19 @@
 //! Entry node detection.
+//!
+//! The flow's `start` is whichever Adaptive Card the user should land on
+//! when the bundle is launched. We pick it topologically: a card that no
+//! other card routes to is a root. Among multiple roots, the most
+//! "branchy" one (most outgoing routes) wins, which on real bundles is
+//! the welcome menu rather than a sub-flow leaf.
+//!
+//! The previous heuristic walked declaration order looking for the first
+//! menu-style card (≥2 outgoing routes). On the Travel-Concierge bundle
+//! that surfaced "Restaurant Reservations" before "Digital Travel
+//! Concierge" because the sub-menu happened to come first in the
+//! generator's output — the welcome card is reachable from itself plus
+//! every sub-menu, but declaration order did not encode that.
+
+use std::collections::HashSet;
 
 use crate::errors::ConvertError;
 use crate::types::{CardEntry, CardKind};
@@ -7,6 +22,29 @@ use crate::types::{CardEntry, CardKind};
 pub fn detect_entry(cards: &[CardEntry]) -> Result<String, ConvertError> {
     if cards.is_empty() {
         return Err(ConvertError::NoCards);
+    }
+
+    let targeted = collect_route_targets(cards);
+
+    let mut best_root: Option<(usize, &CardEntry)> = None;
+    for card in cards {
+        if !matches!(card.kind, CardKind::AdaptiveCard(_)) {
+            continue;
+        }
+        if targeted.contains(card.id.as_str()) {
+            continue;
+        }
+        let outgoing = outgoing_route_count(card);
+        let replace = match best_root {
+            None => true,
+            Some((best_outgoing, _)) => outgoing > best_outgoing,
+        };
+        if replace {
+            best_root = Some((outgoing, card));
+        }
+    }
+    if let Some((_, card)) = best_root {
+        return Ok(card.id.clone());
     }
 
     if let Some(menu) = cards.iter().find(|c| is_menu_card(c)) {
@@ -23,18 +61,40 @@ pub fn detect_entry(cards: &[CardEntry]) -> Result<String, ConvertError> {
     Err(ConvertError::NoEntryCard { count: cards.len() })
 }
 
-fn is_menu_card(card: &CardEntry) -> bool {
+fn collect_route_targets(cards: &[CardEntry]) -> HashSet<&str> {
+    let mut targets = HashSet::new();
+    for card in cards {
+        let CardKind::AdaptiveCard(json) = &card.kind else {
+            continue;
+        };
+        let Some(actions) = json.get("actions").and_then(|a| a.as_array()) else {
+            continue;
+        };
+        for action in actions {
+            if action.get("type").and_then(|v| v.as_str()) != Some("Action.Submit") {
+                continue;
+            }
+            if let Some(target) = action
+                .get("data")
+                .and_then(|d| d.get("nextCardId").or_else(|| d.get("routeToCardId")))
+                .and_then(|v| v.as_str())
+                .filter(|s| !s.is_empty())
+            {
+                targets.insert(target);
+            }
+        }
+    }
+    targets
+}
+
+fn outgoing_route_count(card: &CardEntry) -> usize {
     let CardKind::AdaptiveCard(json) = &card.kind else {
-        return false;
+        return 0;
     };
-    let actions = match json.get("actions").and_then(|a| a.as_array()) {
-        Some(arr) => arr,
-        None => return false,
+    let Some(actions) = json.get("actions").and_then(|a| a.as_array()) else {
+        return 0;
     };
-    // Match both the AC extension's `nextCardId` (emitted by current
-    // role compilers) and the legacy `routeToCardId` (older fixtures /
-    // hand-authored cards). Mirrors the tolerant read in `routing.rs`.
-    let route_count = actions
+    actions
         .iter()
         .filter(|a| {
             a.get("type").and_then(|v| v.as_str()) == Some("Action.Submit")
@@ -43,8 +103,11 @@ fn is_menu_card(card: &CardEntry) -> bool {
                     .and_then(|v| v.as_str())
                     .is_some_and(|s| !s.is_empty())
         })
-        .count();
-    route_count >= 2
+        .count()
+}
+
+fn is_menu_card(card: &CardEntry) -> bool {
+    outgoing_route_count(card) >= 2
 }
 
 #[cfg(test)]
@@ -98,7 +161,8 @@ mod tests {
             ),
             card("after", json!({"type":"AdaptiveCard"})),
         ];
-        // Single-action card is NOT a menu card, fallback to first.
+        // greeter has no incoming route, after is targeted by greeter →
+        // greeter wins as the only root.
         assert_eq!(detect_entry(&cards).unwrap(), "greeter");
     }
 
@@ -115,11 +179,7 @@ mod tests {
     #[test]
     fn picks_menu_card_using_next_card_id() {
         // Cards emitted by the AC extension carry `data.nextCardId`,
-        // not `data.routeToCardId`. is_menu_card must recognise the
-        // newer key — without this every welcome-style menu falls
-        // through to the alphabetical first-card fallback, which
-        // selects the wrong entry on bundles whose menu happens not
-        // to sort first.
+        // not `data.routeToCardId`.
         let cards = vec![
             card("intro", json!({"type":"AdaptiveCard"})),
             card(
@@ -134,5 +194,79 @@ mod tests {
             ),
         ];
         assert_eq!(detect_entry(&cards).unwrap(), "welcome");
+    }
+
+    #[test]
+    fn topological_prefers_root_menu_over_inner_menu() {
+        // Reproduces the Travel-Concierge bundle shape: the welcome
+        // card branches into specialised sub-menus, each of which is
+        // also a menu (≥2 routes). Declaration order lists the
+        // sub-menu first, so the previous heuristic returned the
+        // wrong start. The topological heuristic must pick the
+        // welcome because nothing routes to it.
+        let cards = vec![
+            card(
+                "restaurant_reservations",
+                json!({
+                    "type":"AdaptiveCard",
+                    "actions":[
+                        {"type":"Action.Submit","data":{"nextCardId":"reserve_a"}},
+                        {"type":"Action.Submit","data":{"nextCardId":"reserve_b"}}
+                    ]
+                }),
+            ),
+            card(
+                "concierge_welcome",
+                json!({
+                    "type":"AdaptiveCard",
+                    "actions":[
+                        {"type":"Action.Submit","data":{"nextCardId":"restaurant_reservations"}},
+                        {"type":"Action.Submit","data":{"nextCardId":"hotel_booking"}},
+                        {"type":"Action.Submit","data":{"nextCardId":"flight_search"}}
+                    ]
+                }),
+            ),
+            card(
+                "hotel_booking",
+                json!({
+                    "type":"AdaptiveCard",
+                    "actions":[
+                        {"type":"Action.Submit","data":{"nextCardId":"hotel_a"}},
+                        {"type":"Action.Submit","data":{"nextCardId":"hotel_b"}}
+                    ]
+                }),
+            ),
+        ];
+        assert_eq!(detect_entry(&cards).unwrap(), "concierge_welcome");
+    }
+
+    #[test]
+    fn falls_back_to_first_menu_on_full_cycle() {
+        // Pathological: every card has an incoming route, so the
+        // topological phase finds no root. Falls back to the first
+        // menu-style card by declaration order.
+        let cards = vec![
+            card(
+                "loop_a",
+                json!({
+                    "type":"AdaptiveCard",
+                    "actions":[
+                        {"type":"Action.Submit","data":{"nextCardId":"loop_b"}},
+                        {"type":"Action.Submit","data":{"nextCardId":"loop_b"}}
+                    ]
+                }),
+            ),
+            card(
+                "loop_b",
+                json!({
+                    "type":"AdaptiveCard",
+                    "actions":[
+                        {"type":"Action.Submit","data":{"nextCardId":"loop_a"}},
+                        {"type":"Action.Submit","data":{"nextCardId":"loop_a"}}
+                    ]
+                }),
+            ),
+        ];
+        assert_eq!(detect_entry(&cards).unwrap(), "loop_a");
     }
 }
