@@ -213,15 +213,15 @@ nodes:
   welcome:
     routing:
     - to: scene1_noc_dashboard
-      when: action.action_id == "goto_scene1_noc_dashboard"
+      condition: action.action_id == "goto_scene1_noc_dashboard"
     - to: scene2_alert_intro
-      when: action.action_id == "goto_scene2_alert_intro"
+      condition: action.action_id == "goto_scene2_alert_intro"
     - to: scene3_bgp_alert_intro
-      when: action.action_id == "goto_scene3_bgp_alert_intro"
+      condition: action.action_id == "goto_scene3_bgp_alert_intro"
     - to: scene4_explainability_intro
-      when: action.action_id == "goto_scene4_explainability_intro"
+      condition: action.action_id == "goto_scene4_explainability_intro"
     - to: demo_wrapup
-      when: action.action_id == "goto_demo_wrapup"
+      condition: action.action_id == "goto_demo_wrapup"
     card:
       call:
         op: render
