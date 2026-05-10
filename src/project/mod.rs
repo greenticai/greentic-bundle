@@ -437,12 +437,28 @@ fn bundled_catalog_mode() -> bool {
         .unwrap_or(false)
 }
 
-struct MaterializedCopyTarget {
-    reference: String,
-    destination: PathBuf,
+/// Where a single app-pack reference materialises to inside the
+/// bundle workspace tree.
+///
+/// Two places consume this:
+/// - [`materialize_workspace_dependencies`] copies the file from the
+///   user's local store into `root/<destination>`.
+/// - [`crate::build::plan::build_state`] rewrites bundle.yaml + the
+///   manifest's `app_packs` entries to point at the materialised
+///   destination so post-bundle tooling (the `gtc setup doctor`
+///   `reference_exists` check, in particular) can resolve the
+///   reference against the squashfs filesystem layout. Without that
+///   rewrite the doctor flags `file://./<name>.gtpack` as a missing
+///   pack — the file actually lives at `packs/<name>.gtpack` inside
+///   the bundle.
+pub(crate) struct MaterializedCopyTarget {
+    pub(crate) reference: String,
+    pub(crate) destination: PathBuf,
 }
 
-fn app_pack_copy_targets(workspace: &BundleWorkspaceDefinition) -> Vec<MaterializedCopyTarget> {
+pub(crate) fn app_pack_copy_targets(
+    workspace: &BundleWorkspaceDefinition,
+) -> Vec<MaterializedCopyTarget> {
     if workspace.app_pack_mappings.is_empty() {
         return workspace
             .app_packs
@@ -700,7 +716,26 @@ fn build_manifest(root: &Path, tenant: &str, team: Option<&str>) -> ResolvedMani
         )
     });
 
-    let app_packs = evaluate_app_pack_policies(root, tenant, team, &workspace.app_packs);
+    let mut app_packs = evaluate_app_pack_policies(root, tenant, team, &workspace.app_packs);
+
+    // Rewrite each resolved reference to point at where the pack
+    // actually lands inside the squashfs (`packs/<id>.gtpack` for
+    // global, `tenants/.../packs/...` for scoped). Without this, the
+    // bundled `resolved/<tenant>.yaml` references the canonical
+    // user-supplied form (e.g. `file://./testing.gtpack`), and
+    // `gtc setup doctor`'s `reference_exists` check fails when it
+    // resolves the path against the squashfs root. The user's
+    // workspace + bundle.lock keep their canonical references — only
+    // the resolved YAML that ships inside the bundle is rewritten.
+    let copy_targets = app_pack_copy_targets(&workspace);
+    for entry in &mut app_packs {
+        if let Some(target) = copy_targets.iter().find(|t| t.reference == entry.reference) {
+            // Bare relative path (no scheme) — see the matching
+            // comment in `crate::build::plan::build_state` for why
+            // doctor's `reference_exists` resolver needs this shape.
+            entry.reference = target.destination.display().to_string().replace('\\', "/");
+        }
+    }
 
     ResolvedManifest {
         version: "1".to_string(),
