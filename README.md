@@ -35,6 +35,8 @@ The main jobs of `greentic-bundle` are:
 - generate bundle artifacts with `build`
 - inspect or validate a workspace or artifact later
 
+`.gtbundle` files are SquashFS artifacts. `greentic-bundle` creates, lists, reads, and extracts them with a Rust-native `backhand` implementation by default, so normal use does not require external `mksquashfs` or `unsquashfs` binaries. For compatibility testing, the legacy tools can be selected with `GREENTIC_BUNDLE_SQUASHFS_WRITER=mksquashfs` and `GREENTIC_BUNDLE_SQUASHFS_READER=unsquashfs`; in that mode `squashfs-tools` must be installed.
+
 The most important idea is simple:
 
 1. You choose what should go into the bundle.

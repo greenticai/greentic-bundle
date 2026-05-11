@@ -12,5 +12,6 @@ repository = "https://github.com/greentic-ng/greentic-bundle"
 path = "src/lib.rs"
 
 [dependencies]
+backhand.workspace = true
 serde.workspace = true
 serde_json.workspace = true

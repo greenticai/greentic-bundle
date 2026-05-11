@@ -7,10 +7,11 @@ members = [
 resolver = "2"
 
 [workspace.package]
-version = "0.5.9"
+version = "0.5.10"
 
 [workspace.dependencies]
 anyhow = "1"
+backhand = "0.25"
 assert_cmd = "2"
 ciborium = "0.2"
 clap = { version = "4", features = ["derive"] }
@@ -86,6 +87,7 @@ pkg-fmt = "zip"
 
 [dependencies]
 anyhow.workspace = true
+backhand.workspace = true
 ciborium.workspace = true
 clap.workspace = true
 constant_time_eq.workspace = true
@@ -105,13 +107,13 @@ unic-langid.workspace = true
 zip.workspace = true
 dirs.workspace = true
 tracing.workspace = true
+walkdir.workspace = true
 
 # feature: extensions (bundle-ext Phase A — host-side schema/registry only).
 # WASM execution path was removed pending crates.io-publishable runtime crates;
 # tracked in https://github.com/greenticai/greentic/issues/175.
 jsonschema = { workspace = true, optional = true, default-features = false }
 thiserror = { workspace = true, optional = true }
-walkdir = { workspace = true, optional = true }
 
 [dev-dependencies]
 assert_cmd.workspace = true
@@ -133,5 +135,4 @@ default = []
 extensions = [
   "dep:jsonschema",
   "dep:thiserror",
-  "dep:walkdir",
 ]
