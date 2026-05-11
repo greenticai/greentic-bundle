@@ -81,8 +81,19 @@ struct CardSpec {
 #[derive(Debug, Serialize)]
 #[serde(untagged)]
 enum RouteYaml {
-    Conditional { to: String, when: String },
-    Unconditional { to: String },
+    /// Multi-route node: each entry pairs a target with a `condition`
+    /// expression that must evaluate true. The field is named
+    /// `condition` to match `greentic-flow`'s YGTC schema (legacy code
+    /// emitted `when`, which `additionalProperties: false` rejects —
+    /// runtime then silently fails to load the flow and autoStart
+    /// never fires the start node).
+    Conditional {
+        to: String,
+        condition: String,
+    },
+    Unconditional {
+        to: String,
+    },
 }
 
 pub fn emit_ygtc(
@@ -171,7 +182,7 @@ fn render_routes(edges: Option<&Vec<RouteEdge>>) -> Vec<RouteYaml> {
         .iter()
         .map(|e| RouteYaml::Conditional {
             to: e.target.clone(),
-            when: format!("action.action_id == \"{}\"", e.action_id),
+            condition: format!("action.action_id == \"{}\"", e.action_id),
         })
         .collect()
 }
@@ -230,7 +241,7 @@ mod tests {
             ],
         );
         let yaml = emit_ygtc(&cards, "menu", &routing, &[], "demo").unwrap();
-        assert!(yaml.contains(r#"when: action.action_id == "go_a""#));
-        assert!(yaml.contains(r#"when: action.action_id == "go_b""#));
+        assert!(yaml.contains(r#"condition: action.action_id == "go_a""#));
+        assert!(yaml.contains(r#"condition: action.action_id == "go_b""#));
     }
 }

@@ -61,11 +61,11 @@ nodes:
   menu:
     routing:
     - to: form_a
-      when: action.action_id == "go_a"
+      condition: action.action_id == "go_a"
     - to: form_b
-      when: action.action_id == "go_b"
+      condition: action.action_id == "go_b"
     - to: form_c
-      when: action.action_id == "go_c"
+      condition: action.action_id == "go_c"
     card:
       call:
         op: render

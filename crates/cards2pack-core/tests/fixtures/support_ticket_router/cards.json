@@ -1,0 +1,2897 @@
+[
+  {
+    "id": "accommodation_type",
+    "json": {
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "actions": [
+    {
+      "data": {
+        "accom_type": "hotel",
+        "nextCardId": "collect_accommodation_prefs"
+      },
+      "title": "🏨 Hotel",
+      "type": "Action.Submit"
+    },
+    {
+      "data": {
+        "accom_type": "airbnb",
+        "nextCardId": "collect_accommodation_prefs"
+      },
+      "title": "🏠 Airbnb / Apartment",
+      "type": "Action.Submit"
+    },
+    {
+      "data": {
+        "accom_type": "none",
+        "nextCardId": "collect_venue_details"
+      },
+      "title": "⏭️ No accommodation needed",
+      "type": "Action.Submit"
+    }
+  ],
+  "body": [
+    {
+      "size": "Large",
+      "text": "Accommodation",
+      "type": "TextBlock",
+      "weight": "Bolder",
+      "wrap": true
+    },
+    {
+      "isSubtle": true,
+      "text": "What type of accommodation would you like for this trip?",
+      "type": "TextBlock",
+      "wrap": true
+    }
+  ],
+  "id": "accommodation_type",
+  "type": "AdaptiveCard",
+  "version": "1.6"
+}
+  }
+,
+  {
+    "id": "cancel_exit",
+    "json": {
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "actions": [
+    {
+      "data": {
+        "exit_confirmed": true,
+        "nextCardId": "exit_confirmed",
+        "resolved": true
+      },
+      "style": "positive",
+      "title": "Yes, exit now",
+      "type": "Action.Submit"
+    },
+    {
+      "data": {
+        "exit_confirmed": false,
+        "nextCardId": "digital_travel_concierge_home",
+        "resolved": false
+      },
+      "title": "No, take me back",
+      "type": "Action.Submit"
+    }
+  ],
+  "body": [
+    {
+      "size": "Large",
+      "text": "Cancel & Exit",
+      "type": "TextBlock",
+      "weight": "Bolder",
+      "wrap": true
+    },
+    {
+      "text": "Are you sure you want to exit? Your progress will be saved and you can return to continue planning at any time.",
+      "type": "TextBlock",
+      "wrap": true
+    }
+  ],
+  "id": "cancel_exit",
+  "type": "AdaptiveCard",
+  "version": "1.6"
+}
+  }
+,
+  {
+    "id": "collect_accommodation_prefs",
+    "json": {
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "actions": [
+    {
+      "data": {
+        "nextCardId": "api_search_accommodation"
+      },
+      "style": "positive",
+      "title": "Search Accommodation →",
+      "type": "Action.Submit"
+    },
+    {
+      "data": {
+        "nextCardId": "accommodation_type"
+      },
+      "title": "Back",
+      "type": "Action.Submit"
+    }
+  ],
+  "body": [
+    {
+      "size": "Large",
+      "text": "Accommodation Preferences",
+      "type": "TextBlock",
+      "weight": "Bolder",
+      "wrap": true
+    },
+    {
+      "isSubtle": true,
+      "text": "Help us find the right place to stay.",
+      "type": "TextBlock",
+      "wrap": true
+    },
+    {
+      "errorMessage": "Required",
+      "id": "checkin_date",
+      "isRequired": true,
+      "label": "Check-in date",
+      "type": "Input.Date"
+    },
+    {
+      "errorMessage": "Required",
+      "id": "checkout_date",
+      "isRequired": true,
+      "label": "Check-out date",
+      "type": "Input.Date"
+    },
+    {
+      "errorMessage": "Required",
+      "id": "num_rooms",
+      "isRequired": true,
+      "label": "Number of rooms",
+      "type": "Input.Number"
+    },
+    {
+      "errorMessage": "Required",
+      "id": "guests_per_room",
+      "isRequired": true,
+      "label": "Guests per room",
+      "type": "Input.Number"
+    },
+    {
+      "choices": [
+        {
+          "title": "Near venue",
+          "value": "Near venue"
+        },
+        {
+          "title": "City centre",
+          "value": "City centre"
+        },
+        {
+          "title": "Near airport",
+          "value": "Near airport"
+        },
+        {
+          "title": "Specific address",
+          "value": "Specific address"
+        }
+      ],
+      "errorMessage": "Required",
+      "id": "location_pref",
+      "isRequired": true,
+      "label": "Location preference",
+      "type": "Input.ChoiceSet"
+    },
+    {
+      "errorMessage": "Required",
+      "id": "budget_per_night",
+      "isRequired": true,
+      "label": "Budget per night (approximate)",
+      "type": "Input.Text"
+    },
+    {
+      "choices": [
+        {
+          "title": "Wi-Fi",
+          "value": "Wi-Fi"
+        },
+        {
+          "title": "Breakfast included",
+          "value": "Breakfast included"
+        },
+        {
+          "title": "Parking",
+          "value": "Parking"
+        },
+        {
+          "title": "Gym",
+          "value": "Gym"
+        },
+        {
+          "title": "Workspace / desk",
+          "value": "Workspace / desk"
+        },
+        {
+          "title": "Accessibility features",
+          "value": "Accessibility features"
+        }
+      ],
+      "id": "amenities",
+      "label": "Required amenities",
+      "type": "Input.ChoiceSet"
+    }
+  ],
+  "id": "collect_accommodation_prefs",
+  "type": "AdaptiveCard",
+  "version": "1.6"
+}
+  }
+,
+  {
+    "id": "collect_restaurant_prefs",
+    "json": {
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "actions": [
+    {
+      "data": {
+        "nextCardId": "api_search_restaurants"
+      },
+      "style": "positive",
+      "title": "Find Restaurants →",
+      "type": "Action.Submit"
+    },
+    {
+      "data": {
+        "nextCardId": "api_build_itinerary"
+      },
+      "title": "Skip restaurants",
+      "type": "Action.Submit"
+    }
+  ],
+  "body": [
+    {
+      "size": "Large",
+      "text": "Restaurant Preferences",
+      "type": "TextBlock",
+      "weight": "Bolder",
+      "wrap": true
+    },
+    {
+      "isSubtle": true,
+      "text": "Tell us what kind of dining experience you're looking for.",
+      "type": "TextBlock",
+      "wrap": true
+    },
+    {
+      "errorMessage": "Required",
+      "id": "dining_date",
+      "isRequired": true,
+      "label": "Dining date",
+      "type": "Input.Date"
+    },
+    {
+      "errorMessage": "Required",
+      "id": "dining_time",
+      "isRequired": true,
+      "label": "Preferred dining time",
+      "type": "Input.Time"
+    },
+    {
+      "errorMessage": "Required",
+      "id": "num_diners",
+      "isRequired": true,
+      "label": "Number of people",
+      "type": "Input.Number"
+    },
+    {
+      "id": "cuisine_preference",
+      "label": "Cuisine preference",
+      "type": "Input.Text"
+    },
+    {
+      "choices": [
+        {
+          "title": "Budget-friendly",
+          "value": "Budget-friendly"
+        },
+        {
+          "title": "Mid-range",
+          "value": "Mid-range"
+        },
+        {
+          "title": "Fine dining",
+          "value": "Fine dining"
+        },
+        {
+          "title": "No preference",
+          "value": "No preference"
+        }
+      ],
+      "id": "dining_budget",
+      "label": "Budget per person",
+      "type": "Input.ChoiceSet"
+    },
+    {
+      "id": "dietary_requirements",
+      "label": "Dietary requirements",
+      "type": "Input.Text"
+    },
+    {
+      "choices": [
+        {
+          "title": "Near hotel",
+          "value": "Near hotel"
+        },
+        {
+          "title": "Near venue",
+          "value": "Near venue"
+        },
+        {
+          "title": "City centre",
+          "value": "City centre"
+        },
+        {
+          "title": "No preference",
+          "value": "No preference"
+        }
+      ],
+      "id": "preferred_area",
+      "label": "Preferred area",
+      "type": "Input.ChoiceSet"
+    },
+    {
+      "choices": [
+        {
+          "title": "Formal / business dining",
+          "value": "Formal / business dining"
+        },
+        {
+          "title": "Casual / relaxed",
+          "value": "Casual / relaxed"
+        },
+        {
+          "title": "Trendy / modern",
+          "value": "Trendy / modern"
+        },
+        {
+          "title": "Traditional / local",
+          "value": "Traditional / local"
+        },
+        {
+          "title": "No preference",
+          "value": "No preference"
+        }
+      ],
+      "id": "dining_style",
+      "label": "Atmosphere preference",
+      "type": "Input.ChoiceSet"
+    }
+  ],
+  "id": "collect_restaurant_prefs",
+  "type": "AdaptiveCard",
+  "version": "1.6"
+}
+  }
+,
+  {
+    "id": "collect_trip_basics",
+    "json": {
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "actions": [
+    {
+      "data": {
+        "nextCardId": "api_search_flights",
+        "step": "trip_basics_complete"
+      },
+      "style": "positive",
+      "title": "Search Flights →",
+      "type": "Action.Submit"
+    },
+    {
+      "data": {
+        "nextCardId": "digital_travel_concierge_home"
+      },
+      "title": "Back to Menu",
+      "type": "Action.Submit"
+    }
+  ],
+  "body": [
+    {
+      "size": "Large",
+      "text": "Trip Basics",
+      "type": "TextBlock",
+      "weight": "Bolder",
+      "wrap": true
+    },
+    {
+      "isSubtle": true,
+      "text": "Tell us about your trip so we can find the best options for you.",
+      "type": "TextBlock",
+      "wrap": true
+    },
+    {
+      "choices": [
+        {
+          "title": "Home",
+          "value": "Home"
+        },
+        {
+          "title": "Office",
+          "value": "Office"
+        },
+        {
+          "title": "Custom address",
+          "value": "Custom address"
+        }
+      ],
+      "errorMessage": "Required",
+      "id": "departure_location",
+      "isRequired": true,
+      "label": "Departure location",
+      "type": "Input.ChoiceSet"
+    },
+    {
+      "errorMessage": "Required",
+      "id": "destination_city",
+      "isRequired": true,
+      "label": "Destination city or airport",
+      "type": "Input.Text"
+    },
+    {
+      "choices": [
+        {
+          "title": "Business",
+          "value": "Business"
+        },
+        {
+          "title": "Leisure",
+          "value": "Leisure"
+        },
+        {
+          "title": "Event",
+          "value": "Event"
+        },
+        {
+          "title": "Conference",
+          "value": "Conference"
+        },
+        {
+          "title": "Client visit",
+          "value": "Client visit"
+        },
+        {
+          "title": "Family",
+          "value": "Family"
+        }
+      ],
+      "errorMessage": "Required",
+      "id": "trip_purpose",
+      "isRequired": true,
+      "label": "Trip purpose",
+      "type": "Input.ChoiceSet"
+    },
+    {
+      "errorMessage": "Required",
+      "id": "outbound_date",
+      "isRequired": true,
+      "label": "Outbound date",
+      "type": "Input.Date"
+    },
+    {
+      "errorMessage": "Required",
+      "id": "return_date",
+      "isRequired": true,
+      "label": "Return date",
+      "type": "Input.Date"
+    },
+    {
+      "errorMessage": "Required",
+      "id": "num_travellers",
+      "isRequired": true,
+      "label": "Number of travellers",
+      "type": "Input.Number"
+    },
+    {
+      "choices": [
+        {
+          "title": "Economy",
+          "value": "Economy"
+        },
+        {
+          "title": "Standard",
+          "value": "Standard"
+        },
+        {
+          "title": "Premium",
+          "value": "Premium"
+        },
+        {
+          "title": "Luxury",
+          "value": "Luxury"
+        }
+      ],
+      "errorMessage": "Required",
+      "id": "budget_preference",
+      "isRequired": true,
+      "label": "Budget preference",
+      "type": "Input.ChoiceSet"
+    },
+    {
+      "choices": [
+        {
+          "title": "Fixed dates",
+          "value": "Fixed dates"
+        },
+        {
+          "title": "Flexible ±1 day",
+          "value": "Flexible ±1 day"
+        },
+        {
+          "title": "Flexible ±2 days",
+          "value": "Flexible ±2 days"
+        },
+        {
+          "title": "Flexible ±3 days",
+          "value": "Flexible ±3 days"
+        }
+      ],
+      "errorMessage": "Required",
+      "id": "date_flexibility",
+      "isRequired": true,
+      "label": "Date flexibility",
+      "type": "Input.ChoiceSet"
+    },
+    {
+      "id": "traveller_names",
+      "label": "Traveller names (optional — comma-separated)",
+      "type": "Input.Text"
+    },
+    {
+      "id": "departure_airport",
+      "label": "Preferred departure airport (optional)",
+      "type": "Input.Text"
+    }
+  ],
+  "id": "collect_trip_basics",
+  "type": "AdaptiveCard",
+  "version": "1.6"
+}
+  }
+,
+  {
+    "id": "collect_venue_details",
+    "json": {
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "actions": [
+    {
+      "data": {
+        "nextCardId": "plan_transport_legs"
+      },
+      "style": "positive",
+      "title": "Plan Transport Legs →",
+      "type": "Action.Submit"
+    },
+    {
+      "data": {
+        "nextCardId": "accommodation_type"
+      },
+      "title": "Back",
+      "type": "Action.Submit"
+    }
+  ],
+  "body": [
+    {
+      "size": "Large",
+      "text": "Venue & Destination Details",
+      "type": "TextBlock",
+      "weight": "Bolder",
+      "wrap": true
+    },
+    {
+      "isSubtle": true,
+      "text": "Share your venue details so we can plan transport accurately.",
+      "type": "TextBlock",
+      "wrap": true
+    },
+    {
+      "id": "venue_address",
+      "label": "Main venue address (if known)",
+      "type": "Input.Text"
+    },
+    {
+      "id": "meeting_event_time",
+      "label": "Meeting or event time",
+      "type": "Input.Time"
+    },
+    {
+      "choices": [
+        {
+          "title": "Yes — multiple days",
+          "value": "Yes — multiple days"
+        },
+        {
+          "title": "Yes — single day only",
+          "value": "Yes — single day only"
+        },
+        {
+          "title": "No",
+          "value": "No"
+        }
+      ],
+      "errorMessage": "Required",
+      "id": "daily_travel_needed",
+      "isRequired": true,
+      "label": "Daily travel between lodging and venue?",
+      "type": "Input.ChoiceSet"
+    },
+    {
+      "choices": [
+        {
+          "title": "15 minutes",
+          "value": "15 minutes"
+        },
+        {
+          "title": "30 minutes",
+          "value": "30 minutes"
+        },
+        {
+          "title": "45 minutes",
+          "value": "45 minutes"
+        },
+        {
+          "title": "1 hour",
+          "value": "1 hour"
+        },
+        {
+          "title": "2 hours",
+          "value": "2 hours"
+        }
+      ],
+      "errorMessage": "Required",
+      "id": "arrival_buffer",
+      "isRequired": true,
+      "label": "Preferred arrival buffer before meetings/flights",
+      "type": "Input.ChoiceSet"
+    }
+  ],
+  "id": "collect_venue_details",
+  "type": "AdaptiveCard",
+  "version": "1.6"
+}
+  }
+,
+  {
+    "id": "confirm_booking_plan",
+    "json": {
+  "actions": [
+    {
+      "associatedInputs": "none",
+      "data": {
+        "nextCardId": "digital_travel_concierge_home"
+      },
+      "style": "positive",
+      "title": "🏠 Back to Concierge Home",
+      "type": "Action.Submit"
+    },
+    {
+      "title": "📄 Download Itinerary PDF",
+      "type": "Action.OpenUrl",
+      "url": "${api_submit_booking.itinerary_pdf_url}"
+    }
+  ],
+  "body": [
+    {
+      "bleed": true,
+      "items": [
+        {
+          "columns": [
+            {
+              "items": [
+                {
+                  "altText": "Success",
+                  "size": "Small",
+                  "type": "Image",
+                  "url": "https://img.icons8.com/fluency/96/checkmark.png"
+                }
+              ],
+              "type": "Column",
+              "width": "auto"
+            },
+            {
+              "items": [
+                {
+                  "color": "Good",
+                  "size": "ExtraLarge",
+                  "text": "🎉 Booking Request Submitted!",
+                  "type": "TextBlock",
+                  "weight": "Bolder",
+                  "wrap": true
+                },
+                {
+                  "isSubtle": true,
+                  "spacing": "None",
+                  "text": "Your itinerary has been sent to our concierge team for confirmation.",
+                  "type": "TextBlock",
+                  "wrap": true
+                }
+              ],
+              "type": "Column",
+              "width": "stretch"
+            }
+          ],
+          "type": "ColumnSet"
+        }
+      ],
+      "style": "good",
+      "type": "Container"
+    },
+    {
+      "bleed": true,
+      "items": [
+        {
+          "size": "Medium",
+          "spacing": "Small",
+          "text": "📋 Booking Reference",
+          "type": "TextBlock",
+          "weight": "Bolder"
+        },
+        {
+          "facts": [
+            {
+              "title": "Reference ID",
+              "value": "${api_submit_booking.booking_reference_id}"
+            },
+            {
+              "title": "Submitted at",
+              "value": "${api_submit_booking.submission_timestamp}"
+            },
+            {
+              "title": "Items submitted",
+              "value": "${api_submit_booking.items_submitted_count}"
+            },
+            {
+              "title": "Destination",
+              "value": "${api_submit_booking.destination_city}"
+            },
+            {
+              "title": "Trip dates",
+              "value": "${api_submit_booking.outbound_date} → ${api_submit_booking.return_date}"
+            },
+            {
+              "title": "Travellers",
+              "value": "${api_submit_booking.num_travellers}"
+            },
+            {
+              "title": "Next steps",
+              "value": "Our concierge team will confirm each reservation within 2 business hours"
+            }
+          ],
+          "type": "FactSet"
+        }
+      ],
+      "spacing": "Medium",
+      "style": "emphasis",
+      "type": "Container"
+    },
+    {
+      "bleed": true,
+      "items": [
+        {
+          "color": "Good",
+          "size": "Medium",
+          "text": "✅ Successfully Queued for Booking",
+          "type": "TextBlock",
+          "weight": "Bolder"
+        },
+        {
+          "facts": [
+            {
+              "title": "✈️ Flights",
+              "value": "${api_submit_booking.flight_booking_status}"
+            },
+            {
+              "title": "🏨 Accommodation",
+              "value": "${api_submit_booking.accommodation_booking_status}"
+            },
+            {
+              "title": "🚗 Ground Transport",
+              "value": "${api_submit_booking.transport_booking_status}"
+            },
+            {
+              "title": "🍽️ Restaurants",
+              "value": "${api_submit_booking.restaurant_booking_status}"
+            }
+          ],
+          "type": "FactSet"
+        }
+      ],
+      "spacing": "Small",
+      "style": "good",
+      "type": "Container"
+    },
+    {
+      "bleed": true,
+      "items": [
+        {
+          "color": "Attention",
+          "size": "Medium",
+          "text": "⚠️ Manual Follow-Up Required",
+          "type": "TextBlock",
+          "weight": "Bolder"
+        },
+        {
+          "size": "Small",
+          "text": "${api_submit_booking.manual_followup_items}",
+          "type": "TextBlock",
+          "wrap": true
+        },
+        {
+          "isSubtle": true,
+          "size": "Small",
+          "spacing": "Small",
+          "text": "A member of our concierge team will contact you to resolve these items before travel.",
+          "type": "TextBlock",
+          "wrap": true
+        }
+      ],
+      "spacing": "Small",
+      "style": "attention",
+      "type": "Container"
+    },
+    {
+      "bleed": true,
+      "items": [
+        {
+          "columns": [
+            {
+              "items": [
+                {
+                  "altText": "Email",
+                  "size": "Small",
+                  "type": "Image",
+                  "url": "https://img.icons8.com/fluency/96/email.png"
+                }
+              ],
+              "type": "Column",
+              "width": "auto"
+            },
+            {
+              "items": [
+                {
+                  "size": "Small",
+                  "text": "Confirmation email sent",
+                  "type": "TextBlock",
+                  "weight": "Bolder"
+                },
+                {
+                  "isSubtle": true,
+                  "size": "Small",
+                  "spacing": "None",
+                  "text": "A full itinerary summary has been emailed to you. Booking updates will be sent as each item is confirmed.",
+                  "type": "TextBlock",
+                  "wrap": true
+                }
+              ],
+              "type": "Column",
+              "width": "stretch"
+            }
+          ],
+          "type": "ColumnSet"
+        }
+      ],
+      "spacing": "Small",
+      "style": "emphasis",
+      "type": "Container"
+    }
+  ],
+  "id": "confirm_booking_plan",
+  "type": "AdaptiveCard",
+  "version": "1.6"
+}
+  }
+,
+  {
+    "id": "digital_travel_concierge_home",
+    "json": {
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "actions": [
+    {
+      "data": {
+        "action": "plan_new",
+        "nextCardId": "collect_trip_basics"
+      },
+      "title": "✈️ Plan a new trip",
+      "type": "Action.Submit"
+    },
+    {
+      "data": {
+        "action": "review",
+        "nextCardId": "review_itinerary"
+      },
+      "title": "📋 Review current trip options",
+      "type": "Action.Submit"
+    },
+    {
+      "data": {
+        "action": "modify",
+        "nextCardId": "modify_trip"
+      },
+      "title": "✏️ Modify trip details",
+      "type": "Action.Submit"
+    },
+    {
+      "data": {
+        "action": "confirm",
+        "nextCardId": "request_approval"
+      },
+      "title": "✅ Confirm booking plan",
+      "type": "Action.Submit"
+    },
+    {
+      "data": {
+        "action": "cancel",
+        "nextCardId": "cancel_exit"
+      },
+      "title": "❌ Cancel / Exit",
+      "type": "Action.Submit"
+    }
+  ],
+  "body": [
+    {
+      "size": "Large",
+      "text": "Digital Travel Concierge",
+      "type": "TextBlock",
+      "weight": "Bolder",
+      "wrap": true
+    },
+    {
+      "isSubtle": true,
+      "text": "Your end-to-end travel assistant — flights, accommodation, ground transport, and restaurant reservations, all in one place.",
+      "type": "TextBlock",
+      "wrap": true
+    }
+  ],
+  "id": "digital_travel_concierge_home",
+  "type": "AdaptiveCard",
+  "version": "1.6"
+}
+  }
+,
+  {
+    "id": "error_recovery",
+    "json": {
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "actions": [
+    {
+      "data": {
+        "nextCardId": "collect_trip_basics",
+        "recovery_action": "retry"
+      },
+      "title": "🔄 Retry the failed step",
+      "type": "Action.Submit"
+    },
+    {
+      "data": {
+        "nextCardId": "collect_trip_basics",
+        "recovery_action": "manual"
+      },
+      "title": "✍️ Enter details manually",
+      "type": "Action.Submit"
+    },
+    {
+      "data": {
+        "nextCardId": "review_itinerary",
+        "recovery_action": "continue"
+      },
+      "title": "📋 Continue with what we have",
+      "type": "Action.Submit"
+    },
+    {
+      "data": {
+        "nextCardId": "digital_travel_concierge_home",
+        "recovery_action": "home"
+      },
+      "title": "🏠 Return to Concierge Home",
+      "type": "Action.Submit"
+    }
+  ],
+  "body": [
+    {
+      "size": "Large",
+      "text": "Something Went Wrong",
+      "type": "TextBlock",
+      "weight": "Bolder",
+      "wrap": true
+    },
+    {
+      "isSubtle": true,
+      "text": "One or more parts of your itinerary could not be retrieved automatically. You can retry or continue manually.",
+      "type": "TextBlock",
+      "wrap": true
+    }
+  ],
+  "id": "error_recovery",
+  "type": "AdaptiveCard",
+  "version": "1.6"
+}
+  }
+,
+  {
+    "id": "exit_confirmed",
+    "json": {
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "_meta": {
+    "on_terminal": [
+      {
+        "body": {
+          "destination_city": "${destination_city}",
+          "outbound_date": "${outbound_date}",
+          "trip_purpose": "${trip_purpose}"
+        },
+        "kind": "webhook",
+        "method": "POST",
+        "url": "/api/session/save"
+      }
+    ],
+    "terminal": true
+  },
+  "actions": [
+    {
+      "data": {
+        "nextCardId": "digital_travel_concierge_home"
+      },
+      "title": "Return to Concierge",
+      "type": "Action.Submit"
+    }
+  ],
+  "body": [
+    {
+      "size": "Large",
+      "text": "Trip Planning Saved",
+      "type": "TextBlock",
+      "weight": "Bolder",
+      "wrap": true
+    },
+    {
+      "text": "Your trip planning session has been saved. You can return to the Digital Travel Concierge at any time to continue where you left off. Safe travels!",
+      "type": "TextBlock",
+      "wrap": true
+    }
+  ],
+  "id": "exit_confirmed",
+  "type": "AdaptiveCard",
+  "version": "1.6"
+}
+  }
+,
+  {
+    "id": "flight_preferences",
+    "json": {
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "actions": [
+    {
+      "data": {
+        "nextCardId": "select_flight"
+      },
+      "style": "positive",
+      "title": "Show Flight Options →",
+      "type": "Action.Submit"
+    },
+    {
+      "data": {
+        "nextCardId": "collect_trip_basics"
+      },
+      "title": "Back to Trip Basics",
+      "type": "Action.Submit"
+    }
+  ],
+  "body": [
+    {
+      "size": "Large",
+      "text": "Flight Preferences",
+      "type": "TextBlock",
+      "weight": "Bolder",
+      "wrap": true
+    },
+    {
+      "isSubtle": true,
+      "text": "Refine your flight search with these preferences.",
+      "type": "TextBlock",
+      "wrap": true
+    },
+    {
+      "id": "preferred_airline",
+      "label": "Preferred airline (optional)",
+      "type": "Input.Text"
+    },
+    {
+      "choices": [
+        {
+          "title": "Economy",
+          "value": "Economy"
+        },
+        {
+          "title": "Premium Economy",
+          "value": "Premium Economy"
+        },
+        {
+          "title": "Business",
+          "value": "Business"
+        },
+        {
+          "title": "First",
+          "value": "First"
+        }
+      ],
+      "errorMessage": "Required",
+      "id": "cabin_class",
+      "isRequired": true,
+      "label": "Cabin class",
+      "type": "Input.ChoiceSet"
+    },
+    {
+      "choices": [
+        {
+          "title": "Yes",
+          "value": "Yes"
+        },
+        {
+          "title": "No — allow 1 stop",
+          "value": "No — allow 1 stop"
+        },
+        {
+          "title": "No — any stops",
+          "value": "No — any stops"
+        }
+      ],
+      "errorMessage": "Required",
+      "id": "direct_only",
+      "isRequired": true,
+      "label": "Direct flights only?",
+      "type": "Input.ChoiceSet"
+    },
+    {
+      "choices": [
+        {
+          "title": "Yes",
+          "value": "Yes"
+        },
+        {
+          "title": "No — carry-on only",
+          "value": "No — carry-on only"
+        }
+      ],
+      "errorMessage": "Required",
+      "id": "checked_luggage",
+      "isRequired": true,
+      "label": "Checked luggage needed?",
+      "type": "Input.ChoiceSet"
+    },
+    {
+      "choices": [
+        {
+          "title": "Early morning (05:00–08:00)",
+          "value": "Early morning (05:00–08:00)"
+        },
+        {
+          "title": "Morning (08:00–12:00)",
+          "value": "Morning (08:00–12:00)"
+        },
+        {
+          "title": "Afternoon (12:00–17:00)",
+          "value": "Afternoon (12:00–17:00)"
+        },
+        {
+          "title": "Evening (17:00–21:00)",
+          "value": "Evening (17:00–21:00)"
+        },
+        {
+          "title": "Any time",
+          "value": "Any time"
+        }
+      ],
+      "id": "preferred_departure_time",
+      "label": "Preferred departure time",
+      "type": "Input.ChoiceSet"
+    },
+    {
+      "choices": [
+        {
+          "title": "Early morning (05:00–08:00)",
+          "value": "Early morning (05:00–08:00)"
+        },
+        {
+          "title": "Morning (08:00–12:00)",
+          "value": "Morning (08:00–12:00)"
+        },
+        {
+          "title": "Afternoon (12:00–17:00)",
+          "value": "Afternoon (12:00–17:00)"
+        },
+        {
+          "title": "Evening (17:00–21:00)",
+          "value": "Evening (17:00–21:00)"
+        },
+        {
+          "title": "Any time",
+          "value": "Any time"
+        }
+      ],
+      "id": "preferred_return_time",
+      "label": "Preferred return time",
+      "type": "Input.ChoiceSet"
+    }
+  ],
+  "id": "flight_preferences",
+  "type": "AdaptiveCard",
+  "version": "1.6"
+}
+  }
+,
+  {
+    "id": "modify_trip",
+    "json": {
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "actions": [
+    {
+      "data": {
+        "modify_section": "flights",
+        "nextCardId": "flight_preferences"
+      },
+      "title": "✈️ Change flights",
+      "type": "Action.Submit"
+    },
+    {
+      "data": {
+        "modify_section": "accommodation",
+        "nextCardId": "collect_accommodation_prefs"
+      },
+      "title": "🏨 Change accommodation",
+      "type": "Action.Submit"
+    },
+    {
+      "data": {
+        "modify_section": "venue",
+        "nextCardId": "collect_venue_details"
+      },
+      "title": "📍 Change venue details",
+      "type": "Action.Submit"
+    },
+    {
+      "data": {
+        "modify_section": "transport",
+        "nextCardId": "plan_transport_legs"
+      },
+      "title": "🚗 Change ground transport",
+      "type": "Action.Submit"
+    },
+    {
+      "data": {
+        "modify_section": "restaurants",
+        "nextCardId": "collect_restaurant_prefs"
+      },
+      "title": "🍽️ Change restaurant reservations",
+      "type": "Action.Submit"
+    },
+    {
+      "data": {
+        "nextCardId": "review_itinerary"
+      },
+      "title": "🔙 Back to itinerary review",
+      "type": "Action.Submit"
+    }
+  ],
+  "body": [
+    {
+      "size": "Large",
+      "text": "Modify Trip Details",
+      "type": "TextBlock",
+      "weight": "Bolder",
+      "wrap": true
+    },
+    {
+      "isSubtle": true,
+      "text": "Which part of your itinerary would you like to change?",
+      "type": "TextBlock",
+      "wrap": true
+    }
+  ],
+  "id": "modify_trip",
+  "type": "AdaptiveCard",
+  "version": "1.6"
+}
+  }
+,
+  {
+    "id": "plan_transport_legs",
+    "json": {
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "actions": [
+    {
+      "data": {
+        "nextCardId": "api_search_transport"
+      },
+      "style": "positive",
+      "title": "Search Transport Options →",
+      "type": "Action.Submit"
+    },
+    {
+      "data": {
+        "nextCardId": "collect_venue_details"
+      },
+      "title": "Back to Venue Details",
+      "type": "Action.Submit"
+    }
+  ],
+  "body": [
+    {
+      "size": "Large",
+      "text": "Ground Transport",
+      "type": "TextBlock",
+      "weight": "Bolder",
+      "wrap": true
+    },
+    {
+      "isSubtle": true,
+      "text": "We will plan each transport leg of your journey.",
+      "type": "TextBlock",
+      "wrap": true
+    },
+    {
+      "choices": [
+        {
+          "title": "Standard",
+          "value": "Standard"
+        },
+        {
+          "title": "Comfort",
+          "value": "Comfort"
+        },
+        {
+          "title": "XL / People carrier",
+          "value": "XL / People carrier"
+        },
+        {
+          "title": "Executive",
+          "value": "Executive"
+        }
+      ],
+      "errorMessage": "Required",
+      "id": "vehicle_preference",
+      "isRequired": true,
+      "label": "Preferred vehicle type",
+      "type": "Input.ChoiceSet"
+    },
+    {
+      "errorMessage": "Required",
+      "id": "num_passengers",
+      "isRequired": true,
+      "label": "Number of passengers",
+      "type": "Input.Number"
+    },
+    {
+      "choices": [
+        {
+          "title": "Carry-on only",
+          "value": "Carry-on only"
+        },
+        {
+          "title": "1 checked bag",
+          "value": "1 checked bag"
+        },
+        {
+          "title": "2+ checked bags",
+          "value": "2+ checked bags"
+        },
+        {
+          "title": "Oversized / sports equipment",
+          "value": "Oversized / sports equipment"
+        }
+      ],
+      "errorMessage": "Required",
+      "id": "luggage_amount",
+      "isRequired": true,
+      "label": "Luggage amount",
+      "type": "Input.ChoiceSet"
+    },
+    {
+      "id": "accessibility_needs",
+      "label": "Accessibility requirements (if any)",
+      "type": "Input.Text"
+    },
+    {
+      "errorMessage": "Required",
+      "id": "home_office_address",
+      "isRequired": true,
+      "label": "Your home / office address for pickups",
+      "type": "Input.Text"
+    },
+    {
+      "id": "outbound_pickup_time",
+      "label": "Preferred outbound pickup time (home → airport)",
+      "type": "Input.Time"
+    },
+    {
+      "choices": [
+        {
+          "title": "Home address",
+          "value": "Home address"
+        },
+        {
+          "title": "Office address",
+          "value": "Office address"
+        },
+        {
+          "title": "Hotel / lodging",
+          "value": "Hotel / lodging"
+        },
+        {
+          "title": "Venue",
+          "value": "Venue"
+        }
+      ],
+      "errorMessage": "Required",
+      "id": "return_dropoff_preference",
+      "isRequired": true,
+      "label": "Return drop-off (arrival airport → ?)",
+      "type": "Input.ChoiceSet"
+    }
+  ],
+  "id": "plan_transport_legs",
+  "type": "AdaptiveCard",
+  "version": "1.6"
+}
+  }
+,
+  {
+    "id": "request_approval",
+    "json": {
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "actions": [
+    {
+      "data": {
+        "approval_granted": true,
+        "nextCardId": "api_submit_booking",
+        "resolved": true
+      },
+      "style": "positive",
+      "title": "Yes, I approve — proceed to booking",
+      "type": "Action.Submit"
+    },
+    {
+      "data": {
+        "approval_granted": false,
+        "nextCardId": "modify_trip",
+        "resolved": false
+      },
+      "title": "No — go back and modify",
+      "type": "Action.Submit"
+    }
+  ],
+  "body": [
+    {
+      "size": "Large",
+      "text": "Confirm Your Booking Plan",
+      "type": "TextBlock",
+      "weight": "Bolder",
+      "wrap": true
+    },
+    {
+      "text": "You are about to confirm the booking plan above. This will prepare all reservations for final submission. No payments will be charged and no bookings made until you give explicit final approval. Do you approve this itinerary?",
+      "type": "TextBlock",
+      "wrap": true
+    }
+  ],
+  "id": "request_approval",
+  "type": "AdaptiveCard",
+  "version": "1.6"
+}
+  }
+,
+  {
+    "id": "restaurant_prompt",
+    "json": {
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "actions": [
+    {
+      "data": {
+        "nextCardId": "collect_restaurant_prefs",
+        "resolved": true,
+        "restaurants_requested": true
+      },
+      "style": "positive",
+      "title": "Yes, find restaurants",
+      "type": "Action.Submit"
+    },
+    {
+      "data": {
+        "nextCardId": "api_build_itinerary",
+        "resolved": false,
+        "restaurants_requested": false
+      },
+      "title": "No thanks, skip to review",
+      "type": "Action.Submit"
+    }
+  ],
+  "body": [
+    {
+      "size": "Large",
+      "text": "Restaurant Reservations",
+      "type": "TextBlock",
+      "weight": "Bolder",
+      "wrap": true
+    },
+    {
+      "text": "Would you like us to find and reserve restaurants during your trip? We can suggest options near your hotel or venue.",
+      "type": "TextBlock",
+      "wrap": true
+    }
+  ],
+  "id": "restaurant_prompt",
+  "type": "AdaptiveCard",
+  "version": "1.6"
+}
+  }
+,
+  {
+    "id": "review_itinerary",
+    "json": {
+  "actions": [
+    {
+      "data": {
+        "nextCardId": "request_approval"
+      },
+      "style": "positive",
+      "title": "✅ Proceed to Approval",
+      "type": "Action.Submit"
+    },
+    {
+      "associatedInputs": "none",
+      "data": {
+        "nextCardId": "modify_trip"
+      },
+      "title": "✏️ Modify Trip",
+      "type": "Action.Submit"
+    }
+  ],
+  "body": [
+    {
+      "columns": [
+        {
+          "items": [
+            {
+              "altText": "Itinerary",
+              "size": "Small",
+              "type": "Image",
+              "url": "https://img.icons8.com/fluency/96/itinerary.png"
+            }
+          ],
+          "type": "Column",
+          "width": "auto"
+        },
+        {
+          "items": [
+            {
+              "color": "Accent",
+              "size": "ExtraLarge",
+              "text": "Trip Itinerary Review",
+              "type": "TextBlock",
+              "weight": "Bolder",
+              "wrap": true
+            },
+            {
+              "isSubtle": true,
+              "spacing": "None",
+              "text": "📍 ${api_build_itinerary.destination_city}  •  📅 ${api_build_itinerary.outbound_date} → ${api_build_itinerary.return_date}",
+              "type": "TextBlock",
+              "wrap": true
+            }
+          ],
+          "type": "Column",
+          "width": "stretch"
+        }
+      ],
+      "type": "ColumnSet"
+    },
+    {
+      "isSubtle": true,
+      "size": "Small",
+      "spacing": "Small",
+      "text": "Review every component below before proceeding to approval. All prices are estimates.",
+      "type": "TextBlock",
+      "wrap": true
+    },
+    {
+      "bleed": true,
+      "items": [
+        {
+          "columns": [
+            {
+              "items": [
+                {
+                  "altText": "Travellers",
+                  "size": "Small",
+                  "type": "Image",
+                  "url": "https://img.icons8.com/fluency/96/person-male.png"
+                }
+              ],
+              "type": "Column",
+              "width": "auto"
+            },
+            {
+              "items": [
+                {
+                  "size": "Medium",
+                  "text": "👤 Travellers",
+                  "type": "TextBlock",
+                  "weight": "Bolder"
+                },
+                {
+                  "color": "Good",
+                  "size": "Small",
+                  "spacing": "None",
+                  "text": "🟢 Confirmed",
+                  "type": "TextBlock"
+                }
+              ],
+              "type": "Column",
+              "width": "stretch"
+            }
+          ],
+          "type": "ColumnSet"
+        },
+        {
+          "facts": [
+            {
+              "title": "Number of travellers",
+              "value": "${api_build_itinerary.num_travellers}"
+            },
+            {
+              "title": "Names",
+              "value": "${api_build_itinerary.traveller_names}"
+            },
+            {
+              "title": "Trip purpose",
+              "value": "${api_build_itinerary.trip_purpose}"
+            },
+            {
+              "title": "Budget tier",
+              "value": "${api_build_itinerary.budget_preference}"
+            }
+          ],
+          "spacing": "Small",
+          "type": "FactSet"
+        }
+      ],
+      "spacing": "Medium",
+      "style": "emphasis",
+      "type": "Container"
+    },
+    {
+      "bleed": true,
+      "items": [
+        {
+          "columns": [
+            {
+              "items": [
+                {
+                  "altText": "Flights",
+                  "size": "Small",
+                  "type": "Image",
+                  "url": "https://img.icons8.com/fluency/96/airplane-take-off.png"
+                }
+              ],
+              "type": "Column",
+              "width": "auto"
+            },
+            {
+              "items": [
+                {
+                  "size": "Medium",
+                  "text": "✈️ Flights",
+                  "type": "TextBlock",
+                  "weight": "Bolder"
+                },
+                {
+                  "color": "Warning",
+                  "size": "Small",
+                  "spacing": "None",
+                  "text": "🟡 Pending Confirmation",
+                  "type": "TextBlock"
+                }
+              ],
+              "type": "Column",
+              "width": "stretch"
+            }
+          ],
+          "type": "ColumnSet"
+        },
+        {
+          "facts": [
+            {
+              "title": "Airline",
+              "value": "${api_build_itinerary.flight_airline}"
+            },
+            {
+              "title": "Outbound",
+              "value": "${api_build_itinerary.flight_outbound_departure} → ${api_build_itinerary.flight_outbound_arrival}"
+            },
+            {
+              "title": "Return",
+              "value": "${api_build_itinerary.flight_return_departure} → ${api_build_itinerary.flight_return_arrival}"
+            },
+            {
+              "title": "Cabin class",
+              "value": "${api_build_itinerary.flight_cabin_class}"
+            },
+            {
+              "title": "Baggage",
+              "value": "${api_build_itinerary.flight_baggage}"
+            },
+            {
+              "title": "Cancellation policy",
+              "value": "${api_build_itinerary.flight_cancellation_policy}"
+            },
+            {
+              "title": "Price (total)",
+              "value": "${api_build_itinerary.flight_total_price}"
+            }
+          ],
+          "spacing": "Small",
+          "type": "FactSet"
+        }
+      ],
+      "spacing": "Small",
+      "style": "emphasis",
+      "type": "Container"
+    },
+    {
+      "bleed": true,
+      "items": [
+        {
+          "columns": [
+            {
+              "items": [
+                {
+                  "altText": "Accommodation",
+                  "size": "Small",
+                  "type": "Image",
+                  "url": "https://img.icons8.com/fluency/96/hotel-building.png"
+                }
+              ],
+              "type": "Column",
+              "width": "auto"
+            },
+            {
+              "items": [
+                {
+                  "size": "Medium",
+                  "text": "🏨 Accommodation",
+                  "type": "TextBlock",
+                  "weight": "Bolder"
+                },
+                {
+                  "color": "Warning",
+                  "size": "Small",
+                  "spacing": "None",
+                  "text": "🟡 Pending Confirmation",
+                  "type": "TextBlock"
+                }
+              ],
+              "type": "Column",
+              "width": "stretch"
+            }
+          ],
+          "type": "ColumnSet"
+        },
+        {
+          "facts": [
+            {
+              "title": "Property",
+              "value": "${api_build_itinerary.property_name}"
+            },
+            {
+              "title": "Type",
+              "value": "${api_build_itinerary.accom_type}"
+            },
+            {
+              "title": "Address",
+              "value": "${api_build_itinerary.property_address}"
+            },
+            {
+              "title": "Check-in",
+              "value": "${api_build_itinerary.checkin_date}"
+            },
+            {
+              "title": "Check-out",
+              "value": "${api_build_itinerary.checkout_date}"
+            },
+            {
+              "title": "Room type",
+              "value": "${api_build_itinerary.room_type}"
+            },
+            {
+              "title": "Rate per night",
+              "value": "${api_build_itinerary.rate_per_night}"
+            },
+            {
+              "title": "Total accommodation",
+              "value": "${api_build_itinerary.accommodation_total}"
+            },
+            {
+              "title": "Cancellation policy",
+              "value": "${api_build_itinerary.accom_cancellation_policy}"
+            }
+          ],
+          "spacing": "Small",
+          "type": "FactSet"
+        }
+      ],
+      "spacing": "Small",
+      "style": "emphasis",
+      "type": "Container"
+    },
+    {
+      "bleed": true,
+      "items": [
+        {
+          "columns": [
+            {
+              "items": [
+                {
+                  "altText": "Transport",
+                  "size": "Small",
+                  "type": "Image",
+                  "url": "https://img.icons8.com/fluency/96/car.png"
+                }
+              ],
+              "type": "Column",
+              "width": "auto"
+            },
+            {
+              "items": [
+                {
+                  "size": "Medium",
+                  "text": "🚗 Ground Transport",
+                  "type": "TextBlock",
+                  "weight": "Bolder"
+                },
+                {
+                  "color": "Warning",
+                  "size": "Small",
+                  "spacing": "None",
+                  "text": "🟡 Pending Confirmation",
+                  "type": "TextBlock"
+                }
+              ],
+              "type": "Column",
+              "width": "stretch"
+            }
+          ],
+          "type": "ColumnSet"
+        },
+        {
+          "items": [
+            {
+              "size": "Small",
+              "text": "Leg 1 — Home → Departure Airport",
+              "type": "TextBlock",
+              "weight": "Bolder"
+            },
+            {
+              "facts": [
+                {
+                  "title": "Vehicle",
+                  "value": "${api_build_itinerary.leg1_vehicle}"
+                },
+                {
+                  "title": "Pickup time",
+                  "value": "${api_build_itinerary.leg1_pickup_time}"
+                },
+                {
+                  "title": "Est. duration",
+                  "value": "${api_build_itinerary.leg1_duration}"
+                },
+                {
+                  "title": "Est. fare",
+                  "value": "${api_build_itinerary.leg1_fare}"
+                }
+              ],
+              "type": "FactSet"
+            }
+          ],
+          "spacing": "Small",
+          "type": "Container"
+        },
+        {
+          "items": [
+            {
+              "size": "Small",
+              "text": "Leg 2 — Arrival Airport → Hotel / Venue",
+              "type": "TextBlock",
+              "weight": "Bolder"
+            },
+            {
+              "facts": [
+                {
+                  "title": "Vehicle",
+                  "value": "${api_build_itinerary.leg2_vehicle}"
+                },
+                {
+                  "title": "Pickup time",
+                  "value": "${api_build_itinerary.leg2_pickup_time}"
+                },
+                {
+                  "title": "Est. duration",
+                  "value": "${api_build_itinerary.leg2_duration}"
+                },
+                {
+                  "title": "Est. fare",
+                  "value": "${api_build_itinerary.leg2_fare}"
+                }
+              ],
+              "type": "FactSet"
+            }
+          ],
+          "separator": true,
+          "spacing": "Small",
+          "type": "Container"
+        },
+        {
+          "items": [
+            {
+              "size": "Small",
+              "text": "Leg 3 — Hotel → Venue (daily)",
+              "type": "TextBlock",
+              "weight": "Bolder"
+            },
+            {
+              "facts": [
+                {
+                  "title": "Vehicle",
+                  "value": "${api_build_itinerary.leg3_vehicle}"
+                },
+                {
+                  "title": "Pickup time",
+                  "value": "${api_build_itinerary.leg3_pickup_time}"
+                },
+                {
+                  "title": "Est. duration",
+                  "value": "${api_build_itinerary.leg3_duration}"
+                },
+                {
+                  "title": "Est. fare",
+                  "value": "${api_build_itinerary.leg3_fare}"
+                }
+              ],
+              "type": "FactSet"
+            }
+          ],
+          "separator": true,
+          "spacing": "Small",
+          "type": "Container"
+        },
+        {
+          "items": [
+            {
+              "size": "Small",
+              "text": "Leg 4 — Venue / Hotel → Return Airport",
+              "type": "TextBlock",
+              "weight": "Bolder"
+            },
+            {
+              "facts": [
+                {
+                  "title": "Vehicle",
+                  "value": "${api_build_itinerary.leg4_vehicle}"
+                },
+                {
+                  "title": "Pickup time",
+                  "value": "${api_build_itinerary.leg4_pickup_time}"
+                },
+                {
+                  "title": "Est. duration",
+                  "value": "${api_build_itinerary.leg4_duration}"
+                },
+                {
+                  "title": "Est. fare",
+                  "value": "${api_build_itinerary.leg4_fare}"
+                }
+              ],
+              "type": "FactSet"
+            }
+          ],
+          "separator": true,
+          "spacing": "Small",
+          "type": "Container"
+        },
+        {
+          "items": [
+            {
+              "size": "Small",
+              "text": "Leg 5 — Arrival Airport → Home / Office",
+              "type": "TextBlock",
+              "weight": "Bolder"
+            },
+            {
+              "facts": [
+                {
+                  "title": "Vehicle",
+                  "value": "${api_build_itinerary.leg5_vehicle}"
+                },
+                {
+                  "title": "Pickup time",
+                  "value": "${api_build_itinerary.leg5_pickup_time}"
+                },
+                {
+                  "title": "Est. duration",
+                  "value": "${api_build_itinerary.leg5_duration}"
+                },
+                {
+                  "title": "Est. fare",
+                  "value": "${api_build_itinerary.leg5_fare}"
+                }
+              ],
+              "type": "FactSet"
+            }
+          ],
+          "separator": true,
+          "spacing": "Small",
+          "type": "Container"
+        }
+      ],
+      "spacing": "Small",
+      "style": "emphasis",
+      "type": "Container"
+    },
+    {
+      "bleed": true,
+      "items": [
+        {
+          "columns": [
+            {
+              "items": [
+                {
+                  "altText": "Restaurants",
+                  "size": "Small",
+                  "type": "Image",
+                  "url": "https://img.icons8.com/fluency/96/restaurant.png"
+                }
+              ],
+              "type": "Column",
+              "width": "auto"
+            },
+            {
+              "items": [
+                {
+                  "size": "Medium",
+                  "text": "🍽️ Restaurant Reservations",
+                  "type": "TextBlock",
+                  "weight": "Bolder"
+                },
+                {
+                  "color": "Good",
+                  "size": "Small",
+                  "spacing": "None",
+                  "text": "${api_build_itinerary.restaurants_status}",
+                  "type": "TextBlock"
+                }
+              ],
+              "type": "Column",
+              "width": "stretch"
+            }
+          ],
+          "type": "ColumnSet"
+        },
+        {
+          "facts": [
+            {
+              "title": "Restaurant",
+              "value": "${api_build_itinerary.restaurant_name}"
+            },
+            {
+              "title": "Date & time",
+              "value": "${api_build_itinerary.dining_date} at ${api_build_itinerary.dining_time}"
+            },
+            {
+              "title": "Covers",
+              "value": "${api_build_itinerary.num_diners}"
+            },
+            {
+              "title": "Cuisine",
+              "value": "${api_build_itinerary.cuisine_preference}"
+            },
+            {
+              "title": "Reservation status",
+              "value": "${api_build_itinerary.reservation_status}"
+            }
+          ],
+          "spacing": "Small",
+          "type": "FactSet"
+        }
+      ],
+      "spacing": "Small",
+      "style": "emphasis",
+      "type": "Container"
+    },
+    {
+      "bleed": true,
+      "items": [
+        {
+          "color": "Attention",
+          "size": "Medium",
+          "text": "⚠️ Missing / Incomplete Items",
+          "type": "TextBlock",
+          "weight": "Bolder"
+        },
+        {
+          "size": "Small",
+          "text": "${api_build_itinerary.missing_items_summary}",
+          "type": "TextBlock",
+          "wrap": true
+        }
+      ],
+      "spacing": "Small",
+      "style": "attention",
+      "type": "Container"
+    },
+    {
+      "bleed": true,
+      "items": [
+        {
+          "columns": [
+            {
+              "items": [
+                {
+                  "color": "Good",
+                  "size": "Large",
+                  "text": "💳 Total Estimated Cost",
+                  "type": "TextBlock",
+                  "weight": "Bolder"
+                },
+                {
+                  "isSubtle": true,
+                  "size": "Small",
+                  "spacing": "None",
+                  "text": "Flights + Accommodation + Transport + Dining",
+                  "type": "TextBlock",
+                  "wrap": true
+                }
+              ],
+              "type": "Column",
+              "width": "stretch"
+            },
+            {
+              "items": [
+                {
+                  "color": "Good",
+                  "size": "ExtraLarge",
+                  "text": "${api_build_itinerary.total_estimated_cost}",
+                  "type": "TextBlock",
+                  "weight": "Bolder"
+                }
+              ],
+              "type": "Column",
+              "width": "auto"
+            }
+          ],
+          "type": "ColumnSet"
+        },
+        {
+          "facts": [
+            {
+              "title": "Flights",
+              "value": "${api_build_itinerary.flight_total_price}"
+            },
+            {
+              "title": "Accommodation",
+              "value": "${api_build_itinerary.accommodation_total}"
+            },
+            {
+              "title": "Ground transport",
+              "value": "${api_build_itinerary.transport_total_fare}"
+            },
+            {
+              "title": "Dining",
+              "value": "${api_build_itinerary.dining_total}"
+            }
+          ],
+          "spacing": "Small",
+          "type": "FactSet"
+        }
+      ],
+      "spacing": "Medium",
+      "style": "good",
+      "type": "Container"
+    },
+    {
+      "isSubtle": true,
+      "size": "Small",
+      "spacing": "Small",
+      "text": "⚠️ All costs are estimates only. Final prices are confirmed at booking. No payments have been taken.",
+      "type": "TextBlock",
+      "wrap": true
+    }
+  ],
+  "id": "review_itinerary",
+  "type": "AdaptiveCard",
+  "version": "1.6"
+}
+  }
+,
+  {
+    "id": "select_accommodation",
+    "json": {}
+  }
+,
+  {
+    "id": "select_flight",
+    "json": {
+  "actions": [
+    {
+      "associatedInputs": "none",
+      "data": {
+        "nextCardId": "flight_preferences"
+      },
+      "title": "🔍 Refine search",
+      "type": "Action.Submit"
+    }
+  ],
+  "body": [
+    {
+      "columns": [
+        {
+          "items": [
+            {
+              "altText": "Flights",
+              "size": "Small",
+              "type": "Image",
+              "url": "https://img.icons8.com/fluency/96/airplane-take-off.png"
+            }
+          ],
+          "type": "Column",
+          "width": "auto"
+        },
+        {
+          "items": [
+            {
+              "color": "Accent",
+              "size": "ExtraLarge",
+              "text": "Available Flights",
+              "type": "TextBlock",
+              "weight": "Bolder",
+              "wrap": true
+            },
+            {
+              "isSubtle": true,
+              "size": "Small",
+              "text": "Step 3 of 9 — Select your preferred flight",
+              "type": "TextBlock",
+              "wrap": true
+            }
+          ],
+          "type": "Column",
+          "width": "stretch"
+        }
+      ],
+      "type": "ColumnSet"
+    },
+    {
+      "bleed": true,
+      "items": [
+        {
+          "columns": [
+            {
+              "items": [
+                {
+                  "text": "📍 ${api_search_flights.origin} → ${api_search_flights.destination}",
+                  "type": "TextBlock",
+                  "weight": "Bolder",
+                  "wrap": true
+                }
+              ],
+              "type": "Column",
+              "width": "stretch"
+            },
+            {
+              "items": [
+                {
+                  "isSubtle": true,
+                  "text": "📅 ${api_search_flights.outbound_date} – ${api_search_flights.return_date}",
+                  "type": "TextBlock",
+                  "wrap": true
+                }
+              ],
+              "type": "Column",
+              "width": "auto"
+            }
+          ],
+          "type": "ColumnSet"
+        },
+        {
+          "columns": [
+            {
+              "items": [
+                {
+                  "isSubtle": true,
+                  "size": "Small",
+                  "text": "🧳 ${api_search_flights.num_travellers} traveller(s)",
+                  "type": "TextBlock"
+                }
+              ],
+              "type": "Column",
+              "width": "auto"
+            },
+            {
+              "items": [
+                {
+                  "isSubtle": true,
+                  "size": "Small",
+                  "text": "💺 ${api_search_flights.cabin_class}",
+                  "type": "TextBlock"
+                }
+              ],
+              "type": "Column",
+              "width": "auto"
+            },
+            {
+              "items": [
+                {
+                  "isSubtle": true,
+                  "size": "Small",
+                  "text": "💰 ${api_search_flights.budget_preference}",
+                  "type": "TextBlock"
+                }
+              ],
+              "type": "Column",
+              "width": "auto"
+            }
+          ],
+          "type": "ColumnSet"
+        }
+      ],
+      "style": "emphasis",
+      "type": "Container"
+    },
+    {
+      "size": "Medium",
+      "spacing": "Medium",
+      "text": "✈️ Flight Options",
+      "type": "TextBlock",
+      "weight": "Bolder"
+    },
+    {
+      "items": [
+        {
+          "$data": "${api_search_flights.results[0]}",
+          "items": [
+            {
+              "columns": [
+                {
+                  "items": [
+                    {
+                      "altText": "Airline logo",
+                      "size": "Small",
+                      "type": "Image",
+                      "url": "https://img.icons8.com/color/48/airport.png"
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "auto"
+                },
+                {
+                  "items": [
+                    {
+                      "text": "${api_search_flights.results[0].airline}",
+                      "type": "TextBlock",
+                      "weight": "Bolder",
+                      "wrap": true
+                    },
+                    {
+                      "color": "Good",
+                      "isSubtle": false,
+                      "size": "Small",
+                      "text": "✅ Best value pick",
+                      "type": "TextBlock"
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "stretch"
+                },
+                {
+                  "items": [
+                    {
+                      "color": "Good",
+                      "size": "Large",
+                      "text": "${api_search_flights.results[0].price}",
+                      "type": "TextBlock",
+                      "weight": "Bolder"
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "auto"
+                }
+              ],
+              "type": "ColumnSet"
+            },
+            {
+              "columns": [
+                {
+                  "items": [
+                    {
+                      "text": "🛫 ${api_search_flights.results[0].depart_time}",
+                      "type": "TextBlock",
+                      "weight": "Bolder"
+                    },
+                    {
+                      "isSubtle": true,
+                      "size": "Small",
+                      "text": "${api_search_flights.origin}",
+                      "type": "TextBlock"
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "stretch"
+                },
+                {
+                  "items": [
+                    {
+                      "isSubtle": true,
+                      "text": "──────",
+                      "type": "TextBlock"
+                    },
+                    {
+                      "horizontalAlignment": "Center",
+                      "isSubtle": true,
+                      "size": "Small",
+                      "text": "${api_search_flights.results[0].duration}",
+                      "type": "TextBlock"
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "auto"
+                },
+                {
+                  "items": [
+                    {
+                      "horizontalAlignment": "Right",
+                      "text": "🛬 ${api_search_flights.results[0].arrive_time}",
+                      "type": "TextBlock",
+                      "weight": "Bolder"
+                    },
+                    {
+                      "horizontalAlignment": "Right",
+                      "isSubtle": true,
+                      "size": "Small",
+                      "text": "${api_search_flights.destination}",
+                      "type": "TextBlock"
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "stretch"
+                }
+              ],
+              "type": "ColumnSet"
+            },
+            {
+              "facts": [
+                {
+                  "title": "Stops",
+                  "value": "${api_search_flights.results[0].stops}"
+                },
+                {
+                  "title": "Baggage",
+                  "value": "${api_search_flights.results[0].baggage}"
+                },
+                {
+                  "title": "Cancellation",
+                  "value": "${api_search_flights.results[0].cancellation}"
+                },
+                {
+                  "title": "Flight No.",
+                  "value": "${api_search_flights.results[0].flight_number}"
+                }
+              ],
+              "type": "FactSet"
+            },
+            {
+              "actions": [
+                {
+                  "data": {
+                    "flight_id": "${api_search_flights.results[0].flight_id}",
+                    "nextCardId": "accommodation_type",
+                    "selected_airline": "${api_search_flights.results[0].airline}",
+                    "selected_price": "${api_search_flights.results[0].price}"
+                  },
+                  "style": "positive",
+                  "title": "Select this flight ✓",
+                  "type": "Action.Submit"
+                }
+              ],
+              "type": "ActionSet"
+            }
+          ],
+          "type": "Container"
+        }
+      ],
+      "style": "good",
+      "type": "Container"
+    },
+    {
+      "items": [
+        {
+          "$data": "${api_search_flights.results[1]}",
+          "items": [
+            {
+              "columns": [
+                {
+                  "items": [
+                    {
+                      "altText": "Airline logo",
+                      "size": "Small",
+                      "type": "Image",
+                      "url": "https://img.icons8.com/color/48/airport.png"
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "auto"
+                },
+                {
+                  "items": [
+                    {
+                      "text": "${api_search_flights.results[1].airline}",
+                      "type": "TextBlock",
+                      "weight": "Bolder",
+                      "wrap": true
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "stretch"
+                },
+                {
+                  "items": [
+                    {
+                      "color": "Accent",
+                      "size": "Large",
+                      "text": "${api_search_flights.results[1].price}",
+                      "type": "TextBlock",
+                      "weight": "Bolder"
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "auto"
+                }
+              ],
+              "type": "ColumnSet"
+            },
+            {
+              "columns": [
+                {
+                  "items": [
+                    {
+                      "text": "🛫 ${api_search_flights.results[1].depart_time}",
+                      "type": "TextBlock",
+                      "weight": "Bolder"
+                    },
+                    {
+                      "isSubtle": true,
+                      "size": "Small",
+                      "text": "${api_search_flights.origin}",
+                      "type": "TextBlock"
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "stretch"
+                },
+                {
+                  "items": [
+                    {
+                      "isSubtle": true,
+                      "text": "──────",
+                      "type": "TextBlock"
+                    },
+                    {
+                      "horizontalAlignment": "Center",
+                      "isSubtle": true,
+                      "size": "Small",
+                      "text": "${api_search_flights.results[1].duration}",
+                      "type": "TextBlock"
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "auto"
+                },
+                {
+                  "items": [
+                    {
+                      "horizontalAlignment": "Right",
+                      "text": "🛬 ${api_search_flights.results[1].arrive_time}",
+                      "type": "TextBlock",
+                      "weight": "Bolder"
+                    },
+                    {
+                      "horizontalAlignment": "Right",
+                      "isSubtle": true,
+                      "size": "Small",
+                      "text": "${api_search_flights.destination}",
+                      "type": "TextBlock"
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "stretch"
+                }
+              ],
+              "type": "ColumnSet"
+            },
+            {
+              "facts": [
+                {
+                  "title": "Stops",
+                  "value": "${api_search_flights.results[1].stops}"
+                },
+                {
+                  "title": "Baggage",
+                  "value": "${api_search_flights.results[1].baggage}"
+                },
+                {
+                  "title": "Cancellation",
+                  "value": "${api_search_flights.results[1].cancellation}"
+                },
+                {
+                  "title": "Flight No.",
+                  "value": "${api_search_flights.results[1].flight_number}"
+                }
+              ],
+              "type": "FactSet"
+            },
+            {
+              "actions": [
+                {
+                  "data": {
+                    "flight_id": "${api_search_flights.results[1].flight_id}",
+                    "nextCardId": "accommodation_type",
+                    "selected_airline": "${api_search_flights.results[1].airline}",
+                    "selected_price": "${api_search_flights.results[1].price}"
+                  },
+                  "style": "positive",
+                  "title": "Select this flight ✓",
+                  "type": "Action.Submit"
+                }
+              ],
+              "type": "ActionSet"
+            }
+          ],
+          "type": "Container"
+        }
+      ],
+      "separator": true,
+      "style": "default",
+      "type": "Container"
+    },
+    {
+      "items": [
+        {
+          "$data": "${api_search_flights.results[2]}",
+          "items": [
+            {
+              "columns": [
+                {
+                  "items": [
+                    {
+                      "altText": "Airline logo",
+                      "size": "Small",
+                      "type": "Image",
+                      "url": "https://img.icons8.com/color/48/airport.png"
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "auto"
+                },
+                {
+                  "items": [
+                    {
+                      "text": "${api_search_flights.results[2].airline}",
+                      "type": "TextBlock",
+                      "weight": "Bolder",
+                      "wrap": true
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "stretch"
+                },
+                {
+                  "items": [
+                    {
+                      "color": "Warning",
+                      "size": "Large",
+                      "text": "${api_search_flights.results[2].price}",
+                      "type": "TextBlock",
+                      "weight": "Bolder"
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "auto"
+                }
+              ],
+              "type": "ColumnSet"
+            },
+            {
+              "columns": [
+                {
+                  "items": [
+                    {
+                      "text": "🛫 ${api_search_flights.results[2].depart_time}",
+                      "type": "TextBlock",
+                      "weight": "Bolder"
+                    },
+                    {
+                      "isSubtle": true,
+                      "size": "Small",
+                      "text": "${api_search_flights.origin}",
+                      "type": "TextBlock"
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "stretch"
+                },
+                {
+                  "items": [
+                    {
+                      "isSubtle": true,
+                      "text": "──────",
+                      "type": "TextBlock"
+                    },
+                    {
+                      "horizontalAlignment": "Center",
+                      "isSubtle": true,
+                      "size": "Small",
+                      "text": "${api_search_flights.results[2].duration}",
+                      "type": "TextBlock"
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "auto"
+                },
+                {
+                  "items": [
+                    {
+                      "horizontalAlignment": "Right",
+                      "text": "🛬 ${api_search_flights.results[2].arrive_time}",
+                      "type": "TextBlock",
+                      "weight": "Bolder"
+                    },
+                    {
+                      "horizontalAlignment": "Right",
+                      "isSubtle": true,
+                      "size": "Small",
+                      "text": "${api_search_flights.destination}",
+                      "type": "TextBlock"
+                    }
+                  ],
+                  "type": "Column",
+                  "width": "stretch"
+                }
+              ],
+              "type": "ColumnSet"
+            },
+            {
+              "facts": [
+                {
+                  "title": "Stops",
+                  "value": "${api_search_flights.results[2].stops}"
+                },
+                {
+                  "title": "Baggage",
+                  "value": "${api_search_flights.results[2].baggage}"
+                },
+                {
+                  "title": "Cancellation",
+                  "value": "${api_search_flights.results[2].cancellation}"
+                },
+                {
+                  "title": "Flight No.",
+                  "value": "${api_search_flights.results[2].flight_number}"
+                }
+              ],
+              "type": "FactSet"
+            },
+            {
+              "actions": [
+                {
+                  "data": {
+                    "flight_id": "${api_search_flights.results[2].flight_id}",
+                    "nextCardId": "accommodation_type",
+                    "selected_airline": "${api_search_flights.results[2].airline}",
+                    "selected_price": "${api_search_flights.results[2].price}"
+                  },
+                  "style": "positive",
+                  "title": "Select this flight ✓",
+                  "type": "Action.Submit"
+                }
+              ],
+              "type": "ActionSet"
+            }
+          ],
+          "type": "Container"
+        }
+      ],
+      "separator": true,
+      "style": "default",
+      "type": "Container"
+    },
+    {
+      "isVisible": "${api_search_flights.no_results}",
+      "items": [
+        {
+          "columns": [
+            {
+              "items": [
+                {
+                  "altText": "Error",
+                  "size": "Small",
+                  "type": "Image",
+                  "url": "https://img.icons8.com/fluency/96/error.png"
+                }
+              ],
+              "type": "Column",
+              "width": "auto"
+            },
+            {
+              "items": [
+                {
+                  "color": "Attention",
+                  "text": "No Flights Found",
+                  "type": "TextBlock",
+                  "weight": "Bolder",
+                  "wrap": true
+                },
+                {
+                  "isSubtle": true,
+                  "size": "Small",
+                  "text": "We couldn't find flights matching your criteria. Try adjusting your dates or preferences, or enter details manually.",
+                  "type": "TextBlock",
+                  "wrap": true
+                }
+              ],
+              "type": "Column",
+              "width": "stretch"
+            }
+          ],
+          "type": "ColumnSet"
+        },
+        {
+          "actions": [
+            {
+              "data": {
+                "manual_flight_entry": true,
+                "nextCardId": "flight_preferences"
+              },
+              "style": "positive",
+              "title": "✍️ Enter flight manually",
+              "type": "Action.Submit"
+            }
+          ],
+          "type": "ActionSet"
+        }
+      ],
+      "style": "attention",
+      "type": "Container"
+    }
+  ],
+  "id": "select_flight",
+  "type": "AdaptiveCard",
+  "version": "1.6"
+}
+  }
+,
+  {
+    "id": "select_restaurants",
+    "json": {}
+  }
+,
+  {
+    "id": "select_transport",
+    "json": {}
+  }
+]
