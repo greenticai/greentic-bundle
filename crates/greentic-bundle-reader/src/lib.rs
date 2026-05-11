@@ -1,9 +1,9 @@
 use std::fmt;
 use std::fs;
-use std::io::ErrorKind;
+use std::io::{BufReader, Read};
 use std::path::{Path, PathBuf};
-use std::process::Command;
 
+use backhand::{FilesystemReader, InnerNode};
 use serde::{Deserialize, Serialize};
 
 pub const BUNDLE_FORMAT_VERSION: &str = "gtbundle-v1";
@@ -437,37 +437,115 @@ fn read_build_file(root: &Path, name: &str) -> Result<String, BundleReadError> {
 }
 
 fn read_artifact_file(path: &Path, inner_path: &str) -> Result<String, BundleReadError> {
-    let output = Command::new("unsquashfs")
-        .args(["-cat", path.to_str().unwrap_or_default(), inner_path])
-        .output()
-        .map_err(|error| {
-            BundleReadError::tool(
-                BundleSourceKind::Artifact,
-                path,
-                match error.kind() {
-                    ErrorKind::NotFound => "required tool `unsquashfs` was not found on PATH; install SquashFS tools to read `.gtbundle` artifacts".to_string(),
-                    _ => format!("spawn unsquashfs: {error}"),
-                },
-            )
-        })?;
-    if !output.status.success() {
-        return Err(BundleReadError::tool(
-            BundleSourceKind::Artifact,
-            path,
-            format!(
-                "unsquashfs failed for {}: {}",
-                inner_path,
-                String::from_utf8_lossy(&output.stderr).trim()
-            ),
-        ));
-    }
-    String::from_utf8(output.stdout).map_err(|error| {
+    let bytes = read_artifact_bytes(path, inner_path)?;
+    String::from_utf8(bytes).map_err(|error| {
         BundleReadError::invalid(
             BundleSourceKind::Artifact,
             &path.display().to_string(),
             format!("artifact entry {inner_path} is not valid utf-8: {error}"),
         )
     })
+}
+
+fn read_artifact_bytes(path: &Path, inner_path: &str) -> Result<Vec<u8>, BundleReadError> {
+    let filesystem = open_artifact_filesystem(path)?;
+    let normalized_inner = normalize_artifact_path(inner_path).map_err(|error| {
+        BundleReadError::invalid(
+            BundleSourceKind::Artifact,
+            &path.display().to_string(),
+            format!("invalid artifact path {inner_path}: {error}"),
+        )
+    })?;
+    for node in filesystem.files() {
+        let Some(node_path) = normalize_node_path(&node.fullpath).map_err(|error| {
+            BundleReadError::tool(
+                BundleSourceKind::Artifact,
+                path,
+                format!("read SquashFS path {}: {error}", node.fullpath.display()),
+            )
+        })?
+        else {
+            continue;
+        };
+        if node_path != normalized_inner {
+            continue;
+        }
+        let InnerNode::File(file) = &node.inner else {
+            return Err(BundleReadError::invalid(
+                BundleSourceKind::Artifact,
+                &path.display().to_string(),
+                format!("artifact entry {inner_path} is not a file"),
+            ));
+        };
+        let mut reader = filesystem.file(file).reader();
+        let mut bytes = Vec::new();
+        reader.read_to_end(&mut bytes).map_err(|error| {
+            BundleReadError::tool(
+                BundleSourceKind::Artifact,
+                path,
+                format!("read artifact entry {inner_path}: {error}"),
+            )
+        })?;
+        return Ok(bytes);
+    }
+    Err(BundleReadError::tool(
+        BundleSourceKind::Artifact,
+        path,
+        format!("artifact entry {inner_path} not found"),
+    ))
+}
+
+fn open_artifact_filesystem(path: &Path) -> Result<FilesystemReader<'static>, BundleReadError> {
+    let file = fs::File::open(path).map_err(|error| {
+        BundleReadError::io(
+            BundleSourceKind::Artifact,
+            path,
+            format!("open artifact {}: {error}", path.display()),
+        )
+    })?;
+    FilesystemReader::from_reader(BufReader::new(file)).map_err(|error| {
+        BundleReadError::tool(
+            BundleSourceKind::Artifact,
+            path,
+            format!("read SquashFS artifact with Rust-native reader: {error}"),
+        )
+    })
+}
+
+fn normalize_node_path(path: &Path) -> Result<Option<String>, String> {
+    if path == Path::new("/") {
+        return Ok(None);
+    }
+    let stripped = path.strip_prefix("/").unwrap_or(path);
+    normalize_path(stripped).map(Some)
+}
+
+fn normalize_artifact_path(path: &str) -> Result<String, String> {
+    normalize_path(Path::new(path.trim_matches('/')))
+}
+
+fn normalize_path(path: &Path) -> Result<String, String> {
+    let mut parts = Vec::new();
+    for component in path.components() {
+        match component {
+            std::path::Component::Normal(part) => {
+                let part = part
+                    .to_str()
+                    .ok_or_else(|| format!("path must be valid UTF-8: {}", path.display()))?;
+                parts.push(part.to_string());
+            }
+            std::path::Component::CurDir => {}
+            std::path::Component::ParentDir
+            | std::path::Component::RootDir
+            | std::path::Component::Prefix(_) => {
+                return Err(format!("path must be relative: {}", path.display()));
+            }
+        }
+    }
+    if parts.is_empty() {
+        return Err("path cannot be empty".to_string());
+    }
+    Ok(parts.join("/"))
 }
 
 fn parse_manifest(

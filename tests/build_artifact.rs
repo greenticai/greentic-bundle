@@ -701,6 +701,10 @@ fn reader_rejects_artifact_with_missing_listed_file() {
     greentic_bundle::build::export_build_dir(&build_dir, &artifact, false, false).expect("export");
     let error =
         greentic_bundle_reader::open_artifact(&artifact).expect_err("missing artifact file");
-    assert!(error.details.contains("unsquashfs failed"));
+    assert!(
+        error
+            .details
+            .contains("artifact entry resolved/default.yaml not found")
+    );
     assert!(error.details.contains("resolved/default.yaml"));
 }
