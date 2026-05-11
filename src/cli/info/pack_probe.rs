@@ -300,4 +300,23 @@ mod tests {
         let files = vec!["packs/foo.gtpack".to_string()];
         assert_eq!(match_pack_file(&files, ""), None);
     }
+
+    #[test]
+    fn probe_inlined_packs_with_no_references_returns_empty() {
+        let out = probe_inlined_packs(Path::new("/nonexistent/bundle.gtbundle"), &[]);
+        assert!(out.is_empty());
+    }
+
+    #[test]
+    fn probe_inlined_packs_returns_empty_when_unsquashfs_cannot_list() {
+        // Pointing at a path that isn't a valid SquashFS image makes
+        // `unsquashfs -l` exit non-zero (or the binary may be absent on the
+        // host). Either way the probe should warn and return an empty map
+        // rather than panicking, leaving callers with version = None.
+        let dir = tempfile::tempdir().expect("tempdir");
+        let bogus = dir.path().join("not-a-bundle.gtbundle");
+        std::fs::write(&bogus, b"not a squashfs image").expect("write");
+        let out = probe_inlined_packs(&bogus, &["foo"]);
+        assert!(out.is_empty());
+    }
 }
