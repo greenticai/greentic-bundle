@@ -12,6 +12,8 @@ pub enum PackError {
     Zip(String),
     #[error("E_SERDE: {0}")]
     Serde(String),
+    #[error("E_MANIFEST_CBOR: {0}")]
+    ManifestCbor(String),
 }
 
 impl PackError {
@@ -21,6 +23,7 @@ impl PackError {
             PackError::InvalidConfig(_) => "E_INVALID_CONFIG",
             PackError::Zip(_) => "E_ZIP",
             PackError::Serde(_) => "E_SERDE",
+            PackError::ManifestCbor(_) => "E_MANIFEST_CBOR",
         }
     }
 }
