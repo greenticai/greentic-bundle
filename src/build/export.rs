@@ -31,7 +31,7 @@ pub fn write_build_outputs(
     if warmup {
         crate::build::warmup::warmup_build_dir(&state.build_dir)?;
     }
-    crate::build::squashfs::build_artifact(&state.build_dir, artifact)?;
+    crate::bundle_fs::write_bundle(&state.build_dir, artifact)?;
     Ok(crate::build::BuildResult {
         artifact_path: artifact.display().to_string(),
         build_dir: state.build_dir.display().to_string(),

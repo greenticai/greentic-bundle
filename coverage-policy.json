@@ -10,7 +10,10 @@
     "files": [
       "build.rs",
       "src/lib.rs",
-      "src/main.rs"
+      "src/main.rs",
+      "src/build/squashfs.rs",
+      "src/bundle_fs/native_mksquashfs_writer.rs",
+      "src/bundle_fs/native_unsquashfs_reader.rs"
     ]
   },
   "per_file": {
