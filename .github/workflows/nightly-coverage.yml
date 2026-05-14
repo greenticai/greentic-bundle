@@ -32,7 +32,7 @@ jobs:
       - name: Install coverage toolchain
         run: |
           rustup component add llvm-tools-preview
-          cargo binstall --no-confirm greentic-dev cargo-llvm-cov cargo-nextest
+          cargo binstall --no-confirm --force greentic-dev cargo-llvm-cov cargo-nextest
 
       - name: Validate coverage policy
         run: greentic-dev coverage
