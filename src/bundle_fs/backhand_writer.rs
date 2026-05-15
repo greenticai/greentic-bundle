@@ -133,6 +133,7 @@ fn write_bundle_with_backhand(input_dir: &Path, output_file: &Path) -> Result<()
             input_dir.display()
         );
     }
+    super::assert_no_dev_secret_paths(input_dir)?;
     if let Some(parent) = output_file.parent() {
         std::fs::create_dir_all(parent)
             .with_context(|| format!("create artifact parent {}", parent.display()))?;
