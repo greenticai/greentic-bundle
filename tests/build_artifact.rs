@@ -708,3 +708,107 @@ fn reader_rejects_artifact_with_missing_listed_file() {
     );
     assert!(error.details.contains("resolved/default.yaml"));
 }
+
+// Phase 0 secret-leak hotfix regression test: archived setup-state JSON files
+// must never carry plaintext secret_values, even when the source-of-truth on
+// disk still does. See plans/next-gen-deployment.md P0.1.
+#[test]
+fn build_redacts_secret_values_in_archived_setup_state() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    seed_workspace(&root);
+
+    let setup_state_path = root.join("state/setup/provider-a.json");
+    let leaked_token = "sk-PLAINTEXT-MUST-NOT-LEAK";
+    fs::write(
+        &setup_state_path,
+        format!(
+            r#"{{"schema_version":1,"provider_id":"provider-a","source_kind":"legacy","form":{{"id":"provider-a-setup","title":"Provider A Setup","version":"1.0.0","description":"Provider A provider configuration","questions":[]}},"normalized_answers":{{}},"non_secret_config":{{"region":"eu-west-1"}},"secret_values":{{"api_token":"{leaked_token}"}}}}"#
+        ),
+    )
+    .expect("seed populated setup state");
+
+    let artifact = root.join("redacted.gtbundle");
+    greentic_bundle::build::build_workspace(&root, Some(&artifact), false, false).expect("build");
+
+    let extract_dir = root.join("extracted");
+    greentic_bundle::bundle_fs::extract_bundle(&artifact, &extract_dir).expect("extract");
+
+    let archived_bytes =
+        fs::read(extract_dir.join("state/setup/provider-a.json")).expect("read archived state");
+    let archived_str = String::from_utf8(archived_bytes.clone()).expect("utf8");
+    assert!(
+        !archived_str.contains(leaked_token),
+        "archived setup-state must not contain plaintext token, got: {archived_str}"
+    );
+    let archived: Value = serde_json::from_slice(&archived_bytes).expect("parse archived");
+    assert_eq!(archived["secret_values"], serde_json::json!({}));
+    assert_eq!(
+        archived["non_secret_config"]["region"],
+        Value::String("eu-west-1".to_string())
+    );
+    assert_eq!(
+        archived["provider_id"],
+        Value::String("provider-a".to_string())
+    );
+
+    // Source-of-truth on disk is untouched — runtime still reads plaintext from
+    // here until Phase B replaces the in-memory map with SecretRef. Only the
+    // archived copy is redacted.
+    let source_str = fs::read_to_string(&setup_state_path).expect("read source state");
+    assert!(
+        source_str.contains(leaked_token),
+        "source setup-state should retain plaintext until Phase B; got: {source_str}"
+    );
+}
+
+// Phase 0 secret-leak hotfix regression test: any dev-store file or directory
+// reaching the archive boundary must abort the build with a loud error rather
+// than silently shipping. See plans/next-gen-deployment.md P0.1.
+#[test]
+fn bundle_fs_refuses_to_archive_dev_secrets_env_path() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    seed_workspace(&root);
+
+    // Run the build pipeline once to produce a valid build_dir.
+    greentic_bundle::build::build_workspace(&root, None, false, false).expect("seed build dir");
+    let build_dir = root.join("state/build/demo-bundle/normalized");
+    assert!(build_dir.is_dir());
+
+    // Inject a stray dev-store file as if upstream pipeline had a regression.
+    let dev_dir = build_dir.join(".greentic/dev");
+    fs::create_dir_all(&dev_dir).expect("dev dir");
+    fs::write(dev_dir.join(".dev.secrets.env"), "GTC_API_TOKEN=leaked").expect("seed dev secret");
+
+    let artifact = root.join("denylist.gtbundle");
+    let err = greentic_bundle::bundle_fs::write_bundle(&build_dir, &artifact)
+        .expect_err("denylist must bail");
+    let msg = format!("{err:#}");
+    assert!(
+        msg.contains("refusing to archive"),
+        "expected denylist bail; got: {msg}"
+    );
+    assert!(
+        !artifact.exists(),
+        "denylisted build must not produce artifact"
+    );
+}
+
+// Same denylist invariant, exercised through the stray `.dev.secrets.env`
+// filename pattern (the file pattern, not the directory pattern).
+#[test]
+fn bundle_fs_refuses_stray_dev_secrets_env_filename() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    seed_workspace(&root);
+
+    greentic_bundle::build::build_workspace(&root, None, false, false).expect("seed build dir");
+    let build_dir = root.join("state/build/demo-bundle/normalized");
+    fs::write(build_dir.join("packs/.dev.secrets.env"), "X=Y").expect("seed stray");
+
+    let artifact = root.join("stray.gtbundle");
+    let err = greentic_bundle::bundle_fs::write_bundle(&build_dir, &artifact)
+        .expect_err("denylist must bail");
+    assert!(format!("{err:#}").contains(".dev.secrets.env"));
+}
