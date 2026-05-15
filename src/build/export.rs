@@ -8,6 +8,11 @@ use serde_json::{Value, json};
 const SETUP_STATE_PREFIX: &str = "state/setup/";
 const SETUP_STATE_SUFFIX: &str = ".json";
 const SECRET_VALUES_KEY: &str = "secret_values";
+const NORMALIZED_ANSWERS_KEY: &str = "normalized_answers";
+const FORM_KEY: &str = "form";
+const QUESTIONS_KEY: &str = "questions";
+const QUESTION_ID_KEY: &str = "id";
+const QUESTION_SECRET_KEY: &str = "secret";
 
 #[derive(Debug, Clone)]
 pub struct ExportPlan {
@@ -91,9 +96,16 @@ pub fn write_normalized_build_dir(
     Ok(())
 }
 
-// Phase 0 secret-leak hotfix: setup-state JSON files carry a `secret_values`
-// map. The runtime still reads plaintext from the on-disk source-of-truth, but
-// the archived copy that ships in the .gtbundle must never carry plaintext.
+// Phase 0 secret-leak hotfix: setup-state JSON files carry plaintext secrets
+// in TWO places — `secret_values` (the split-out map) and `normalized_answers`
+// (the full pre-split map, which retains every answer including secret ones —
+// see greentic-bundle/src/setup/persist.rs:84-105). The runtime still reads
+// plaintext from the on-disk source-of-truth, but the archived copy that ships
+// in the .gtbundle must never carry plaintext.
+//
+// Strategy: parse with serde_json::Value (tolerant to schema drift), discover
+// the secret question IDs from the embedded `form.questions[*].secret` flag,
+// then drop those IDs from `normalized_answers` AND clear `secret_values`.
 // See plans/next-gen-deployment.md P0.1.
 fn redact_secret_values<'a>(name: &str, contents: &'a str) -> Result<Cow<'a, str>> {
     if !is_setup_state_file(name) {
@@ -104,13 +116,52 @@ fn redact_secret_values<'a>(name: &str, contents: &'a str) -> Result<Cow<'a, str
     let Some(map) = value.as_object_mut() else {
         return Ok(Cow::Borrowed(contents));
     };
-    if !map.contains_key(SECRET_VALUES_KEY) {
+    let secret_ids = collect_secret_question_ids(map);
+    let mut changed = false;
+    if map.contains_key(SECRET_VALUES_KEY) {
+        map.insert(SECRET_VALUES_KEY.to_string(), json!({}));
+        changed = true;
+    }
+    if !secret_ids.is_empty()
+        && let Some(answers) = map
+            .get_mut(NORMALIZED_ANSWERS_KEY)
+            .and_then(Value::as_object_mut)
+    {
+        for id in &secret_ids {
+            if answers.remove(id).is_some() {
+                changed = true;
+            }
+        }
+    }
+    if !changed {
         return Ok(Cow::Borrowed(contents));
     }
-    map.insert(SECRET_VALUES_KEY.to_string(), json!({}));
     let redacted = serde_json::to_string_pretty(&value)
         .with_context(|| format!("re-serialize redacted setup-state JSON: {name}"))?;
     Ok(Cow::Owned(format!("{redacted}\n")))
+}
+
+fn collect_secret_question_ids(map: &serde_json::Map<String, Value>) -> Vec<String> {
+    let Some(questions) = map
+        .get(FORM_KEY)
+        .and_then(|form| form.get(QUESTIONS_KEY))
+        .and_then(Value::as_array)
+    else {
+        return Vec::new();
+    };
+    questions
+        .iter()
+        .filter(|q| {
+            q.get(QUESTION_SECRET_KEY)
+                .and_then(Value::as_bool)
+                .unwrap_or(false)
+        })
+        .filter_map(|q| {
+            q.get(QUESTION_ID_KEY)
+                .and_then(Value::as_str)
+                .map(str::to_string)
+        })
+        .collect()
 }
 
 fn is_setup_state_file(name: &str) -> bool {
@@ -129,6 +180,64 @@ mod tests {
         assert_eq!(parsed["secret_values"], json!({}));
         assert!(!out.contains("sk-PLAINTEXT-LEAK"));
         assert_eq!(parsed["non_secret_config"], json!({}));
+    }
+
+    // Codex adversarial review caught this: persist.rs:84-105 writes the full
+    // pre-split map to `normalized_answers`, then copies secret-marked values
+    // into `secret_values`. Both fields ship in the archive. Redacting only
+    // `secret_values` leaves the plaintext alive in `normalized_answers`.
+    #[test]
+    fn redacts_plaintext_secrets_from_normalized_answers_via_form_metadata() {
+        let input = r#"{
+            "schema_version":1,
+            "provider_id":"telegram",
+            "source_kind":"legacy",
+            "form":{
+                "id":"telegram","title":"Telegram","version":"1",
+                "questions":[
+                    {"id":"api_token","kind":"string","title":"Token","required":true,"secret":true},
+                    {"id":"name","kind":"string","title":"Name","required":true,"secret":false}
+                ]
+            },
+            "normalized_answers":{"api_token":"sk-PLAINTEXT-LEAK","name":"my-bot"},
+            "non_secret_config":{"name":"my-bot"},
+            "secret_values":{"api_token":"sk-PLAINTEXT-LEAK"}
+        }"#;
+        let out = redact_secret_values("state/setup/telegram.json", input).expect("redact");
+        assert!(
+            !out.contains("sk-PLAINTEXT-LEAK"),
+            "redacted JSON must not contain the secret token, got:\n{out}"
+        );
+        let parsed: Value = serde_json::from_str(out.as_ref()).expect("parse output");
+        assert_eq!(parsed["secret_values"], json!({}));
+        assert_eq!(parsed["normalized_answers"], json!({"name": "my-bot"}));
+        assert_eq!(parsed["non_secret_config"], json!({"name": "my-bot"}));
+    }
+
+    #[test]
+    fn collects_secret_ids_from_embedded_form_metadata() {
+        let map: serde_json::Map<String, Value> = serde_json::from_str(
+            r#"{
+                "form": {
+                    "questions": [
+                        {"id":"k1","secret":true},
+                        {"id":"k2","secret":false},
+                        {"id":"k3","secret":true}
+                    ]
+                }
+            }"#,
+        )
+        .unwrap();
+        let mut ids = collect_secret_question_ids(&map);
+        ids.sort();
+        assert_eq!(ids, vec!["k1".to_string(), "k3".to_string()]);
+    }
+
+    #[test]
+    fn collects_no_secret_ids_when_form_missing() {
+        let map: serde_json::Map<String, Value> =
+            serde_json::from_str(r#"{"normalized_answers":{}}"#).unwrap();
+        assert!(collect_secret_question_ids(&map).is_empty());
     }
 
     #[test]

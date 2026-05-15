@@ -762,6 +762,83 @@ fn build_redacts_secret_values_in_archived_setup_state() {
     );
 }
 
+// Codex adversarial review (PR #112) caught that the original hotfix only
+// cleared `secret_values` and left the SAME token alive in `normalized_answers`
+// (greentic-bundle/src/setup/persist.rs:84-105 writes both). This test
+// exercises the real-shape state where normalized_answers holds the secret
+// token under the secret-marked question ID and asserts the extracted archive
+// bytes contain neither plaintext copy. See plans/next-gen-deployment.md P0.1.
+#[test]
+fn build_redacts_secrets_from_normalized_answers_in_archived_setup_state() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    seed_workspace(&root);
+
+    let setup_state_path = root.join("state/setup/provider-a.json");
+    let leaked_token = "sk-PLAINTEXT-MUST-NOT-LEAK-VIA-NORMALIZED";
+    fs::write(
+        &setup_state_path,
+        format!(
+            r#"{{
+                "schema_version":1,
+                "provider_id":"provider-a",
+                "source_kind":"legacy",
+                "form":{{
+                    "id":"provider-a-setup","title":"Provider A","version":"1.0.0",
+                    "questions":[
+                        {{"id":"api_token","kind":"string","title":"Token","required":true,"secret":true}},
+                        {{"id":"region","kind":"string","title":"Region","required":true,"secret":false}}
+                    ]
+                }},
+                "normalized_answers":{{"api_token":"{leaked_token}","region":"eu-west-1"}},
+                "non_secret_config":{{"region":"eu-west-1"}},
+                "secret_values":{{"api_token":"{leaked_token}"}}
+            }}"#
+        ),
+    )
+    .expect("seed real-shape setup state");
+
+    let artifact = root.join("redacted.gtbundle");
+    greentic_bundle::build::build_workspace(&root, Some(&artifact), false, false).expect("build");
+
+    let extract_dir = root.join("extracted");
+    greentic_bundle::bundle_fs::extract_bundle(&artifact, &extract_dir).expect("extract");
+
+    let archived_bytes =
+        fs::read(extract_dir.join("state/setup/provider-a.json")).expect("read archived state");
+    let archived_str = String::from_utf8(archived_bytes.clone()).expect("utf8");
+    assert!(
+        !archived_str.contains(leaked_token),
+        "archived setup-state must not contain plaintext token in any field, got:\n{archived_str}"
+    );
+
+    let archived: Value = serde_json::from_slice(&archived_bytes).expect("parse archived");
+    assert_eq!(archived["secret_values"], serde_json::json!({}));
+    assert_eq!(
+        archived["normalized_answers"],
+        serde_json::json!({"region": "eu-west-1"}),
+        "normalized_answers must retain only non-secret keys"
+    );
+    assert_eq!(
+        archived["non_secret_config"],
+        serde_json::json!({"region": "eu-west-1"})
+    );
+
+    // Raw archive bytes (pre-extract) must not contain the token either,
+    // closing the loop on any compression/encoding path that might preserve it.
+    let raw_artifact_bytes = fs::read(&artifact).expect("read artifact");
+    assert!(
+        !contains_bytes(&raw_artifact_bytes, leaked_token.as_bytes()),
+        "raw .gtbundle bytes must not contain plaintext token"
+    );
+}
+
+fn contains_bytes(haystack: &[u8], needle: &[u8]) -> bool {
+    haystack
+        .windows(needle.len())
+        .any(|window| window == needle)
+}
+
 // Phase 0 secret-leak hotfix regression test: any dev-store file or directory
 // reaching the archive boundary must abort the build with a loud error rather
 // than silently shipping. See plans/next-gen-deployment.md P0.1.
