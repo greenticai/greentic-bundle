@@ -11,6 +11,7 @@ version = "1.2.0-dev.0"
 
 [workspace.dependencies]
 anyhow = "1"
+backhand = "0.25"
 assert_cmd = "2"
 ciborium = "0.2"
 clap = { version = "4", features = ["derive"] }
@@ -87,6 +88,7 @@ pkg-fmt = "zip"
 
 [dependencies]
 anyhow.workspace = true
+backhand.workspace = true
 ciborium.workspace = true
 clap.workspace = true
 constant_time_eq.workspace = true
@@ -106,6 +108,7 @@ unic-langid.workspace = true
 zip.workspace = true
 dirs.workspace = true
 tracing.workspace = true
+walkdir.workspace = true
 
 [dev-dependencies]
 assert_cmd.workspace = true
