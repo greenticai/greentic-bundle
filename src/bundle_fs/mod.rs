@@ -112,6 +112,30 @@ pub(crate) fn assert_no_dev_secret_paths(input_dir: &Path) -> Result<()> {
                 relative.display()
             );
         }
+        // Phase 0 P0.1 symlink-bypass guard. WalkDir with follow_links(false)
+        // visits symlinks as single entries without recursing into them, so
+        // a symlink whose own relative path is benign (e.g. `packs/seed.env`)
+        // but whose target points into a dev-store path would otherwise pass
+        // through. The backhand writer preserves symlinks as symlinks
+        // (push_symlink ships the target STRING into the archive), so even
+        // without dereferencing, an attacker can plant a known-bad target
+        // path inside the .gtbundle. Bail if the target itself matches the
+        // dev-secret pattern.
+        if entry.file_type().is_symlink() {
+            let target = std::fs::read_link(entry.path()).with_context(|| {
+                format!(
+                    "read symlink target for dev-secret denylist: {}",
+                    relative.display()
+                )
+            })?;
+            if let Some(reason) = dev_secret_match(&target) {
+                bail!(
+                    "refusing to archive symlink {} whose target {} matches dev-secret pattern ({reason})",
+                    relative.display(),
+                    target.display()
+                );
+            }
+        }
     }
     Ok(())
 }
@@ -308,5 +332,75 @@ mod tests {
         let message = error.to_string();
         assert!(message.contains(READER_ENV));
         assert!(message.contains("backhand, unsquashfs"));
+    }
+
+    // Phase 0 P0.1 symlink-bypass regression tests. The backhand writer
+    // preserves symlinks intentionally, so we cannot reject them wholesale —
+    // instead we inspect the symlink TARGET against the dev-secret pattern.
+    //
+    // dev_secret_match works on Path::components() with non-Normal components
+    // filtered out, so it correctly handles `../`, absolute, and relative
+    // targets uniformly.
+
+    #[cfg(unix)]
+    #[test]
+    fn assert_denylist_bails_on_file_symlink_targeting_dev_store() {
+        let temp = TempDir::new().expect("tempdir");
+        let root = temp.path();
+        std::fs::create_dir_all(root.join("packs")).expect("packs dir");
+        let benign_name = root.join("packs/seed.env");
+        // The target itself does not exist; that's fine — read_link only
+        // returns the link string, not target metadata.
+        std::os::unix::fs::symlink("../.greentic/dev/.dev.secrets.env", &benign_name)
+            .expect("create symlink");
+        let err = assert_no_dev_secret_paths(root).expect_err("must bail on dev-targeted symlink");
+        let msg = format!("{err:#}");
+        assert!(
+            msg.contains("refusing to archive symlink"),
+            "expected symlink refusal; got: {msg}"
+        );
+        assert!(msg.contains(".greentic/dev"));
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn assert_denylist_bails_on_directory_symlink_targeting_dev_tree() {
+        let temp = TempDir::new().expect("tempdir");
+        let root = temp.path();
+        std::fs::create_dir_all(root.join("packs")).expect("dir");
+        std::os::unix::fs::symlink("/tmp/host/.greentic/state/dev", root.join("packs/seed-dir"))
+            .expect("create dir symlink");
+        let err = assert_no_dev_secret_paths(root).expect_err("must bail");
+        assert!(format!("{err:#}").contains(".greentic/state/dev"));
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn assert_denylist_bails_on_symlink_targeting_stray_dev_secrets_env() {
+        let temp = TempDir::new().expect("tempdir");
+        let root = temp.path();
+        std::fs::create_dir_all(root.join("packs")).expect("dir");
+        std::os::unix::fs::symlink(
+            "/elsewhere/.dev.secrets.env",
+            root.join("packs/innocent.txt"),
+        )
+        .expect("create symlink");
+        let err = assert_no_dev_secret_paths(root).expect_err("must bail");
+        assert!(format!("{err:#}").contains(".dev.secrets.env"));
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn assert_denylist_allows_benign_symlink_target() {
+        // A symlink whose target is unrelated to dev-store paths is allowed,
+        // because the backhand writer's push_symlink legitimately supports
+        // symlinks. The string-leak class is bounded to dev-store target
+        // patterns; everything else is the bundle author's choice.
+        let temp = TempDir::new().expect("tempdir");
+        let root = temp.path();
+        std::fs::create_dir_all(root.join("packs")).expect("dir");
+        std::os::unix::fs::symlink("../resolved/default.yaml", root.join("packs/link"))
+            .expect("create benign symlink");
+        assert_no_dev_secret_paths(root).expect("benign symlink must pass");
     }
 }
