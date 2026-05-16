@@ -127,11 +127,9 @@ if [ "$PACKAGE_ONLY" -eq 0 ]; then
 
   header "cargo clippy"
   cargo clippy --all-targets --all-features -- -D warnings
-  cargo clippy --features extensions --all-targets -- -D warnings
 
   header "cargo test"
   GREENTIC_BUNDLE_USE_BUNDLED_CATALOG=1 cargo test --all-features
-  GREENTIC_BUNDLE_USE_BUNDLED_CATALOG=1 cargo test --features extensions --all-targets
 
   header "cargo build"
   cargo build --all-features
