@@ -1,3 +1,4 @@
+pub mod doctor_secrets;
 pub mod export;
 pub mod lock;
 pub mod manifest;
@@ -127,7 +128,7 @@ fn doctor_workspace(root: &Path) -> Result<DoctorReport> {
     let drift_ok = lock::lock_matches_manifest(&state.lock, &state.manifest);
     let reader_validation = open_workspace_build_dir(root);
     let reader_ok = reader_validation.is_ok();
-    let checks = vec![
+    let mut checks = vec![
         DoctorCheck {
             name: "bundle.yaml".to_string(),
             ok: root.join(crate::project::WORKSPACE_ROOT_FILE).exists(),
@@ -162,6 +163,9 @@ fn doctor_workspace(root: &Path) -> Result<DoctorReport> {
             },
         },
     ];
+    let staging = temp_build_dir(&state)?;
+    let secrets = doctor_secrets::scan_build_dir(staging.path())?;
+    checks.extend(secret_scan_checks(secrets));
     Ok(DoctorReport {
         target: root.display().to_string(),
         ok: checks.iter().all(|check| check.ok),
@@ -172,7 +176,7 @@ fn doctor_workspace(root: &Path) -> Result<DoctorReport> {
 fn doctor_artifact(artifact: &Path) -> Result<DoctorReport> {
     let opened = greentic_bundle_reader::open_artifact(artifact)
         .with_context(|| format!("open artifact {}", artifact.display()))?;
-    let checks = vec![
+    let mut checks = vec![
         DoctorCheck {
             name: "artifact exists".to_string(),
             ok: artifact.exists(),
@@ -198,11 +202,51 @@ fn doctor_artifact(artifact: &Path) -> Result<DoctorReport> {
             )),
         },
     ];
+    let secrets = doctor_secrets::scan_artifact(artifact)?;
+    checks.extend(secret_scan_checks(secrets));
     Ok(DoctorReport {
         target: artifact.display().to_string(),
         ok: checks.iter().all(|check| check.ok),
         checks,
     })
+}
+
+// Translates a SecretsReport into DoctorCheck entries so the existing JSON
+// schema stays stable for downstream consumers (CI, status pages). Clean
+// scans emit a single `secret-leak scan` pass; every finding becomes its own
+// `secret-leak: <kind>` fail-check with the finding message + path.
+fn secret_scan_checks(report: doctor_secrets::SecretsReport) -> Vec<DoctorCheck> {
+    if report.findings.is_empty() {
+        return vec![DoctorCheck {
+            name: "secret-leak scan".to_string(),
+            ok: true,
+            details: None,
+        }];
+    }
+    report
+        .findings
+        .into_iter()
+        .map(|finding| {
+            let detail = match finding.path.as_deref() {
+                Some(path) => format!("{path}: {}", finding.message),
+                None => finding.message.clone(),
+            };
+            DoctorCheck {
+                name: format!("secret-leak: {}", finding_kind_label(finding.kind)),
+                ok: false,
+                details: Some(detail),
+            }
+        })
+        .collect()
+}
+
+fn finding_kind_label(kind: doctor_secrets::FindingKind) -> &'static str {
+    match kind {
+        doctor_secrets::FindingKind::DevStorePath => "dev-store path",
+        doctor_secrets::FindingKind::SecretValuesPopulated => "secret_values populated",
+        doctor_secrets::FindingKind::NormalizedAnswersLeak => "normalized_answers leak",
+        doctor_secrets::FindingKind::ArchiveBytesContainsDevPath => "archive-bytes dev path",
+    }
 }
 
 fn inspect_artifact(artifact: &Path) -> Result<InspectReport> {

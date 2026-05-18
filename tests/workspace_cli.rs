@@ -413,6 +413,117 @@ fn doctor_without_artifact_checks_workspace_root() {
     assert!(report.get("checks").and_then(Value::as_array).is_some());
 }
 
+// Phase 0 P0.2: CI relies on `doctor` exiting non-zero when the secret-leak
+// scanner flags findings. We can't produce a leaky artifact through the
+// normal build pipeline (P0.1's redactor + writer denylist combine to refuse
+// it), so this test bypasses the redactor at the library level — overwrite
+// the redacted setup-state with a leaky one between `write_normalized_build_dir`
+// and `bundle_fs::write_bundle` — then invokes the CLI doctor and asserts
+// the binary exits non-zero with the leak finding in its JSON output.
+#[test]
+fn doctor_cli_exits_non_zero_when_artifact_carries_plaintext_secret() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    init_workspace(&root);
+
+    cargo_bin()
+        .args(["build", "--root", root.to_str().expect("utf8 root")])
+        .assert()
+        .success();
+    let build_dir = root.join("state/build/demo-bundle/normalized");
+    let leaky_state = build_dir.join("state/setup/leaky-provider.json");
+    fs::create_dir_all(leaky_state.parent().expect("setup dir")).expect("setup dir");
+    fs::write(
+        &leaky_state,
+        br#"{
+            "schema_version":1,
+            "provider_id":"leaky-provider",
+            "source_kind":"legacy",
+            "form":{"id":"leaky-provider-setup","title":"Leaky","version":"1.0.0","questions":[]},
+            "normalized_answers":{},
+            "non_secret_config":{},
+            "secret_values":{"api_token":"sk-LEAK-VIA-CLI-DOCTOR"}
+        }"#,
+    )
+    .expect("write leaky state");
+
+    let artifact = root.join("leaky.gtbundle");
+    greentic_bundle::bundle_fs::write_bundle(&build_dir, &artifact)
+        .expect("write_bundle ignores JSON contents (only blocks dev-store paths)");
+
+    let result = cargo_bin()
+        .args([
+            "doctor",
+            "--artifact",
+            artifact.to_str().expect("utf8 artifact"),
+        ])
+        .output()
+        .expect("invoke doctor");
+    assert!(
+        !result.status.success(),
+        "doctor must exit non-zero on leak; status: {:?}",
+        result.status
+    );
+    let report: Value = serde_json::from_slice(&result.stdout).expect("json on stdout");
+    assert_eq!(report.get("ok").and_then(Value::as_bool), Some(false));
+    let checks = report
+        .get("checks")
+        .and_then(Value::as_array)
+        .expect("checks array");
+    assert!(
+        checks.iter().any(|check| check
+            .get("name")
+            .and_then(Value::as_str)
+            .is_some_and(|name| name.contains("secret_values populated"))),
+        "missing secret_values finding in {checks:?}"
+    );
+}
+
+// Phase 0 P0.2: positive-side coverage that the doctor's secret-leak scan
+// surfaces in the CLI JSON output for clean bundles.
+#[test]
+fn doctor_cli_reports_secret_leak_scan_check_on_clean_bundle() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    init_workspace(&root);
+    let artifact = root.join("clean.gtbundle");
+    cargo_bin()
+        .args([
+            "build",
+            "--root",
+            root.to_str().expect("utf8 root"),
+            "--output",
+            artifact.to_str().expect("utf8 artifact"),
+        ])
+        .assert()
+        .success();
+
+    let output = cargo_bin()
+        .args([
+            "doctor",
+            "--artifact",
+            artifact.to_str().expect("utf8 artifact"),
+        ])
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+    let report: Value = serde_json::from_slice(&output).expect("json");
+    assert_eq!(report.get("ok").and_then(Value::as_bool), Some(true));
+    let checks = report
+        .get("checks")
+        .and_then(Value::as_array)
+        .expect("checks array");
+    assert!(
+        checks.iter().any(|check| {
+            check.get("name").and_then(Value::as_str) == Some("secret-leak scan")
+                && check.get("ok").and_then(Value::as_bool) == Some(true)
+        }),
+        "missing passing secret-leak scan check in {checks:?}"
+    );
+}
+
 #[test]
 fn build_dry_run_reports_artifact_path_without_writing_it() {
     let temp = TempDir::new().expect("tempdir");
