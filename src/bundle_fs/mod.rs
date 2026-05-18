@@ -140,7 +140,7 @@ pub(crate) fn assert_no_dev_secret_paths(input_dir: &Path) -> Result<()> {
     Ok(())
 }
 
-fn dev_secret_match(relative: &Path) -> Option<&'static str> {
+pub(crate) fn dev_secret_match(relative: &Path) -> Option<&'static str> {
     let parts: Vec<&str> = relative
         .components()
         .filter_map(|component| match component {

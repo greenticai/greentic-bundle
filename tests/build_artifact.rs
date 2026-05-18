@@ -889,3 +889,90 @@ fn bundle_fs_refuses_stray_dev_secrets_env_filename() {
         .expect_err("denylist must bail");
     assert!(format!("{err:#}").contains(".dev.secrets.env"));
 }
+
+// Phase 0 P0.2: end-to-end coverage that `doctor_target` plumbs the secret-leak
+// scanner into both workspace and artifact reports and that a clean build
+// surfaces a passing `secret-leak scan` check.
+#[test]
+fn doctor_target_includes_secret_scan_check_on_clean_bundle() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    seed_workspace(&root);
+    let artifact = root.join("clean.gtbundle");
+    greentic_bundle::build::build_workspace(&root, Some(&artifact), false, false).expect("build");
+
+    for report in [
+        greentic_bundle::build::doctor_target(Some(&root), None).expect("doctor workspace"),
+        greentic_bundle::build::doctor_target(None, Some(&artifact)).expect("doctor artifact"),
+    ] {
+        assert!(report.ok, "expected clean report, got {report:?}");
+        let scan = report
+            .checks
+            .iter()
+            .find(|check| check.name == "secret-leak scan")
+            .expect("missing secret-leak scan check");
+        assert!(
+            scan.ok,
+            "secret-leak scan check should be ok on clean build"
+        );
+    }
+}
+
+// Phase 0 P0.2: full-pipeline integration — bypass the redactor by writing a
+// build dir with populated `secret_values` directly, then bundle via the raw
+// `bundle_fs::write_bundle` (which only blocks dev-store *paths*, not JSON
+// *content*). The doctor must catch the leak post-archive.
+#[test]
+fn doctor_target_flags_artifact_with_populated_secret_values_in_setup_state() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    seed_workspace(&root);
+
+    // Run the normal pipeline once so the build_dir has a valid manifest/lock,
+    // then overwrite the redacted setup-state with a leaky one before re-archiving.
+    greentic_bundle::build::build_workspace(&root, None, false, false).expect("seed build dir");
+    let build_dir = root.join("state/build/demo-bundle/normalized");
+    fs::write(
+        build_dir.join("state/setup/provider-a.json"),
+        br#"{
+            "schema_version":1,
+            "provider_id":"provider-a",
+            "source_kind":"legacy",
+            "form":{"id":"provider-a-setup","title":"Provider A","version":"1.0.0","questions":[
+                {"id":"api_token","kind":"string","title":"Token","required":true,"secret":true}
+            ]},
+            "normalized_answers":{"api_token":"sk-LEAK-VIA-DOCTOR"},
+            "non_secret_config":{},
+            "secret_values":{"api_token":"sk-LEAK-VIA-DOCTOR"}
+        }"#,
+    )
+    .expect("overwrite redacted state with leaky one");
+
+    let artifact = root.join("leaky.gtbundle");
+    greentic_bundle::bundle_fs::write_bundle(&build_dir, &artifact)
+        .expect("write_bundle accepts dev-store-clean tree even with leaky JSON");
+
+    let report = greentic_bundle::build::doctor_target(None, Some(&artifact)).expect("doctor");
+    assert!(
+        !report.ok,
+        "doctor must flag leaky artifact, got {report:?}"
+    );
+    let kinds: Vec<&str> = report
+        .checks
+        .iter()
+        .filter(|check| !check.ok && check.name.starts_with("secret-leak: "))
+        .map(|check| check.name.as_str())
+        .collect();
+    assert!(
+        kinds
+            .iter()
+            .any(|name| name.contains("secret_values populated")),
+        "missing secret_values finding in {kinds:?}"
+    );
+    assert!(
+        kinds
+            .iter()
+            .any(|name| name.contains("normalized_answers leak")),
+        "missing normalized_answers finding in {kinds:?}"
+    );
+}
