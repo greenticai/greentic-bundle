@@ -210,6 +210,7 @@ pub fn run_command(args: WizardRunArgs) -> Result<()> {
             args.emit_answers.as_ref(),
             args.schema_version.as_deref(),
             execution_for_run(args.dry_run),
+            &args.env,
         )?
     };
     print_plan(&result.plan)?;
@@ -472,6 +473,7 @@ pub fn run_interactive(
     emit_answers: Option<&PathBuf>,
     schema_version: Option<&str>,
     execution: ExecutionMode,
+    env_id: &str,
 ) -> Result<WizardRunResult> {
     match run_interactive_with_zero_action(
         initial_mode,
@@ -479,6 +481,7 @@ pub fn run_interactive(
         schema_version,
         execution,
         RootMenuZeroAction::Exit,
+        env_id,
     )? {
         Some(result) => Ok(result),
         None => bail!("{}", crate::i18n::tr("wizard.exit.message")),
@@ -491,14 +494,20 @@ pub fn run_interactive_with_zero_action(
     schema_version: Option<&str>,
     execution: ExecutionMode,
     zero_action: RootMenuZeroAction,
+    env_id: &str,
 ) -> Result<Option<WizardRunResult>> {
     let stdin = io::stdin();
     let stdout = io::stdout();
     let mut input = stdin.lock();
     let mut output = stdout.lock();
     loop {
-        let Some(selection) =
-            collect_guided_interactive_request(&mut input, &mut output, initial_mode, zero_action)?
+        let Some(selection) = collect_guided_interactive_request(
+            &mut input,
+            &mut output,
+            initial_mode,
+            zero_action,
+            env_id,
+        )?
         else {
             return Ok(None);
         };
@@ -532,12 +541,13 @@ fn collect_guided_interactive_request<R: BufRead, W: Write>(
     output: &mut W,
     initial_mode: Option<WizardMode>,
     zero_action: RootMenuZeroAction,
+    env_id: &str,
 ) -> Result<Option<InteractiveSelection>> {
     if let Some(mode) = initial_mode {
         let interactive = match mode {
-            WizardMode::Create => collect_create_flow(input, output)?,
-            WizardMode::Update => collect_update_flow(input, output, false)?,
-            WizardMode::Doctor => collect_doctor_flow(input, output)?,
+            WizardMode::Create => collect_create_flow(input, output, env_id)?,
+            WizardMode::Update => collect_update_flow(input, output, false, env_id)?,
+            WizardMode::Doctor => collect_doctor_flow(input, output, env_id)?,
         };
         return Ok(Some(InteractiveSelection::Request(Box::new(interactive))));
     }
@@ -548,13 +558,13 @@ fn collect_guided_interactive_request<R: BufRead, W: Write>(
 
     match choice {
         InteractiveChoice::Create => Ok(Some(InteractiveSelection::Request(Box::new(
-            collect_create_flow(input, output)?,
+            collect_create_flow(input, output, env_id)?,
         )))),
         InteractiveChoice::Update => Ok(Some(InteractiveSelection::Request(Box::new(
-            collect_update_flow(input, output, false)?,
+            collect_update_flow(input, output, false, env_id)?,
         )))),
         InteractiveChoice::Validate => Ok(Some(InteractiveSelection::Request(Box::new(
-            collect_update_flow(input, output, true)?,
+            collect_update_flow(input, output, true, env_id)?,
         )))),
         InteractiveChoice::Doctor => {
             perform_doctor_action(input, output)?;
@@ -655,6 +665,7 @@ fn write_root_menu_option<W: Write>(
 fn collect_create_flow<R: BufRead, W: Write>(
     input: &mut R,
     output: &mut W,
+    _env_id: &str,
 ) -> Result<InteractiveRequest> {
     let locale = crate::i18n::current_locale();
     let bundle_name = prompt_required_string(
@@ -709,6 +720,7 @@ fn collect_update_flow<R: BufRead, W: Write>(
     input: &mut R,
     output: &mut W,
     validate_only: bool,
+    _env_id: &str,
 ) -> Result<InteractiveRequest> {
     let (target, mut state) = prompt_request_from_bundle_target(
         input,
@@ -757,6 +769,7 @@ fn collect_update_flow<R: BufRead, W: Write>(
 fn collect_doctor_flow<R: BufRead, W: Write>(
     input: &mut R,
     output: &mut W,
+    _env_id: &str,
 ) -> Result<InteractiveRequest> {
     Ok(InteractiveRequest {
         request: prompt_request_from_bundle_target(
