@@ -56,6 +56,8 @@ pub struct WizardRunArgs {
     pub dry_run: bool,
     #[arg(long, value_enum, help = "cli.wizard.mode.option")]
     pub mode: Option<WizardMode>,
+    #[arg(long = "env", short = 'e', default_value = "local")]
+    pub env: String,
 }
 
 #[derive(Debug, Args)]
@@ -122,6 +124,7 @@ pub fn run(args: WizardArgs) -> Result<()> {
                     None,
                     crate::wizard::ExecutionMode::Execute,
                     zero_action,
+                    "local",
                 ) {
                     Ok(result) => result,
                     Err(error) if error.to_string() == crate::i18n::tr("wizard.exit.message") => {
