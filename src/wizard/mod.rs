@@ -1051,19 +1051,21 @@ fn execute_request(
 fn collect_interactive_request<R: BufRead, W: Write>(
     input: &mut R,
     output: &mut W,
+    env_id: &str,
     initial_mode: Option<WizardMode>,
     last_compact_title: &mut Option<String>,
 ) -> Result<NormalizedRequest> {
     let mode = match initial_mode {
         Some(mode) => mode,
-        None => choose_mode_via_qa(input, output, last_compact_title)?,
+        None => choose_mode_via_qa(input, output, env_id, last_compact_title)?,
     };
     let request = match mode {
-        WizardMode::Update => collect_update_request(input, output, last_compact_title)?,
+        WizardMode::Update => collect_update_request(input, output, env_id, last_compact_title)?,
         WizardMode::Create | WizardMode::Doctor => {
             let answers = run_qa_form(
                 input,
                 output,
+                env_id,
                 &wizard_request_form_spec_json(mode, None)?,
                 None,
                 "root wizard",
@@ -1072,7 +1074,7 @@ fn collect_interactive_request<R: BufRead, W: Write>(
             normalized_request_from_qa_answers(answers, crate::i18n::current_locale(), mode)?
         }
     };
-    collect_interactive_setup_answers(input, output, request, last_compact_title)
+    collect_interactive_setup_answers(input, output, env_id, request, last_compact_title)
 }
 
 #[allow(dead_code)]
@@ -1088,6 +1090,7 @@ fn parse_csv_answers(raw: &str) -> Vec<String> {
 fn choose_mode_via_qa<R: BufRead, W: Write>(
     input: &mut R,
     output: &mut W,
+    env_id: &str,
     last_compact_title: &mut Option<String>,
 ) -> Result<WizardMode> {
     let config = WizardRunConfig {
@@ -1120,6 +1123,7 @@ fn choose_mode_via_qa<R: BufRead, W: Write>(
             debug: false,
         },
         verbose: false,
+        env_id: env_id.to_string(),
     };
     let mut driver =
         WizardDriver::new(config).context("initialize greentic-qa-lib wizard mode form")?;
@@ -1253,11 +1257,13 @@ fn prompt_compact_enum<R: BufRead, W: Write>(
 fn collect_update_request<R: BufRead, W: Write>(
     input: &mut R,
     output: &mut W,
+    env_id: &str,
     last_compact_title: &mut Option<String>,
 ) -> Result<NormalizedRequest> {
     let root_answers = run_qa_form(
         input,
         output,
+        env_id,
         &json!({
             "id": "greentic-bundle-update-root",
             "title": crate::i18n::tr("wizard.menu.update"),
@@ -1294,6 +1300,7 @@ fn collect_update_request<R: BufRead, W: Write>(
     let answers = run_qa_form(
         input,
         output,
+        env_id,
         &wizard_request_form_spec_json(WizardMode::Update, Some(&defaults))?,
         None,
         "update wizard",
@@ -1325,6 +1332,7 @@ fn request_defaults_from_workspace(
 fn run_qa_form<R: BufRead, W: Write>(
     input: &mut R,
     output: &mut W,
+    env_id: &str,
     spec_json: &str,
     initial_answers_json: Option<String>,
     context_label: &str,
@@ -1340,6 +1348,7 @@ fn run_qa_form<R: BufRead, W: Write>(
             debug: false,
         },
         verbose: false,
+        env_id: env_id.to_string(),
     };
     let mut driver = WizardDriver::new(config)
         .with_context(|| format!("initialize greentic-qa-lib {context_label}"))?;
@@ -4312,6 +4321,7 @@ fn collect_setup_instructions(
 fn collect_interactive_setup_answers<R: BufRead, W: Write>(
     input: &mut R,
     output: &mut W,
+    env_id: &str,
     request: NormalizedRequest,
     last_compact_title: &mut Option<String>,
 ) -> Result<NormalizedRequest> {
@@ -4347,8 +4357,14 @@ fn collect_interactive_setup_answers<R: BufRead, W: Write>(
             .ok_or_else(|| anyhow::anyhow!("missing setup spec for {provider_id}"))?;
         let parsed = serde_json::from_value::<crate::setup::SetupSpecInput>(spec_input)?;
         let (_, form) = crate::setup::form_spec_from_input(&parsed, &provider_id)?;
-        let answers =
-            prompt_setup_form_answers(input, output, &provider_id, &form, last_compact_title)?;
+        let answers = prompt_setup_form_answers(
+            input,
+            output,
+            env_id,
+            &provider_id,
+            &form,
+            last_compact_title,
+        )?;
         request
             .setup_answers
             .insert(provider_id, Value::Object(answers.into_iter().collect()));
@@ -4361,6 +4377,7 @@ fn collect_interactive_setup_answers<R: BufRead, W: Write>(
 fn prompt_setup_form_answers<R: BufRead, W: Write>(
     input: &mut R,
     output: &mut W,
+    env_id: &str,
     provider_id: &str,
     form: &crate::setup::FormSpec,
     last_compact_title: &mut Option<String>,
@@ -4382,6 +4399,7 @@ fn prompt_setup_form_answers<R: BufRead, W: Write>(
             debug: false,
         },
         verbose: false,
+        env_id: env_id.to_string(),
     };
     let mut driver =
         WizardDriver::new(config).context("initialize greentic-qa-lib setup wizard")?;
