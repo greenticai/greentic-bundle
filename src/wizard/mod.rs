@@ -1046,7 +1046,7 @@ fn execute_request(
         let mut applied_files = apply_plan(&request, &bundle_lock, env_id)?;
         if build_bundle_now {
             let build_result =
-                crate::build::build_workspace(&request.output_dir, None, false, false)?;
+                crate::build::build_workspace(&request.output_dir, None, false, false, None)?;
             applied_files.push(PathBuf::from(build_result.artifact_path));
         }
         applied_files.sort();
