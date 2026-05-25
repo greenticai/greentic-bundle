@@ -1,7 +1,15 @@
 use std::fs;
 use std::path::Path;
 
+use ed25519_dalek::SigningKey;
+use ed25519_dalek::pkcs8::spki::der::pem::LineEnding;
+use ed25519_dalek::pkcs8::{EncodePrivateKey, EncodePublicKey};
+use greentic_bundle::build::signing::SigningConfig;
+use greentic_distributor_client::signing::{
+    TrustRoot, TrustedKey, key_id_for_public_key_pem, verify_artifact_dsse,
+};
 use serde_json::Value;
+use sha2::{Digest, Sha256};
 use tempfile::TempDir;
 
 fn seed_workspace(root: &Path) {
@@ -122,9 +130,9 @@ fn build_produces_byte_stable_artifact() {
 
     let artifact_one = root.join("one.gtbundle");
     let artifact_two = root.join("two.gtbundle");
-    greentic_bundle::build::build_workspace(&root, Some(&artifact_one), false, false)
+    greentic_bundle::build::build_workspace(&root, Some(&artifact_one), false, false, None)
         .expect("build one");
-    greentic_bundle::build::build_workspace(&root, Some(&artifact_two), false, false)
+    greentic_bundle::build::build_workspace(&root, Some(&artifact_two), false, false, None)
         .expect("build two");
 
     assert_eq!(
@@ -157,7 +165,8 @@ fn build_normalized_dir_includes_materialized_pack_and_provider_files() {
     seed_workspace(&root);
 
     let build_dir = root.join("state/build/demo-bundle/normalized");
-    greentic_bundle::build::build_workspace(&root, None, false, false).expect("build workspace");
+    greentic_bundle::build::build_workspace(&root, None, false, false, None)
+        .expect("build workspace");
 
     assert_eq!(
         fs::read(build_dir.join("packs/pack-a.gtpack")).expect("built pack"),
@@ -175,7 +184,8 @@ fn build_defaults_artifact_path_to_dist_directory() {
     let root = temp.path().join("bundle");
     seed_workspace(&root);
 
-    let result = greentic_bundle::build::build_workspace(&root, None, false, false).expect("build");
+    let result =
+        greentic_bundle::build::build_workspace(&root, None, false, false, None).expect("build");
     let expected = root.join("dist/demo-bundle.gtbundle");
 
     assert_eq!(result.artifact_path, expected.display().to_string());
@@ -202,7 +212,8 @@ fn doctor_validates_workspace_and_artifact() {
     let root = temp.path().join("bundle");
     seed_workspace(&root);
     let artifact = root.join("demo.gtbundle");
-    greentic_bundle::build::build_workspace(&root, Some(&artifact), false, false).expect("build");
+    greentic_bundle::build::build_workspace(&root, Some(&artifact), false, false, None)
+        .expect("build");
 
     let workspace_report =
         greentic_bundle::build::doctor_target(Some(&root), None).expect("doctor workspace");
@@ -218,7 +229,8 @@ fn inspect_artifact_includes_content_listing() {
     let root = temp.path().join("bundle");
     seed_workspace(&root);
     let artifact = root.join("demo.gtbundle");
-    greentic_bundle::build::build_workspace(&root, Some(&artifact), false, false).expect("build");
+    greentic_bundle::build::build_workspace(&root, Some(&artifact), false, false, None)
+        .expect("build");
 
     let report = greentic_bundle::build::inspect_target(None, Some(&artifact)).expect("inspect");
     let contents = report.contents.expect("artifact contents");
@@ -240,8 +252,9 @@ fn dry_run_export_computes_plan_without_writing_artifact() {
     let build_dir = root.join("state/build/demo-bundle/normalized");
     let artifact = root.join("dry-run.gtbundle");
 
-    greentic_bundle::build::build_workspace(&root, None, false, false).expect("seed build dir");
-    let result = greentic_bundle::build::export_build_dir(&build_dir, &artifact, true, false)
+    greentic_bundle::build::build_workspace(&root, None, false, false, None)
+        .expect("seed build dir");
+    let result = greentic_bundle::build::export_build_dir(&build_dir, &artifact, true, false, None)
         .expect("dry-run export");
     assert_eq!(result.artifact_path, artifact.display().to_string());
     assert!(!artifact.exists());
@@ -322,7 +335,8 @@ fn inspect_artifact_reads_embedded_manifest() {
     let root = temp.path().join("bundle");
     seed_workspace(&root);
     let artifact = root.join("demo.gtbundle");
-    greentic_bundle::build::build_workspace(&root, Some(&artifact), false, false).expect("build");
+    greentic_bundle::build::build_workspace(&root, Some(&artifact), false, false, None)
+        .expect("build");
 
     let report =
         greentic_bundle::build::inspect_target(None, Some(&artifact)).expect("inspect artifact");
@@ -338,7 +352,8 @@ fn reader_opens_normalized_build_directory() {
     let temp = TempDir::new().expect("tempdir");
     let root = temp.path().join("bundle");
     seed_workspace(&root);
-    let result = greentic_bundle::build::build_workspace(&root, None, false, false).expect("build");
+    let result =
+        greentic_bundle::build::build_workspace(&root, None, false, false, None).expect("build");
 
     let opened = greentic_bundle_reader::open_build_dir(Path::new(&result.build_dir))
         .expect("open build dir");
@@ -361,7 +376,8 @@ fn reader_opens_artifact_and_exposes_runtime_surface() {
     let root = temp.path().join("bundle");
     seed_workspace(&root);
     let artifact = root.join("demo.gtbundle");
-    greentic_bundle::build::build_workspace(&root, Some(&artifact), false, false).expect("build");
+    greentic_bundle::build::build_workspace(&root, Some(&artifact), false, false, None)
+        .expect("build");
 
     let opened = greentic_bundle_reader::open_artifact(&artifact).expect("open artifact");
     assert_eq!(opened.source_kind.as_str(), "artifact");
@@ -382,7 +398,8 @@ fn reader_runtime_surface_exposes_catalogs_and_file_views() {
     let root = temp.path().join("bundle");
     seed_workspace(&root);
     let artifact = root.join("demo.gtbundle");
-    greentic_bundle::build::build_workspace(&root, Some(&artifact), false, false).expect("build");
+    greentic_bundle::build::build_workspace(&root, Some(&artifact), false, false, None)
+        .expect("build");
 
     let surface = greentic_bundle_reader::open_artifact(&artifact)
         .expect("open artifact")
@@ -444,7 +461,8 @@ export_intent: false
     )
     .expect("rewrite bundle yaml");
 
-    let report = greentic_bundle::build::build_workspace(&root, None, false, false).expect("build");
+    let report =
+        greentic_bundle::build::build_workspace(&root, None, false, false, None).expect("build");
     let opened = greentic_bundle_reader::open_build_dir(Path::new(&report.build_dir))
         .expect("open build dir");
     let surface = opened.runtime_surface();
@@ -524,7 +542,8 @@ app_packs:
     )
     .expect("rewrite resolved");
 
-    let report = greentic_bundle::build::build_workspace(&root, None, false, false).expect("build");
+    let report =
+        greentic_bundle::build::build_workspace(&root, None, false, false, None).expect("build");
     let target = greentic_bundle_reader::open_build_dir(Path::new(&report.build_dir))
         .expect("open build dir")
         .runtime_surface()
@@ -698,7 +717,8 @@ fn reader_rejects_artifact_with_missing_listed_file() {
     fs::write(build_dir.join("bundle.yaml"), "bundle_id: demo-bundle\n").expect("bundle yaml");
     let artifact = temp.path().join("broken.gtbundle");
 
-    greentic_bundle::build::export_build_dir(&build_dir, &artifact, false, false).expect("export");
+    greentic_bundle::build::export_build_dir(&build_dir, &artifact, false, false, None)
+        .expect("export");
     let error =
         greentic_bundle_reader::open_artifact(&artifact).expect_err("missing artifact file");
     assert!(
@@ -729,7 +749,8 @@ fn build_redacts_secret_values_in_archived_setup_state() {
     .expect("seed populated setup state");
 
     let artifact = root.join("redacted.gtbundle");
-    greentic_bundle::build::build_workspace(&root, Some(&artifact), false, false).expect("build");
+    greentic_bundle::build::build_workspace(&root, Some(&artifact), false, false, None)
+        .expect("build");
 
     let extract_dir = root.join("extracted");
     greentic_bundle::bundle_fs::extract_bundle(&artifact, &extract_dir).expect("extract");
@@ -800,7 +821,8 @@ fn build_redacts_secrets_from_normalized_answers_in_archived_setup_state() {
     .expect("seed real-shape setup state");
 
     let artifact = root.join("redacted.gtbundle");
-    greentic_bundle::build::build_workspace(&root, Some(&artifact), false, false).expect("build");
+    greentic_bundle::build::build_workspace(&root, Some(&artifact), false, false, None)
+        .expect("build");
 
     let extract_dir = root.join("extracted");
     greentic_bundle::bundle_fs::extract_bundle(&artifact, &extract_dir).expect("extract");
@@ -851,7 +873,8 @@ fn bundle_fs_refuses_to_archive_dev_secrets_env_path() {
     seed_workspace(&root);
 
     // Run the build pipeline once to produce a valid build_dir.
-    greentic_bundle::build::build_workspace(&root, None, false, false).expect("seed build dir");
+    greentic_bundle::build::build_workspace(&root, None, false, false, None)
+        .expect("seed build dir");
     let build_dir = root.join("state/build/demo-bundle/normalized");
     assert!(build_dir.is_dir());
 
@@ -882,7 +905,8 @@ fn bundle_fs_refuses_stray_dev_secrets_env_filename() {
     let root = temp.path().join("bundle");
     seed_workspace(&root);
 
-    greentic_bundle::build::build_workspace(&root, None, false, false).expect("seed build dir");
+    greentic_bundle::build::build_workspace(&root, None, false, false, None)
+        .expect("seed build dir");
     let build_dir = root.join("state/build/demo-bundle/normalized");
     fs::write(build_dir.join("packs/.dev.secrets.env"), "X=Y").expect("seed stray");
 
@@ -901,7 +925,8 @@ fn doctor_target_includes_secret_scan_check_on_clean_bundle() {
     let root = temp.path().join("bundle");
     seed_workspace(&root);
     let artifact = root.join("clean.gtbundle");
-    greentic_bundle::build::build_workspace(&root, Some(&artifact), false, false).expect("build");
+    greentic_bundle::build::build_workspace(&root, Some(&artifact), false, false, None)
+        .expect("build");
 
     for report in [
         greentic_bundle::build::doctor_target(Some(&root), None).expect("doctor workspace"),
@@ -932,7 +957,8 @@ fn doctor_target_flags_artifact_with_populated_secret_values_in_setup_state() {
 
     // Run the normal pipeline once so the build_dir has a valid manifest/lock,
     // then overwrite the redacted setup-state with a leaky one before re-archiving.
-    greentic_bundle::build::build_workspace(&root, None, false, false).expect("seed build dir");
+    greentic_bundle::build::build_workspace(&root, None, false, false, None)
+        .expect("seed build dir");
     let build_dir = root.join("state/build/demo-bundle/normalized");
     fs::write(
         build_dir.join("state/setup/provider-a.json"),
@@ -977,4 +1003,75 @@ fn doctor_target_flags_artifact_with_populated_secret_values_in_setup_state() {
             .any(|name| name.contains("normalized_answers leak")),
         "missing normalized_answers finding in {kinds:?}"
     );
+}
+
+// C2: write_build_outputs --signing-key path produces a DSSE envelope sidecar
+// at <artifact>.sig that verifies against the matching public key.
+#[test]
+fn build_with_signing_emits_verifiable_sig_sidecar() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    seed_workspace(&root);
+
+    let sk = SigningKey::from_bytes(&[42u8; 32]);
+    let vk = sk.verifying_key();
+    let priv_pem = sk.to_pkcs8_pem(LineEnding::LF).unwrap().to_string();
+    let pub_pem = vk.to_public_key_pem(LineEnding::LF).unwrap();
+    let key_dir = temp.path().join("keys");
+    fs::create_dir_all(&key_dir).unwrap();
+    let key_path = key_dir.join("signing.pem");
+    fs::write(&key_path, &priv_pem).unwrap();
+    fs::write(key_dir.join("signing.pem.pub"), &pub_pem).unwrap();
+
+    let artifact = root.join("signed.gtbundle");
+    let result = greentic_bundle::build::build_workspace(
+        &root,
+        Some(&artifact),
+        false,
+        false,
+        Some(&SigningConfig {
+            signing_key_path: key_path,
+            key_id_override: None,
+            builder_id: Some("greentic-bundle:test".into()),
+            signature_path_override: None,
+        }),
+    )
+    .expect("signed build");
+
+    let sig_path = result.signature_path.expect("signature_path present");
+    assert_eq!(sig_path, format!("{}.sig", artifact.display()));
+    let envelope_bytes = fs::read(&sig_path).expect("read sig");
+
+    let artifact_bytes = fs::read(&artifact).expect("read artifact");
+    let expected_digest = hex::encode(Sha256::digest(&artifact_bytes));
+    let key_id = key_id_for_public_key_pem(&pub_pem).unwrap();
+    let trust = TrustRoot::new(vec![TrustedKey {
+        key_id: key_id.clone(),
+        public_key_pem: pub_pem,
+    }]);
+    let verified = verify_artifact_dsse(&envelope_bytes, &expected_digest, &trust).expect("verify");
+    assert_eq!(verified.verified_key_ids, vec![key_id]);
+    assert_eq!(
+        verified.statement.predicate_type,
+        "https://slsa.dev/provenance/v1"
+    );
+}
+
+#[test]
+fn build_without_signing_omits_signature_path() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    seed_workspace(&root);
+    let artifact = root.join("unsigned.gtbundle");
+    let result =
+        greentic_bundle::build::build_workspace(&root, Some(&artifact), false, false, None)
+            .expect("build");
+    assert!(result.signature_path.is_none());
+    let json = serde_json::to_value(&result).unwrap();
+    assert!(
+        json.get("signature_path").is_none(),
+        "signature_path must be omitted via skip_serializing_if when absent, got {json}"
+    );
+    // Companion sidecar must not exist.
+    assert!(!Path::new(&format!("{}.sig", artifact.display())).exists());
 }

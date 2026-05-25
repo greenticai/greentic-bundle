@@ -37,12 +37,21 @@ pub fn write_build_outputs(
     state: &crate::build::plan::BuildState,
     artifact: &Path,
     warmup: bool,
+    signing: Option<&crate::build::signing::SigningConfig>,
 ) -> Result<crate::build::BuildResult> {
     write_normalized_build_dir(state, &state.build_dir)?;
     if warmup {
         crate::build::warmup::warmup_build_dir(&state.build_dir)?;
     }
     crate::bundle_fs::write_bundle(&state.build_dir, artifact)?;
+    let signature_path = match signing {
+        Some(cfg) => Some(
+            crate::build::signing::sign_artifact(artifact, cfg)?
+                .display()
+                .to_string(),
+        ),
+        None => None,
+    };
     Ok(crate::build::BuildResult {
         artifact_path: artifact.display().to_string(),
         build_dir: state.build_dir.display().to_string(),
@@ -51,6 +60,7 @@ pub fn write_build_outputs(
             .join("bundle-manifest.json")
             .display()
             .to_string(),
+        signature_path,
     })
 }
 

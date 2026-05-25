@@ -3,6 +3,7 @@ pub mod export;
 pub mod lock;
 pub mod manifest;
 pub mod plan;
+pub mod signing;
 pub mod squashfs;
 pub mod warmup;
 
@@ -24,6 +25,10 @@ pub struct BuildResult {
     pub artifact_path: String,
     pub build_dir: String,
     pub manifest_path: String,
+    /// Path to the DSSE signature sidecar emitted next to `artifact_path`,
+    /// present iff the build ran with `--signing-key`.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub signature_path: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -63,6 +68,7 @@ pub fn build_workspace(
     output: Option<&Path>,
     dry_run: bool,
     warmup: bool,
+    signing: Option<&signing::SigningConfig>,
 ) -> Result<BuildResult> {
     let state = plan::build_state(root)?;
     let artifact = output
@@ -74,9 +80,10 @@ pub fn build_workspace(
             artifact_path: export_plan.artifact_path,
             build_dir: export_plan.build_dir,
             manifest_path: export_plan.manifest_path,
+            signature_path: None,
         });
     }
-    export::write_build_outputs(&state, &artifact, warmup)
+    export::write_build_outputs(&state, &artifact, warmup, signing)
 }
 
 pub fn export_build_dir(
@@ -84,6 +91,7 @@ pub fn export_build_dir(
     output: &Path,
     dry_run: bool,
     warmup: bool,
+    signing: Option<&signing::SigningConfig>,
 ) -> Result<BuildResult> {
     let state = plan::load_build_state(build_dir)?;
     let export_plan = export::export_plan(&state, output);
@@ -92,9 +100,10 @@ pub fn export_build_dir(
             artifact_path: export_plan.artifact_path,
             build_dir: export_plan.build_dir,
             manifest_path: export_plan.manifest_path,
+            signature_path: None,
         });
     }
-    export::write_build_outputs(&state, output, warmup)
+    export::write_build_outputs(&state, output, warmup, signing)
 }
 
 pub fn inspect_target(root: Option<&Path>, artifact: Option<&Path>) -> Result<InspectReport> {
