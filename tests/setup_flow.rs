@@ -176,13 +176,14 @@ fn replayed_setup_answers_produce_same_normalized_persisted_output() {
     );
     assert!(state_one.get("non_secret_config").is_some());
     // B12: secret answers persist only as `secret://` refs — no plaintext in
-    // `secret_values` (gone) or `normalized_answers`.
+    // `secret_values` (gone) or `normalized_answers`. The ref path includes
+    // `provider_id` to disambiguate same-named secrets across providers.
     assert!(state_one.get("secret_values").is_none());
     assert_eq!(
         state_one
             .pointer("/secret_refs/api_token")
             .and_then(Value::as_str),
-        Some("secret://local/demo-bundle/api_token")
+        Some("secret://local/demo-bundle/provider-a/api_token")
     );
     assert!(state_one.pointer("/normalized_answers/api_token").is_none());
 
@@ -265,15 +266,78 @@ fn setup_persistence_applies_defaults_and_records_secret_refs() {
         state.non_secret_config.get("region"),
         Some(&json!("eu-west-1"))
     );
-    // The secret answer is recorded as a `secret://<env>/<bundle>/<key>` ref,
-    // never as plaintext — and is dropped from normalized_answers too (B12).
+    // The secret answer is recorded as a
+    // `secret://<env>/<bundle>/<provider_id>/<question_id>` ref, never as
+    // plaintext — and is dropped from normalized_answers too (B12).
     assert_eq!(
         state.secret_refs.get("api_token").map(|r| r.as_str()),
-        Some("secret://local/test-bundle/api_token")
+        Some("secret://local/test-bundle/provider-a/api_token")
     );
     assert!(!state.normalized_answers.contains_key("api_token"));
     assert!(!state.non_secret_config.contains_key("api_token"));
     assert!(root.join("state/setup/provider-a.json").exists());
+}
+
+/// Regression for the multi-provider collision flagged by Codex review:
+/// two providers in the same bundle commonly share a secret key like
+/// `api_token`, so the ref path must include `provider_id` or both refs alias
+/// the same backend slot. Asserts the two refs are distinct and provider-scoped.
+#[test]
+fn secret_refs_disambiguate_same_question_id_across_providers() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    let spec = json!({
+        "type": "legacy",
+        "spec": {
+            "title": "Provider Setup",
+            "questions": [
+                {"name": "api_token", "kind": "string", "required": true, "secret": true}
+            ]
+        }
+    });
+    let instructions = greentic_bundle::setup::persist::collect_setup_instructions(
+        &BTreeMap::from([
+            ("provider-a".to_string(), spec.clone()),
+            ("provider-b".to_string(), spec),
+        ]),
+        &BTreeMap::from([
+            ("provider-a".to_string(), json!({"api_token": "a-secret"})),
+            ("provider-b".to_string(), json!({"api_token": "b-secret"})),
+        ]),
+    )
+    .expect("instructions");
+
+    let result = greentic_bundle::setup::persist::persist_setup(
+        &root,
+        &instructions,
+        &greentic_bundle::setup::backend::FileSetupBackend::new(&root),
+        &greentic_bundle::setup::persist::SetupScope {
+            env_id: "local",
+            bundle_id: "test-bundle",
+        },
+    )
+    .expect("persist");
+
+    let by_provider: BTreeMap<&str, &greentic_bundle::setup::PersistedSetupState> = result
+        .states
+        .iter()
+        .map(|s| (s.provider_id.as_str(), s))
+        .collect();
+    let a = by_provider.get("provider-a").expect("provider-a state");
+    let b = by_provider.get("provider-b").expect("provider-b state");
+    assert_eq!(
+        a.secret_refs.get("api_token").map(|r| r.as_str()),
+        Some("secret://local/test-bundle/provider-a/api_token")
+    );
+    assert_eq!(
+        b.secret_refs.get("api_token").map(|r| r.as_str()),
+        Some("secret://local/test-bundle/provider-b/api_token")
+    );
+    assert_ne!(
+        a.secret_refs.get("api_token"),
+        b.secret_refs.get("api_token"),
+        "same question id across providers must mint distinct refs"
+    );
 }
 
 #[test]

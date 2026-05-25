@@ -68,9 +68,10 @@ pub struct PersistedSetupState {
     pub form: FormSpec,
     pub normalized_answers: BTreeMap<String, Value>,
     pub non_secret_config: BTreeMap<String, Value>,
-    /// `secret://<env>/<bundle>/<key>` references for secret-marked answers.
-    /// The plaintext never persists here — it is routed to the env's secrets
-    /// backend (the qa_persist path) and only the reference is recorded (B12).
+    /// `secret://<env>/<bundle>/<provider_id>/<question_id>` references for
+    /// secret-marked answers. Plaintext never persists in this state — it is
+    /// routed to the env's secrets backend by the consuming wizard pipeline
+    /// (qa_persist → DevStore); only the reference is recorded (B12).
     pub secret_refs: BTreeMap<String, SecretRef>,
 }
 

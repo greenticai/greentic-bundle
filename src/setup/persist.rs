@@ -25,8 +25,11 @@ pub struct SetupPersistenceResult {
     pub writes: Vec<String>,
 }
 
-/// Env + bundle scope used to mint `secret://<env>/<bundle>/<key>` references
-/// for secret-marked answers (B12, plan §246 app-bundle form).
+/// Env + bundle scope used to mint
+/// `secret://<env>/<bundle>/<provider_id>/<question_id>` references for
+/// secret-marked answers (B12, plan §246 app-bundle form). `provider_id` is
+/// part of the path so two providers in one bundle can carry the same secret
+/// key (e.g. `api_token`) without colliding on the same ref.
 #[derive(Debug, Clone, Copy)]
 pub struct SetupScope<'a> {
     pub env_id: &'a str,
@@ -102,15 +105,19 @@ fn build_state(
             continue;
         };
         if question.secret {
-            // Secret answers never persist as plaintext: the value is routed to
-            // the env's secrets backend (the qa_persist path) and only a
-            // `secret://` reference is recorded here. Drop it from
-            // normalized_answers too so the on-disk state carries no secret
-            // material.
+            // Plaintext never persists in PersistedSetupState. The actual
+            // secret bytes are written to the env's secrets backend by the
+            // consuming wizard pipeline (greentic-setup / greentic-operator
+            // qa_persist → DevStore); here we record only a ref. Phase D wires
+            // a real `SecretsSink` (A10 deferral) into this build path; today
+            // the on-disk state is intent + provenance, not storage.
+            //
+            // Drop the answer from normalized_answers too so the state file
+            // carries zero secret material.
             normalized_answers.remove(&question.id);
             let uri = format!(
-                "secret://{}/{}/{}",
-                scope.env_id, scope.bundle_id, question.id
+                "secret://{}/{}/{}/{}",
+                scope.env_id, scope.bundle_id, instruction.provider_id, question.id
             );
             let secret_ref = SecretRef::try_new(uri)
                 .with_context(|| format!("mint secret ref for answer {}", question.id))?;

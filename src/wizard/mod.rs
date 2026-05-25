@@ -186,11 +186,6 @@ struct LoadedRequest {
     build_bundle_now: bool,
 }
 
-/// Env used to mint `secret://` refs on the file-driven `validate`/`apply`
-/// paths, which don't expose `--env`. Mirrors the `wizard run` clap default.
-/// A first-class `--env` on these commands is C7's wizard env-scoping work.
-const DEFAULT_SETUP_ENV: &str = "local";
-
 pub fn run_command(args: WizardRunArgs) -> Result<()> {
     let locale = crate::i18n::current_locale();
     let result = if let Some(path) = args.answers.as_ref() {
@@ -443,7 +438,7 @@ pub fn validate_command(args: WizardValidateArgs) -> Result<()> {
         args.schema_version.as_deref(),
         args.emit_answers.as_ref(),
         Some(loaded.locks),
-        DEFAULT_SETUP_ENV,
+        &args.env,
     )?;
     print_plan(&result.plan)?;
     Ok(())
@@ -470,7 +465,7 @@ pub fn apply_command(args: WizardApplyArgs) -> Result<()> {
         args.schema_version.as_deref(),
         args.emit_answers.as_ref(),
         Some(loaded.locks),
-        DEFAULT_SETUP_ENV,
+        &args.env,
     )?;
     print_plan(&result.plan)?;
     Ok(())
