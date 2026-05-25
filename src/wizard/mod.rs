@@ -186,6 +186,11 @@ struct LoadedRequest {
     build_bundle_now: bool,
 }
 
+/// Env used to mint `secret://` refs on the file-driven `validate`/`apply`
+/// paths, which don't expose `--env`. Mirrors the `wizard run` clap default.
+/// A first-class `--env` on these commands is C7's wizard env-scoping work.
+const DEFAULT_SETUP_ENV: &str = "local";
+
 pub fn run_command(args: WizardRunArgs) -> Result<()> {
     let locale = crate::i18n::current_locale();
     let result = if let Some(path) = args.answers.as_ref() {
@@ -203,6 +208,7 @@ pub fn run_command(args: WizardRunArgs) -> Result<()> {
             args.schema_version.as_deref(),
             args.emit_answers.as_ref(),
             Some(loaded.locks),
+            &args.env,
         )?
     } else {
         run_interactive(
@@ -437,6 +443,7 @@ pub fn validate_command(args: WizardValidateArgs) -> Result<()> {
         args.schema_version.as_deref(),
         args.emit_answers.as_ref(),
         Some(loaded.locks),
+        DEFAULT_SETUP_ENV,
     )?;
     print_plan(&result.plan)?;
     Ok(())
@@ -463,6 +470,7 @@ pub fn apply_command(args: WizardApplyArgs) -> Result<()> {
         args.schema_version.as_deref(),
         args.emit_answers.as_ref(),
         Some(loaded.locks),
+        DEFAULT_SETUP_ENV,
     )?;
     print_plan(&result.plan)?;
     Ok(())
@@ -532,6 +540,7 @@ pub fn run_interactive_with_zero_action(
             schema_version,
             emit_answers,
             None,
+            env_id,
         )?));
     }
 }
@@ -1000,6 +1009,7 @@ fn execute_request(
     schema_version: Option<&str>,
     emit_answers: Option<&PathBuf>,
     source_locks: Option<BTreeMap<String, Value>>,
+    env_id: &str,
 ) -> Result<WizardRunResult> {
     let target_version = requested_schema_version(schema_version)?;
     if !request.remote_catalogs.is_empty() {
@@ -1023,7 +1033,7 @@ fn execute_request(
         );
     }
     let request = discover_setup_specs(request, &catalog_resolution);
-    let setup_writes = preview_setup_writes(&request, execution)?;
+    let setup_writes = preview_setup_writes(&request, execution, env_id)?;
     let bundle_lock = build_bundle_lock(&request, execution, &catalog_resolution, &setup_writes);
     let plan = build_plan(
         &request,
@@ -1038,7 +1048,7 @@ fn execute_request(
     locks.extend(bundle_lock_to_answer_locks(&bundle_lock));
     document.locks = locks;
     let applied_files = if execution == ExecutionMode::Execute {
-        let mut applied_files = apply_plan(&request, &bundle_lock)?;
+        let mut applied_files = apply_plan(&request, &bundle_lock, env_id)?;
         if build_bundle_now {
             let build_result =
                 crate::build::build_workspace(&request.output_dir, None, false, false)?;
@@ -4018,6 +4028,7 @@ fn plan_steps(request: &NormalizedRequest, build_bundle_now: bool) -> Vec<Wizard
 fn apply_plan(
     request: &NormalizedRequest,
     bundle_lock: &crate::project::BundleLock,
+    env_id: &str,
 ) -> Result<Vec<PathBuf>> {
     fs::create_dir_all(&request.output_dir)
         .with_context(|| format!("create output dir {}", request.output_dir.display()))?;
@@ -4062,7 +4073,7 @@ fn apply_plan(
         );
     }
 
-    let setup_result = persist_setup_state(request, ExecutionMode::Execute)?;
+    let setup_result = persist_setup_state(request, ExecutionMode::Execute, env_id)?;
     crate::project::write_bundle_lock(&request.output_dir, bundle_lock)
         .with_context(|| format!("write {}", lock_file.display()))?;
     crate::project::sync_project_with_reference_roots(
@@ -4286,16 +4297,22 @@ fn bundle_lock_to_answer_locks(lock: &crate::project::BundleLock) -> BTreeMap<St
 fn preview_setup_writes(
     request: &NormalizedRequest,
     execution: ExecutionMode,
+    env_id: &str,
 ) -> Result<Vec<String>> {
     let _ = execution;
     let instructions = collect_setup_instructions(request)?;
     if instructions.is_empty() {
         return Ok(Vec::new());
     }
+    let scope = crate::setup::persist::SetupScope {
+        env_id,
+        bundle_id: &request.bundle_id,
+    };
     Ok(crate::setup::persist::persist_setup(
         &request.output_dir,
         &instructions,
         &crate::setup::backend::NoopSetupBackend,
+        &scope,
     )?
     .writes)
 }
@@ -4303,6 +4320,7 @@ fn preview_setup_writes(
 fn persist_setup_state(
     request: &NormalizedRequest,
     execution: ExecutionMode,
+    env_id: &str,
 ) -> Result<crate::setup::persist::SetupPersistenceResult> {
     let instructions = collect_setup_instructions(request)?;
     if instructions.is_empty() {
@@ -4318,7 +4336,16 @@ fn persist_setup_state(
         )),
         ExecutionMode::DryRun => Box::new(crate::setup::backend::NoopSetupBackend),
     };
-    crate::setup::persist::persist_setup(&request.output_dir, &instructions, backend.as_ref())
+    let scope = crate::setup::persist::SetupScope {
+        env_id,
+        bundle_id: &request.bundle_id,
+    };
+    crate::setup::persist::persist_setup(
+        &request.output_dir,
+        &instructions,
+        backend.as_ref(),
+        &scope,
+    )
 }
 
 fn collect_setup_instructions(

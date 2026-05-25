@@ -1,7 +1,8 @@
 use std::collections::BTreeMap;
 use std::path::Path;
 
-use anyhow::{Result, bail};
+use anyhow::{Context, Result, bail};
+use greentic_deploy_spec::SecretRef;
 use serde_json::Value;
 
 use super::backend::SetupBackend;
@@ -22,6 +23,14 @@ pub struct SetupInstruction {
 pub struct SetupPersistenceResult {
     pub states: Vec<PersistedSetupState>,
     pub writes: Vec<String>,
+}
+
+/// Env + bundle scope used to mint `secret://<env>/<bundle>/<key>` references
+/// for secret-marked answers (B12, plan §246 app-bundle form).
+#[derive(Debug, Clone, Copy)]
+pub struct SetupScope<'a> {
+    pub env_id: &'a str,
+    pub bundle_id: &'a str,
 }
 
 pub fn collect_setup_instructions(
@@ -57,11 +66,12 @@ pub fn persist_setup(
     root: &Path,
     instructions: &[SetupInstruction],
     backend: &dyn SetupBackend,
+    scope: &SetupScope<'_>,
 ) -> Result<SetupPersistenceResult> {
     let mut states = Vec::new();
     let mut writes = Vec::new();
     for instruction in instructions {
-        let state = build_state(instruction)?;
+        let state = build_state(instruction, scope)?;
         if let Some(path) = backend.persist(&state)? {
             writes.push(relative_display(root, &path));
         } else {
@@ -77,20 +87,36 @@ pub fn persist_setup(
     Ok(SetupPersistenceResult { states, writes })
 }
 
-fn build_state(instruction: &SetupInstruction) -> Result<PersistedSetupState> {
+fn build_state(
+    instruction: &SetupInstruction,
+    scope: &SetupScope<'_>,
+) -> Result<PersistedSetupState> {
     let (source_kind, form) =
         super::form_spec_from_input(&instruction.spec_input, &instruction.provider_id)?;
 
-    let normalized_answers = normalize_answers(&form, &instruction.answers)?;
+    let mut normalized_answers = normalize_answers(&form, &instruction.answers)?;
     let mut non_secret_config = BTreeMap::new();
-    let mut secret_values = BTreeMap::new();
+    let mut secret_refs = BTreeMap::new();
     for question in &form.questions {
-        if let Some(value) = normalized_answers.get(&question.id) {
-            if question.secret {
-                secret_values.insert(question.id.clone(), value.clone());
-            } else {
-                non_secret_config.insert(question.id.clone(), value.clone());
-            }
+        let Some(value) = normalized_answers.get(&question.id).cloned() else {
+            continue;
+        };
+        if question.secret {
+            // Secret answers never persist as plaintext: the value is routed to
+            // the env's secrets backend (the qa_persist path) and only a
+            // `secret://` reference is recorded here. Drop it from
+            // normalized_answers too so the on-disk state carries no secret
+            // material.
+            normalized_answers.remove(&question.id);
+            let uri = format!(
+                "secret://{}/{}/{}",
+                scope.env_id, scope.bundle_id, question.id
+            );
+            let secret_ref = SecretRef::try_new(uri)
+                .with_context(|| format!("mint secret ref for answer {}", question.id))?;
+            secret_refs.insert(question.id.clone(), secret_ref);
+        } else {
+            non_secret_config.insert(question.id.clone(), value);
         }
     }
 
@@ -101,7 +127,7 @@ fn build_state(instruction: &SetupInstruction) -> Result<PersistedSetupState> {
         form,
         normalized_answers,
         non_secret_config,
-        secret_values,
+        secret_refs,
     })
 }
 

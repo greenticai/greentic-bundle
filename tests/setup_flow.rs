@@ -96,6 +96,10 @@ fn dry_run_setup_does_not_persist_side_effects() {
         &root,
         &instructions,
         &greentic_bundle::setup::backend::NoopSetupBackend,
+        &greentic_bundle::setup::persist::SetupScope {
+            env_id: "local",
+            bundle_id: "test-bundle",
+        },
     )
     .expect("persist");
     assert_eq!(
@@ -171,7 +175,16 @@ fn replayed_setup_answers_produce_same_normalized_persisted_output() {
         Some("legacy")
     );
     assert!(state_one.get("non_secret_config").is_some());
-    assert!(state_one.get("secret_values").is_some());
+    // B12: secret answers persist only as `secret://` refs — no plaintext in
+    // `secret_values` (gone) or `normalized_answers`.
+    assert!(state_one.get("secret_values").is_none());
+    assert_eq!(
+        state_one
+            .pointer("/secret_refs/api_token")
+            .and_then(Value::as_str),
+        Some("secret://local/demo-bundle/api_token")
+    );
+    assert!(state_one.pointer("/normalized_answers/api_token").is_none());
 
     let rewritten = fs::read_to_string(&answers_path).expect("original answers");
     let rewritten = rewritten.replace(
@@ -202,7 +215,7 @@ fn replayed_setup_answers_produce_same_normalized_persisted_output() {
 }
 
 #[test]
-fn setup_persistence_applies_defaults_and_splits_secret_values() {
+fn setup_persistence_applies_defaults_and_records_secret_refs() {
     let temp = TempDir::new().expect("tempdir");
     let root = temp.path().join("bundle");
     let instructions = greentic_bundle::setup::persist::collect_setup_instructions(
@@ -231,6 +244,10 @@ fn setup_persistence_applies_defaults_and_splits_secret_values() {
         &root,
         &instructions,
         &greentic_bundle::setup::backend::FileSetupBackend::new(&root),
+        &greentic_bundle::setup::persist::SetupScope {
+            env_id: "local",
+            bundle_id: "test-bundle",
+        },
     )
     .expect("persist");
 
@@ -248,10 +265,13 @@ fn setup_persistence_applies_defaults_and_splits_secret_values() {
         state.non_secret_config.get("region"),
         Some(&json!("eu-west-1"))
     );
+    // The secret answer is recorded as a `secret://<env>/<bundle>/<key>` ref,
+    // never as plaintext — and is dropped from normalized_answers too (B12).
     assert_eq!(
-        state.secret_values.get("api_token"),
-        Some(&json!("secret123"))
+        state.secret_refs.get("api_token").map(|r| r.as_str()),
+        Some("secret://local/test-bundle/api_token")
     );
+    assert!(!state.normalized_answers.contains_key("api_token"));
     assert!(!state.non_secret_config.contains_key("api_token"));
     assert!(root.join("state/setup/provider-a.json").exists());
 }

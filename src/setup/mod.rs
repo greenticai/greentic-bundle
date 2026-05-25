@@ -6,6 +6,7 @@ pub mod qa_bridge;
 use std::collections::BTreeMap;
 
 use anyhow::Result;
+use greentic_deploy_spec::SecretRef;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -67,7 +68,10 @@ pub struct PersistedSetupState {
     pub form: FormSpec,
     pub normalized_answers: BTreeMap<String, Value>,
     pub non_secret_config: BTreeMap<String, Value>,
-    pub secret_values: BTreeMap<String, Value>,
+    /// `secret://<env>/<bundle>/<key>` references for secret-marked answers.
+    /// The plaintext never persists here — it is routed to the env's secrets
+    /// backend (the qa_persist path) and only the reference is recorded (B12).
+    pub secret_refs: BTreeMap<String, SecretRef>,
 }
 
 pub fn form_spec_from_input(
