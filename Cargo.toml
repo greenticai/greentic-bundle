@@ -96,6 +96,7 @@ ciborium.workspace = true
 clap.workspace = true
 constant_time_eq.workspace = true
 greentic-bundle-reader.workspace = true
+ed25519-dalek.workspace = true
 greentic-deploy-spec.workspace = true
 greentic-distributor-client.workspace = true
 greentic-qa-lib.workspace = true
@@ -118,7 +119,6 @@ walkdir.workspace = true
 [dev-dependencies]
 assert_cmd.workspace = true
 criterion.workspace = true
-ed25519-dalek.workspace = true
 predicates.workspace = true
 sha2.workspace = true
 tempfile.workspace = true

@@ -1075,3 +1075,72 @@ fn build_without_signing_omits_signature_path() {
     // Companion sidecar must not exist.
     assert!(!Path::new(&format!("{}.sig", artifact.display())).exists());
 }
+
+// Codex #2 + #3 regression: a mismatched --key-id must abort build_workspace
+// BEFORE any .gtbundle is written. Otherwise a stale rotated id would leave
+// the .gtbundle on disk paired with an envelope a verifier cannot trust.
+#[test]
+fn signing_config_validation_aborts_before_artifact_lands() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    seed_workspace(&root);
+
+    let sk = SigningKey::from_bytes(&[43u8; 32]);
+    let priv_pem = sk.to_pkcs8_pem(LineEnding::LF).unwrap().to_string();
+    let key_path = temp.path().join("k.pem");
+    fs::write(&key_path, &priv_pem).unwrap();
+
+    let artifact = root.join("never-lands.gtbundle");
+    let err = greentic_bundle::build::build_workspace(
+        &root,
+        Some(&artifact),
+        false,
+        false,
+        Some(&SigningConfig {
+            signing_key_path: key_path,
+            // Wrong key id for this private key.
+            key_id_override: Some("deadbeefdeadbeefdeadbeefdeadbeef".into()),
+            builder_id: None,
+            signature_path_override: None,
+        }),
+    )
+    .expect_err("mismatched --key-id must abort");
+    assert!(format!("{err:#}").contains("does not match"));
+    // Crucial: the .gtbundle must not exist — early validation gated it.
+    assert!(!artifact.exists());
+    assert!(!Path::new(&format!("{}.sig", artifact.display())).exists());
+    assert!(!Path::new(&format!("{}.partial", artifact.display())).exists());
+}
+
+// Codex #1 regression at the workspace-build layer: --signature-output that
+// equals the artifact path must abort before write_bundle runs.
+#[test]
+fn signature_path_collision_aborts_before_artifact_lands() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    seed_workspace(&root);
+
+    let sk = SigningKey::from_bytes(&[44u8; 32]);
+    let priv_pem = sk.to_pkcs8_pem(LineEnding::LF).unwrap().to_string();
+    let key_path = temp.path().join("k.pem");
+    fs::write(&key_path, &priv_pem).unwrap();
+
+    let artifact = root.join("collide.gtbundle");
+    let err = greentic_bundle::build::build_workspace(
+        &root,
+        Some(&artifact),
+        false,
+        false,
+        Some(&SigningConfig {
+            signing_key_path: key_path,
+            key_id_override: None,
+            builder_id: None,
+            // Sidecar path == artifact path; refuse to overwrite the bundle
+            // with its own envelope.
+            signature_path_override: Some(artifact.clone()),
+        }),
+    )
+    .expect_err("collision must abort");
+    assert!(format!("{err:#}").contains("refusing to overwrite"));
+    assert!(!artifact.exists());
+}

@@ -39,19 +39,35 @@ pub fn write_build_outputs(
     warmup: bool,
     signing: Option<&crate::build::signing::SigningConfig>,
 ) -> Result<crate::build::BuildResult> {
+    // Validate the signing config BEFORE any artifact lands on disk. A bad
+    // key, mismatched .pub sibling, or signature_output==artifact must abort
+    // before write_bundle, never after — closes Codex finding #3.
+    let signer = match signing {
+        Some(cfg) => Some(crate::build::signing::PreparedSigner::prepare(
+            artifact, cfg,
+        )?),
+        None => None,
+    };
+
     write_normalized_build_dir(state, &state.build_dir)?;
     if warmup {
         crate::build::warmup::warmup_build_dir(&state.build_dir)?;
     }
-    crate::bundle_fs::write_bundle(&state.build_dir, artifact)?;
-    let signature_path = match signing {
-        Some(cfg) => Some(
-            crate::build::signing::sign_artifact(artifact, cfg)?
-                .display()
-                .to_string(),
-        ),
-        None => None,
+
+    let signature_path = match signer {
+        Some(s) => {
+            let build_dir = state.build_dir.clone();
+            let sig_path = crate::build::signing::stage_sign_and_publish(artifact, &s, |staged| {
+                crate::bundle_fs::write_bundle(&build_dir, staged)
+            })?;
+            Some(sig_path.display().to_string())
+        }
+        None => {
+            crate::bundle_fs::write_bundle(&state.build_dir, artifact)?;
+            None
+        }
     };
+
     Ok(crate::build::BuildResult {
         artifact_path: artifact.display().to_string(),
         build_dir: state.build_dir.display().to_string(),
