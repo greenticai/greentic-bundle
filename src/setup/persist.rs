@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 
 use anyhow::{Context, Result, bail};
@@ -97,23 +97,49 @@ fn build_state(
     let (source_kind, form) =
         super::form_spec_from_input(&instruction.spec_input, &instruction.provider_id)?;
 
+    // Validate the three identifiers that flow into the `secret://` URI path.
+    // SecretRef::try_new only enforces scheme + non-empty env segment, so a
+    // `/` or empty value here would silently corrupt the 4-segment layout and
+    // alias unrelated slots. bundle_id is normalized upstream by
+    // normalize_bundle_id but we still validate it for defense-in-depth.
+    validate_ref_segment("env_id", scope.env_id)?;
+    validate_ref_segment("bundle_id", scope.bundle_id)?;
+    validate_ref_segment("provider_id", &instruction.provider_id)?;
+
     let mut normalized_answers = normalize_answers(&form, &instruction.answers)?;
     let mut non_secret_config = BTreeMap::new();
     let mut secret_refs = BTreeMap::new();
+    let mut seen_ids = BTreeSet::new();
     for question in &form.questions {
+        if !seen_ids.insert(question.id.clone()) {
+            // Duplicate id in the form spec would let the first iteration
+            // remove the answer from normalized_answers (for secrets) and the
+            // second iteration's `.get(...)` would return None — silently
+            // dropping the second question. Fail loudly instead.
+            bail!(
+                "duplicate question id `{}` in setup spec for provider `{}`",
+                question.id,
+                instruction.provider_id
+            );
+        }
         let Some(value) = normalized_answers.get(&question.id).cloned() else {
             continue;
         };
         if question.secret {
-            // Plaintext never persists in PersistedSetupState. The actual
-            // secret bytes are written to the env's secrets backend by the
-            // consuming wizard pipeline (greentic-setup / greentic-operator
-            // qa_persist → DevStore); here we record only a ref. Phase D wires
-            // a real `SecretsSink` (A10 deferral) into this build path; today
-            // the on-disk state is intent + provenance, not storage.
+            // Plaintext never persists in PersistedSetupState. This crate
+            // records only a `secret://` reference; the actual secret bytes
+            // are routed to the env's secrets backend by the *consuming*
+            // wizard pipeline (greentic-setup / greentic-operator qa_persist
+            // → DevStore). NOTE: the two URI schemes are distinct address
+            // spaces — DevStore writes under `secrets://<env>/<tenant>/<team>/
+            // <provider>/<key>`, this crate mints `secret://<env>/<bundle>/
+            // <provider>/<question>`. Phase D wires the resolver that bridges
+            // them (A10's deferred real `SecretsSink`); today the on-disk
+            // state is intent + provenance, not storage.
             //
             // Drop the answer from normalized_answers too so the state file
             // carries zero secret material.
+            validate_ref_segment("question.id", &question.id)?;
             normalized_answers.remove(&question.id);
             let uri = format!(
                 "secret://{}/{}/{}/{}",
@@ -127,6 +153,14 @@ fn build_state(
         }
     }
 
+    if !secret_refs.is_empty() {
+        tracing::debug!(
+            provider = %instruction.provider_id,
+            count = secret_refs.len(),
+            "recorded secret refs in setup state — backend population is the consuming wizard pipeline's responsibility (qa_persist → secrets backend)",
+        );
+    }
+
     Ok(PersistedSetupState {
         schema_version: SETUP_STATE_SCHEMA_VERSION,
         provider_id: instruction.provider_id.clone(),
@@ -136,6 +170,19 @@ fn build_state(
         non_secret_config,
         secret_refs,
     })
+}
+
+/// Reject empty or `/`-containing identifiers that would corrupt the
+/// `secret://<env>/<bundle>/<provider>/<question>` path structure
+/// (SecretRef::try_new only validates the scheme + non-empty env segment).
+fn validate_ref_segment(label: &str, value: &str) -> Result<()> {
+    if value.is_empty() {
+        bail!("{label} must not be empty when minting a secret ref");
+    }
+    if value.contains('/') {
+        bail!("{label} `{value}` contains '/' which would corrupt the secret-ref URI path");
+    }
+    Ok(())
 }
 
 fn normalize_answers(form: &FormSpec, answers: &Value) -> Result<BTreeMap<String, Value>> {

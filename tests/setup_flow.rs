@@ -340,6 +340,157 @@ fn secret_refs_disambiguate_same_question_id_across_providers() {
     );
 }
 
+/// Same answers + spec, different `env_id` on the scope → distinct refs.
+/// Closes the env-scoping coverage gap in the replay-determinism test.
+#[test]
+fn secret_refs_discriminate_on_env_id() {
+    let spec = json!({
+        "type": "legacy",
+        "spec": {
+            "title": "Provider Setup",
+            "questions": [
+                {"name": "api_token", "kind": "string", "required": true, "secret": true}
+            ]
+        }
+    });
+    let instructions = greentic_bundle::setup::persist::collect_setup_instructions(
+        &BTreeMap::from([("provider-a".to_string(), spec)]),
+        &BTreeMap::from([("provider-a".to_string(), json!({"api_token": "sec"}))]),
+    )
+    .expect("instructions");
+
+    let mk = |env_id: &str| {
+        let tmp = TempDir::new().expect("tempdir");
+        let root = tmp.path().join("bundle");
+        let r = greentic_bundle::setup::persist::persist_setup(
+            &root,
+            &instructions,
+            &greentic_bundle::setup::backend::NoopSetupBackend,
+            &greentic_bundle::setup::persist::SetupScope {
+                env_id,
+                bundle_id: "test-bundle",
+            },
+        )
+        .expect("persist");
+        r.states
+            .into_iter()
+            .next()
+            .expect("one state")
+            .secret_refs
+            .get("api_token")
+            .map(|r| r.as_str().to_string())
+            .expect("ref")
+    };
+    let local = mk("local");
+    let staging = mk("staging");
+    assert_eq!(local, "secret://local/test-bundle/provider-a/api_token");
+    assert_eq!(staging, "secret://staging/test-bundle/provider-a/api_token");
+    assert_ne!(
+        local, staging,
+        "different env_id must produce different refs"
+    );
+}
+
+/// Reject empty or `/`-bearing identifiers at mint time — these would
+/// silently corrupt the 4-segment URI structure (SecretRef::try_new only
+/// validates scheme + non-empty env segment).
+#[test]
+fn ref_segment_validation_rejects_slashes_and_empties() {
+    let spec = json!({
+        "type": "legacy",
+        "spec": {
+            "title": "Provider Setup",
+            "questions": [
+                {"name": "tok", "kind": "string", "required": true, "secret": true}
+            ]
+        }
+    });
+    let instructions = greentic_bundle::setup::persist::collect_setup_instructions(
+        &BTreeMap::from([("p".to_string(), spec.clone())]),
+        &BTreeMap::from([("p".to_string(), json!({"tok": "sec"}))]),
+    )
+    .expect("instructions");
+    let mk = |env_id, bundle_id| {
+        let tmp = TempDir::new().expect("tempdir");
+        let root = tmp.path().join("bundle");
+        greentic_bundle::setup::persist::persist_setup(
+            &root,
+            &instructions,
+            &greentic_bundle::setup::backend::NoopSetupBackend,
+            &greentic_bundle::setup::persist::SetupScope { env_id, bundle_id },
+        )
+    };
+    assert!(mk("", "test-bundle").is_err(), "empty env_id must error");
+    assert!(
+        mk("staging/eu", "test-bundle").is_err(),
+        "env_id with `/` must error"
+    );
+    assert!(mk("local", "").is_err(), "empty bundle_id must error");
+    assert!(
+        mk("local", "test/bundle").is_err(),
+        "bundle_id with `/` must error"
+    );
+
+    // provider_id with `/` (from a malformed `setup_specs` key)
+    let bad_provider = greentic_bundle::setup::persist::collect_setup_instructions(
+        &BTreeMap::from([("my/provider".to_string(), spec.clone())]),
+        &BTreeMap::from([("my/provider".to_string(), json!({"tok": "sec"}))]),
+    )
+    .expect("instructions");
+    let tmp = TempDir::new().expect("tempdir");
+    assert!(
+        greentic_bundle::setup::persist::persist_setup(
+            &tmp.path().join("bundle"),
+            &bad_provider,
+            &greentic_bundle::setup::backend::NoopSetupBackend,
+            &greentic_bundle::setup::persist::SetupScope {
+                env_id: "local",
+                bundle_id: "test-bundle",
+            },
+        )
+        .is_err(),
+        "provider_id with `/` must error"
+    );
+}
+
+/// Duplicate question id in a form spec must fail loudly — the previous
+/// behavior would silently drop the second iteration after the first
+/// removed the answer from `normalized_answers`.
+#[test]
+fn duplicate_question_id_in_form_spec_is_rejected() {
+    let spec = json!({
+        "type": "legacy",
+        "spec": {
+            "title": "Provider Setup",
+            "questions": [
+                {"name": "api_token", "kind": "string", "required": true, "secret": true},
+                {"name": "api_token", "kind": "string", "required": true, "secret": true}
+            ]
+        }
+    });
+    let instructions = greentic_bundle::setup::persist::collect_setup_instructions(
+        &BTreeMap::from([("p".to_string(), spec)]),
+        &BTreeMap::from([("p".to_string(), json!({"api_token": "sec"}))]),
+    )
+    .expect("instructions");
+    let tmp = TempDir::new().expect("tempdir");
+    let err = greentic_bundle::setup::persist::persist_setup(
+        &tmp.path().join("bundle"),
+        &instructions,
+        &greentic_bundle::setup::backend::NoopSetupBackend,
+        &greentic_bundle::setup::persist::SetupScope {
+            env_id: "local",
+            bundle_id: "test-bundle",
+        },
+    )
+    .expect_err("duplicate question id must error");
+    let msg = format!("{err:#}");
+    assert!(
+        msg.contains("duplicate question id") && msg.contains("api_token"),
+        "error message must name the duplicate id, got: {msg}"
+    );
+}
+
 #[test]
 fn provider_qa_bridge_falls_back_to_ids_and_description_keys() {
     let qa_output = json!({
