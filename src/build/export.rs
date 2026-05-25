@@ -3,7 +3,7 @@ use std::fs;
 use std::path::Path;
 
 use anyhow::{Context, Result};
-use serde_json::{Value, json};
+use serde_json::Value;
 
 const SETUP_STATE_PREFIX: &str = "state/setup/";
 const SETUP_STATE_SUFFIX: &str = ".json";
@@ -118,8 +118,10 @@ fn redact_secret_values<'a>(name: &str, contents: &'a str) -> Result<Cow<'a, str
     };
     let secret_ids = collect_secret_question_ids(map);
     let mut changed = false;
-    if map.contains_key(SECRET_VALUES_KEY) {
-        map.insert(SECRET_VALUES_KEY.to_string(), json!({}));
+    // Drop the legacy `secret_values` key entirely (B12 producers no longer
+    // emit it; leaving a stale `{}` would round-trip through a B12-aware
+    // deserializer as an unknown field and mask a real missing `secret_refs`).
+    if map.remove(SECRET_VALUES_KEY).is_some() {
         changed = true;
     }
     if !secret_ids.is_empty()
@@ -171,13 +173,16 @@ fn is_setup_state_file(name: &str) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use serde_json::json;
 
     #[test]
     fn redacts_plaintext_secret_values_in_setup_state() {
         let input = r#"{"schema_version":1,"provider_id":"p","source_kind":"legacy","form":{"id":"f","title":"t","version":"1","questions":[]},"normalized_answers":{},"non_secret_config":{},"secret_values":{"api_token":"sk-PLAINTEXT-LEAK"}}"#;
         let out = redact_secret_values("state/setup/p.json", input).expect("redact");
         let parsed: Value = serde_json::from_str(out.as_ref()).expect("parse output");
-        assert_eq!(parsed["secret_values"], json!({}));
+        // B12: the legacy `secret_values` key is removed entirely (not cleared)
+        // so the redacted file deserializes cleanly into the new schema.
+        assert!(parsed.get("secret_values").is_none());
         assert!(!out.contains("sk-PLAINTEXT-LEAK"));
         assert_eq!(parsed["non_secret_config"], json!({}));
     }
@@ -209,7 +214,7 @@ mod tests {
             "redacted JSON must not contain the secret token, got:\n{out}"
         );
         let parsed: Value = serde_json::from_str(out.as_ref()).expect("parse output");
-        assert_eq!(parsed["secret_values"], json!({}));
+        assert!(parsed.get("secret_values").is_none());
         assert_eq!(parsed["normalized_answers"], json!({"name": "my-bot"}));
         assert_eq!(parsed["non_secret_config"], json!({"name": "my-bot"}));
     }
@@ -241,11 +246,13 @@ mod tests {
     }
 
     #[test]
-    fn preserves_empty_secret_values_field() {
+    fn removes_empty_secret_values_field() {
         let input = r#"{"secret_values":{}}"#;
         let out = redact_secret_values("state/setup/p.json", input).expect("redact");
         let parsed: Value = serde_json::from_str(out.as_ref()).expect("parse output");
-        assert_eq!(parsed["secret_values"], json!({}));
+        // B12: a stray `secret_values` key (even empty) is dropped so it can't
+        // mask a missing `secret_refs` for a B12-aware reader.
+        assert!(parsed.get("secret_values").is_none());
     }
 
     #[test]

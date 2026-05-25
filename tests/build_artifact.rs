@@ -742,7 +742,8 @@ fn build_redacts_secret_values_in_archived_setup_state() {
         "archived setup-state must not contain plaintext token, got: {archived_str}"
     );
     let archived: Value = serde_json::from_slice(&archived_bytes).expect("parse archived");
-    assert_eq!(archived["secret_values"], serde_json::json!({}));
+    // B12: the redactor drops the legacy `secret_values` key entirely.
+    assert!(archived.get("secret_values").is_none());
     assert_eq!(
         archived["non_secret_config"]["region"],
         Value::String("eu-west-1".to_string())
@@ -813,7 +814,8 @@ fn build_redacts_secrets_from_normalized_answers_in_archived_setup_state() {
     );
 
     let archived: Value = serde_json::from_slice(&archived_bytes).expect("parse archived");
-    assert_eq!(archived["secret_values"], serde_json::json!({}));
+    // B12: the redactor drops the legacy `secret_values` key entirely.
+    assert!(archived.get("secret_values").is_none());
     assert_eq!(
         archived["normalized_answers"],
         serde_json::json!({"region": "eu-west-1"}),

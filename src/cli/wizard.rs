@@ -80,6 +80,8 @@ pub struct WizardValidateArgs {
     pub migrate: bool,
     #[arg(long, value_enum, help = "cli.wizard.mode.option")]
     pub mode: Option<WizardMode>,
+    #[arg(long = "env", short = 'e', default_value = "local")]
+    pub env: String,
 }
 
 #[derive(Debug, Args)]
@@ -104,6 +106,8 @@ pub struct WizardApplyArgs {
     pub dry_run: bool,
     #[arg(long, value_enum, help = "cli.wizard.mode.option")]
     pub mode: Option<WizardMode>,
+    #[arg(long = "env", short = 'e', default_value = "local")]
+    pub env: String,
 }
 
 pub fn run(args: WizardArgs) -> Result<()> {

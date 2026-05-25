@@ -127,11 +127,9 @@ if [ "$PACKAGE_ONLY" -eq 0 ]; then
 
   header "cargo clippy"
   cargo clippy --all-targets --all-features -- -D warnings
-  cargo clippy --features extensions --all-targets -- -D warnings
 
   header "cargo test"
   GREENTIC_BUNDLE_USE_BUNDLED_CATALOG=1 cargo test --all-features
-  GREENTIC_BUNDLE_USE_BUNDLED_CATALOG=1 cargo test --features extensions --all-targets
 
   header "cargo build"
   cargo build --all-features
@@ -159,8 +157,8 @@ if [ "$PACKAGE_ONLY" -eq 0 ]; then
   fi
 fi
 
-# Phase A compile-regression guard: extensions-off binary must stay within
-# 500 KB of the main-branch baseline. Skipped if baseline file is absent.
+# Phase A compile-regression guard: the no-default-features binary must stay
+# within 500 KB of the main-branch baseline. Skipped if baseline file is absent.
 if [ -f /tmp/greentic-bundle-baseline.size ]; then
   cargo build --release --no-default-features
   NEW=$(stat -c '%s' target/release/greentic-bundle 2>/dev/null || stat -f '%z' target/release/greentic-bundle)
