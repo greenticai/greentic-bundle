@@ -1474,6 +1474,7 @@ dependencies = [
  "tracing",
  "unic-langid",
  "walkdir",
+ "zeroize",
  "zip",
 ]
 

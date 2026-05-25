@@ -32,13 +32,20 @@ pub struct SigningArgs {
     #[arg(long, value_name = "FILE")]
     pub signing_key: Option<PathBuf>,
 
-    /// Explicit DSSE `keyid`. Default: derived from a sibling `<key>.pub`
-    /// SPKI PEM (hex of `SHA-256(raw 32-byte public key)[..16]`).
+    /// Explicit DSSE `keyid`. Default: derived directly from the
+    /// `--signing-key` private PEM (hex of `SHA-256(raw 32-byte public
+    /// key)[..16]`). If a sibling `<key>.pub` SPKI PEM exists it is
+    /// cross-checked against the derived id; a mismatch (stale `.pub` from a
+    /// rotated key) is rejected. Override is only honored when it matches the
+    /// canonical id — case-insensitive.
     #[arg(long, value_name = "HEX", requires = "signing_key")]
     pub key_id: Option<String>,
 
-    /// SLSA `builder.id` recorded in the provenance predicate.
-    /// Default: `greentic-bundle:<package version>`.
+    /// SLSA `builder.id` recorded in the provenance predicate. Default:
+    /// `greentic-bundle:<library version>` — i.e. the greentic-bundle crate
+    /// version at compile time, not the calling CLI's version. Top-level
+    /// binaries that embed this signer (e.g. `gtc`) should pass `--builder-id`
+    /// to record their own identity in provenance.
     #[arg(long, value_name = "ID", requires = "signing_key")]
     pub builder_id: Option<String>,
 
