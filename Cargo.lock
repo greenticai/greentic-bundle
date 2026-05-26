@@ -1502,9 +1502,9 @@ dependencies = [
 
 [[package]]
 name = "greentic-deploy-spec"
-version = "0.1.26399159415"
+version = "0.1.26414195396"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "57657ea153de75ff7bcb7352acbe0eed2e5174ef3e154ddfc1d6053add281e84"
+checksum = "285d29cf3415d111d6aa956d403722ff148becc89b8923dc591ad8deaa049584"
 dependencies = [
  "chrono",
  "greentic-config-types",
@@ -2962,7 +2962,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "27c6023962132f4b30eb4c172c91ce92d933da334c59c23cddee82358ddafb0b"
 dependencies = [
  "anyhow",
- "itertools 0.14.0",
+ "itertools 0.13.0",
  "proc-macro2",
  "quote",
  "syn",
