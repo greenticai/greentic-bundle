@@ -178,6 +178,67 @@ fn build_normalized_dir_includes_materialized_pack_and_provider_files() {
     );
 }
 
+// Setup wizard writes provider configuration to `.providers/<id>/` (envelope
+// CBOR plus contract cache), workspace overrides to `assets/`, and tenant
+// allow rules to `tenants/<t>/tenant.gmap`. Build must materialize these into
+// the bundle so the runtime can resolve provider configs (skin, nav_links,
+// jwt_signing_key) and serve per-tenant client config without depending on
+// rebuilt setup state on the target host. Without this, `gtc start
+// --target=aws --upload-bundle <dir>` produces an artifact that drops the
+// wizard answers and the deployed runtime renders the default skin and fails
+// JWT verification.
+#[test]
+fn build_normalized_dir_preserves_workspace_provider_config_and_assets() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    seed_workspace(&root);
+
+    // Setup wizard outputs that today get silently dropped by the build.
+    fs::create_dir_all(root.join(".providers/messaging-webchat-gui")).expect("dot-providers dir");
+    fs::write(
+        root.join(".providers/messaging-webchat-gui/config.envelope.cbor"),
+        b"envelope-cbor-bytes",
+    )
+    .expect("envelope file");
+    fs::create_dir_all(root.join(".providers/_contracts")).expect("contracts dir");
+    fs::write(
+        root.join(".providers/_contracts/abc123.contract.cbor"),
+        b"contract-cbor-bytes",
+    )
+    .expect("contract file");
+    fs::create_dir_all(root.join("assets/webchat-gui/config/tenants")).expect("assets dir");
+    fs::write(
+        root.join("assets/webchat-gui/config/tenants/demo.json"),
+        br#"{"tenant_id":"demo","skin":"3aigent"}"#,
+    )
+    .expect("tenant overlay");
+
+    let build_dir = root.join("state/build/demo-bundle/normalized");
+    greentic_bundle::build::build_workspace(&root, None, false, false).expect("build workspace");
+
+    assert_eq!(
+        fs::read(build_dir.join(".providers/messaging-webchat-gui/config.envelope.cbor"))
+            .expect("envelope materialized"),
+        b"envelope-cbor-bytes",
+    );
+    assert_eq!(
+        fs::read(build_dir.join(".providers/_contracts/abc123.contract.cbor"))
+            .expect("contract cache materialized"),
+        b"contract-cbor-bytes",
+    );
+    assert_eq!(
+        fs::read(build_dir.join("assets/webchat-gui/config/tenants/demo.json"))
+            .expect("tenant overlay materialized"),
+        br#"{"tenant_id":"demo","skin":"3aigent"}"#,
+    );
+    // tenant.gmap was already written by `seed_workspace`; it must survive the
+    // build (current code drops it because the file isn't a `.gtpack`).
+    assert_eq!(
+        fs::read(build_dir.join("tenants/default/tenant.gmap")).expect("tenant gmap materialized"),
+        b"_ = forbidden\n",
+    );
+}
+
 #[test]
 fn build_defaults_artifact_path_to_dist_directory() {
     let temp = TempDir::new().expect("tempdir");
