@@ -6,11 +6,17 @@ pub mod qa_bridge;
 use std::collections::BTreeMap;
 
 use anyhow::Result;
+use greentic_deploy_spec::SecretRef;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 pub const SETUP_STATE_DIR: &str = "state/setup";
-pub const SETUP_STATE_SCHEMA_VERSION: u32 = 1;
+/// Bumped to `2` for B12: the schema replaces plaintext `secret_values:
+/// BTreeMap<String, Value>` with reference-only `secret_refs: BTreeMap<String,
+/// SecretRef>` and drops secret-marked answers from `normalized_answers`. The
+/// two shapes are not deserialization-compatible (value types differ); any
+/// future reader must gate on this version.
+pub const SETUP_STATE_SCHEMA_VERSION: u32 = 2;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct FormSpec {
@@ -67,7 +73,15 @@ pub struct PersistedSetupState {
     pub form: FormSpec,
     pub normalized_answers: BTreeMap<String, Value>,
     pub non_secret_config: BTreeMap<String, Value>,
-    pub secret_values: BTreeMap<String, Value>,
+    /// `secret://<env>/<bundle>/<provider_id>/<question_id>` references for
+    /// secret-marked answers. Plaintext never persists in this state; only the
+    /// reference is recorded (B12). The actual secret bytes are routed to the
+    /// env's secrets backend by the *consuming* wizard pipeline (greentic-setup
+    /// / greentic-operator `qa_persist` → DevStore), which writes under the
+    /// distinct `secrets://<env>/<tenant>/<team>/<provider>/<key>` scheme — a
+    /// separate address space. Phase D wires the resolver that bridges these
+    /// two URI families (A10's deferred handler-backed `SecretsSink`).
+    pub secret_refs: BTreeMap<String, SecretRef>,
 }
 
 pub fn form_spec_from_input(

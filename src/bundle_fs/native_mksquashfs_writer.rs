@@ -16,6 +16,7 @@ impl BundleFsWriter for MksquashfsBundleFsWriter {
         if output_file.exists() {
             std::fs::remove_file(output_file)?;
         }
+        super::assert_no_dev_secret_paths(input_dir)?;
         let output = Command::new("mksquashfs")
             .arg(input_dir)
             .arg(output_file)
