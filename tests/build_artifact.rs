@@ -214,7 +214,8 @@ fn build_normalized_dir_preserves_workspace_provider_config_and_assets() {
     .expect("tenant overlay");
 
     let build_dir = root.join("state/build/demo-bundle/normalized");
-    greentic_bundle::build::build_workspace(&root, None, false, false).expect("build workspace");
+    greentic_bundle::build::build_workspace(&root, None, false, false, None)
+        .expect("build workspace");
 
     assert_eq!(
         fs::read(build_dir.join(".providers/messaging-webchat-gui/config.envelope.cbor"))
