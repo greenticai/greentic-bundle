@@ -532,3 +532,158 @@ fn provider_qa_bridge_falls_back_to_ids_and_description_keys() {
 fn read_json(path: &Path) -> Value {
     serde_json::from_slice(&fs::read(path).expect("read json")).expect("parse json")
 }
+
+/// C7: persisted state records the active scope's `env_id`. Same provider,
+/// same answers, two different scopes → two states whose `env_id` matches the
+/// scope that built them.
+#[test]
+fn persisted_setup_state_records_env_id_from_scope() {
+    let spec = json!({
+        "type": "legacy",
+        "spec": {
+            "title": "Provider Setup",
+            "questions": [
+                {"name": "api_token", "kind": "string", "required": true, "secret": true}
+            ]
+        }
+    });
+    let instructions = greentic_bundle::setup::persist::collect_setup_instructions(
+        &BTreeMap::from([("provider-a".to_string(), spec)]),
+        &BTreeMap::from([("provider-a".to_string(), json!({"api_token": "sec"}))]),
+    )
+    .expect("instructions");
+
+    let mk = |env_id: &str| {
+        let tmp = TempDir::new().expect("tempdir");
+        let root = tmp.path().join("bundle");
+        let r = greentic_bundle::setup::persist::persist_setup(
+            &root,
+            &instructions,
+            &greentic_bundle::setup::backend::NoopSetupBackend,
+            &greentic_bundle::setup::persist::SetupScope {
+                env_id,
+                bundle_id: "test-bundle",
+            },
+        )
+        .expect("persist");
+        r.states.into_iter().next().expect("one state").env_id
+    };
+    assert_eq!(mk("local"), "local");
+    assert_eq!(mk("staging"), "staging");
+}
+
+/// C7: refuse to overwrite a state that was minted under a different env.
+/// Aliases the same provider's `secret://` ref across two envs otherwise.
+#[test]
+fn persist_rejects_remint_under_different_env_id() {
+    let spec = json!({
+        "type": "legacy",
+        "spec": {
+            "title": "Provider Setup",
+            "questions": [
+                {"name": "api_token", "kind": "string", "required": true, "secret": true}
+            ]
+        }
+    });
+    let instructions = greentic_bundle::setup::persist::collect_setup_instructions(
+        &BTreeMap::from([("provider-a".to_string(), spec)]),
+        &BTreeMap::from([("provider-a".to_string(), json!({"api_token": "sec"}))]),
+    )
+    .expect("instructions");
+
+    let tmp = TempDir::new().expect("tempdir");
+    let root = tmp.path().join("bundle");
+    // Mint under `local`.
+    greentic_bundle::setup::persist::persist_setup(
+        &root,
+        &instructions,
+        &greentic_bundle::setup::backend::FileSetupBackend::new(&root),
+        &greentic_bundle::setup::persist::SetupScope {
+            env_id: "local",
+            bundle_id: "test-bundle",
+        },
+    )
+    .expect("first persist");
+
+    // Re-running the wizard under `staging` for the same (bundle, provider) must fail.
+    let err = greentic_bundle::setup::persist::persist_setup(
+        &root,
+        &instructions,
+        &greentic_bundle::setup::backend::FileSetupBackend::new(&root),
+        &greentic_bundle::setup::persist::SetupScope {
+            env_id: "staging",
+            bundle_id: "test-bundle",
+        },
+    )
+    .expect_err("env_id remint must error");
+    let msg = format!("{err:#}");
+    assert!(
+        msg.contains("minted under env `local`") && msg.contains("env `staging`"),
+        "error must name both envs, got: {msg}"
+    );
+
+    // Same env is allowed (overwrite is the happy path).
+    greentic_bundle::setup::persist::persist_setup(
+        &root,
+        &instructions,
+        &greentic_bundle::setup::backend::FileSetupBackend::new(&root),
+        &greentic_bundle::setup::persist::SetupScope {
+            env_id: "local",
+            bundle_id: "test-bundle",
+        },
+    )
+    .expect("same-env remint must succeed");
+}
+
+/// C7: pre-C7 on-disk state files (schema_version <= 2, no `env_id`) are
+/// rejected at remint time. Operator must delete the file and re-run the
+/// wizard so the new state is bound to an env from the start.
+#[test]
+fn persist_rejects_pre_c7_state_without_env_id() {
+    let tmp = TempDir::new().expect("tempdir");
+    let root = tmp.path().join("bundle");
+    fs::create_dir_all(root.join("state/setup")).expect("mkdir");
+    fs::write(
+        root.join("state/setup/provider-a.json"),
+        r#"{"schema_version":2,"provider_id":"provider-a","source_kind":"legacy","form":{"id":"provider-a-setup","title":"x","version":"1.0.0","questions":[]},"normalized_answers":{},"non_secret_config":{},"secret_refs":{}}"#,
+    )
+    .expect("seed pre-C7 state");
+
+    let spec = json!({
+        "type": "legacy",
+        "spec": {
+            "title": "Provider Setup",
+            "questions": [
+                {"name": "api_token", "kind": "string", "required": true, "secret": true}
+            ]
+        }
+    });
+    let instructions = greentic_bundle::setup::persist::collect_setup_instructions(
+        &BTreeMap::from([("provider-a".to_string(), spec)]),
+        &BTreeMap::from([("provider-a".to_string(), json!({"api_token": "sec"}))]),
+    )
+    .expect("instructions");
+
+    let err = greentic_bundle::setup::persist::persist_setup(
+        &root,
+        &instructions,
+        &greentic_bundle::setup::backend::FileSetupBackend::new(&root),
+        &greentic_bundle::setup::persist::SetupScope {
+            env_id: "local",
+            bundle_id: "test-bundle",
+        },
+    )
+    .expect_err("pre-C7 state must be rejected");
+    let msg = format!("{err:#}");
+    assert!(
+        msg.contains("no env_id") && msg.contains("pre-C7"),
+        "error must name the pre-C7 condition, got: {msg}"
+    );
+}
+
+/// C7: the bumped `SETUP_STATE_SCHEMA_VERSION` is what new states report.
+/// Pinning the constant prevents an accidental rollback.
+#[test]
+fn persisted_state_advertises_c7_schema_version() {
+    assert_eq!(greentic_bundle::setup::SETUP_STATE_SCHEMA_VERSION, 3);
+}

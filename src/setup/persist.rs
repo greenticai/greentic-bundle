@@ -75,6 +75,7 @@ pub fn persist_setup(
     let mut writes = Vec::new();
     for instruction in instructions {
         let state = build_state(instruction, scope)?;
+        reject_env_id_remint(root, &state)?;
         if let Some(path) = backend.persist(&state)? {
             writes.push(relative_display(root, &path));
         } else {
@@ -88,6 +89,43 @@ pub fn persist_setup(
     writes.sort();
     writes.dedup();
     Ok(SetupPersistenceResult { states, writes })
+}
+
+/// Reject re-minting an existing state under a different env (C7).
+///
+/// Re-running the wizard for the same `(bundle, provider)` under a new
+/// `--env` would aliase two envs' `secret://` refs onto the same provider
+/// path — the on-disk URI now reads as one env, while the in-memory scope
+/// (and live DevStore writes) point at another. Detect at the persist
+/// boundary by reading whatever's on disk and comparing `env_id`. Older
+/// `schema_version <= 2` states have no `env_id` and are likewise rejected:
+/// they were minted before C7's binding existed, so the conservative answer
+/// is to require a fresh emission.
+fn reject_env_id_remint(root: &Path, state: &PersistedSetupState) -> Result<()> {
+    let path = root
+        .join(SETUP_STATE_DIR)
+        .join(format!("{}.json", state.provider_id));
+    let Ok(bytes) = std::fs::read(&path) else {
+        return Ok(());
+    };
+    let existing: serde_json::Value = match serde_json::from_slice(&bytes) {
+        Ok(v) => v,
+        Err(_) => return Ok(()),
+    };
+    let existing_env = existing.get("env_id").and_then(|v| v.as_str());
+    match existing_env {
+        Some(env) if env == state.env_id => Ok(()),
+        Some(env) => bail!(
+            "persisted setup state at `{}` was minted under env `{env}`, refusing to overwrite under env `{}` (use a different bundle_id to keep both envs)",
+            path.display(),
+            state.env_id
+        ),
+        None => bail!(
+            "persisted setup state at `{}` has no env_id (pre-C7 schema), refusing to overwrite under env `{}` (delete the file and re-run the wizard to mint fresh state)",
+            path.display(),
+            state.env_id
+        ),
+    }
 }
 
 fn build_state(
@@ -163,6 +201,7 @@ fn build_state(
 
     Ok(PersistedSetupState {
         schema_version: SETUP_STATE_SCHEMA_VERSION,
+        env_id: scope.env_id.to_string(),
         provider_id: instruction.provider_id.clone(),
         source_kind,
         form,

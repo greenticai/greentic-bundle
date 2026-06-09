@@ -93,6 +93,7 @@ capabilities:
     let lock = greentic_bundle::project::BundleLock {
         schema_version: greentic_bundle::project::LOCK_SCHEMA_VERSION,
         bundle_id: "demo-bundle".to_string(),
+        env_id: None,
         requested_mode: "create".to_string(),
         execution: "execute".to_string(),
         cache_policy: "workspace-local".to_string(),
