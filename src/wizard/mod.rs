@@ -260,6 +260,11 @@ pub fn answer_document_schema(
                 "type": "string",
                 "minLength": 1
             },
+            "env_id": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Environment id the wizard ran under (C7). Absent for pre-C7 documents."
+            },
             "answers": {
                 "type": "object",
                 "additionalProperties": false,
@@ -1029,7 +1034,13 @@ fn execute_request(
     }
     let request = discover_setup_specs(request, &catalog_resolution);
     let setup_writes = preview_setup_writes(&request, execution, env_id)?;
-    let bundle_lock = build_bundle_lock(&request, execution, &catalog_resolution, &setup_writes);
+    let bundle_lock = build_bundle_lock(
+        &request,
+        execution,
+        &catalog_resolution,
+        &setup_writes,
+        env_id,
+    );
     let plan = build_plan(
         &request,
         execution,
@@ -1039,6 +1050,7 @@ fn execute_request(
         &setup_writes,
     );
     let mut document = answer_document_from_request(&request, Some(&target_version.to_string()))?;
+    document.env_id = Some(env_id.to_string());
     let mut locks = source_locks.unwrap_or_default();
     locks.extend(bundle_lock_to_answer_locks(&bundle_lock));
     document.locks = locks;
@@ -4199,10 +4211,12 @@ fn build_bundle_lock(
     execution: ExecutionMode,
     catalog_resolution: &crate::catalog::resolve::CatalogResolution,
     setup_writes: &[String],
+    env_id: &str,
 ) -> crate::project::BundleLock {
     crate::project::BundleLock {
         schema_version: crate::project::LOCK_SCHEMA_VERSION,
         bundle_id: request.bundle_id.clone(),
+        env_id: Some(env_id.to_string()),
         requested_mode: mode_name(request.mode).to_string(),
         execution: match execution {
             ExecutionMode::DryRun => "dry_run",

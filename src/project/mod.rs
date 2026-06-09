@@ -118,6 +118,13 @@ struct ResolvedReferencePolicy {
 pub struct BundleLock {
     pub schema_version: u32,
     pub bundle_id: String,
+    /// Environment id the wizard ran under (C7). `None` for locks emitted by
+    /// `empty_bundle_lock` (workspace scaffold, before any wizard run); set to
+    /// `Some(env)` once the wizard's `execute_request` materializes it. Read
+    /// by downstream readers that need to know which env the bundled
+    /// `setup_state_files` were minted under.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub env_id: Option<String>,
     pub requested_mode: String,
     pub execution: String,
     pub cache_policy: String,
@@ -801,6 +808,7 @@ fn empty_bundle_lock(workspace: &BundleWorkspaceDefinition) -> BundleLock {
     BundleLock {
         schema_version: LOCK_SCHEMA_VERSION,
         bundle_id: workspace.bundle_id.clone(),
+        env_id: None,
         requested_mode: workspace.mode.clone(),
         execution: "execute".to_string(),
         cache_policy: "workspace-local".to_string(),
