@@ -110,7 +110,10 @@ fn reject_env_id_remint(root: &Path, state: &PersistedSetupState) -> Result<()> 
     };
     let existing: serde_json::Value = match serde_json::from_slice(&bytes) {
         Ok(v) => v,
-        Err(_) => return Ok(()),
+        Err(e) => bail!(
+            "persisted setup state at `{}` is corrupt JSON ({e}), refusing to overwrite (delete the file and re-run the wizard)",
+            path.display()
+        ),
     };
     let existing_env = existing.get("env_id").and_then(|v| v.as_str());
     match existing_env {

@@ -260,6 +260,11 @@ pub fn answer_document_schema(
                 "type": "string",
                 "minLength": 1
             },
+            "env_id": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Environment id the wizard ran under (C7). Absent for pre-C7 documents."
+            },
             "answers": {
                 "type": "object",
                 "additionalProperties": false,

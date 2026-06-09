@@ -681,6 +681,48 @@ fn persist_rejects_pre_c7_state_without_env_id() {
     );
 }
 
+/// C7: corrupt (non-JSON) on-disk state files are rejected at remint time
+/// rather than silently overwritten. Fail-closed: operator must delete the
+/// file before re-running the wizard.
+#[test]
+fn persist_rejects_corrupt_state_file() {
+    let tmp = TempDir::new().expect("tempdir");
+    let root = tmp.path().join("bundle");
+    fs::create_dir_all(root.join("state/setup")).expect("mkdir");
+    fs::write(root.join("state/setup/provider-a.json"), b"NOT JSON").expect("seed corrupt state");
+
+    let spec = json!({
+        "type": "legacy",
+        "spec": {
+            "title": "Provider Setup",
+            "questions": [
+                {"name": "api_token", "kind": "string", "required": true, "secret": true}
+            ]
+        }
+    });
+    let instructions = greentic_bundle::setup::persist::collect_setup_instructions(
+        &BTreeMap::from([("provider-a".to_string(), spec)]),
+        &BTreeMap::from([("provider-a".to_string(), json!({"api_token": "sec"}))]),
+    )
+    .expect("instructions");
+
+    let err = greentic_bundle::setup::persist::persist_setup(
+        &root,
+        &instructions,
+        &greentic_bundle::setup::backend::FileSetupBackend::new(&root),
+        &greentic_bundle::setup::persist::SetupScope {
+            env_id: "local",
+            bundle_id: "test-bundle",
+        },
+    )
+    .expect_err("corrupt state must be rejected");
+    let msg = format!("{err:#}");
+    assert!(
+        msg.contains("corrupt JSON"),
+        "error must mention corrupt JSON, got: {msg}"
+    );
+}
+
 /// C7: the bumped `SETUP_STATE_SCHEMA_VERSION` is what new states report.
 /// Pinning the constant prevents an accidental rollback.
 #[test]
