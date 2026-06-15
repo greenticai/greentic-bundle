@@ -317,7 +317,7 @@ dependencies = [
 name = "bundle-standard-core"
 version = "1.2.0-dev.0"
 dependencies = [
- "greentic-types 1.1.0-dev.26462942350",
+ "greentic-types 1.1.0-dev.27365613679",
  "semver",
  "serde",
  "serde_json",
@@ -512,7 +512,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "daaabdc0dfe7c0c9b3084a46be352fd00567d987c6c8b160e8a684995539a12f"
 dependencies = [
  "greentic-interfaces-guest",
- "greentic-types 1.1.0-dev.26462942350",
+ "greentic-types 1.1.0-dev.27365613679",
  "qa-spec",
  "serde",
  "serde_cbor",
@@ -1493,7 +1493,7 @@ version = "1.1.0-dev.26438011743"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b63d06c83341553fd090fd6051b251cfcef02904e9180a31eb2924dfd5e27097"
 dependencies = [
- "greentic-types 1.1.0-dev.26462942350",
+ "greentic-types 1.1.0-dev.27365613679",
  "serde",
  "serde_json",
  "toml",
@@ -1508,7 +1508,7 @@ checksum = "c13525bee2a21bb58661acf7a327a9ea9a5c567ad32e75930892cbb89fda3823"
 dependencies = [
  "chrono",
  "greentic-config-types",
- "greentic-types 1.1.0-dev.26462942350",
+ "greentic-types 1.1.0-dev.27365613679",
  "hex",
  "semver",
  "serde",
@@ -1533,7 +1533,7 @@ dependencies = [
  "greentic-config-types",
  "greentic-interfaces-guest",
  "greentic-secrets-lib",
- "greentic-types 1.1.0-dev.26462942350",
+ "greentic-types 1.1.0-dev.27365613679",
  "hex",
  "oci-distribution",
  "reqwest 0.13.4",
@@ -1556,7 +1556,7 @@ checksum = "70cc5c8879100bccba31858ab7a120adafa7f9fdd578bf25c3ab8391a8f030bd"
 dependencies = [
  "anyhow",
  "constant_time_eq 0.4.2",
- "greentic-types 1.1.0-dev.26462942350",
+ "greentic-types 1.1.0-dev.27365613679",
  "semver",
  "thiserror 2.0.18",
  "time",
@@ -1573,7 +1573,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dd69bcbfc230eebf3db8ce18b1f532b7c9a3ece0e98a74263a782e54e9e730e7"
 dependencies = [
  "greentic-interfaces",
- "greentic-types 1.1.0-dev.26462942350",
+ "greentic-types 1.1.0-dev.27365613679",
  "wit-bindgen 0.57.1",
  "wit-bindgen-core 0.57.1",
  "wit-bindgen-rust 0.57.1",
@@ -1729,9 +1729,9 @@ dependencies = [
 
 [[package]]
 name = "greentic-types"
-version = "1.1.0-dev.26462942350"
+version = "1.1.0-dev.27365613679"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "70fbb1e3da7e2cd9cd018383bdbf07baf4d51973c605b6c66e45bd8890d613fe"
+checksum = "450c5ffe2ed8fe66913008084983ba7a70d583e835b395605e81c66a03fa97df"
 dependencies = [
  "anyhow",
  "blake3",
