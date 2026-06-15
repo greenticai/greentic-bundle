@@ -95,6 +95,7 @@ fn build_manifest_cbor(config: &StandardConfig) -> Result<Vec<u8>, PackError> {
         signatures: PackSignatures::default(),
         bootstrap: None,
         extensions: None,
+        agents: std::collections::BTreeMap::new(),
     };
     encode_pack_manifest(&manifest)
         .map_err(|e| PackError::ManifestCbor(format!("encode_pack_manifest: {e}")))
