@@ -21,7 +21,7 @@ pub struct BuildState {
 pub fn build_state(root: &Path) -> Result<BuildState> {
     let lock = crate::project::read_bundle_lock(root)
         .with_context(|| format!("read {}", root.join(crate::project::LOCK_FILE).display()))?;
-    let bundle_yaml = fs::read_to_string(root.join(crate::project::WORKSPACE_ROOT_FILE))
+    let bundle_yaml_raw = fs::read_to_string(root.join(crate::project::WORKSPACE_ROOT_FILE))
         .with_context(|| {
             format!(
                 "read {}",
@@ -29,18 +29,61 @@ pub fn build_state(root: &Path) -> Result<BuildState> {
             )
         })?;
 
-    let bundle_doc = parse_yaml_document(&bundle_yaml);
-    let bundle_id = yaml_string(&bundle_doc, "bundle_id").unwrap_or_else(|| lock.bundle_id.clone());
-    let bundle_name = yaml_string(&bundle_doc, "bundle_name").unwrap_or_else(|| bundle_id.clone());
+    // Parse the manifest fields from the user-authored YAML *before*
+    // any rewrite — bundle-manifest.json's `app_packs` records the
+    // canonical references the workspace declared (registry names,
+    // OCI refs, file:// URIs as-typed), not the post-materialisation
+    // squashfs locations. Downstream tooling that introspects the
+    // manifest (catalog hooks, lock-file generators, etc.) expects
+    // those canonical refs unchanged.
+    let raw_doc = parse_yaml_document(&bundle_yaml_raw);
+    let bundle_id = yaml_string(&raw_doc, "bundle_id").unwrap_or_else(|| lock.bundle_id.clone());
+    let bundle_name = yaml_string(&raw_doc, "bundle_name").unwrap_or_else(|| bundle_id.clone());
     let requested_mode =
-        yaml_string(&bundle_doc, "mode").unwrap_or_else(|| lock.requested_mode.clone());
-    let locale = yaml_string(&bundle_doc, "locale").unwrap_or_else(|| "en".to_string());
-    let app_packs = yaml_string_list(&bundle_doc, "app_packs");
-    let extension_providers = yaml_string_list(&bundle_doc, "extension_providers");
-    let catalogs = yaml_string_list(&bundle_doc, "remote_catalogs");
-    let hooks = yaml_string_list(&bundle_doc, "hooks");
-    let subscriptions = yaml_string_list(&bundle_doc, "subscriptions");
-    let capabilities = yaml_string_list(&bundle_doc, "capabilities");
+        yaml_string(&raw_doc, "mode").unwrap_or_else(|| lock.requested_mode.clone());
+    let locale = yaml_string(&raw_doc, "locale").unwrap_or_else(|| "en".to_string());
+    let app_packs = yaml_string_list(&raw_doc, "app_packs");
+    let extension_providers = yaml_string_list(&raw_doc, "extension_providers");
+    let catalogs = yaml_string_list(&raw_doc, "remote_catalogs");
+    let hooks = yaml_string_list(&raw_doc, "hooks");
+    let subscriptions = yaml_string_list(&raw_doc, "subscriptions");
+    let capabilities = yaml_string_list(&raw_doc, "capabilities");
+
+    // Rewrite the bundle.yaml that ships *inside* the squashfs so its
+    // `app_packs` references resolve against the materialised file
+    // layout (`packs/<id>.gtpack`, `tenants/.../packs/...`).
+    // Without this, `gtc setup doctor` reads
+    // `file://./testing.gtpack` from the bundled yaml, resolves it
+    // relative to the bundle root, and reports the pack as missing
+    // even though the file is right there inside
+    // `packs/testing.gtpack`. The user's source bundle.yaml on disk
+    // is left untouched — only the copy that goes into the squashfs
+    // is rewritten. See `crate::project::MaterializedCopyTarget` for
+    // the destination rules.
+    let workspace = crate::project::read_bundle_workspace(root).ok();
+    let copy_targets: Vec<crate::project::MaterializedCopyTarget> = workspace
+        .as_ref()
+        .map(crate::project::app_pack_copy_targets)
+        .unwrap_or_default();
+    let reference_rewrites: Vec<(String, String)> = copy_targets
+        .iter()
+        .map(|t| {
+            let dest_str = t.destination.display().to_string();
+            // Always emit forward slashes — squashfs paths are POSIX
+            // even when the build runs on Windows.
+            let dest_norm = dest_str.replace('\\', "/");
+            // Bare relative path, no `file://` scheme.
+            // `gtc setup doctor`'s `reference_exists` check resolves
+            // the reference against the bundle root via
+            // `bundle_root.join(reference)` and treats anything
+            // unrecognised as a literal path component — including
+            // a `file://` scheme prefix, which then dangles. Emitting
+            // a bare relative path is the form the doctor's resolver
+            // can reach inside the squashfs without scheme handling.
+            (t.reference.clone(), dest_norm)
+        })
+        .collect();
+    let bundle_yaml = rewrite_app_pack_references_in_yaml(&bundle_yaml_raw, &reference_rewrites);
     let resolved_files = collect_files(root, &root.join("resolved"))?;
     let setup_files = collect_named_files(root, &lock.setup_state_files)?;
     let asset_files = collect_asset_files(root)?;
@@ -180,6 +223,31 @@ fn parse_yaml_document(raw: &str) -> Option<Value> {
     serde_yaml_bw::from_str(raw).ok()
 }
 
+/// Replace every occurrence of an original app-pack reference in the
+/// bundle.yaml text with its materialised destination. Operates on
+/// the raw YAML string so user formatting (comments, quoting,
+/// section ordering) survives — re-emitting via serde would lose all
+/// of that.
+///
+/// Each rewrite is anchored on the original reference's literal text;
+/// references that don't match any rewrite are left untouched. This
+/// keeps OCI / repo / store references (which already resolve at
+/// runtime) and any user-typed `file://` strings the materialiser
+/// chose not to relocate exactly as the user wrote them.
+fn rewrite_app_pack_references_in_yaml(raw: &str, rewrites: &[(String, String)]) -> String {
+    if rewrites.is_empty() {
+        return raw.to_string();
+    }
+    let mut out = raw.to_string();
+    for (original, replacement) in rewrites {
+        if original == replacement {
+            continue;
+        }
+        out = out.replace(original, replacement);
+    }
+    out
+}
+
 fn yaml_string(doc: &Option<Value>, key: &str) -> Option<String> {
     doc.as_ref()?.get(key)?.as_str().map(ToOwned::to_owned)
 }
@@ -249,4 +317,78 @@ fn parse_reference_policies(doc: &Value) -> Vec<ResolvedReferencePolicy> {
             Some(ResolvedReferencePolicy { reference, policy })
         })
         .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn rewrite_replaces_app_pack_references_in_yaml() {
+        let raw = "schema_version: 1
+bundle_id: demo
+app_packs:
+  - file://./testing.gtpack
+app_pack_mappings:
+  - reference: file://./testing.gtpack
+    scope: global
+";
+        let rewrites = vec![(
+            "file://./testing.gtpack".to_string(),
+            "file://./packs/testing.gtpack".to_string(),
+        )];
+        let out = rewrite_app_pack_references_in_yaml(raw, &rewrites);
+        assert!(
+            out.contains("- file://./packs/testing.gtpack"),
+            "rewritten app_packs entry missing: {out}"
+        );
+        assert!(
+            out.contains("reference: file://./packs/testing.gtpack"),
+            "rewritten mapping reference missing: {out}"
+        );
+        // Original literal should NOT appear anywhere else (every
+        // occurrence was a target of the rewrite).
+        assert!(
+            !out.contains("file://./testing.gtpack"),
+            "original reference still present: {out}"
+        );
+    }
+
+    #[test]
+    fn rewrite_skips_no_op_replacements() {
+        let raw = "app_packs:\n  - file://./packs/foo.gtpack\n";
+        let rewrites = vec![(
+            "file://./packs/foo.gtpack".to_string(),
+            "file://./packs/foo.gtpack".to_string(),
+        )];
+        let out = rewrite_app_pack_references_in_yaml(raw, &rewrites);
+        assert_eq!(out, raw);
+    }
+
+    #[test]
+    fn rewrite_leaves_unrelated_references_alone() {
+        let raw = "app_packs:
+  - file://./testing.gtpack
+extension_providers:
+  - oci://ghcr.io/example/messaging:latest
+  - oci://ghcr.io/example/state:latest
+";
+        let rewrites = vec![(
+            "file://./testing.gtpack".to_string(),
+            "file://./packs/testing.gtpack".to_string(),
+        )];
+        let out = rewrite_app_pack_references_in_yaml(raw, &rewrites);
+        assert!(out.contains("file://./packs/testing.gtpack"));
+        // OCI extension-provider strings unchanged
+        assert!(out.contains("oci://ghcr.io/example/messaging:latest"));
+        assert!(out.contains("oci://ghcr.io/example/state:latest"));
+    }
+
+    #[test]
+    fn rewrite_handles_empty_input_list() {
+        let raw = "app_packs: []\n";
+        let rewrites: Vec<(String, String)> = Vec::new();
+        let out = rewrite_app_pack_references_in_yaml(raw, &rewrites);
+        assert_eq!(out, raw);
+    }
 }

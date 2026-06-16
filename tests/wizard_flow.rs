@@ -510,8 +510,19 @@ fn create_flow_uses_pack_id_for_access_rules_and_resolved_policy() {
 
     let resolved =
         fs::read_to_string(bundle_root.join("resolved/default.yaml")).expect("resolved output");
-    assert!(resolved.contains(&format!("reference: {}", pack_path.display())));
+    // Resolved YAML now ships rewritten references that match the
+    // squashfs `packs/` layout (so `gtc setup doctor`'s
+    // `reference_exists` check resolves them against the bundle
+    // root). The pack id was slugified to `cisco-bundle` per the
+    // tenant_gmap assertion above, so the materialised destination
+    // is `packs/cisco-bundle.gtpack`. The user's source path
+    // (`pack_path`) stays canonical in `bundle.lock.json`.
+    assert!(
+        resolved.contains("reference: packs/cisco-bundle.gtpack"),
+        "resolved/default.yaml should reference the materialised pack path; got:\n{resolved}"
+    );
     assert!(resolved.contains("policy: public"));
+    let _ = pack_path; // silence unused-binding lint after the rewrite
 }
 
 #[test]
