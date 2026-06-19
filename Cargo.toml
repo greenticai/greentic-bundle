@@ -11,7 +11,10 @@ version = "1.2.0-dev.0"
 
 [workspace.dependencies]
 anyhow = "1"
-backhand = "0.25"
+# default-features dropped to exclude `parallel` (rayon): the parallel squashfs
+# reader sizes its thread pool to the host core count, ignores the container's
+# CPU cgroup quota, and silently yields a 0-byte extraction when throttled.
+backhand = { version = "0.25", default-features = false, features = ["xz", "gzip", "zstd", "lz4"] }
 assert_cmd = "2"
 ciborium = "0.2"
 clap = { version = "4", features = ["derive"] }
