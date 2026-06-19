@@ -314,7 +314,7 @@ dependencies = [
 
 [[package]]
 name = "bundle-standard-core"
-version = "1.2.0-dev.0"
+version = "1.1.0-dev.0"
 dependencies = [
  "greentic-types",
  "semver",
@@ -333,7 +333,7 @@ checksum = "8ae3f5d315924270530207e2a68396c3cc547f6dca3fbdca317cfb1a51edb593"
 
 [[package]]
 name = "cards2pack-core"
-version = "1.2.0-dev.0"
+version = "1.1.0-dev.0"
 dependencies = [
  "insta",
  "serde",
@@ -1450,7 +1450,7 @@ dependencies = [
 
 [[package]]
 name = "greentic-bundle"
-version = "1.2.0-dev.0"
+version = "1.1.0-dev.0"
 dependencies = [
  "anyhow",
  "assert_cmd",
@@ -1485,7 +1485,7 @@ dependencies = [
 
 [[package]]
 name = "greentic-bundle-reader"
-version = "1.2.0-dev.0"
+version = "1.1.0-dev.0"
 dependencies = [
  "backhand",
  "serde",
@@ -1507,9 +1507,9 @@ dependencies = [
 
 [[package]]
 name = "greentic-deploy-spec"
-version = "0.1.27785617238"
+version = "0.1.27808355252"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "733aa248fee7ef8297310fee10aa759769efd989f4ccd5929beb5b0393ef6d37"
+checksum = "74de13fffb3f080a50a69bdcd31ec2e5e9d62d6ba04c2183fea91a6f3dfe7413"
 dependencies = [
  "chrono",
  "greentic-config-types",
