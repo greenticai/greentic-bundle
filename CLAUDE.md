@@ -16,7 +16,7 @@ conventions see [docs/coding-agents.md](docs/coding-agents.md).
 | `bundle-standard-core` | Shared standard-bundle types |
 | `cards2pack-core` | Adaptive Card JSON to pack conversion core |
 
-Workspace version: `1.2.0-dev.0`. Edition 2024, `rust-version = "1.91"`.
+Workspace version: `1.1.0-dev.0`. Edition 2024, `rust-version = "1.91"`.
 Toolchain pinned to 1.95.0 via `rust-toolchain.toml` (managed centrally).
 
 ## Source Layout (`src/`)
