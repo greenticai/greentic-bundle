@@ -747,6 +747,9 @@ fn build_manifest(root: &Path, tenant: &str, team: Option<&str>) -> ResolvedMani
 }
 
 fn render_bundle_workspace(workspace: &BundleWorkspaceDefinition) -> String {
+    // TODO(SP2 Task 5): emit `agent_packs` here. This hand-written serializer must
+    // stay in lockstep with `BundleWorkspaceDefinition`; until Task 5 adds the field,
+    // a write-back round-trip silently drops any parsed `agent_packs` mapping.
     format!(
         concat!(
             "schema_version: {}\n",
