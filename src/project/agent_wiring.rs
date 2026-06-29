@@ -1,5 +1,5 @@
 //! Extract `dw.agent` references from compiled flow manifests and collect
-//! agent ids already provided by `dw-application` packs.
+//! agent ids provided by agentic-worker packs.
 //!
 //! These two helpers are the read-side primitives for Task 5's auto-wiring
 //! resolution pass:
@@ -8,18 +8,31 @@
 //!   packs and returns every `(flow_id, node_id, agent_id)` triple where a node
 //!   has `component.id == "dw.agent"` and a non-empty `component.operation`.
 //!
-//! * [`provided_agent_ids`] — reads `manifest.cbor` bytes from the bundle's
-//!   existing packs, filters to those with `kind == "dw-application"`, and
-//!   returns the string keys of their `agents` map.
+//! * [`provided_agent_ids`] — reads `dw-agents.json` sidecar bytes (one per
+//!   pack) and returns the top-level JSON-object keys (the agent ids declared
+//!   by that pack).  The discriminator for "this pack provides agents" is the
+//!   **presence of the `dw-agents.json` sidecar** inside the `.gtpack` — NOT
+//!   the manifest `kind` field (packc collapses `dw-application` → `application`
+//!   and hardcodes the manifest `agents` map empty; the real data lives only in
+//!   the sidecar).
 //!
-//! ## IR shape
+//! ## IR shape — `referenced_dw_agents`
 //!
-//! Both functions consume raw CBOR bytes already extracted from a `.gtpack`
-//! ZIP.  The manifest.cbor IR uses interned symbol tables: `node.component.id`
-//! is an integer index into `symbols.component_ids`, and `node.id` is an
-//! integer index into `symbols.node_ids`.  Inline string ids are accepted as a
-//! defensive fallback (matching the rule in `greentic-start`'s
+//! `flow_manifests` are raw `manifest.cbor` bytes already extracted from a
+//! `.gtpack` ZIP.  The manifest.cbor IR uses interned symbol tables:
+//! `node.component.id` is an integer index into `symbols.component_ids`, and
+//! `node.id` is an integer index into `symbols.node_ids`.  Inline string ids
+//! are accepted as a defensive fallback (matching the rule in `greentic-start`'s
 //! `agent_preflight`).
+//!
+//! ## IR shape — `provided_agent_ids`
+//!
+//! `sidecars` are raw `dw-agents.json` bytes, one per pack (packs that do not
+//! contain a `dw-agents.json` file should not contribute a slice at all).  The
+//! sidecar is a bare JSON object `{ "<agent_id>": <AgentConfig> }`; the caller
+//! (Task 5) is responsible for reading the file from the ZIP.  This matches the
+//! wire format produced by `packc agent_pack.rs` and consumed by
+//! `greentic-runner pack.rs:2314–2327`.
 //!
 //! ## Mirror contract
 //!
@@ -40,9 +53,6 @@ use ciborium::Value;
 
 /// Component id that marks an agentic-worker node in a compiled flow.
 const DW_AGENT_COMPONENT_ID: &str = "dw.agent";
-
-/// Pack kind that declares one or more agentic workers.
-const DW_APPLICATION_KIND: &str = "dw-application";
 
 /// Scan `flow_manifests` (raw `manifest.cbor` bytes, one per pack) and collect
 /// every `dw.agent` node reference.
@@ -107,51 +117,40 @@ fn extract_dw_agent_refs(manifest: &Value, refs: &mut Vec<(String, String, Strin
     }
 }
 
-/// Scan `pack_manifests` (raw `manifest.cbor` bytes, one per pack) and collect
-/// agent ids declared by every `dw-application` pack.
+/// Scan `sidecars` (raw `dw-agents.json` bytes, one per pack) and collect
+/// agent ids declared by each sidecar.
+///
+/// Each `&[u8]` is the bytes of one pack's `dw-agents.json` sidecar file.  The
+/// sidecar is a bare JSON object `{ "<agent_id>": <AgentConfig> }` written by
+/// `packc agent_pack.rs` and consumed by `greentic-runner pack.rs:2314–2327`.
 ///
 /// For each byte slice:
 ///
-/// 1. Decode as CBOR.
-/// 2. Skip unless `kind == "dw-application"`.
-/// 3. Collect the string keys of the `agents` map.
+/// 1. Parse as JSON.
+/// 2. Skip unless the root value is a JSON object.
+/// 3. Collect the non-empty top-level keys (the agent ids).
 ///
-/// A dw-application pack may provide more than one agent id; all keys are
-/// returned.  Invalid / unreadable slices and non-dw-application packs are
-/// silently skipped (fail-soft).
-///
-/// Mirrors the concept of `greentic-start`'s `dw_agents_from_bundle` /
-/// `provided_agent_from_pack`.
-pub(crate) fn provided_agent_ids(pack_manifests: &[&[u8]]) -> BTreeSet<String> {
+/// Malformed or non-object blobs are silently skipped (fail-soft, no panic),
+/// mirroring the runner's "ignore malformed dw-agents.json" behavior.  The
+/// caller is responsible for only passing slices from packs that actually
+/// contain a `dw-agents.json` file; packs without the sidecar provide no
+/// agents.
+pub(crate) fn provided_agent_ids(sidecars: &[&[u8]]) -> BTreeSet<String> {
     let mut ids = BTreeSet::new();
-    for bytes in pack_manifests {
-        let Ok(manifest) = ciborium::de::from_reader::<Value, _>(*bytes) else {
+    for bytes in sidecars {
+        let Ok(json_value) = serde_json::from_slice::<serde_json::Value>(bytes) else {
             continue;
         };
-        collect_provided_agent_ids(&manifest, &mut ids);
-    }
-    ids
-}
-
-/// Collect agent ids from one decoded `manifest.cbor` if it is a
-/// `dw-application` pack.
-fn collect_provided_agent_ids(manifest: &Value, ids: &mut BTreeSet<String>) {
-    let Some(kind) = map_get(manifest, "kind").and_then(as_text) else {
-        return;
-    };
-    if kind != DW_APPLICATION_KIND {
-        return;
-    }
-    let Some(Value::Map(agents_map)) = map_get(manifest, "agents") else {
-        return;
-    };
-    for (key, _) in agents_map {
-        if let Some(agent_id) = as_text(key)
-            && !agent_id.is_empty()
-        {
-            ids.insert(agent_id);
+        let Some(agent_map) = json_value.as_object() else {
+            continue;
+        };
+        for key in agent_map.keys() {
+            if !key.is_empty() {
+                ids.insert(key.clone());
+            }
         }
     }
+    ids
 }
 
 // ---------------------------------------------------------------------------
@@ -316,16 +315,6 @@ mod tests {
         to_cbor_bytes(&manifest)
     }
 
-    /// A `manifest.cbor` for a `dw-application` pack providing `tavily_researcher`.
-    fn dw_application_manifest_bytes(agent_id: &str) -> Vec<u8> {
-        let agents_map = cbor_map(vec![(agent_id, text("agent-config-placeholder"))]);
-        let manifest = cbor_map(vec![
-            ("kind", text("dw-application")),
-            ("agents", agents_map),
-        ]);
-        to_cbor_bytes(&manifest)
-    }
-
     // --- referenced_dw_agents ------------------------------------------------
 
     #[test]
@@ -429,85 +418,111 @@ mod tests {
         assert!(refs.is_empty(), "invalid CBOR must be silently skipped");
     }
 
-    // --- provided_agent_ids --------------------------------------------------
+    // --- provided_agent_ids (dw-agents.json sidecar) -------------------------
+
+    /// Build a `dw-agents.json` sidecar byte fixture with the given agent ids.
+    /// This is the same format packc writes:
+    /// `serde_json::to_vec(&BTreeMap<String, serde_json::Value>)`.
+    fn dw_agents_sidecar_bytes(agent_ids: &[&str]) -> Vec<u8> {
+        let map: std::collections::BTreeMap<String, serde_json::Value> = agent_ids
+            .iter()
+            .map(|id| (id.to_string(), serde_json::json!({"kind": "placeholder"})))
+            .collect();
+        serde_json::to_vec(&map).expect("sidecar serialization must succeed")
+    }
 
     #[test]
-    fn returns_agent_ids_from_dw_application_pack() {
-        let bytes = dw_application_manifest_bytes("tavily_researcher");
+    fn provided_agent_ids_extracts_keys_from_json_sidecar() {
+        // `{"tavily_researcher": {...}, "second_agent": {...}}` as JSON bytes
+        let bytes = serde_json::to_vec(&serde_json::json!({
+            "tavily_researcher": {"kind": "dw-agent", "llm": "openai"},
+            "second_agent": {"kind": "dw-agent"}
+        }))
+        .unwrap();
         let ids = provided_agent_ids(&[&bytes]);
         assert!(
             ids.contains("tavily_researcher"),
             "tavily_researcher must be in the provided set"
         );
-        assert_eq!(ids.len(), 1);
-    }
-
-    #[test]
-    fn multi_agent_dw_application_pack_returns_all_agents() {
-        let agents_map = cbor_map(vec![
-            ("agent_one", text("config-a")),
-            ("agent_two", text("config-b")),
-        ]);
-        let manifest = cbor_map(vec![
-            ("kind", text("dw-application")),
-            ("agents", agents_map),
-        ]);
-        let bytes = to_cbor_bytes(&manifest);
-        let ids = provided_agent_ids(&[&bytes]);
-        assert!(ids.contains("agent_one"));
-        assert!(ids.contains("agent_two"));
+        assert!(
+            ids.contains("second_agent"),
+            "second_agent must be in the provided set"
+        );
         assert_eq!(ids.len(), 2);
     }
 
     #[test]
-    fn non_dw_application_pack_is_skipped() {
-        let manifest = cbor_map(vec![
-            ("kind", text("application")),
-            ("agents", cbor_map(vec![("some_agent", text("config"))])),
-        ]);
-        let bytes = to_cbor_bytes(&manifest);
+    fn malformed_sidecar_blob_is_skipped_gracefully() {
+        let bad: &[u8] = b"not json at all {{ broken";
+        let ids = provided_agent_ids(&[bad]);
         assert!(
-            provided_agent_ids(&[&bytes]).is_empty(),
-            "packs with kind != dw-application must be skipped"
+            ids.is_empty(),
+            "a malformed sidecar must silently yield an empty set (no panic)"
         );
     }
 
     #[test]
-    fn pack_without_kind_is_skipped() {
-        let manifest = cbor_map(vec![(
-            "agents",
-            cbor_map(vec![("some_agent", text("config"))]),
-        )]);
-        let bytes = to_cbor_bytes(&manifest);
+    fn empty_json_object_yields_empty_set() {
+        let bytes: &[u8] = b"{}";
         assert!(
-            provided_agent_ids(&[&bytes]).is_empty(),
-            "packs without a kind field must be skipped"
+            provided_agent_ids(&[bytes]).is_empty(),
+            "an empty JSON object sidecar must yield an empty set"
         );
     }
 
     #[test]
-    fn dw_application_pack_without_agents_map_returns_empty() {
-        let manifest = cbor_map(vec![("kind", text("dw-application"))]);
-        let bytes = to_cbor_bytes(&manifest);
+    fn non_object_json_blob_yields_empty_set() {
+        // A JSON array is valid JSON but not the expected object shape.
+        let bytes = b"[\"some_key\"]";
         assert!(
-            provided_agent_ids(&[&bytes]).is_empty(),
-            "a dw-application pack with no agents map yields an empty set"
+            provided_agent_ids(&[bytes]).is_empty(),
+            "a non-object JSON blob must be skipped (contributes nothing)"
         );
     }
 
     #[test]
-    fn multiple_packs_are_scanned() {
-        let bytes_a = dw_application_manifest_bytes("agent_a");
-        let bytes_b = dw_application_manifest_bytes("agent_b");
+    fn multiple_sidecars_are_aggregated() {
+        let bytes_a = dw_agents_sidecar_bytes(&["agent_a"]);
+        let bytes_b = dw_agents_sidecar_bytes(&["agent_b"]);
         let ids = provided_agent_ids(&[&bytes_a, &bytes_b]);
-        assert!(ids.contains("agent_a"));
-        assert!(ids.contains("agent_b"));
+        assert!(
+            ids.contains("agent_a"),
+            "agent_a from sidecar A must be present"
+        );
+        assert!(
+            ids.contains("agent_b"),
+            "agent_b from sidecar B must be present"
+        );
         assert_eq!(ids.len(), 2);
     }
 
     #[test]
-    fn invalid_pack_bytes_are_skipped() {
-        let bad: &[u8] = b"not cbor";
-        assert!(provided_agent_ids(&[bad]).is_empty());
+    fn round_trip_guard_matches_packc_wire_format() {
+        // Build the sidecar bytes EXACTLY as packc does in agent_pack.rs:
+        // serde_json::to_vec(&BTreeMap<String, serde_json::Value>).
+        // This pins the wire format and guards against future packc drift.
+        let mut agents: std::collections::BTreeMap<String, serde_json::Value> =
+            std::collections::BTreeMap::new();
+        agents.insert(
+            "crm_assistant".to_string(),
+            serde_json::json!({"kind": "dw-agent", "llm_provider": "openai"}),
+        );
+        agents.insert(
+            "email_drafter".to_string(),
+            serde_json::json!({"kind": "dw-agent", "llm_provider": "anthropic"}),
+        );
+        let sidecar_bytes =
+            serde_json::to_vec(&agents).expect("packc-style serialization must succeed");
+
+        let ids = provided_agent_ids(&[&sidecar_bytes]);
+        assert!(
+            ids.contains("crm_assistant"),
+            "crm_assistant must round-trip through the packc wire format"
+        );
+        assert!(
+            ids.contains("email_drafter"),
+            "email_drafter must round-trip through the packc wire format"
+        );
+        assert_eq!(ids.len(), 2, "only the declared agents must be present");
     }
 }
