@@ -1,3 +1,5 @@
+pub(crate) mod agent_wiring;
+
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
