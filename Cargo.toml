@@ -7,19 +7,27 @@ members = [
 resolver = "2"
 
 [workspace.package]
-version = "0.5.11"
+version = "1.1.0"
 
 [workspace.dependencies]
 anyhow = "1"
-backhand = "0.25"
+# default-features dropped to exclude `parallel` (rayon): the parallel squashfs
+# reader sizes its thread pool to the host core count, ignores the container's
+# CPU cgroup quota, and silently yields a 0-byte extraction when throttled.
+backhand = { version = "0.25", default-features = false, features = ["xz", "gzip", "zstd", "lz4"] }
 assert_cmd = "2"
 ciborium = "0.2"
 clap = { version = "4", features = ["derive"] }
 constant_time_eq = "0.5"
 criterion = "0.8"
-greentic-bundle-reader = { version = ">=0.5.0-0, <0.6.0-0", path = "crates/greentic-bundle-reader" }
-greentic-distributor-client = { version = ">=0.5.0-0, <0.6.0-0", default-features = false, features = ["dist-client", "pack-fetch"] }
-greentic-qa-lib = ">=0.5.0-0, <0.6.0-0"
+ed25519-dalek = { version = "2", features = ["pkcs8", "pem", "zeroize"] }
+hex = "0.4"
+zeroize = "1"
+bundle-standard-core = { version = ">=0.6.0-0, <0.7.0-0", path = "crates/bundle-standard-core" }
+greentic-bundle-reader = { version = ">=1.1.0-dev, <1.2.0-0", path = "crates/greentic-bundle-reader" }
+greentic-deploy-spec = ">=0.1, <0.2"
+greentic-distributor-client = { version = ">=1.1.0-dev, <1.2.0-0", default-features = false, features = ["dist-client", "pack-fetch"] }
+greentic-qa-lib = ">=1.1.0-dev, <1.2.0-0"
 jsonschema = { version = "0.46", default-features = false }
 predicates = "3"
 rpassword = "7"
@@ -36,7 +44,7 @@ unic-langid = "0.9"
 dirs = "6"
 tracing = "0.1"
 walkdir = "2"
-zip = { version = "8", default-features = false, features = ["deflate"] }
+zip = { version = "=7.1.0", default-features = false, features = ["deflate"] }
 
 [package]
 name = "greentic-bundle"
@@ -92,8 +100,11 @@ ciborium.workspace = true
 clap.workspace = true
 constant_time_eq.workspace = true
 greentic-bundle-reader.workspace = true
+ed25519-dalek.workspace = true
+greentic-deploy-spec.workspace = true
 greentic-distributor-client.workspace = true
 greentic-qa-lib.workspace = true
+hex.workspace = true
 rpassword.workspace = true
 semver.workspace = true
 serde.workspace = true
@@ -104,20 +115,16 @@ sys-locale.workspace = true
 tempfile.workspace = true
 tokio.workspace = true
 unic-langid.workspace = true
+zeroize.workspace = true
 zip.workspace = true
 dirs.workspace = true
 tracing.workspace = true
 walkdir.workspace = true
 
-# feature: extensions (bundle-ext Phase A — host-side schema/registry only).
-# WASM execution path was removed pending crates.io-publishable runtime crates;
-# tracked in https://github.com/greenticai/greentic/issues/175.
-jsonschema = { workspace = true, optional = true, default-features = false }
-thiserror = { workspace = true, optional = true }
-
 [dev-dependencies]
 assert_cmd.workspace = true
 criterion.workspace = true
+httpmock = "0.8"
 predicates.workspace = true
 sha2.workspace = true
 tempfile.workspace = true
@@ -132,7 +139,3 @@ harness = false
 
 [features]
 default = []
-extensions = [
-  "dep:jsonschema",
-  "dep:thiserror",
-]

@@ -4,14 +4,14 @@
 //! Given a bundle artifact path and a list of pack references (as they appear
 //! in `bundle-manifest.json` / `bundle-lock.json`), this module:
 //!
-//! 1. Lists the `.gtpack` files inlined in the SquashFS.
+//! 1. Lists the `.gtpack` files inlined in the SquashFS via `unsquashfs -l`.
 //! 2. Matches each reference to one of those files by pack slug.
-//! 3. Extracts `manifest.cbor` from the matched pack.
+//! 3. Extracts `manifest.cbor` from the matched pack with `unsquashfs -cat`.
 //! 4. Decodes the manifest and returns `{ name, version }`.
 //!
 //! Every step is best-effort: on any failure we log a `tracing::warn!` and the
 //! caller keeps `version = None`. This keeps `greentic-bundle info` useful even
-//! when the bundle cannot be read or a pack reference doesn't match any
+//! when `unsquashfs` is unavailable or a pack reference doesn't match any
 //! inlined file (e.g. the bundle was built by an older builder, or the pack
 //! was skipped).
 //!
@@ -22,6 +22,7 @@
 use std::collections::BTreeMap;
 use std::io::{Cursor, Read};
 use std::path::Path;
+use std::process::Command;
 
 use serde::Deserialize;
 use tracing::warn;
@@ -105,7 +106,7 @@ pub(crate) fn extract_pack_metadata(
     artifact: &Path,
     pack_inner_path: &str,
 ) -> anyhow::Result<Option<PackMetaSlim>> {
-    let zip_bytes = crate::bundle_fs::read_bundle_file(artifact, pack_inner_path)?;
+    let zip_bytes = unsquashfs_cat_bytes(artifact, pack_inner_path)?;
     let reader = Cursor::new(zip_bytes);
     let mut archive =
         zip::ZipArchive::new(reader).map_err(|e| anyhow::anyhow!("open .gtpack zip: {e}"))?;
@@ -125,13 +126,52 @@ pub(crate) fn extract_pack_metadata(
     Ok(Some(meta))
 }
 
-/// Enumerate `.gtpack` files inside the SquashFS.
+/// Enumerate `.gtpack` files inside the SquashFS via `unsquashfs -l`.
+///
+/// Returns paths as they appear in the archive (e.g.
+/// `providers/messaging/messaging-webchat-gui.gtpack`), stripping the leading
+/// `squashfs-root/` that `unsquashfs -l` prepends.
 fn list_gtpack_files(artifact: &Path) -> anyhow::Result<Vec<String>> {
-    Ok(crate::bundle_fs::list_bundle(artifact)?
-        .into_iter()
-        .map(|entry| entry.path)
-        .filter(|path| path.ends_with(".gtpack"))
-        .collect())
+    let output = Command::new("unsquashfs")
+        .args(["-l", artifact.to_str().unwrap_or_default()])
+        .output()
+        .map_err(|e| anyhow::anyhow!("spawn unsquashfs -l: {e}"))?;
+    if !output.status.success() {
+        return Err(anyhow::anyhow!(
+            "unsquashfs -l failed: {}",
+            String::from_utf8_lossy(&output.stderr).trim()
+        ));
+    }
+    let mut files = Vec::new();
+    for line in String::from_utf8_lossy(&output.stdout).lines() {
+        let trimmed = line.trim();
+        if !trimmed.ends_with(".gtpack") {
+            continue;
+        }
+        // `unsquashfs -l` lines look like: `squashfs-root/providers/messaging/x.gtpack`
+        let stripped = trimmed
+            .strip_prefix("squashfs-root/")
+            .unwrap_or(trimmed)
+            .to_string();
+        files.push(stripped);
+    }
+    Ok(files)
+}
+
+/// Run `unsquashfs -cat <artifact> <inner>` and return raw stdout bytes.
+fn unsquashfs_cat_bytes(artifact: &Path, inner_path: &str) -> anyhow::Result<Vec<u8>> {
+    let output = Command::new("unsquashfs")
+        .args(["-cat", artifact.to_str().unwrap_or_default(), inner_path])
+        .output()
+        .map_err(|e| anyhow::anyhow!("spawn unsquashfs -cat: {e}"))?;
+    if !output.status.success() {
+        return Err(anyhow::anyhow!(
+            "unsquashfs -cat {} failed: {}",
+            inner_path,
+            String::from_utf8_lossy(&output.stderr).trim()
+        ));
+    }
+    Ok(output.stdout)
 }
 
 /// Compute a "pack slug" from a dependency reference so we can match it to an
@@ -268,10 +308,11 @@ mod tests {
     }
 
     #[test]
-    fn probe_inlined_packs_returns_empty_when_bundle_cannot_be_listed() {
+    fn probe_inlined_packs_returns_empty_when_unsquashfs_cannot_list() {
         // Pointing at a path that isn't a valid SquashFS image makes
-        // the bundle reader fail. The probe should warn and return an empty
-        // map rather than panicking, leaving callers with version = None.
+        // `unsquashfs -l` exit non-zero (or the binary may be absent on the
+        // host). Either way the probe should warn and return an empty map
+        // rather than panicking, leaving callers with version = None.
         let dir = tempfile::tempdir().expect("tempdir");
         let bogus = dir.path().join("not-a-bundle.gtbundle");
         std::fs::write(&bogus, b"not a squashfs image").expect("write");

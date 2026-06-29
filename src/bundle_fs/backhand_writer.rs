@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::fs::File;
 use std::io::{BufReader, Read};
 use std::path::{Component, Path, PathBuf};
@@ -57,22 +58,32 @@ impl BundleFsReader for BackhandBundleFsReader {
         let filesystem = open_backhand_filesystem(bundle_file)?;
         std::fs::create_dir_all(output_dir)
             .with_context(|| format!("create extraction directory {}", output_dir.display()))?;
+        // Phase 0 P0.4: prevent duplicate normalized inner paths from silently
+        // overwriting each other. An attacker could otherwise stage a benign
+        // entry first to pass any scanner and then overwrite it with a
+        // malicious payload before the consumer ever reads the file.
+        let mut seen_paths: HashSet<String> = HashSet::new();
         for node in filesystem.files() {
             let Some(path) = normalized_node_path(&node.fullpath)? else {
                 continue;
             };
+            if !seen_paths.insert(path.clone()) {
+                bail!("duplicate bundle entry rejected: {path}");
+            }
             let destination = safe_output_path(output_dir, &path)?;
             match &node.inner {
                 InnerNode::Dir(_) => {
-                    std::fs::create_dir_all(&destination)
+                    safe_create_dir_all(output_dir, &destination)
                         .with_context(|| format!("create directory {}", destination.display()))?;
                 }
                 InnerNode::File(file) => {
                     if let Some(parent) = destination.parent() {
-                        std::fs::create_dir_all(parent).with_context(|| {
+                        safe_create_dir_all(output_dir, parent).with_context(|| {
                             format!("create parent directory {}", parent.display())
                         })?;
                     }
+                    assert_no_existing_symlink(&destination)
+                        .with_context(|| format!("validate file destination {path}"))?;
                     let mut source = filesystem.file(file).reader();
                     let mut target = File::create(&destination)
                         .with_context(|| format!("create file {}", destination.display()))?;
@@ -81,10 +92,23 @@ impl BundleFsReader for BackhandBundleFsReader {
                 }
                 InnerNode::Symlink(symlink) => {
                     if let Some(parent) = destination.parent() {
-                        std::fs::create_dir_all(parent).with_context(|| {
+                        safe_create_dir_all(output_dir, parent).with_context(|| {
                             format!("create parent directory {}", parent.display())
                         })?;
                     }
+                    assert_no_existing_symlink(&destination)
+                        .with_context(|| format!("validate symlink destination {path}"))?;
+                    // Phase 0 P0.4: validate the symlink's target string before
+                    // we materialize it. The writer accepts symlinks for
+                    // legitimate bundle authoring, so we cannot refuse them
+                    // outright on the reader — but we must refuse targets that
+                    // resolve outside the extract root. `link.link` is the raw
+                    // bytes the archive stored; we treat it as a Path and
+                    // reject absolute paths, drive-letter prefixes, and
+                    // relative paths whose `..` count outruns the depth of
+                    // the symlink's own parent.
+                    assert_symlink_target_within_root(&path, &symlink.link)
+                        .with_context(|| format!("validate symlink target for {path}"))?;
                     create_symlink(&symlink.link, &destination)
                         .with_context(|| format!("extract symlink {path}"))?;
                 }
@@ -133,6 +157,7 @@ fn write_bundle_with_backhand(input_dir: &Path, output_file: &Path) -> Result<()
             input_dir.display()
         );
     }
+    super::assert_no_dev_secret_paths(input_dir)?;
     if let Some(parent) = output_file.parent() {
         std::fs::create_dir_all(parent)
             .with_context(|| format!("create artifact parent {}", parent.display()))?;
@@ -292,6 +317,130 @@ fn safe_output_path(output_dir: &Path, inner_path: &str) -> Result<PathBuf> {
     Ok(out)
 }
 
+// Phase 0 P0.4: walk each ancestor of `target` from the extract root down,
+// verifying with no-follow `symlink_metadata` that no existing component is a
+// symlink before descending. This is the categorization fix called out in
+// the plan: the previous `std::fs::create_dir_all` follows symlinks, so an
+// archive could plant `etc-link -> /etc` and then write through it on the
+// next iteration. Creates only missing directories under `target`; preserves
+// any pre-existing real directory.
+fn safe_create_dir_all(extract_root: &Path, target: &Path) -> Result<()> {
+    if !target.starts_with(extract_root) {
+        bail!(
+            "refusing to descend outside extract root: {} not under {}",
+            target.display(),
+            extract_root.display()
+        );
+    }
+    let relative = target.strip_prefix(extract_root).map_err(|err| {
+        anyhow!(
+            "make {} relative to extract root {}: {err}",
+            target.display(),
+            extract_root.display()
+        )
+    })?;
+    let mut current = extract_root.to_path_buf();
+    for component in relative.components() {
+        let part = match component {
+            Component::Normal(part) => part,
+            Component::CurDir => continue,
+            Component::ParentDir | Component::RootDir | Component::Prefix(_) => {
+                bail!(
+                    "refusing to traverse unsafe component during mkdir: {}",
+                    target.display()
+                );
+            }
+        };
+        current.push(part);
+        match std::fs::symlink_metadata(&current) {
+            Ok(meta) => {
+                if meta.file_type().is_symlink() {
+                    bail!(
+                        "refusing to descend through symlink at {}",
+                        current.display()
+                    );
+                }
+                if !meta.file_type().is_dir() {
+                    bail!(
+                        "refusing to descend through non-directory at {}",
+                        current.display()
+                    );
+                }
+            }
+            Err(err) if err.kind() == std::io::ErrorKind::NotFound => {
+                std::fs::create_dir(&current)
+                    .with_context(|| format!("create directory {}", current.display()))?;
+            }
+            Err(err) => {
+                return Err(err)
+                    .with_context(|| format!("stat {} during safe mkdir", current.display()));
+            }
+        }
+    }
+    Ok(())
+}
+
+// Phase 0 P0.4: the final write into `destination` would also follow a
+// symlink at `destination` itself (not just its ancestors), so refuse if the
+// destination already exists as a symlink. Missing path is fine.
+fn assert_no_existing_symlink(destination: &Path) -> Result<()> {
+    match std::fs::symlink_metadata(destination) {
+        Ok(meta) if meta.file_type().is_symlink() => {
+            bail!(
+                "refusing to write through existing symlink at {}",
+                destination.display()
+            );
+        }
+        Ok(_) | Err(_) => Ok(()),
+    }
+}
+
+// Phase 0 P0.4: refuse symlink targets that escape the extract root. The
+// link target is interpreted relative to the symlink's *parent directory*
+// inside the archive — that's how the kernel will resolve it once extracted.
+// Reject absolute paths and Windows-style prefixes outright. For relative
+// targets, fold `..` against the symlink's depth: if the accumulated depth
+// ever goes negative, the symlink can escape.
+//
+// Example: a symlink at `packs/inner/link` with target `../../../etc/passwd`
+// starts at depth 2 (`packs`, `inner`), consumes 3 `..` -> depth -1 -> bail.
+fn assert_symlink_target_within_root(symlink_inner_path: &str, target: &Path) -> Result<()> {
+    let parent_depth = Path::new(symlink_inner_path)
+        .parent()
+        .map(|parent| {
+            parent
+                .components()
+                .filter(|component| matches!(component, Component::Normal(_)))
+                .count()
+        })
+        .unwrap_or(0);
+    let mut depth: i64 = parent_depth as i64;
+    for component in target.components() {
+        match component {
+            Component::Normal(_) => depth += 1,
+            Component::CurDir => {}
+            Component::ParentDir => {
+                depth -= 1;
+                if depth < 0 {
+                    bail!(
+                        "refusing symlink target {} from {}: escapes extract root",
+                        target.display(),
+                        symlink_inner_path
+                    );
+                }
+            }
+            Component::RootDir | Component::Prefix(_) => {
+                bail!(
+                    "refusing absolute symlink target {} from {}",
+                    target.display(),
+                    symlink_inner_path
+                );
+            }
+        }
+    }
+    Ok(())
+}
+
 #[cfg(unix)]
 fn create_symlink(target: &Path, destination: &Path) -> std::io::Result<()> {
     std::os::unix::fs::symlink(target, destination)
@@ -304,8 +453,12 @@ fn create_symlink(target: &Path, destination: &Path) -> std::io::Result<()> {
 
 #[cfg(test)]
 mod tests {
-    use super::normalized_path;
+    use super::{
+        assert_no_existing_symlink, assert_symlink_target_within_root, normalized_path,
+        safe_create_dir_all,
+    };
     use std::path::Path;
+    use tempfile::TempDir;
 
     #[test]
     fn normalizes_paths_with_forward_slashes() {
@@ -313,5 +466,115 @@ mod tests {
             normalized_path(Path::new("assets/example.txt")).unwrap(),
             "assets/example.txt"
         );
+    }
+
+    // Phase 0 P0.4 — safe_create_dir_all.
+
+    #[test]
+    fn safe_create_dir_all_creates_missing_dirs() {
+        let temp = TempDir::new().expect("tempdir");
+        let root = temp.path();
+        let target = root.join("a/b/c");
+        safe_create_dir_all(root, &target).expect("mkdir");
+        assert!(target.is_dir());
+    }
+
+    #[test]
+    fn safe_create_dir_all_accepts_existing_real_dirs() {
+        let temp = TempDir::new().expect("tempdir");
+        let root = temp.path();
+        std::fs::create_dir_all(root.join("a/b")).expect("seed");
+        safe_create_dir_all(root, &root.join("a/b/c")).expect("mkdir");
+        assert!(root.join("a/b/c").is_dir());
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn safe_create_dir_all_rejects_traversal_through_symlink() {
+        let temp = TempDir::new().expect("tempdir");
+        let root = temp.path();
+        let outside = temp.path().join("outside");
+        std::fs::create_dir(&outside).expect("outside");
+        // Plant a symlink at <root>/escape -> <outside>. A naive
+        // create_dir_all(<root>/escape/inner) would resolve through the link.
+        std::os::unix::fs::symlink(&outside, root.join("escape")).expect("symlink");
+        let err = safe_create_dir_all(root, &root.join("escape/inner"))
+            .expect_err("must reject symlink ancestor");
+        assert!(
+            format!("{err:#}").contains("descend through symlink"),
+            "unexpected error: {err:#}"
+        );
+        // The outside dir must remain empty.
+        assert!(!outside.join("inner").exists());
+    }
+
+    #[test]
+    fn safe_create_dir_all_rejects_target_outside_root() {
+        let temp = TempDir::new().expect("tempdir");
+        let root = temp.path().join("root");
+        std::fs::create_dir(&root).expect("root");
+        let outside = temp.path().join("outside");
+        let err =
+            safe_create_dir_all(&root, &outside).expect_err("must reject target outside root");
+        assert!(format!("{err:#}").contains("outside extract root"));
+    }
+
+    // Phase 0 P0.4 — assert_no_existing_symlink.
+
+    #[cfg(unix)]
+    #[test]
+    fn assert_no_existing_symlink_rejects_symlink_at_destination() {
+        let temp = TempDir::new().expect("tempdir");
+        let root = temp.path();
+        std::os::unix::fs::symlink("/tmp/nope", root.join("link")).expect("symlink");
+        let err = assert_no_existing_symlink(&root.join("link"))
+            .expect_err("must reject existing symlink");
+        assert!(format!("{err:#}").contains("write through existing symlink"));
+    }
+
+    #[test]
+    fn assert_no_existing_symlink_accepts_missing_destination() {
+        let temp = TempDir::new().expect("tempdir");
+        assert_no_existing_symlink(&temp.path().join("missing")).expect("missing is fine");
+    }
+
+    #[test]
+    fn assert_no_existing_symlink_accepts_existing_file() {
+        let temp = TempDir::new().expect("tempdir");
+        let path = temp.path().join("real.txt");
+        std::fs::write(&path, "x").expect("write");
+        assert_no_existing_symlink(&path).expect("real file is fine");
+    }
+
+    // Phase 0 P0.4 — assert_symlink_target_within_root.
+
+    #[test]
+    fn symlink_target_within_root_accepts_sibling() {
+        assert_symlink_target_within_root("packs/a/link", Path::new("../b/file"))
+            .expect("sibling resolves under root");
+    }
+
+    #[test]
+    fn symlink_target_within_root_rejects_absolute_target() {
+        let err = assert_symlink_target_within_root("packs/link", Path::new("/etc/passwd"))
+            .expect_err("must reject absolute");
+        assert!(format!("{err:#}").contains("absolute symlink target"));
+    }
+
+    #[test]
+    fn symlink_target_within_root_rejects_escaping_target() {
+        // Symlink at depth 1 (parent = "packs"). `../../etc` consumes 2 `..`
+        // → depth -1 → escape.
+        let err = assert_symlink_target_within_root("packs/link", Path::new("../../etc"))
+            .expect_err("must reject escape");
+        assert!(format!("{err:#}").contains("escapes extract root"));
+    }
+
+    #[test]
+    fn symlink_target_within_root_accepts_walk_back_to_root() {
+        // Symlink at depth 2; walking back to depth 0 stays at root and is
+        // therefore fine — anything inside the root after `../..` is allowed.
+        assert_symlink_target_within_root("packs/inner/link", Path::new("../../allowed/file"))
+            .expect("walk back to root is within bounds");
     }
 }

@@ -33,9 +33,15 @@ pub fn build_routing(
         let Some(actions) = actions else { continue };
 
         for action in actions {
+            // Cards emitted by the AC extension role compilers carry
+            // the route target under `data.nextCardId`; older fixtures
+            // and provider-side callbacks still use `data.routeToCardId`.
+            // Prefer the newer key, fall back to the legacy one — that
+            // way fresh designer output and pre-existing card sources
+            // both produce a non-empty routing graph.
             let target = action
                 .get("data")
-                .and_then(|d| d.get("routeToCardId"))
+                .and_then(|d| d.get("nextCardId").or_else(|| d.get("routeToCardId")))
                 .and_then(|v| v.as_str())
                 .filter(|s| !s.is_empty());
 
@@ -168,5 +174,70 @@ mod tests {
         ];
         let (g, _) = build_routing(&cards, false).unwrap();
         assert_eq!(g.edges.get("welcome").unwrap()[0].action_id, "goto_target");
+    }
+
+    #[test]
+    fn routes_via_next_card_id() {
+        // Cards emitted by the AC extension role compilers (and any
+        // hand-authored card that follows the AC v1.6 idiom) carry the
+        // route target under `data.nextCardId`. build_routing must
+        // resolve that key — without this it returns an empty graph
+        // and emit_ygtc writes routing: [] for every node.
+        let cards = vec![
+            card(
+                "welcome",
+                json!({"actions":[
+                    {"type":"Action.Submit","data":{"nextCardId":"customer_size"}}
+                ]}),
+            ),
+            card("customer_size", json!({})),
+        ];
+        let (g, diags) = build_routing(&cards, false).unwrap();
+        assert!(diags.is_empty(), "got: {diags:?}");
+        let edges = g.edges.get("welcome").unwrap();
+        assert_eq!(edges[0].target, "customer_size");
+    }
+
+    #[test]
+    fn prefers_next_card_id_over_route_to_card_id() {
+        // Defensive: if a card carries both keys (migration in flight,
+        // hand-merged JSON), nextCardId wins because that's the spec
+        // direction across AC ext + designer scaffold.
+        let cards = vec![
+            card(
+                "welcome",
+                json!({"actions":[
+                    {"type":"Action.Submit","data":{
+                        "nextCardId":"new",
+                        "routeToCardId":"legacy"
+                    }}
+                ]}),
+            ),
+            card("new", json!({})),
+            card("legacy", json!({})),
+        ];
+        let (g, _) = build_routing(&cards, false).unwrap();
+        let edges = g.edges.get("welcome").unwrap();
+        assert_eq!(edges[0].target, "new");
+    }
+
+    #[test]
+    fn falls_back_to_route_to_card_id_when_next_card_id_absent() {
+        // Backward compat: existing fixtures and provider callbacks
+        // still carry `routeToCardId`. The fallback must keep them
+        // routing correctly.
+        let cards = vec![
+            card(
+                "welcome",
+                json!({"actions":[
+                    {"type":"Action.Submit","data":{"routeToCardId":"legacy_target"}}
+                ]}),
+            ),
+            card("legacy_target", json!({})),
+        ];
+        let (g, diags) = build_routing(&cards, false).unwrap();
+        assert!(diags.is_empty(), "got: {diags:?}");
+        let edges = g.edges.get("welcome").unwrap();
+        assert_eq!(edges[0].target, "legacy_target");
     }
 }

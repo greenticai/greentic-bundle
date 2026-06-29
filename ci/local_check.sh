@@ -136,10 +136,29 @@ if [ "$PACKAGE_ONLY" -eq 0 ]; then
 
   header "cargo doc"
   cargo doc --no-deps --all-features
+
+  # Phase 0 P0.2: shell-level grep gate over any .gtbundle in the working tree.
+  # The in-Rust scanner is the source of truth (runs via `cargo test`), but a
+  # raw-bytes grep catches accidentally-committed leaky fixtures even if the
+  # scanner is bypassed or a test stops covering this path. See plans/next-gen-deployment.md.
+  header "secret-leak grep gate"
+  gate_failed=0
+  while IFS= read -r artifact; do
+    [ -n "$artifact" ] || continue
+    for needle in '.dev.secrets.env' '.greentic/dev/' '.greentic/state/dev/'; do
+      if grep -aqF -- "$needle" "$artifact"; then
+        printf 'ERROR: %s contains forbidden substring %q\n' "$artifact" "$needle" >&2
+        gate_failed=1
+      fi
+    done
+  done < <(find . -type f -name '*.gtbundle' -not -path './target/*' -not -path './.git/*')
+  if [ "$gate_failed" -ne 0 ]; then
+    exit 1
+  fi
 fi
 
-# Phase A compile-regression guard: extensions-off binary must stay within
-# 500 KB of the main-branch baseline. Skipped if baseline file is absent.
+# Phase A compile-regression guard: the no-default-features binary must stay
+# within 500 KB of the main-branch baseline. Skipped if baseline file is absent.
 if [ -f /tmp/greentic-bundle-baseline.size ]; then
   cargo build --release --no-default-features
   NEW=$(stat -c '%s' target/release/greentic-bundle 2>/dev/null || stat -f '%z' target/release/greentic-bundle)

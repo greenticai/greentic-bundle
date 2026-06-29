@@ -9,12 +9,13 @@ it can be compiled to `wasm32-wasip2` without modifications.
 ## Features
 
 - Parses card sequences (AdaptiveCard + HTTP node entries) from JSON
-- Builds a routing graph that respects `routeToCardId` and preserves back-edges
+- Builds a routing graph that respects `data.nextCardId` (preferred) or
+  `data.routeToCardId` (legacy fallback) and preserves back-edges
 - Emits deterministic YGTc 2.0 YAML with `when:` conditional routes
 - Fixes four bugs present in the legacy `greentic-cards2pack` v0.4 converter:
-  - Alphabetical-ordering instead of `routeToCardId`-driven routing
+  - Alphabetical-ordering instead of route-key-driven routing
   - `demo_wrapup` incorrectly chosen as flow start
-  - `routeToCardId` field silently ignored in some card shapes
+  - Route-key field silently ignored in some card shapes
   - Schema bloat duplicating flat fields outside `card.call.payload`
 
 ## Usage
