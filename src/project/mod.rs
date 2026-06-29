@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result};
@@ -31,6 +32,11 @@ pub struct BundleWorkspaceDefinition {
     pub advanced_setup: bool,
     #[serde(default)]
     pub app_packs: Vec<String>,
+    /// Maps a runtime `agent_id` (`dw.agent` `operation`) to a pack coordinate
+    /// (`store://<name>@<version>` or `file://<path>`) so referenced agentic
+    /// workers can be auto-wired into the bundle at build/deploy time.
+    #[serde(default)]
+    pub agent_packs: BTreeMap<String, String>,
     #[serde(default)]
     pub app_pack_mappings: Vec<AppPackMapping>,
     #[serde(default)]
@@ -161,6 +167,7 @@ impl BundleWorkspaceDefinition {
             mode,
             advanced_setup: false,
             app_packs: Vec::new(),
+            agent_packs: BTreeMap::new(),
             app_pack_mappings: Vec::new(),
             extension_providers: Vec::new(),
             remote_catalogs: Vec::new(),
@@ -1219,7 +1226,40 @@ fn extract_pack_assets(root: &Path, pack_path: &Path) -> Result<Vec<PathBuf>> {
 mod tests {
     use std::path::PathBuf;
 
+    use super::BundleWorkspaceDefinition;
     use super::{provider_destination_path, should_skip_extension_provider_materialization};
+
+    #[test]
+    fn agent_packs_parses_into_map() {
+        let raw = concat!(
+            "schema_version: 1\n",
+            "bundle_id: demo\n",
+            "bundle_name: Demo Bundle\n",
+            "agent_packs:\n",
+            "  tavily_researcher: \"store://greentic.agentic-research-tavily-agent@0.1.0\"\n",
+        );
+        let definition = serde_yaml_bw::from_str::<BundleWorkspaceDefinition>(raw)
+            .expect("config with agent_packs should parse");
+        assert_eq!(
+            definition
+                .agent_packs
+                .get("tavily_researcher")
+                .map(String::as_str),
+            Some("store://greentic.agentic-research-tavily-agent@0.1.0"),
+        );
+    }
+
+    #[test]
+    fn agent_packs_defaults_to_empty_map() {
+        let raw = concat!(
+            "schema_version: 1\n",
+            "bundle_id: demo\n",
+            "bundle_name: Demo Bundle\n",
+        );
+        let definition = serde_yaml_bw::from_str::<BundleWorkspaceDefinition>(raw)
+            .expect("config without agent_packs should parse");
+        assert!(definition.agent_packs.is_empty());
+    }
 
     #[test]
     fn bundled_catalog_mode_skips_https_provider_materialization() {
