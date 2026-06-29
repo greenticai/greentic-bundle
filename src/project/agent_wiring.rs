@@ -188,7 +188,29 @@ pub fn auto_wire_agent_packs(
     use anyhow::Context as _;
 
     let referenced = referenced_dw_agents(flow_manifests);
-    let provided = provided_agent_ids(provided_sidecars);
+    let mut provided = provided_agent_ids(provided_sidecars);
+
+    // Also fold in agent ids from packs already materialized in `packs_dir`.
+    // This ensures idempotency (a second sync skips packs written by the first)
+    // and offline safety (bundles wired online can be rebuilt offline as long as
+    // the pack files are present on disk).
+    //
+    // Fail-soft: a missing or unreadable `packs_dir` (e.g. first run, empty dir)
+    // is treated as contributing zero agents — no panic, no error.
+    if packs_dir.is_dir()
+        && let Ok(entries) = std::fs::read_dir(packs_dir)
+    {
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if path.extension().and_then(|ext| ext.to_str()) == Some("gtpack")
+                && let Ok(pack_bytes) = std::fs::read(&path)
+                && let Some(sidecar_bytes) =
+                    read_zip_entry_from_bytes(&pack_bytes, "dw-agents.json")
+            {
+                provided.extend(provided_agent_ids(&[sidecar_bytes.as_slice()]));
+            }
+        }
+    }
 
     // Collect missing agent_ids and the flow_id of their first reference for error messages.
     let mut missing_by_id: std::collections::BTreeMap<String, String> =

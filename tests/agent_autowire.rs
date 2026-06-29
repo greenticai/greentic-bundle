@@ -404,3 +404,107 @@ fn mismatch_agent_id_in_pack_returns_error() {
         "error must name the expected agent_id; got: {message}"
     );
 }
+
+/// Idempotency: a second `auto_wire_agent_packs` call against the same `packs_dir`
+/// that already contains the materialized pack must return an empty list and must
+/// NOT attempt to re-fetch the coordinate.
+///
+/// The test removes the original `file://` source after the first run so that any
+/// attempt to re-read it would produce an I/O error — proving that the second run
+/// relies on `packs_dir` alone.
+#[test]
+fn idempotent_second_run_skips_already_materialized() {
+    let agent_id = "idempotency_agent";
+    let pack_bytes = agent_pack_zip(agent_id);
+
+    let temp = tempfile::tempdir().expect("tempdir");
+    let source_pack = temp.path().join("idempotency-agent.gtpack");
+    std::fs::write(&source_pack, &pack_bytes).expect("write source pack");
+
+    let packs_dir = temp.path().join("packs");
+    let cache_dir = temp.path().join("cache");
+    std::fs::create_dir_all(&packs_dir).unwrap();
+    std::fs::create_dir_all(&cache_dir).unwrap();
+
+    let cbor = flow_manifest_cbor("flow1", "node1", agent_id);
+    let coordinate = format!("file://{}", source_pack.display());
+    let def = workspace_def(agent_id, &coordinate);
+    let trust = TrustRoot::default();
+
+    // First run: should materialize the pack into packs_dir.
+    let first_run = auto_wire_agent_packs(
+        &def,
+        &[cbor.as_slice()],
+        &[],
+        &packs_dir,
+        &cache_dir,
+        false,
+        &trust,
+    )
+    .expect("first auto_wire run should succeed");
+
+    assert!(
+        first_run.contains(&agent_id.to_string()),
+        "first run must materialize the agent pack; got: {first_run:?}"
+    );
+
+    // Remove the source so any re-fetch attempt would fail with an I/O error.
+    std::fs::remove_file(&source_pack).expect("remove source pack to force packs_dir-only reuse");
+
+    // Second run: packs_dir already contains the pack — must return empty materialized.
+    let second_run = auto_wire_agent_packs(
+        &def,
+        &[cbor.as_slice()],
+        &[],
+        &packs_dir,
+        &cache_dir,
+        false,
+        &trust,
+    )
+    .expect("second auto_wire run must succeed (pack already in packs_dir)");
+
+    assert!(
+        second_run.is_empty(),
+        "second run must return empty — nothing to re-fetch; got: {second_run:?}"
+    );
+}
+
+/// Offline reuse: a pack already present in `packs_dir` (from a previous online run)
+/// must satisfy the agent reference when `offline=true`, so no network call is made
+/// and the function succeeds.
+#[test]
+fn offline_reuse_of_already_materialized_pack_succeeds() {
+    let agent_id = "offline_reuse_agent";
+    let pack_bytes = agent_pack_zip(agent_id);
+
+    let temp = tempfile::tempdir().expect("tempdir");
+    let packs_dir = temp.path().join("packs");
+    let cache_dir = temp.path().join("cache");
+    std::fs::create_dir_all(&packs_dir).unwrap();
+    std::fs::create_dir_all(&cache_dir).unwrap();
+
+    // Pre-place the pack in packs_dir, simulating a previous successful online run.
+    let pack_path = packs_dir.join("offline-reuse-agent.gtpack");
+    std::fs::write(&pack_path, &pack_bytes).expect("pre-place pack in packs_dir");
+
+    let cbor = flow_manifest_cbor("flow1", "node1", agent_id);
+    // A store coordinate that would fail if fetched (no server + offline=true).
+    let def = workspace_def(agent_id, "store://greentic.offline-reuse-agent@1.0.0");
+    let trust = TrustRoot::default();
+
+    let materialized = auto_wire_agent_packs(
+        &def,
+        &[cbor.as_slice()],
+        &[],
+        &packs_dir,
+        &cache_dir,
+        true, // offline — any network attempt would fail
+        &trust,
+    )
+    .expect("offline auto_wire must succeed when pack is already in packs_dir");
+
+    assert!(
+        materialized.is_empty(),
+        "already-materialized pack must not be re-fetched; got: {materialized:?}"
+    );
+}
