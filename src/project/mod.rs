@@ -494,9 +494,13 @@ fn run_agent_pack_auto_wiring(
 
     let packs_dir = root.join("packs");
     let cache_dir = root.join(crate::catalog::CACHE_ROOT_DIR).join("artifacts");
-    // Empty TrustRoot = sha256-only (fail-open for the DSSE layer).  Operators
-    // who want full Ed25519 verification should thread a populated TrustRoot
-    // through the CLI in a future iteration.
+    // SP2 v1 deliberate choice: an empty TrustRoot = sha256-only verification.
+    // The Ed25519/DSSE chain is fully plumbed (the store emits a DSSE envelope
+    // pinning the artifact sha256; `fetch_store_agentic_worker_verified` checks
+    // it whenever the TrustRoot is non-empty) but kept DORMANT here on purpose:
+    // enforcement is a follow-up to be flipped on once the store serves the
+    // envelope in production and a trusted-publisher-key source is wired. A
+    // populated TrustRoot here would fail-closed every fetch until then.
     let trust = greentic_distributor_client::signing::TrustRoot::default();
 
     let materialized = agent_wiring::auto_wire_agent_packs(
