@@ -41,12 +41,6 @@
 //! so that the bundle build and the runtime guard agree on what "referenced"
 //! means.
 
-// These helpers are consumed by the test suite now and by Task 5's
-// `auto_wire_agent_packs` call-site later.  The `dead_code` lint fires on
-// non-test builds because Task 5 hasn't wired the call yet; suppress it here
-// rather than polluting the public-item surface with forced re-exports.
-#![allow(dead_code)]
-
 use std::collections::BTreeSet;
 
 use ciborium::Value;
@@ -151,6 +145,215 @@ pub(crate) fn provided_agent_ids(sidecars: &[&[u8]]) -> BTreeSet<String> {
         }
     }
     ids
+}
+
+// ---------------------------------------------------------------------------
+// Auto-wiring resolution pass (Task 5)
+// ---------------------------------------------------------------------------
+
+/// Fetch, verify, and materialize agent packs for every `dw.agent` node that is
+/// referenced by `flow_manifests` but not yet in `provided_sidecars`.
+///
+/// # Parameters
+/// * `def` — bundle workspace definition; its `agent_packs` map resolves each
+///   missing agent id to a coordinate (`store://<name>@<version>` or
+///   `file://<path>`).
+/// * `flow_manifests` — raw `manifest.cbor` bytes from already-materialized app
+///   packs; passed to [`referenced_dw_agents`].
+/// * `provided_sidecars` — raw `dw-agents.json` bytes from already-materialized
+///   app packs; passed to [`provided_agent_ids`].
+/// * `packs_dir` — directory where resolved agent `.gtpack` files are written.
+/// * `cache_dir` — root cache directory for `fetch_store_agentic_worker_verified`.
+/// * `offline` — when `true`, no network calls are made (cache only).
+/// * `trust` — trusted signing-key set for Ed25519/DSSE verification.  An empty
+///   `TrustRoot` falls back to sha256-only (fail-open for that specific check).
+///
+/// # Returns
+/// A sorted, deduplicated list of agent ids that were newly materialized.
+///
+/// # Errors
+/// * An agent id is referenced but has no `agent_packs` mapping → actionable bail.
+/// * An agent pack is fetched but its `dw-agents.json` sidecar does not provide
+///   the expected agent id → bail naming the mismatch.
+/// * Any I/O or network error during fetch → propagated as `anyhow::Error`.
+pub fn auto_wire_agent_packs(
+    def: &super::BundleWorkspaceDefinition,
+    flow_manifests: &[&[u8]],
+    provided_sidecars: &[&[u8]],
+    packs_dir: &std::path::Path,
+    cache_dir: &std::path::Path,
+    offline: bool,
+    trust: &greentic_distributor_client::signing::TrustRoot,
+) -> anyhow::Result<Vec<String>> {
+    use anyhow::Context as _;
+
+    let referenced = referenced_dw_agents(flow_manifests);
+    let provided = provided_agent_ids(provided_sidecars);
+
+    // Collect missing agent_ids and the flow_id of their first reference for error messages.
+    let mut missing_by_id: std::collections::BTreeMap<String, String> =
+        std::collections::BTreeMap::new();
+    for (flow_id, _node_id, agent_id) in &referenced {
+        if !provided.contains(agent_id) {
+            missing_by_id
+                .entry(agent_id.clone())
+                .or_insert_with(|| flow_id.clone());
+        }
+    }
+
+    if missing_by_id.is_empty() {
+        return Ok(Vec::new());
+    }
+
+    // Map each missing agent_id to its coordinate — bail immediately on any unmapped id.
+    let mut coordinate_to_agents: std::collections::BTreeMap<String, Vec<String>> =
+        std::collections::BTreeMap::new();
+    for (agent_id, flow_id) in &missing_by_id {
+        let coordinate = def.agent_packs.get(agent_id).ok_or_else(|| {
+            anyhow::anyhow!(
+                "agent \"{agent_id}\" referenced by flow \"{flow_id}\" is not provided \
+                 and has no agent_packs mapping — add \
+                 agent_packs.{agent_id} = store://\u{2026} or include its pack"
+            )
+        })?;
+        coordinate_to_agents
+            .entry(coordinate.clone())
+            .or_default()
+            .push(agent_id.clone());
+    }
+
+    // Derive the store REST API base URL from the environment (test-overridable).
+    let store_base = std::env::var("GREENTIC_STORE_URL")
+        .unwrap_or_else(|_| "https://store.greentic.cloud".to_string());
+
+    // Ensure the destination directory exists.
+    std::fs::create_dir_all(packs_dir)
+        .with_context(|| format!("create packs_dir {}", packs_dir.display()))?;
+
+    let mut materialized: Vec<String> = Vec::new();
+
+    for (coordinate, expected_agent_ids) in &coordinate_to_agents {
+        let pack_bytes = fetch_coordinate_bytes(coordinate, &store_base, cache_dir, offline, trust)
+            .with_context(|| format!("resolve agent pack coordinate {coordinate}"))?;
+
+        // Verify the sidecar provides each expected agent id before writing.
+        let sidecar_opt = read_zip_entry_from_bytes(&pack_bytes, "dw-agents.json");
+        let actual_ids = match &sidecar_opt {
+            Some(bytes) => provided_agent_ids(&[bytes.as_slice()]),
+            None => BTreeSet::new(),
+        };
+        for agent_id in expected_agent_ids {
+            if !actual_ids.contains(agent_id) {
+                anyhow::bail!(
+                    "agent pack at {coordinate} does not provide agent \"{agent_id}\" \
+                     — expected it in dw-agents.json sidecar but the pack provides: [{}]",
+                    actual_ids.iter().cloned().collect::<Vec<_>>().join(", ")
+                );
+            }
+        }
+
+        // Write the pack to packs_dir using a filesystem-safe filename.
+        let filename = pack_filename_for_coordinate(coordinate);
+        let dest = packs_dir.join(&filename);
+        std::fs::write(&dest, &pack_bytes)
+            .with_context(|| format!("write agent pack to {}", dest.display()))?;
+
+        materialized.extend(expected_agent_ids.iter().cloned());
+    }
+
+    materialized.sort();
+    materialized.dedup();
+    Ok(materialized)
+}
+
+/// Fetch the raw `.gtpack` bytes for a coordinate.
+fn fetch_coordinate_bytes(
+    coordinate: &str,
+    store_base: &str,
+    cache_dir: &std::path::Path,
+    offline: bool,
+    trust: &greentic_distributor_client::signing::TrustRoot,
+) -> anyhow::Result<Vec<u8>> {
+    use anyhow::Context as _;
+    use greentic_distributor_client::store_agentic_worker::fetch_store_agentic_worker_verified;
+
+    if let Some(name_version) = coordinate.strip_prefix("store://") {
+        let (name, version) = parse_store_name_version(name_version)
+            .with_context(|| format!("parse store coordinate store://{name_version}"))?;
+        return fetch_store_agentic_worker_verified(
+            store_base, &name, &version, cache_dir, offline, trust,
+        )
+        .with_context(|| format!("fetch store agentic worker {name}@{version}"));
+    }
+
+    if let Some(path_str) = coordinate.strip_prefix("file://") {
+        let path = std::path::PathBuf::from(path_str);
+        return std::fs::read(&path)
+            .with_context(|| format!("read agent pack from {}", path.display()));
+    }
+
+    anyhow::bail!(
+        "unsupported agent pack coordinate scheme: \"{coordinate}\" \
+         (expected store:// or file://)"
+    )
+}
+
+/// Parse `<name>@<version>` from the path segment of a `store://` coordinate.
+fn parse_store_name_version(name_version: &str) -> anyhow::Result<(String, String)> {
+    let (name, version) = name_version.split_once('@').ok_or_else(|| {
+        anyhow::anyhow!(
+            "store coordinate must be in the form <name>@<version>, got: \"{name_version}\""
+        )
+    })?;
+    if name.is_empty() {
+        anyhow::bail!("store coordinate name is empty in \"{name_version}\"");
+    }
+    if version.is_empty() {
+        anyhow::bail!("store coordinate version is empty in \"{name_version}\"");
+    }
+    Ok((name.to_string(), version.to_string()))
+}
+
+/// Derive a filesystem-safe `.gtpack` filename from a coordinate.
+///
+/// * `store://greentic.agentic-research-tavily-agent@0.1.0`
+///   → `greentic.agentic-research-tavily-agent.gtpack`
+/// * `file:///path/to/my-agent.gtpack`
+///   → `my-agent.gtpack`
+fn pack_filename_for_coordinate(coordinate: &str) -> String {
+    if let Some(name_version) = coordinate.strip_prefix("store://") {
+        let name = name_version.split('@').next().unwrap_or(name_version);
+        return format!("{name}.gtpack");
+    }
+    if let Some(path_str) = coordinate.strip_prefix("file://") {
+        let path = std::path::Path::new(path_str);
+        if let Some(filename) = path.file_name() {
+            let s = filename.to_string_lossy();
+            if !s.ends_with(".gtpack") {
+                return format!("{s}.gtpack");
+            }
+            return s.into_owned();
+        }
+    }
+    // Fallback: sanitize the entire coordinate.
+    let sanitized = coordinate
+        .replace(['/', '\\', ':', '@', ' '], "_")
+        .trim_matches('_')
+        .to_string();
+    format!("{sanitized}.gtpack")
+}
+
+/// Read a named entry from a `.gtpack` ZIP given its raw bytes.
+///
+/// Returns `None` when the entry is absent or the zip cannot be parsed.
+pub(crate) fn read_zip_entry_from_bytes(pack_bytes: &[u8], entry_name: &str) -> Option<Vec<u8>> {
+    use std::io::{Cursor, Read};
+    let cursor = Cursor::new(pack_bytes);
+    let mut archive = zip::ZipArchive::new(cursor).ok()?;
+    let mut entry = archive.by_name(entry_name).ok()?;
+    let mut buf = Vec::new();
+    entry.read_to_end(&mut buf).ok()?;
+    Some(buf)
 }
 
 // ---------------------------------------------------------------------------

@@ -124,6 +124,7 @@ walkdir.workspace = true
 [dev-dependencies]
 assert_cmd.workspace = true
 criterion.workspace = true
+httpmock = "0.8"
 predicates.workspace = true
 sha2.workspace = true
 tempfile.workspace = true
@@ -138,3 +139,9 @@ harness = false
 
 [features]
 default = []
+
+[patch.crates-io]
+# Use the local sp2-task1 worktree of greentic-distributor-client which adds
+# `store_agentic_worker` (Task 1+2 of SP2).  This patch stays until the module
+# lands in a published crates.io release.
+greentic-distributor-client = { path = "../../../greentic-distributor-client/.worktrees/sp2-task1" }
