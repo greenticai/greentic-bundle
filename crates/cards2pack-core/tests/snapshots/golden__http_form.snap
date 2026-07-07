@@ -29,7 +29,7 @@ nodes:
     - to: thanks
     component:
       exec:
-        source: oci://ghcr.io/greenticai/components/component-http:latest
+        source: oci://ghcr.io/greenticai/component/component-http:stable
         bindings:
           body_mapping:
             name: $.formData.name

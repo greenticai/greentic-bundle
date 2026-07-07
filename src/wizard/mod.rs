@@ -18,7 +18,11 @@ pub mod i18n;
 pub const WIZARD_ID: &str = "greentic-bundle.wizard.run";
 pub const ANSWER_SCHEMA_ID: &str = "greentic-bundle.wizard.answers";
 pub const DEFAULT_PROVIDER_REGISTRY: &str =
-    "oci://ghcr.io/greenticai/greentic-bundle/providers:latest";
+    "oci://ghcr.io/greenticai/greentic-bundle/providers:stable";
+const DEPLOYER_AWS_REF: &str = "oci://ghcr.io/greenticai/packs/deployer/greentic.deploy.aws:stable";
+const DEPLOYER_AZURE_REF: &str =
+    "oci://ghcr.io/greenticai/packs/deployer/greentic.deploy.azure:stable";
+const DEPLOYER_GCP_REF: &str = "oci://ghcr.io/greenticai/packs/deployer/greentic.deploy.gcp:stable";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "snake_case")]
@@ -199,6 +203,7 @@ pub fn run_command(args: WizardRunArgs) -> Result<()> {
             args.schema_version.as_deref(),
             args.emit_answers.as_ref(),
             Some(loaded.locks),
+            &args.env,
         )?
     } else {
         run_interactive(
@@ -206,6 +211,7 @@ pub fn run_command(args: WizardRunArgs) -> Result<()> {
             args.emit_answers.as_ref(),
             args.schema_version.as_deref(),
             execution_for_run(args.dry_run),
+            &args.env,
         )?
     };
     print_plan(&result.plan)?;
@@ -254,6 +260,11 @@ pub fn answer_document_schema(
                 "type": "string",
                 "minLength": 1
             },
+            "env_id": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Environment id the wizard ran under (C7). Absent for pre-C7 documents."
+            },
             "answers": {
                 "type": "object",
                 "additionalProperties": false,
@@ -279,6 +290,10 @@ pub fn answer_document_schema(
                     },
                     "app_packs": string_array_schema("App-pack references or local paths."),
                     "extension_providers": string_array_schema("Extension provider references or local paths."),
+                    "cloud_deployer_target": {
+                        "type": "string",
+                        "enum": ["aws", "azure", "gcp"]
+                    },
                     "remote_catalogs": string_array_schema("Additional remote catalog references."),
                     "setup_specs": {
                         "type": "object",
@@ -428,6 +443,7 @@ pub fn validate_command(args: WizardValidateArgs) -> Result<()> {
         args.schema_version.as_deref(),
         args.emit_answers.as_ref(),
         Some(loaded.locks),
+        &args.env,
     )?;
     print_plan(&result.plan)?;
     Ok(())
@@ -454,6 +470,7 @@ pub fn apply_command(args: WizardApplyArgs) -> Result<()> {
         args.schema_version.as_deref(),
         args.emit_answers.as_ref(),
         Some(loaded.locks),
+        &args.env,
     )?;
     print_plan(&result.plan)?;
     Ok(())
@@ -464,6 +481,7 @@ pub fn run_interactive(
     emit_answers: Option<&PathBuf>,
     schema_version: Option<&str>,
     execution: ExecutionMode,
+    env_id: &str,
 ) -> Result<WizardRunResult> {
     match run_interactive_with_zero_action(
         initial_mode,
@@ -471,6 +489,7 @@ pub fn run_interactive(
         schema_version,
         execution,
         RootMenuZeroAction::Exit,
+        env_id,
     )? {
         Some(result) => Ok(result),
         None => bail!("{}", crate::i18n::tr("wizard.exit.message")),
@@ -483,14 +502,20 @@ pub fn run_interactive_with_zero_action(
     schema_version: Option<&str>,
     execution: ExecutionMode,
     zero_action: RootMenuZeroAction,
+    env_id: &str,
 ) -> Result<Option<WizardRunResult>> {
     let stdin = io::stdin();
     let stdout = io::stdout();
     let mut input = stdin.lock();
     let mut output = stdout.lock();
     loop {
-        let Some(selection) =
-            collect_guided_interactive_request(&mut input, &mut output, initial_mode, zero_action)?
+        let Some(selection) = collect_guided_interactive_request(
+            &mut input,
+            &mut output,
+            initial_mode,
+            zero_action,
+            env_id,
+        )?
         else {
             return Ok(None);
         };
@@ -515,6 +540,7 @@ pub fn run_interactive_with_zero_action(
             schema_version,
             emit_answers,
             None,
+            env_id,
         )?));
     }
 }
@@ -524,12 +550,13 @@ fn collect_guided_interactive_request<R: BufRead, W: Write>(
     output: &mut W,
     initial_mode: Option<WizardMode>,
     zero_action: RootMenuZeroAction,
+    env_id: &str,
 ) -> Result<Option<InteractiveSelection>> {
     if let Some(mode) = initial_mode {
         let interactive = match mode {
-            WizardMode::Create => collect_create_flow(input, output)?,
-            WizardMode::Update => collect_update_flow(input, output, false)?,
-            WizardMode::Doctor => collect_doctor_flow(input, output)?,
+            WizardMode::Create => collect_create_flow(input, output, env_id)?,
+            WizardMode::Update => collect_update_flow(input, output, false, env_id)?,
+            WizardMode::Doctor => collect_doctor_flow(input, output, env_id)?,
         };
         return Ok(Some(InteractiveSelection::Request(Box::new(interactive))));
     }
@@ -540,13 +567,13 @@ fn collect_guided_interactive_request<R: BufRead, W: Write>(
 
     match choice {
         InteractiveChoice::Create => Ok(Some(InteractiveSelection::Request(Box::new(
-            collect_create_flow(input, output)?,
+            collect_create_flow(input, output, env_id)?,
         )))),
         InteractiveChoice::Update => Ok(Some(InteractiveSelection::Request(Box::new(
-            collect_update_flow(input, output, false)?,
+            collect_update_flow(input, output, false, env_id)?,
         )))),
         InteractiveChoice::Validate => Ok(Some(InteractiveSelection::Request(Box::new(
-            collect_update_flow(input, output, true)?,
+            collect_update_flow(input, output, true, env_id)?,
         )))),
         InteractiveChoice::Doctor => {
             perform_doctor_action(input, output)?;
@@ -614,7 +641,9 @@ fn choose_interactive_menu<R: BufRead, W: Write>(
         write!(output, "{} ", crate::i18n::tr("wizard.setup.enum_prompt"))?;
         output.flush()?;
         let mut line = String::new();
-        input.read_line(&mut line)?;
+        if input.read_line(&mut line)? == 0 {
+            bail!("{}", crate::i18n::tr("wizard.error.input_ended"));
+        }
         match line.trim() {
             "0" => match zero_action {
                 RootMenuZeroAction::Exit => bail!("{}", crate::i18n::tr("wizard.exit.message")),
@@ -645,6 +674,7 @@ fn write_root_menu_option<W: Write>(
 fn collect_create_flow<R: BufRead, W: Write>(
     input: &mut R,
     output: &mut W,
+    _env_id: &str,
 ) -> Result<InteractiveRequest> {
     let locale = crate::i18n::current_locale();
     let bundle_name = prompt_required_string(
@@ -673,6 +703,7 @@ fn collect_create_flow<R: BufRead, W: Write>(
         app_pack_entries: Vec::new(),
         access_rules: Vec::new(),
         extension_provider_entries: Vec::new(),
+        cloud_deployer_target: None,
         advanced_setup: false,
         app_packs: Vec::new(),
         extension_providers: Vec::new(),
@@ -685,6 +716,7 @@ fn collect_create_flow<R: BufRead, W: Write>(
     });
     state = edit_app_packs(input, output, state, false)?;
     state = edit_extension_providers(input, output, state, false)?;
+    state = edit_cloud_deployer_target(input, output, state)?;
     state = edit_bundle_capabilities(input, output, state)?;
     let review_action = review_summary(input, output, &state, false)?;
     Ok(InteractiveRequest {
@@ -697,6 +729,7 @@ fn collect_update_flow<R: BufRead, W: Write>(
     input: &mut R,
     output: &mut W,
     validate_only: bool,
+    _env_id: &str,
 ) -> Result<InteractiveRequest> {
     let (target, mut state) = prompt_request_from_bundle_target(
         input,
@@ -727,6 +760,7 @@ fn collect_update_flow<R: BufRead, W: Write>(
     if !validate_only {
         state = edit_app_packs(input, output, state, true)?;
         state = edit_extension_providers(input, output, state, true)?;
+        state = edit_cloud_deployer_target(input, output, state)?;
         state = edit_bundle_capabilities(input, output, state)?;
         let review_action = review_summary(input, output, &state, true)?;
         Ok(InteractiveRequest {
@@ -744,6 +778,7 @@ fn collect_update_flow<R: BufRead, W: Write>(
 fn collect_doctor_flow<R: BufRead, W: Write>(
     input: &mut R,
     output: &mut W,
+    _env_id: &str,
 ) -> Result<InteractiveRequest> {
     Ok(InteractiveRequest {
         request: prompt_request_from_bundle_target(
@@ -974,6 +1009,7 @@ fn execute_request(
     schema_version: Option<&str>,
     emit_answers: Option<&PathBuf>,
     source_locks: Option<BTreeMap<String, Value>>,
+    env_id: &str,
 ) -> Result<WizardRunResult> {
     let target_version = requested_schema_version(schema_version)?;
     if !request.remote_catalogs.is_empty() {
@@ -997,8 +1033,14 @@ fn execute_request(
         );
     }
     let request = discover_setup_specs(request, &catalog_resolution);
-    let setup_writes = preview_setup_writes(&request, execution)?;
-    let bundle_lock = build_bundle_lock(&request, execution, &catalog_resolution, &setup_writes);
+    let setup_writes = preview_setup_writes(&request, execution, env_id)?;
+    let bundle_lock = build_bundle_lock(
+        &request,
+        execution,
+        &catalog_resolution,
+        &setup_writes,
+        env_id,
+    );
     let plan = build_plan(
         &request,
         execution,
@@ -1008,13 +1050,15 @@ fn execute_request(
         &setup_writes,
     );
     let mut document = answer_document_from_request(&request, Some(&target_version.to_string()))?;
+    document.env_id = Some(env_id.to_string());
     let mut locks = source_locks.unwrap_or_default();
     locks.extend(bundle_lock_to_answer_locks(&bundle_lock));
     document.locks = locks;
     let applied_files = if execution == ExecutionMode::Execute {
-        let mut applied_files = apply_plan(&request, &bundle_lock)?;
+        let mut applied_files = apply_plan(&request, &bundle_lock, env_id)?;
         if build_bundle_now {
-            let build_result = crate::build::build_workspace(&request.output_dir, None, false)?;
+            let build_result =
+                crate::build::build_workspace(&request.output_dir, None, false, false, None)?;
             applied_files.push(PathBuf::from(build_result.artifact_path));
         }
         applied_files.sort();
@@ -1037,19 +1081,21 @@ fn execute_request(
 fn collect_interactive_request<R: BufRead, W: Write>(
     input: &mut R,
     output: &mut W,
+    env_id: &str,
     initial_mode: Option<WizardMode>,
     last_compact_title: &mut Option<String>,
 ) -> Result<NormalizedRequest> {
     let mode = match initial_mode {
         Some(mode) => mode,
-        None => choose_mode_via_qa(input, output, last_compact_title)?,
+        None => choose_mode_via_qa(input, output, env_id, last_compact_title)?,
     };
     let request = match mode {
-        WizardMode::Update => collect_update_request(input, output, last_compact_title)?,
+        WizardMode::Update => collect_update_request(input, output, env_id, last_compact_title)?,
         WizardMode::Create | WizardMode::Doctor => {
             let answers = run_qa_form(
                 input,
                 output,
+                env_id,
                 &wizard_request_form_spec_json(mode, None)?,
                 None,
                 "root wizard",
@@ -1058,7 +1104,7 @@ fn collect_interactive_request<R: BufRead, W: Write>(
             normalized_request_from_qa_answers(answers, crate::i18n::current_locale(), mode)?
         }
     };
-    collect_interactive_setup_answers(input, output, request, last_compact_title)
+    collect_interactive_setup_answers(input, output, env_id, request, last_compact_title)
 }
 
 #[allow(dead_code)]
@@ -1074,6 +1120,7 @@ fn parse_csv_answers(raw: &str) -> Vec<String> {
 fn choose_mode_via_qa<R: BufRead, W: Write>(
     input: &mut R,
     output: &mut W,
+    env_id: &str,
     last_compact_title: &mut Option<String>,
 ) -> Result<WizardMode> {
     let config = WizardRunConfig {
@@ -1106,6 +1153,7 @@ fn choose_mode_via_qa<R: BufRead, W: Write>(
             debug: false,
         },
         verbose: false,
+        env_id: env_id.to_string(),
     };
     let mut driver =
         WizardDriver::new(config).context("initialize greentic-qa-lib wizard mode form")?;
@@ -1208,7 +1256,9 @@ fn prompt_compact_enum<R: BufRead, W: Write>(
         output.flush()?;
 
         let mut line = String::new();
-        input.read_line(&mut line)?;
+        if input.read_line(&mut line)? == 0 {
+            bail!("{}", crate::i18n::tr("wizard.error.input_ended"));
+        }
         let trimmed = line.trim();
         if trimmed.is_empty() {
             if let Some(default) = &default_value {
@@ -1237,11 +1287,13 @@ fn prompt_compact_enum<R: BufRead, W: Write>(
 fn collect_update_request<R: BufRead, W: Write>(
     input: &mut R,
     output: &mut W,
+    env_id: &str,
     last_compact_title: &mut Option<String>,
 ) -> Result<NormalizedRequest> {
     let root_answers = run_qa_form(
         input,
         output,
+        env_id,
         &json!({
             "id": "greentic-bundle-update-root",
             "title": crate::i18n::tr("wizard.menu.update"),
@@ -1278,6 +1330,7 @@ fn collect_update_request<R: BufRead, W: Write>(
     let answers = run_qa_form(
         input,
         output,
+        env_id,
         &wizard_request_form_spec_json(WizardMode::Update, Some(&defaults))?,
         None,
         "update wizard",
@@ -1298,6 +1351,7 @@ fn request_defaults_from_workspace(
         advanced_setup: Some(workspace.advanced_setup.to_string()),
         app_packs: Some(workspace.app_packs.join(", ")),
         extension_providers: Some(workspace.extension_providers.join(", ")),
+        cloud_deployer_target: detect_cloud_deployer_target(&workspace.extension_providers),
         remote_catalogs: Some(workspace.remote_catalogs.join(", ")),
         setup_execution_intent: Some(workspace.setup_execution_intent.to_string()),
         export_intent: Some(workspace.export_intent.to_string()),
@@ -1308,6 +1362,7 @@ fn request_defaults_from_workspace(
 fn run_qa_form<R: BufRead, W: Write>(
     input: &mut R,
     output: &mut W,
+    env_id: &str,
     spec_json: &str,
     initial_answers_json: Option<String>,
     context_label: &str,
@@ -1323,6 +1378,7 @@ fn run_qa_form<R: BufRead, W: Write>(
             debug: false,
         },
         verbose: false,
+        env_id: env_id.to_string(),
     };
     let mut driver = WizardDriver::new(config)
         .with_context(|| format!("initialize greentic-qa-lib {context_label}"))?;
@@ -1384,6 +1440,7 @@ struct RequestDefaults {
     advanced_setup: Option<String>,
     app_packs: Option<String>,
     extension_providers: Option<String>,
+    cloud_deployer_target: Option<String>,
     remote_catalogs: Option<String>,
     setup_execution_intent: Option<String>,
     export_intent: Option<String>,
@@ -1464,6 +1521,16 @@ fn wizard_request_form_spec_json(
                 "visible_if": { "op": "var", "path": "/advanced_setup" }
             },
             {
+                "id": "cloud_deployer_target",
+                "type": "string",
+                "title": "Cloud deployer target",
+                "required": false,
+                "default_value": defaults.cloud_deployer_target,
+                "enum": ["", "aws", "azure", "gcp"],
+                "enum_labels": ["None", "AWS", "Azure", "GCP"],
+                "visible_if": { "op": "var", "path": "/advanced_setup" }
+            },
+            {
                 "id": "remote_catalogs",
                 "type": "string",
                 "title": crate::i18n::tr("wizard.prompt.remote_catalogs"),
@@ -1504,6 +1571,7 @@ struct SeedRequest {
     app_pack_entries: Vec<AppPackEntry>,
     access_rules: Vec<AccessRuleInput>,
     extension_provider_entries: Vec<ExtensionProviderEntry>,
+    cloud_deployer_target: Option<String>,
     advanced_setup: bool,
     app_packs: Vec<String>,
     extension_providers: Vec<String>,
@@ -1547,6 +1615,9 @@ fn normalize_request(seed: SeedRequest) -> NormalizedRequest {
     app_packs.extend(app_pack_entries.iter().map(|entry| entry.reference.clone()));
 
     let mut extension_provider_entries = seed.extension_provider_entries;
+    if let Some(target) = seed.cloud_deployer_target.as_deref() {
+        apply_cloud_deployer_target_to_entries(&mut extension_provider_entries, target);
+    }
     if extension_provider_entries.is_empty() {
         extension_provider_entries = seed
             .extension_providers
@@ -1693,6 +1764,7 @@ fn request_from_workspace(
         app_pack_entries,
         access_rules,
         extension_provider_entries,
+        cloud_deployer_target: detect_cloud_deployer_target(&workspace.extension_providers),
         advanced_setup: false,
         app_packs: workspace.app_packs.clone(),
         extension_providers: workspace.extension_providers.clone(),
@@ -2016,7 +2088,9 @@ fn prompt_menu_value<R: BufRead, W: Write>(input: &mut R, output: &mut W) -> Res
     write!(output, "{} ", crate::i18n::tr("wizard.setup.enum_prompt"))?;
     output.flush()?;
     let mut line = String::new();
-    input.read_line(&mut line)?;
+    if input.read_line(&mut line)? == 0 {
+        bail!("{}", crate::i18n::tr("wizard.error.input_ended"));
+    }
     Ok(line.trim().to_string())
 }
 
@@ -2130,6 +2204,7 @@ fn rebuild_request(request: NormalizedRequest) -> NormalizedRequest {
         app_pack_entries: request.app_pack_entries,
         access_rules: request.access_rules,
         extension_provider_entries: request.extension_provider_entries,
+        cloud_deployer_target: detect_cloud_deployer_target(&request.extension_providers),
         advanced_setup: false,
         app_packs: Vec::new(),
         extension_providers: Vec::new(),
@@ -2140,6 +2215,83 @@ fn rebuild_request(request: NormalizedRequest) -> NormalizedRequest {
         export_intent: false,
         capabilities: request.capabilities,
     })
+}
+
+fn edit_cloud_deployer_target<R: BufRead, W: Write>(
+    input: &mut R,
+    output: &mut W,
+    mut state: NormalizedRequest,
+) -> Result<NormalizedRequest> {
+    let current = detect_cloud_deployer_target(&state.extension_providers);
+    let labels = vec![
+        "None".to_string(),
+        "AWS".to_string(),
+        "Azure".to_string(),
+        "GCP".to_string(),
+    ];
+    let prompt = format!(
+        "Choose cloud deployer target (current: {})",
+        current.as_deref().unwrap_or("none")
+    );
+    let Some(index) = choose_named_index(input, output, &prompt, &labels)? else {
+        return Ok(state);
+    };
+    let target = match index {
+        1 => "aws",
+        2 => "azure",
+        3 => "gcp",
+        _ => "",
+    };
+    apply_cloud_deployer_target_to_entries(&mut state.extension_provider_entries, target);
+    Ok(rebuild_request(state))
+}
+
+fn apply_cloud_deployer_target_to_entries(entries: &mut Vec<ExtensionProviderEntry>, target: &str) {
+    entries.retain(|entry| !is_cloud_deployer_entry(entry));
+    if let Some(entry) = cloud_deployer_entry_for_target(target) {
+        entries.push(entry);
+    }
+}
+
+fn cloud_deployer_entry_for_target(target: &str) -> Option<ExtensionProviderEntry> {
+    let (provider_id, display_name, reference) = match target.trim() {
+        "aws" => ("deployer-aws", "AWS Deployer", DEPLOYER_AWS_REF),
+        "azure" => ("deployer-azure", "Azure Deployer", DEPLOYER_AZURE_REF),
+        "gcp" => ("deployer-gcp", "GCP Deployer", DEPLOYER_GCP_REF),
+        _ => return None,
+    };
+    Some(ExtensionProviderEntry {
+        reference: reference.to_string(),
+        detected_kind: "catalog".to_string(),
+        provider_id: provider_id.to_string(),
+        display_name: display_name.to_string(),
+        version: inferred_reference_version(reference),
+        source_catalog: Some(DEFAULT_PROVIDER_REGISTRY.to_string()),
+        group: Some("deployer".to_string()),
+    })
+}
+
+fn is_cloud_deployer_entry(entry: &ExtensionProviderEntry) -> bool {
+    matches!(
+        entry.provider_id.as_str(),
+        "deployer-aws" | "deployer-azure" | "deployer-gcp"
+    ) || detect_cloud_deployer_target(std::slice::from_ref(&entry.reference)).is_some()
+}
+
+fn detect_cloud_deployer_target(references: &[String]) -> Option<String> {
+    for reference in references {
+        let normalized = reference.trim().to_ascii_lowercase();
+        if normalized.contains("greentic.deploy.aws") || normalized.ends_with("/aws.gtpack") {
+            return Some("aws".to_string());
+        }
+        if normalized.contains("greentic.deploy.azure") || normalized.ends_with("/azure.gtpack") {
+            return Some("azure".to_string());
+        }
+        if normalized.contains("greentic.deploy.gcp") || normalized.ends_with("/gcp.gtpack") {
+            return Some("gcp".to_string());
+        }
+    }
+    None
 }
 
 fn format_mapping(mapping: &AppPackMappingInput) -> String {
@@ -3222,6 +3374,7 @@ fn normalized_request_from_document(
             &answers,
             "extension_provider_entries",
         )?,
+        cloud_deployer_target: optional_string(&answers, "cloud_deployer_target")?,
         advanced_setup: optional_bool(&answers, "advanced_setup")?,
         app_packs: optional_string_list(&answers, "app_packs")?,
         extension_providers: optional_string_list(&answers, "extension_providers")?,
@@ -3377,6 +3530,12 @@ fn normalized_request_from_qa_answers(
         app_pack_entries: Vec::new(),
         access_rules: Vec::new(),
         extension_provider_entries: Vec::new(),
+        cloud_deployer_target: object
+            .get("cloud_deployer_target")
+            .and_then(Value::as_str)
+            .map(str::trim)
+            .filter(|value| !value.is_empty())
+            .map(ToOwned::to_owned),
         advanced_setup: object
             .get("advanced_setup")
             .and_then(Value::as_bool)
@@ -3448,6 +3607,21 @@ fn optional_bool(answers: &BTreeMap<String, Value>, key: &str) -> Result<bool> {
     match answers.get(key) {
         None => Ok(false),
         Some(Value::Bool(value)) => Ok(*value),
+        Some(_) => Err(invalid_answer_field(key)),
+    }
+}
+
+fn optional_string(answers: &BTreeMap<String, Value>, key: &str) -> Result<Option<String>> {
+    match answers.get(key) {
+        None => Ok(None),
+        Some(Value::String(value)) => {
+            let trimmed = value.trim();
+            if trimmed.is_empty() {
+                Ok(None)
+            } else {
+                Ok(Some(trimmed.to_string()))
+            }
+        }
         Some(_) => Err(invalid_answer_field(key)),
     }
 }
@@ -3861,6 +4035,7 @@ fn plan_steps(request: &NormalizedRequest, build_bundle_now: bool) -> Vec<Wizard
 fn apply_plan(
     request: &NormalizedRequest,
     bundle_lock: &crate::project::BundleLock,
+    env_id: &str,
 ) -> Result<Vec<PathBuf>> {
     fs::create_dir_all(&request.output_dir)
         .with_context(|| format!("create output dir {}", request.output_dir.display()))?;
@@ -3905,7 +4080,7 @@ fn apply_plan(
         );
     }
 
-    let setup_result = persist_setup_state(request, ExecutionMode::Execute)?;
+    let setup_result = persist_setup_state(request, ExecutionMode::Execute, env_id)?;
     crate::project::write_bundle_lock(&request.output_dir, bundle_lock)
         .with_context(|| format!("write {}", lock_file.display()))?;
     crate::project::sync_project_with_reference_roots(
@@ -4036,10 +4211,12 @@ fn build_bundle_lock(
     execution: ExecutionMode,
     catalog_resolution: &crate::catalog::resolve::CatalogResolution,
     setup_writes: &[String],
+    env_id: &str,
 ) -> crate::project::BundleLock {
     crate::project::BundleLock {
         schema_version: crate::project::LOCK_SCHEMA_VERSION,
         bundle_id: request.bundle_id.clone(),
+        env_id: Some(env_id.to_string()),
         requested_mode: mode_name(request.mode).to_string(),
         execution: match execution {
             ExecutionMode::DryRun => "dry_run",
@@ -4129,16 +4306,22 @@ fn bundle_lock_to_answer_locks(lock: &crate::project::BundleLock) -> BTreeMap<St
 fn preview_setup_writes(
     request: &NormalizedRequest,
     execution: ExecutionMode,
+    env_id: &str,
 ) -> Result<Vec<String>> {
     let _ = execution;
     let instructions = collect_setup_instructions(request)?;
     if instructions.is_empty() {
         return Ok(Vec::new());
     }
+    let scope = crate::setup::persist::SetupScope {
+        env_id,
+        bundle_id: &request.bundle_id,
+    };
     Ok(crate::setup::persist::persist_setup(
         &request.output_dir,
         &instructions,
         &crate::setup::backend::NoopSetupBackend,
+        &scope,
     )?
     .writes)
 }
@@ -4146,6 +4329,7 @@ fn preview_setup_writes(
 fn persist_setup_state(
     request: &NormalizedRequest,
     execution: ExecutionMode,
+    env_id: &str,
 ) -> Result<crate::setup::persist::SetupPersistenceResult> {
     let instructions = collect_setup_instructions(request)?;
     if instructions.is_empty() {
@@ -4161,7 +4345,16 @@ fn persist_setup_state(
         )),
         ExecutionMode::DryRun => Box::new(crate::setup::backend::NoopSetupBackend),
     };
-    crate::setup::persist::persist_setup(&request.output_dir, &instructions, backend.as_ref())
+    let scope = crate::setup::persist::SetupScope {
+        env_id,
+        bundle_id: &request.bundle_id,
+    };
+    crate::setup::persist::persist_setup(
+        &request.output_dir,
+        &instructions,
+        backend.as_ref(),
+        &scope,
+    )
 }
 
 fn collect_setup_instructions(
@@ -4177,6 +4370,7 @@ fn collect_setup_instructions(
 fn collect_interactive_setup_answers<R: BufRead, W: Write>(
     input: &mut R,
     output: &mut W,
+    env_id: &str,
     request: NormalizedRequest,
     last_compact_title: &mut Option<String>,
 ) -> Result<NormalizedRequest> {
@@ -4212,8 +4406,14 @@ fn collect_interactive_setup_answers<R: BufRead, W: Write>(
             .ok_or_else(|| anyhow::anyhow!("missing setup spec for {provider_id}"))?;
         let parsed = serde_json::from_value::<crate::setup::SetupSpecInput>(spec_input)?;
         let (_, form) = crate::setup::form_spec_from_input(&parsed, &provider_id)?;
-        let answers =
-            prompt_setup_form_answers(input, output, &provider_id, &form, last_compact_title)?;
+        let answers = prompt_setup_form_answers(
+            input,
+            output,
+            env_id,
+            &provider_id,
+            &form,
+            last_compact_title,
+        )?;
         request
             .setup_answers
             .insert(provider_id, Value::Object(answers.into_iter().collect()));
@@ -4226,6 +4426,7 @@ fn collect_interactive_setup_answers<R: BufRead, W: Write>(
 fn prompt_setup_form_answers<R: BufRead, W: Write>(
     input: &mut R,
     output: &mut W,
+    env_id: &str,
     provider_id: &str,
     form: &crate::setup::FormSpec,
     last_compact_title: &mut Option<String>,
@@ -4247,6 +4448,7 @@ fn prompt_setup_form_answers<R: BufRead, W: Write>(
             debug: false,
         },
         verbose: false,
+        env_id: env_id.to_string(),
     };
     let mut driver =
         WizardDriver::new(config).context("initialize greentic-qa-lib setup wizard")?;
@@ -4482,7 +4684,9 @@ fn prompt_qa_string_like<R: BufRead, W: Write>(
         )?;
         output.flush()?;
         let mut line = String::new();
-        input.read_line(&mut line)?;
+        if input.read_line(&mut line)? == 0 {
+            bail!("{}", crate::i18n::tr("wizard.error.input_ended"));
+        }
         let trimmed = line.trim();
         if trimmed.is_empty() {
             if let Some(default) = &default_value {
@@ -4514,7 +4718,9 @@ fn prompt_qa_boolean<R: BufRead, W: Write>(
         )?;
         output.flush()?;
         let mut line = String::new();
-        input.read_line(&mut line)?;
+        if input.read_line(&mut line)? == 0 {
+            bail!("{}", crate::i18n::tr("wizard.error.input_ended"));
+        }
         let trimmed = line.trim().to_ascii_lowercase();
         if trimmed.is_empty() {
             if let Some(default) = &default_value {
@@ -4606,7 +4812,9 @@ fn prompt_qa_enum<R: BufRead, W: Write>(
         output.flush()?;
 
         let mut line = String::new();
-        input.read_line(&mut line)?;
+        if input.read_line(&mut line)? == 0 {
+            bail!("{}", crate::i18n::tr("wizard.error.input_ended"));
+        }
         let trimmed = line.trim();
         if trimmed.is_empty() {
             if let Some(default) = &default_value {
@@ -4711,8 +4919,9 @@ mod tests {
     use crate::catalog::registry::CatalogEntry;
 
     use super::{
-        RootMenuZeroAction, build_extension_provider_options, choose_interactive_menu,
-        clean_extension_provider_label, detected_reference_kind,
+        RootMenuZeroAction, apply_cloud_deployer_target_to_entries,
+        build_extension_provider_options, choose_interactive_menu, clean_extension_provider_label,
+        detect_cloud_deployer_target, detected_reference_kind,
     };
 
     #[test]
@@ -4750,7 +4959,7 @@ mod tests {
             category_description: None,
             label: Some("Greentic Secrets AWS SM".to_string()),
             reference:
-                "oci://ghcr.io/greenticai/packs/secret/greentic.secrets.aws-sm.gtpack:latest"
+                "oci://ghcr.io/greenticai/packs/secret/greentic.secrets.aws-sm.gtpack:stable"
                     .to_string(),
             setup: None,
         };
@@ -4774,7 +4983,7 @@ mod tests {
             category_label: None,
             category_description: None,
             label: Some("Greentic Secrets AWS SM (latest)".to_string()),
-            reference: "oci://ghcr.io/example/secrets:latest".to_string(),
+            reference: "oci://ghcr.io/example/secrets:stable".to_string(),
             setup: None,
         };
         let semver = CatalogEntry {
@@ -4816,6 +5025,33 @@ mod tests {
         assert_eq!(
             detected_reference_kind(root, "https://example.com/packs/cards-demo.gtpack"),
             "https"
+        );
+    }
+
+    #[test]
+    fn cloud_deployer_target_adds_provider_entry() {
+        let mut entries = Vec::new();
+        apply_cloud_deployer_target_to_entries(&mut entries, "aws");
+
+        assert_eq!(entries.len(), 1);
+        assert_eq!(entries[0].provider_id, "deployer-aws");
+        assert_eq!(
+            entries[0].reference,
+            "oci://ghcr.io/greenticai/packs/deployer/greentic.deploy.aws:stable"
+        );
+    }
+
+    #[test]
+    fn cloud_deployer_target_replaces_existing_cloud_deployer_entry() {
+        let mut entries = Vec::new();
+        apply_cloud_deployer_target_to_entries(&mut entries, "aws");
+        apply_cloud_deployer_target_to_entries(&mut entries, "gcp");
+
+        assert_eq!(entries.len(), 1);
+        assert_eq!(entries[0].provider_id, "deployer-gcp");
+        assert_eq!(
+            detect_cloud_deployer_target(&[entries[0].reference.clone()]),
+            Some("gcp".to_string())
         );
     }
 }

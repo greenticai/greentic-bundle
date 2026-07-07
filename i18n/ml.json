@@ -133,6 +133,7 @@
   "wizard.error.bundle_target_missing": "Bundle target നിലവിലില്ല",
   "wizard.error.empty_answer": "Wizard prompt-ന് ഒരു മൂല്യം ആവശ്യമാണ്.",
   "wizard.error.empty_catalog": "catalog-ൽ extension providers ഒന്നും കണ്ടെത്തിയില്ല.",
+  "wizard.error.input_ended": "സാധുവായ ഒരു തിരഞ്ഞെടുപ്പ് നൽകുന്നതിന് മുമ്പ് വിസാർഡ് ഇൻപുട്ട് അവസാനിച്ചു.",
   "wizard.error.invalid_choice": "അസാധുവായ തിരഞ്ഞെടുപ്പ്. 1, 2, 3, അല്ലെങ്കിൽ 0 നൽകുക.",
   "wizard.exit.message": "ഉത്തരങ്ങൾ ശേഖരിക്കാതെ Wizard അവസാനിപ്പിച്ചു.",
   "wizard.label.name": "പേര്",

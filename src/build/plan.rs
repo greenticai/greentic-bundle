@@ -152,7 +152,10 @@ pub fn load_build_state(build_dir: &Path) -> Result<BuildState> {
 
 fn collect_asset_files(root: &Path) -> Result<Vec<(String, Vec<u8>)>> {
     let mut files = Vec::new();
-    for relative_root in ["packs", "providers", "tenants"] {
+    // `packs/` and `providers/` only ship `.gtpack` archives; everything else
+    // there is build noise (manifest snapshots, scratch files) and must not be
+    // re-bundled.
+    for relative_root in ["packs", "providers"] {
         let dir = root.join(relative_root);
         if !dir.exists() {
             continue;
@@ -161,6 +164,26 @@ fn collect_asset_files(root: &Path) -> Result<Vec<(String, Vec<u8>)>> {
             if entry.extension().and_then(|value| value.to_str()) != Some("gtpack") {
                 continue;
             }
+            let rel = entry
+                .strip_prefix(root)
+                .unwrap_or(&entry)
+                .display()
+                .to_string();
+            files.push((rel, fs::read(&entry)?));
+        }
+    }
+    // `.providers/`, `assets/`, and `tenants/` carry deploy-time configuration
+    // the setup wizard wrote (provider envelopes, contract cache, per-tenant
+    // client overlays, allow-rule gmaps). The runtime needs all of these to
+    // resolve provider configs and serve per-tenant client config; a build that
+    // drops them produces an artifact that renders the default skin and breaks
+    // JWT verification on cloud deploys.
+    for relative_root in [".providers", "assets", "tenants"] {
+        let dir = root.join(relative_root);
+        if !dir.exists() {
+            continue;
+        }
+        for entry in walk(&dir)? {
             let rel = entry
                 .strip_prefix(root)
                 .unwrap_or(&entry)

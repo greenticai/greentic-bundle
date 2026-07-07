@@ -144,7 +144,7 @@ fn build_catalog(items: usize) -> String {
             raw.push(',');
         }
         raw.push_str(&format!(
-            "{{\"id\":\"provider-{idx}\",\"category\":\"cat-{}\",\"label\":{{\"fallback\":\"Provider {idx}\"}},\"ref\":\"oci://ghcr.io/greenticai/packs/provider-{idx}:latest\"}}",
+            "{{\"id\":\"provider-{idx}\",\"category\":\"cat-{}\",\"label\":{{\"fallback\":\"Provider {idx}\"}},\"ref\":\"oci://ghcr.io/greenticai/packs/provider-{idx}:stable\"}}",
             idx % 8
         ));
     }

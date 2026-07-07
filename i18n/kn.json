@@ -133,6 +133,7 @@
   "wizard.error.bundle_target_missing": "Bundle target ಅಸ್ತಿತ್ವದಲ್ಲಿಲ್ಲ",
   "wizard.error.empty_answer": "Wizard prompt ಗೆ ಒಂದು ಮೌಲ್ಯ ಅಗತ್ಯವಿದೆ.",
   "wizard.error.empty_catalog": "catalog ನಲ್ಲಿ ಯಾವುದೇ extension providers ಕಂಡುಬಂದಿಲ್ಲ.",
+  "wizard.error.input_ended": "ಮಾನ್ಯ ಆಯ್ಕೆಯನ್ನು ಒದಗಿಸುವ ಮೊದಲು ವಿಝಾರ್ಡ್ ಇನ್‌ಪುಟ್ ಮುಕ್ತಾಯಗೊಂಡಿದೆ.",
   "wizard.error.invalid_choice": "ಅಮಾನ್ಯ ಆಯ್ಕೆ. 1, 2, 3, ಅಥವಾ 0 ನಮೂದಿಸಿ.",
   "wizard.exit.message": "ಉತ್ತರಗಳನ್ನು ಸಂಗ್ರಹಿಸದೆ Wizard ನಿರ್ಗಮಿಸಿದೆ.",
   "wizard.label.name": "ಹೆಸರು",

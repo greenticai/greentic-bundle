@@ -133,6 +133,7 @@
   "wizard.error.bundle_target_missing": "Bundle-målet finns inte",
   "wizard.error.empty_answer": "Wizard-prompten kräver ett värde.",
   "wizard.error.empty_catalog": "Inga extension providers hittades i katalogen.",
+  "wizard.error.input_ended": "Guidens inmatning avslutades innan ett giltigt val angavs.",
   "wizard.error.invalid_choice": "Ogiltigt val. Ange 1, 2, 3 eller 0.",
   "wizard.exit.message": "Wizard avslutades utan att samla in svar.",
   "wizard.label.name": "Namn",

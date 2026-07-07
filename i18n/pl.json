@@ -133,6 +133,7 @@
   "wizard.error.bundle_target_missing": "Cel bundle nie istnieje",
   "wizard.error.empty_answer": "Monit kreatora wymaga wartości.",
   "wizard.error.empty_catalog": "W katalogu nie znaleziono żadnych extension providerów.",
+  "wizard.error.input_ended": "Wprowadzanie w kreatorze zakończyło się, zanim podano prawidłowy wybór.",
   "wizard.error.invalid_choice": "Nieprawidłowy wybór. Wpisz 1, 2, 3 lub 0.",
   "wizard.exit.message": "Kreator zakończył działanie bez zebrania odpowiedzi.",
   "wizard.label.name": "Nazwa",

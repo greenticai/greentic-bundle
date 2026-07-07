@@ -133,6 +133,7 @@
   "wizard.error.bundle_target_missing": "Bundle-Ziel existiert nicht",
   "wizard.error.empty_answer": "Die Wizard-Eingabeaufforderung erfordert einen Wert.",
   "wizard.error.empty_catalog": "Im Katalog wurden keine Extension-Provider gefunden.",
+  "wizard.error.input_ended": "Die Eingabe des Assistenten endete, bevor eine gültige Auswahl angegeben wurde.",
   "wizard.error.invalid_choice": "Ungültige Auswahl. Geben Sie 1, 2, 3 oder 0 ein.",
   "wizard.exit.message": "Wizard wurde beendet, ohne Antworten zu erfassen.",
   "wizard.label.name": "Name",

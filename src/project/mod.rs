@@ -1,3 +1,6 @@
+pub mod agent_wiring;
+
+use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result};
@@ -31,6 +34,11 @@ pub struct BundleWorkspaceDefinition {
     pub advanced_setup: bool,
     #[serde(default)]
     pub app_packs: Vec<String>,
+    /// Maps a runtime `agent_id` (`dw.agent` `operation`) to a pack coordinate
+    /// (`store://<name>@<version>` or `file://<path>`) so referenced agentic
+    /// workers can be auto-wired into the bundle at build/deploy time.
+    #[serde(default)]
+    pub agent_packs: BTreeMap<String, String>,
     #[serde(default)]
     pub app_pack_mappings: Vec<AppPackMapping>,
     #[serde(default)]
@@ -118,6 +126,13 @@ struct ResolvedReferencePolicy {
 pub struct BundleLock {
     pub schema_version: u32,
     pub bundle_id: String,
+    /// Environment id the wizard ran under (C7). `None` for locks emitted by
+    /// `empty_bundle_lock` (workspace scaffold, before any wizard run); set to
+    /// `Some(env)` once the wizard's `execute_request` materializes it. Read
+    /// by downstream readers that need to know which env the bundled
+    /// `setup_state_files` were minted under.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub env_id: Option<String>,
     pub requested_mode: String,
     pub execution: String,
     pub cache_policy: String,
@@ -154,6 +169,7 @@ impl BundleWorkspaceDefinition {
             mode,
             advanced_setup: false,
             app_packs: Vec::new(),
+            agent_packs: BTreeMap::new(),
             app_pack_mappings: Vec::new(),
             extension_providers: Vec::new(),
             remote_catalogs: Vec::new(),
@@ -419,6 +435,90 @@ fn materialize_workspace_dependencies(
     }
     if total > 0 {
         eprintln!("  [done] Resolved {total} package(s)");
+    }
+
+    // --- Agent-pack auto-wiring pass (SP2 Task 5) ----------------------------
+    // After all declared app_packs are materialised, scan them for dw.agent
+    // references that are not yet provided, and resolve any missing ones from
+    // the bundle's `agent_packs` coordinate map.
+    run_agent_pack_auto_wiring(root, workspace, &app_targets)?;
+
+    Ok(())
+}
+
+/// Read a named entry from a `.gtpack` ZIP by filesystem path.
+///
+/// Returns `None` when the entry is absent, the file cannot be opened, or the
+/// zip archive cannot be parsed.  Never panics.
+fn read_gtpack_entry(pack_path: &Path, entry_name: &str) -> Option<Vec<u8>> {
+    use std::io::Read;
+    let file = std::fs::File::open(pack_path).ok()?;
+    let mut archive = zip::ZipArchive::new(file).ok()?;
+    let mut entry = archive.by_name(entry_name).ok()?;
+    let mut buf = Vec::new();
+    entry.read_to_end(&mut buf).ok()?;
+    Some(buf)
+}
+
+/// Collect flow manifests and agent sidecars from a set of already-materialised
+/// app packs, then call `auto_wire_agent_packs` for any unreferenced agents.
+fn run_agent_pack_auto_wiring(
+    root: &Path,
+    workspace: &BundleWorkspaceDefinition,
+    app_targets: &[MaterializedCopyTarget],
+) -> Result<()> {
+    // Skip entirely when the workspace has no agent_packs mapping — nothing to
+    // wire, and we avoid zip-opening overhead for bundles that don't use agents.
+    if workspace.agent_packs.is_empty() {
+        return Ok(());
+    }
+
+    let mut flow_manifests: Vec<Vec<u8>> = Vec::new();
+    let mut provided_sidecars: Vec<Vec<u8>> = Vec::new();
+
+    for target in app_targets {
+        let pack_path = root.join(&target.destination);
+        if !pack_path.exists() {
+            continue;
+        }
+        if let Some(cbor) = read_gtpack_entry(&pack_path, "manifest.cbor") {
+            flow_manifests.push(cbor);
+        }
+        if let Some(sidecar) = read_gtpack_entry(&pack_path, "dw-agents.json") {
+            provided_sidecars.push(sidecar);
+        }
+    }
+
+    let manifest_refs: Vec<&[u8]> = flow_manifests.iter().map(Vec::as_slice).collect();
+    let sidecar_refs: Vec<&[u8]> = provided_sidecars.iter().map(Vec::as_slice).collect();
+
+    let packs_dir = root.join("packs");
+    let cache_dir = root.join(crate::catalog::CACHE_ROOT_DIR).join("artifacts");
+    // SP2 v1 deliberate choice: an empty TrustRoot = sha256-only verification.
+    // The Ed25519/DSSE chain is fully plumbed (the store emits a DSSE envelope
+    // pinning the artifact sha256; `fetch_store_agentic_worker_verified` checks
+    // it whenever the TrustRoot is non-empty) but kept DORMANT here on purpose:
+    // enforcement is a follow-up to be flipped on once the store serves the
+    // envelope in production and a trusted-publisher-key source is wired. A
+    // populated TrustRoot here would fail-closed every fetch until then.
+    let trust = greentic_distributor_client::signing::TrustRoot::default();
+
+    let materialized = agent_wiring::auto_wire_agent_packs(
+        workspace,
+        &manifest_refs,
+        &sidecar_refs,
+        &packs_dir,
+        &cache_dir,
+        crate::runtime::offline(),
+        &trust,
+    )?;
+
+    if !materialized.is_empty() {
+        eprintln!(
+            "  [agent-packs] Auto-wired {} agent pack(s): {}",
+            materialized.len(),
+            materialized.join(", ")
+        );
     }
     Ok(())
 }
@@ -768,6 +868,8 @@ fn build_manifest(root: &Path, tenant: &str, team: Option<&str>) -> ResolvedMani
 }
 
 fn render_bundle_workspace(workspace: &BundleWorkspaceDefinition) -> String {
+    // NOTE: keep this format! in lockstep with `BundleWorkspaceDefinition`; every
+    // field must be emitted so a parse→render→re-parse round-trip is lossless.
     format!(
         concat!(
             "schema_version: {}\n",
@@ -776,6 +878,7 @@ fn render_bundle_workspace(workspace: &BundleWorkspaceDefinition) -> String {
             "locale: {}\n",
             "mode: {}\n",
             "advanced_setup: {}\n",
+            "agent_packs:{}\n",
             "app_packs:{}\n",
             "app_pack_mappings:{}\n",
             "extension_providers:{}\n",
@@ -792,6 +895,7 @@ fn render_bundle_workspace(workspace: &BundleWorkspaceDefinition) -> String {
         workspace.locale,
         workspace.mode,
         workspace.advanced_setup,
+        yaml_sorted_string_map(&workspace.agent_packs),
         yaml_list(&workspace.app_packs),
         yaml_mapping_list(&workspace.app_pack_mappings),
         yaml_list(&workspace.extension_providers),
@@ -836,6 +940,7 @@ fn empty_bundle_lock(workspace: &BundleWorkspaceDefinition) -> BundleLock {
     BundleLock {
         schema_version: LOCK_SCHEMA_VERSION,
         bundle_id: workspace.bundle_id.clone(),
+        env_id: None,
         requested_mode: workspace.mode.clone(),
         execution: "execute".to_string(),
         cache_policy: "workspace-local".to_string(),
@@ -873,6 +978,21 @@ fn yaml_list(values: &[String]) -> String {
             .map(|value| format!("\n  - {value}"))
             .collect::<String>()
     }
+}
+
+/// Serialize a `BTreeMap<String, String>` as a YAML block mapping.
+///
+/// An empty map emits ` {}`.  Non-empty entries are sorted by key (BTreeMap
+/// guarantees this already) and emitted as `\n  <key>: "<value>"`.  String
+/// values are always quoted to handle values that contain YAML-special characters
+/// (colons, slashes, etc.).
+fn yaml_sorted_string_map(map: &BTreeMap<String, String>) -> String {
+    if map.is_empty() {
+        return " {}".to_string();
+    }
+    map.iter()
+        .map(|(key, value)| format!("\n  {key}: \"{value}\""))
+        .collect()
 }
 
 fn sort_unique(values: &mut Vec<String>) {
@@ -1131,6 +1251,11 @@ fn inferred_provider_filename(reference: &str) -> String {
         .next()
         .unwrap_or(reference)
         .trim_end_matches(".gtpack");
+    if let Some(deployer_target) = cleaned.strip_prefix("greentic.deploy.")
+        && !deployer_target.trim().is_empty()
+    {
+        return deployer_target.trim().to_string();
+    }
     if cleaned.is_empty() {
         inferred_access_pack_id(reference)
     } else {
@@ -1239,7 +1364,42 @@ fn extract_pack_assets(root: &Path, pack_path: &Path) -> Result<Vec<PathBuf>> {
 
 #[cfg(test)]
 mod tests {
-    use super::should_skip_extension_provider_materialization;
+    use std::path::PathBuf;
+
+    use super::BundleWorkspaceDefinition;
+    use super::{provider_destination_path, should_skip_extension_provider_materialization};
+
+    #[test]
+    fn agent_packs_parses_into_map() {
+        let raw = concat!(
+            "schema_version: 1\n",
+            "bundle_id: demo\n",
+            "bundle_name: Demo Bundle\n",
+            "agent_packs:\n",
+            "  tavily_researcher: \"store://greentic.agentic-research-tavily-agent@0.1.0\"\n",
+        );
+        let definition = serde_yaml_bw::from_str::<BundleWorkspaceDefinition>(raw)
+            .expect("config with agent_packs should parse");
+        assert_eq!(
+            definition
+                .agent_packs
+                .get("tavily_researcher")
+                .map(String::as_str),
+            Some("store://greentic.agentic-research-tavily-agent@0.1.0"),
+        );
+    }
+
+    #[test]
+    fn agent_packs_defaults_to_empty_map() {
+        let raw = concat!(
+            "schema_version: 1\n",
+            "bundle_id: demo\n",
+            "bundle_name: Demo Bundle\n",
+        );
+        let definition = serde_yaml_bw::from_str::<BundleWorkspaceDefinition>(raw)
+            .expect("config without agent_packs should parse");
+        assert!(definition.agent_packs.is_empty());
+    }
 
     #[test]
     fn bundled_catalog_mode_skips_https_provider_materialization() {
@@ -1252,5 +1412,87 @@ mod tests {
         unsafe {
             std::env::remove_var("GREENTIC_BUNDLE_USE_BUNDLED_CATALOG");
         }
+    }
+
+    #[test]
+    fn deployer_provider_destination_uses_canonical_filename() {
+        assert_eq!(
+            provider_destination_path(
+                "oci://ghcr.io/greenticai/packs/deployer/greentic.deploy.aws:stable"
+            ),
+            PathBuf::from("providers/deployer/aws.gtpack")
+        );
+    }
+
+    /// Round-trip guard: parse a config containing `agent_packs`, render it with
+    /// `render_bundle_workspace`, re-parse, and assert the map survives intact.
+    ///
+    /// This is the "Also close the Task 3 deferral" test required by the SP2 plan.
+    #[test]
+    fn agent_packs_round_trips_through_render_bundle_workspace() {
+        use super::render_bundle_workspace;
+
+        let raw = concat!(
+            "schema_version: 1\n",
+            "bundle_id: demo\n",
+            "bundle_name: Demo Bundle\n",
+            "agent_packs:\n",
+            "  crm_assistant: \"store://greentic.crm-assistant@1.2.0\"\n",
+            "  tavily_researcher: \"store://greentic.agentic-research-tavily-agent@0.1.0\"\n",
+        );
+        let original =
+            serde_yaml_bw::from_str::<BundleWorkspaceDefinition>(raw).expect("parse original");
+
+        // Render → re-parse.
+        let rendered = render_bundle_workspace(&original);
+        let round_tripped = serde_yaml_bw::from_str::<BundleWorkspaceDefinition>(&rendered)
+            .expect("re-parse after render");
+
+        // Both entries must survive.
+        assert_eq!(
+            round_tripped
+                .agent_packs
+                .get("tavily_researcher")
+                .map(String::as_str),
+            Some("store://greentic.agentic-research-tavily-agent@0.1.0"),
+            "tavily_researcher must survive the render round-trip"
+        );
+        assert_eq!(
+            round_tripped
+                .agent_packs
+                .get("crm_assistant")
+                .map(String::as_str),
+            Some("store://greentic.crm-assistant@1.2.0"),
+            "crm_assistant must survive the render round-trip"
+        );
+        assert_eq!(
+            round_tripped.agent_packs.len(),
+            2,
+            "no extra entries should appear after round-trip"
+        );
+    }
+
+    /// An empty `agent_packs` map must render and re-parse as empty (not missing).
+    #[test]
+    fn empty_agent_packs_round_trips_as_empty_map() {
+        use super::render_bundle_workspace;
+
+        let raw = concat!(
+            "schema_version: 1\n",
+            "bundle_id: demo\n",
+            "bundle_name: Demo Bundle\n",
+        );
+        let original =
+            serde_yaml_bw::from_str::<BundleWorkspaceDefinition>(raw).expect("parse original");
+        assert!(original.agent_packs.is_empty());
+
+        let rendered = render_bundle_workspace(&original);
+        let round_tripped = serde_yaml_bw::from_str::<BundleWorkspaceDefinition>(&rendered)
+            .expect("re-parse after render");
+
+        assert!(
+            round_tripped.agent_packs.is_empty(),
+            "empty agent_packs must survive the render round-trip"
+        );
     }
 }

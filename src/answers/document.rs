@@ -11,6 +11,12 @@ pub struct AnswerDocument {
     pub schema_id: String,
     pub schema_version: Version,
     pub locale: String,
+    /// Environment id the wizard ran under (C7). `None` for documents
+    /// constructed via [`AnswerDocument::new`] (no env binding yet) or read
+    /// from pre-C7 artifacts; set to `Some(env)` once the wizard's
+    /// `execute_request` materializes it.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub env_id: Option<String>,
     #[serde(default)]
     pub answers: BTreeMap<String, Value>,
     #[serde(default)]
@@ -24,6 +30,7 @@ impl AnswerDocument {
             schema_id: crate::wizard::ANSWER_SCHEMA_ID.to_string(),
             schema_version: Version::new(1, 0, 0),
             locale: crate::i18n::normalize_locale(locale).unwrap_or_else(|| "en".to_string()),
+            env_id: None,
             answers: BTreeMap::new(),
             locks: BTreeMap::new(),
         }

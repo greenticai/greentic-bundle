@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use anyhow::Result;
+use anyhow::{Result, bail};
 use clap::Args;
 
 #[derive(Debug, Args)]
@@ -33,5 +33,14 @@ pub fn run(args: DoctorArgs) -> Result<()> {
     };
     let _ = args.json;
     println!("{}", serde_json::to_string_pretty(&report)?);
+    if !report.ok {
+        // Phase 0 P0.2: non-zero exit so CI can rely on `doctor` as a gate.
+        // Existing JSON output above is the single source of truth for what
+        // failed; this message is just an exit-code anchor.
+        bail!(
+            "doctor reported failing checks for {}; see report above",
+            report.target
+        );
+    }
     Ok(())
 }

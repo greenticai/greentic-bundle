@@ -1,4 +1,5 @@
 /target
+/.worktrees
 
 # OS
 .DS_Store
