@@ -50,9 +50,10 @@ bash ci/local_check.sh                                 # full local CI gate
 
 ## Key Dependencies and Invariants
 
-- **greentic-deploy-spec**: Consumed for `SecretRef` and deploy-spec types.
-  Known cyclic dependency with `greentic-deployer` (deployer depends on
-  greentic-bundle too) — plan their publishes together, not in strict tier order.
+- **greentic-secrets-spec**: Owns `SecretRef` (the `secret://` URI newtype).
+  Depend on it directly — do **not** reach `SecretRef` through
+  `greentic-deploy-spec`'s re-export: `greentic-deployer` depends on
+  `greentic-bundle`, so that route reintroduces a publish cycle.
 - **serde_yaml_gtc** (imported as `serde_yaml_bw`): Hardened YAML fork. Never
   use upstream `serde_yaml`.
 - **DSSE signing** (`build/signing.rs`): Ed25519 DSSE envelopes (in-toto

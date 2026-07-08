@@ -25,9 +25,9 @@ hex = "0.4"
 zeroize = "1"
 bundle-standard-core = { version = ">=0.6.0-0, <0.7.0-0", path = "crates/bundle-standard-core" }
 greentic-bundle-reader = { version = ">=1.1.1-dev, <1.2.0-0", path = "crates/greentic-bundle-reader" }
-greentic-deploy-spec = ">=0.1, <0.2"
 greentic-distributor-client = { version = ">=1.1.0-dev, <1.2.0-0", default-features = false, features = ["dist-client", "pack-fetch"] }
 greentic-qa-lib = ">=1.1.0-dev, <1.2.0-0"
+greentic-secrets-spec = ">=1.1.0-dev, <1.2.0-0"
 jsonschema = { version = "0.46", default-features = false }
 predicates = "3"
 rpassword = "7"
@@ -101,9 +101,9 @@ clap.workspace = true
 constant_time_eq.workspace = true
 greentic-bundle-reader.workspace = true
 ed25519-dalek.workspace = true
-greentic-deploy-spec.workspace = true
 greentic-distributor-client.workspace = true
 greentic-qa-lib.workspace = true
+greentic-secrets-spec.workspace = true
 hex.workspace = true
 rpassword.workspace = true
 semver.workspace = true
