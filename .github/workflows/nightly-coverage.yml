@@ -30,9 +30,14 @@ jobs:
       - uses: cargo-bins/cargo-binstall@main
 
       - name: Install coverage toolchain
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           rustup component add llvm-tools-preview
-          cargo binstall --no-confirm --force greentic-dev cargo-llvm-cov cargo-nextest
+          cargo binstall --no-confirm --force --disable-strategies compile greentic-dev cargo-llvm-cov cargo-nextest
+          command -v greentic-dev
+          command -v cargo-llvm-cov
+          command -v cargo-nextest
 
       - name: Validate coverage policy
         run: greentic-dev coverage
