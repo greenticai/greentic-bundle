@@ -16,7 +16,7 @@ conventions see [docs/coding-agents.md](docs/coding-agents.md).
 | `bundle-standard-core` | Shared standard-bundle types |
 | `cards2pack-core` | Adaptive Card JSON to pack conversion core |
 
-Workspace version: `1.1.0-dev.0`. Edition 2024, `rust-version = "1.91"`.
+Workspace version: `1.2.0-dev.0`. Edition 2024, `rust-version = "1.91"`.
 Toolchain pinned to 1.95.0 via `rust-toolchain.toml` (managed centrally).
 
 ## Source Layout (`src/`)
@@ -28,7 +28,7 @@ Toolchain pinned to 1.95.0 via `rust-toolchain.toml` (managed centrally).
 | `build/` | Bundle build pipeline: `plan.rs` (build plan), `manifest.rs`, `lock.rs` (pack-list lock), `signing.rs` (DSSE+Ed25519 `.gtbundle` signing), `doctor_secrets.rs` (secret-leak scanner), `export.rs`, `squashfs.rs`, `warmup.rs` |
 | `bundle_fs/` | SquashFS read/write: `backhand_writer.rs`, `native_mksquashfs_writer.rs`, `native_unsquashfs_reader.rs` — symlink-TOCTOU-hardened |
 | `catalog/` | Pack catalog resolution and indexing |
-| `cli/` | Clap CLI: `add`, `build`, `doctor`, `export`, `info/`, `init`, `inspect`, `remove`, `unbundle`, `wizard` |
+| `cli/` | Clap CLI: `access`, `add`, `build`, `doctor`, `export`, `info/`, `init`, `inspect`, `remove`, `unbundle`, `wizard` |
 | `i18n/` | Embedded i18n facade (50+ locales via `i18n-locales.json`) |
 | `project/` | Bundle project model (on-disk layout, metadata) |
 | `runtime.rs` | Global runtime flags (offline mode, refresh mode) |
@@ -75,6 +75,7 @@ bash ci/local_check.sh                                 # full local CI gate
 greentic-bundle --help          # top-level
 greentic-bundle wizard --help   # interactive bundle creation
 greentic-bundle build --help    # build .gtbundle from project
+greentic-bundle access --help   # access-map (.gmap) authoring
 greentic-bundle doctor --help   # diagnose bundle health
 greentic-bundle inspect --help  # inspect .gtbundle contents
 ```
