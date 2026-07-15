@@ -15,6 +15,10 @@ use crate::cli::wizard::{WizardApplyArgs, WizardMode, WizardRunArgs, WizardValid
 
 pub mod i18n;
 
+mod answers_source;
+
+use answers_source::{AnswersSource, DistributorAnswersClient, resolve_answers_source};
+
 pub const WIZARD_ID: &str = "greentic-bundle.wizard.run";
 pub const ANSWER_SCHEMA_ID: &str = "greentic-bundle.wizard.answers";
 pub const DEFAULT_PROVIDER_REGISTRY: &str =
@@ -3220,20 +3224,38 @@ fn load_and_normalize_answers(
     migrate: bool,
     locale: &str,
 ) -> Result<LoadedRequest> {
-    let raw = fs::read_to_string(path)
-        .with_context(|| format!("failed to read answers file {}", path.display()))?;
+    let source = resolve_answers_source(&path.to_string_lossy(), &DistributorAnswersClient)?;
+    let (raw, base_dir, origin) = match source {
+        AnswersSource::Local(local_path) => {
+            let raw = fs::read_to_string(&local_path)
+                .with_context(|| format!("failed to read answers file {}", local_path.display()))?;
+            let base_dir = answer_reference_base_dir(&local_path)?;
+            let origin = local_path.display().to_string();
+            (raw, Some(base_dir), origin)
+        }
+        AnswersSource::Remote { reference, bytes } => {
+            let raw = String::from_utf8(bytes)
+                .with_context(|| format!("answers document {reference} is not valid UTF-8"))?;
+            (raw, None, reference)
+        }
+    };
     let value: Value = serde_json::from_str(&raw).map_err(|_| {
         anyhow::anyhow!(crate::i18n::trf(
             "errors.answer_document.invalid_json",
-            &[("path", &path.display().to_string())],
+            &[("path", &origin)],
         ))
     })?;
     let document = parse_answer_document(value, schema_version, migrate, locale)?;
     let locks = document.locks.clone();
     let build_bundle_now = answer_document_requests_bundle_build(&document);
     let request = normalized_request_from_document(document, mode_override)?;
+    // A remote answer document has no local base directory, so every pack /
+    // provider reference inside it must be absolutely resolvable on its own.
+    if base_dir.is_none() {
+        ensure_remote_references_absolute(&request, &origin)?;
+    }
     let request = NormalizedRequest {
-        local_reference_base_dir: Some(answer_reference_base_dir(path)?),
+        local_reference_base_dir: base_dir,
         ..request
     };
     Ok(LoadedRequest {
@@ -3241,6 +3263,40 @@ fn load_and_normalize_answers(
         locks,
         build_bundle_now,
     })
+}
+
+/// Rejects a remotely-loaded answer document that carries a relative or
+/// local-filesystem reference, which cannot be resolved without a local base
+/// directory. Absolute `https` / `oci` / `repo` / `store` references pass.
+fn ensure_remote_references_absolute(request: &NormalizedRequest, origin: &str) -> Result<()> {
+    let probe_root = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
+    let mut references: Vec<&str> = Vec::new();
+    references.extend(
+        request
+            .app_pack_entries
+            .iter()
+            .map(|entry| entry.reference.as_str()),
+    );
+    references.extend(
+        request
+            .extension_provider_entries
+            .iter()
+            .map(|entry| entry.reference.as_str()),
+    );
+    references.extend(request.app_packs.iter().map(String::as_str));
+    references.extend(request.extension_providers.iter().map(String::as_str));
+    references.extend(request.remote_catalogs.iter().map(String::as_str));
+
+    for reference in references {
+        match detected_reference_kind(&probe_root, reference) {
+            "https" | "oci" | "repo" | "store" => {}
+            other => bail!(
+                "answers loaded from {origin} must use absolute references \
+                 (https://, oci://, repo://, store://); found {other} reference `{reference}`"
+            ),
+        }
+    }
+    Ok(())
 }
 
 fn answer_reference_base_dir(path: &Path) -> Result<PathBuf> {
@@ -4919,10 +4975,62 @@ mod tests {
     use crate::catalog::registry::CatalogEntry;
 
     use super::{
-        RootMenuZeroAction, apply_cloud_deployer_target_to_entries,
+        NormalizedRequest, RootMenuZeroAction, WizardMode, apply_cloud_deployer_target_to_entries,
         build_extension_provider_options, choose_interactive_menu, clean_extension_provider_label,
-        detect_cloud_deployer_target, detected_reference_kind,
+        detect_cloud_deployer_target, detected_reference_kind, ensure_remote_references_absolute,
     };
+    use std::collections::BTreeMap;
+    use std::path::PathBuf;
+
+    /// Minimal request carrying only the `app_packs` references under test.
+    fn remote_request_with_app_packs(app_packs: &[&str]) -> NormalizedRequest {
+        NormalizedRequest {
+            mode: WizardMode::Create,
+            locale: "en-GB".to_string(),
+            bundle_name: "demo".to_string(),
+            bundle_id: "demo".to_string(),
+            output_dir: PathBuf::from("demo-bundle"),
+            local_reference_base_dir: None,
+            app_pack_entries: Vec::new(),
+            access_rules: Vec::new(),
+            extension_provider_entries: Vec::new(),
+            advanced_setup: false,
+            app_packs: app_packs.iter().map(|s| s.to_string()).collect(),
+            extension_providers: Vec::new(),
+            remote_catalogs: Vec::new(),
+            setup_specs: BTreeMap::new(),
+            setup_answers: BTreeMap::new(),
+            setup_execution_intent: false,
+            export_intent: false,
+            capabilities: Vec::new(),
+        }
+    }
+
+    #[test]
+    fn remote_answers_accept_absolute_references() {
+        let request = remote_request_with_app_packs(&[
+            "https://github.com/greenticai/greentic-demo/releases/latest/download/x.gtpack",
+            // Non-`:stable` tag on purpose: a `:stable` literal here would be
+            // collected by the stable-OCI-cache scan test and demand a cache entry.
+            "oci://ghcr.io/greenticai/packs/state/state-memory:1.2.0",
+            "store://greentic.hubspot@1.2.1-research",
+        ]);
+        assert!(ensure_remote_references_absolute(&request, "oci://ref").is_ok());
+    }
+
+    #[test]
+    fn remote_answers_reject_relative_reference() {
+        let request =
+            remote_request_with_app_packs(&["./tavily-research/dist/tavily-research.gtpack"]);
+        let error = ensure_remote_references_absolute(&request, "oci://ref")
+            .expect_err("relative reference must be rejected");
+        let message = error.to_string();
+        assert!(
+            message.contains("must use absolute references"),
+            "{message}"
+        );
+        assert!(message.contains("tavily-research.gtpack"), "{message}");
+    }
 
     #[test]
     fn root_menu_shows_back_and_returns_none_for_embedded_wizards() {
