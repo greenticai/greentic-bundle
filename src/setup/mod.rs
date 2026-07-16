@@ -6,7 +6,7 @@ pub mod qa_bridge;
 use std::collections::BTreeMap;
 
 use anyhow::Result;
-use greentic_deploy_spec::SecretRef;
+use greentic_secrets_spec::SecretRef;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
