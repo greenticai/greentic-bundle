@@ -20,7 +20,7 @@ pub struct BuildState {
 
 pub fn build_state(root: &Path) -> Result<BuildState> {
     let lock = crate::project::read_bundle_lock(root)
-        .with_context(|| format!("read {}", root.join(crate::project::LOCK_FILE).display()))?;
+        .with_context(|| format!("read bundle lock in {}", root.display()))?;
     let bundle_yaml = fs::read_to_string(root.join(crate::project::WORKSPACE_ROOT_FILE))
         .with_context(|| {
             format!(
