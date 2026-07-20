@@ -145,7 +145,10 @@ fn doctor_workspace(root: &Path) -> Result<DoctorReport> {
         },
         DoctorCheck {
             name: "bundle.lock.json".to_string(),
-            ok: root.join(crate::project::LOCK_FILE).exists(),
+            // Accept either layout, matching `read_bundle_lock`; otherwise doctor
+            // reports ok=false for an artifact-layout dir that `build_state`
+            // opened successfully.
+            ok: crate::project::resolve_lock_path(root).is_some(),
             details: None,
         },
         DoctorCheck {
