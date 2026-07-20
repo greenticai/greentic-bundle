@@ -13,6 +13,10 @@ use tokio::runtime::Runtime;
 
 pub const WORKSPACE_ROOT_FILE: &str = "bundle.yaml";
 pub const LOCK_FILE: &str = "bundle.lock.json";
+/// Lock filename used by the normalized *artifact* layout written into a
+/// `.gtbundle` (see `build::export::write_normalized_build_dir`). Holds the
+/// identical [`BundleLock`] payload as [`LOCK_FILE`]; only the name differs.
+pub const ARTIFACT_LOCK_FILE: &str = "bundle-lock.json";
 pub const LOCK_SCHEMA_VERSION: u32 = 1;
 
 const DEFAULT_GMAP: &str = "_ = forbidden\n";
@@ -770,8 +774,30 @@ pub fn list_teams(root: &Path, tenant: &str) -> Result<Vec<String>> {
     Ok(teams)
 }
 
+/// Locate the bundle lock under `root`, accepting either on-disk layout.
+///
+/// A bundle *workspace* names the lock [`LOCK_FILE`]; the normalized *artifact*
+/// layout extracted from a `.gtbundle` names it [`ARTIFACT_LOCK_FILE`]. Both
+/// carry the same [`BundleLock`], so readers accept whichever is present and
+/// prefer the workspace name when a directory somehow carries both.
+///
+/// Returns `None` when neither name exists.
+pub fn resolve_lock_path(root: &Path) -> Option<PathBuf> {
+    let workspace = root.join(LOCK_FILE);
+    if workspace.is_file() {
+        return Some(workspace);
+    }
+    let artifact = root.join(ARTIFACT_LOCK_FILE);
+    if artifact.is_file() {
+        return Some(artifact);
+    }
+    None
+}
+
 pub fn write_bundle_lock(root: &Path, lock: &BundleLock) -> Result<()> {
-    let path = root.join(LOCK_FILE);
+    // Update the lock already on disk under whichever name it uses, so an
+    // artifact-layout directory is not left with two lock files that drift.
+    let path = resolve_lock_path(root).unwrap_or_else(|| root.join(LOCK_FILE));
     if let Some(parent) = path.parent() {
         ensure_dir(parent)?;
     }
@@ -780,9 +806,15 @@ pub fn write_bundle_lock(root: &Path, lock: &BundleLock) -> Result<()> {
 }
 
 pub fn read_bundle_lock(root: &Path) -> Result<BundleLock> {
-    let path = root.join(LOCK_FILE);
-    let raw = std::fs::read_to_string(&path)?;
-    Ok(serde_json::from_str(&raw)?)
+    let path = resolve_lock_path(root).ok_or_else(|| {
+        anyhow::anyhow!(
+            "no bundle lock in {}: expected `{LOCK_FILE}` (workspace layout) or \
+             `{ARTIFACT_LOCK_FILE}` (artifact layout)",
+            root.display()
+        )
+    })?;
+    let raw = std::fs::read_to_string(&path).with_context(|| format!("read {}", path.display()))?;
+    serde_json::from_str(&raw).with_context(|| format!("parse {}", path.display()))
 }
 
 fn build_manifest(root: &Path, tenant: &str, team: Option<&str>) -> ResolvedManifest {
@@ -1459,5 +1491,100 @@ mod tests {
             round_tripped.agent_packs.is_empty(),
             "empty agent_packs must survive the render round-trip"
         );
+    }
+
+    fn sample_lock() -> super::BundleLock {
+        let raw = concat!(
+            "schema_version: 1\n",
+            "bundle_id: demo\n",
+            "bundle_name: Demo Bundle\n",
+        );
+        let workspace =
+            serde_yaml_bw::from_str::<BundleWorkspaceDefinition>(raw).expect("parse workspace");
+        super::empty_bundle_lock(&workspace)
+    }
+
+    fn write_lock_as(root: &std::path::Path, name: &str, lock: &super::BundleLock) {
+        std::fs::write(
+            root.join(name),
+            serde_json::to_string_pretty(lock).expect("serialize lock"),
+        )
+        .expect("write lock");
+    }
+
+    #[test]
+    fn read_bundle_lock_reads_workspace_layout() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        write_lock_as(dir.path(), super::LOCK_FILE, &sample_lock());
+
+        let lock = super::read_bundle_lock(dir.path()).expect("read workspace lock");
+        assert_eq!(lock.bundle_id, "demo");
+    }
+
+    /// Regression: an extracted `.gtbundle` names its lock `bundle-lock.json`.
+    /// Reading it used to fail with a bare ENOENT for `bundle.lock.json`.
+    #[test]
+    fn read_bundle_lock_reads_artifact_layout() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        write_lock_as(dir.path(), super::ARTIFACT_LOCK_FILE, &sample_lock());
+
+        let lock = super::read_bundle_lock(dir.path()).expect("read artifact lock");
+        assert_eq!(lock.bundle_id, "demo");
+    }
+
+    #[test]
+    fn workspace_lock_wins_when_both_names_are_present() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        let mut workspace_lock = sample_lock();
+        workspace_lock.bundle_id = "workspace".to_string();
+        let mut artifact_lock = sample_lock();
+        artifact_lock.bundle_id = "artifact".to_string();
+        write_lock_as(dir.path(), super::LOCK_FILE, &workspace_lock);
+        write_lock_as(dir.path(), super::ARTIFACT_LOCK_FILE, &artifact_lock);
+
+        let lock = super::read_bundle_lock(dir.path()).expect("read lock");
+        assert_eq!(lock.bundle_id, "workspace");
+    }
+
+    #[test]
+    fn read_bundle_lock_names_both_layouts_when_missing() {
+        let dir = tempfile::tempdir().expect("tempdir");
+
+        let err = super::read_bundle_lock(dir.path()).expect_err("must fail with no lock");
+        let message = err.to_string();
+        assert!(message.contains(super::LOCK_FILE), "message: {message}");
+        assert!(
+            message.contains(super::ARTIFACT_LOCK_FILE),
+            "message: {message}"
+        );
+    }
+
+    /// Writing back to an artifact-layout directory must update the file that is
+    /// already there, not leave two lock files free to drift apart.
+    #[test]
+    fn write_bundle_lock_updates_artifact_name_in_place() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        write_lock_as(dir.path(), super::ARTIFACT_LOCK_FILE, &sample_lock());
+
+        let mut updated = sample_lock();
+        updated.bundle_id = "updated".to_string();
+        super::write_bundle_lock(dir.path(), &updated).expect("write lock");
+
+        assert!(
+            !dir.path().join(super::LOCK_FILE).exists(),
+            "must not create a second lock file"
+        );
+        let reread = super::read_bundle_lock(dir.path()).expect("reread lock");
+        assert_eq!(reread.bundle_id, "updated");
+    }
+
+    #[test]
+    fn write_bundle_lock_defaults_to_workspace_name_on_empty_root() {
+        let dir = tempfile::tempdir().expect("tempdir");
+
+        super::write_bundle_lock(dir.path(), &sample_lock()).expect("write lock");
+
+        assert!(dir.path().join(super::LOCK_FILE).exists());
+        assert!(!dir.path().join(super::ARTIFACT_LOCK_FILE).exists());
     }
 }
