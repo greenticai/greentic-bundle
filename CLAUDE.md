@@ -64,6 +64,14 @@ bash ci/local_check.sh                                 # full local CI gate
   plaintext leaks.
 - **SquashFS safety**: `bundle_fs/` writers validate symlink targets against
   TOCTOU races; paths are containment-checked before write.
+- **`backhand` parallel feature excluded**: The `parallel` (rayon) feature is
+  deliberately disabled via `default-features = false`. The parallel SquashFS
+  reader sizes its thread pool to host core count, ignores the container CPU
+  cgroup quota, and silently yields 0-byte extractions when throttled.
+- **No `greentic-deploy-spec` dependency**: Intentionally absent from
+  `Cargo.toml`. Adding it would reintroduce the `greentic-bundle` ↔
+  `greentic-deployer` publish cycle (`greentic-deployer` depends on
+  `greentic-bundle`). Use `greentic-secrets-spec` for `SecretRef` instead.
 - **greentic-distributor-client**: Pack fetching and cache management (features
   `dist-client`, `pack-fetch`).
 - **Answer-document env scoping**: `AnswerDocument.env_id` binds answers to an
