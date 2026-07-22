@@ -7,6 +7,7 @@ use std::process::Command;
 use anyhow::{Context, Result, bail};
 
 const WARMUP_TOOL: &str = "greentic-start";
+const WARMUP_TOOL_ENV: &str = "GREENTIC_WARMUP_TOOL";
 
 /// Run `greentic-start warmup` against `build_dir`, writing precompiled cwasm
 /// artifacts under `<build_dir>/.cache/v1/<engine_profile_id>/artifacts/` so
@@ -16,8 +17,13 @@ const WARMUP_TOOL: &str = "greentic-start";
 /// `GREENTIC_CACHE_DIR` points at `<bundle>/.cache`. greentic-start auto-adopts
 /// that directory when the bundle ships one, so consumers of warmup-baked
 /// bundles get faster cold start without further configuration.
+///
+/// The warmup tool defaults to `greentic-start` but can be overridden via the
+/// `GREENTIC_WARMUP_TOOL` environment variable (useful in CI environments
+/// where the binary lives at a non-standard path).
 pub fn warmup_build_dir(build_dir: &Path) -> Result<()> {
-    warmup_with_tool(WARMUP_TOOL, build_dir)
+    let tool = std::env::var(WARMUP_TOOL_ENV).unwrap_or_else(|_| WARMUP_TOOL.to_string());
+    warmup_with_tool(&tool, build_dir)
 }
 
 fn warmup_with_tool(tool: &str, build_dir: &Path) -> Result<()> {
@@ -33,7 +39,7 @@ fn warmup_with_tool(tool: &str, build_dir: &Path) -> Result<()> {
         .output()
         .map_err(|error| match error.kind() {
             ErrorKind::NotFound => anyhow::anyhow!(
-                "required tool `{tool}` was not found on PATH; install greentic-start to embed precompiled component cache, or run `greentic-bundle build` with `--no-warmup` to skip"
+                "required tool `{tool}` was not found on PATH; install greentic-start to embed precompiled component cache, or omit `--warmup` to skip"
             ),
             _ => anyhow::Error::new(error).context(format!("spawn {tool} warmup")),
         })?;
@@ -135,8 +141,8 @@ mod tests {
             "expected NotFound hint, got: {msg}"
         );
         assert!(
-            msg.contains("--no-warmup"),
-            "expected hint about --no-warmup, got: {msg}"
+            msg.contains("omit `--warmup`"),
+            "expected hint about omitting --warmup, got: {msg}"
         );
     }
 
@@ -155,6 +161,78 @@ mod tests {
     fn successful_tool_returns_ok() {
         let dir = tempfile::tempdir().expect("tempdir");
         warmup_with_tool("true", dir.path()).expect("`true` exits zero");
+    }
+
+    #[test]
+    fn fake_tool_creates_cache_structure_in_build_dir() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        let build_dir = dir.path().join("normalized");
+        fs::create_dir_all(&build_dir).expect("build dir");
+
+        let tool = dir.path().join("fake-warmup-cache.sh");
+        fs::write(
+            &tool,
+            r#"#!/usr/bin/env bash
+set -e
+cache_dir=""
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --cache-dir) cache_dir="$2"; shift 2 ;;
+        *) shift ;;
+    esac
+done
+if [ -z "$cache_dir" ]; then echo "no --cache-dir" >&2; exit 1; fi
+profile_dir="$cache_dir/v1/sha256_fakeprofile123/artifacts"
+mkdir -p "$profile_dir"
+echo "precompiled-wasm-bytes" > "$profile_dir/sha256_abc123.cwasm"
+echo "precompiled-wasm-bytes-2" > "$profile_dir/sha256_def456.cwasm"
+"#,
+        )
+        .expect("write tool");
+        let mut perms = fs::metadata(&tool).expect("metadata").permissions();
+        perms.set_mode(0o755);
+        fs::set_permissions(&tool, perms).expect("chmod");
+
+        warmup_with_tool(tool.to_str().expect("tool utf8"), &build_dir).expect("warmup ok");
+
+        let cache_dir = build_dir.join(".cache");
+        assert!(cache_dir.is_dir(), ".cache must exist after warmup");
+        let profile_dir = cache_dir.join("v1/sha256_fakeprofile123/artifacts");
+        assert!(profile_dir.is_dir(), "profile artifacts dir must exist");
+        let entries: Vec<_> = fs::read_dir(&profile_dir)
+            .expect("read artifacts dir")
+            .filter_map(|e| e.ok())
+            .map(|e| e.file_name().to_string_lossy().into_owned())
+            .collect();
+        assert_eq!(
+            entries.len(),
+            2,
+            "expected 2 cwasm artifacts, got {entries:?}"
+        );
+    }
+
+    #[test]
+    fn warmup_respects_tool_env_override() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        let build_dir = dir.path().join("normalized");
+        fs::create_dir_all(&build_dir).expect("build dir");
+
+        let tool = dir.path().join("custom-warmup.sh");
+        fs::write(&tool, "#!/usr/bin/env bash\nexit 0\n").expect("write tool");
+        let mut perms = fs::metadata(&tool).expect("metadata").permissions();
+        perms.set_mode(0o755);
+        fs::set_permissions(&tool, perms).expect("chmod");
+
+        // SAFETY: test-only; no other test reads/writes GREENTIC_WARMUP_TOOL
+        // concurrently (the key is unique to this test scenario).
+        unsafe {
+            std::env::set_var(WARMUP_TOOL_ENV, tool.to_str().expect("tool utf8"));
+        }
+        let result = warmup_build_dir(&build_dir);
+        unsafe {
+            std::env::remove_var(WARMUP_TOOL_ENV);
+        }
+        result.expect("warmup must succeed with env-overridden tool");
     }
 
     #[test]
