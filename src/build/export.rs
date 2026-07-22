@@ -53,6 +53,7 @@ pub fn write_build_outputs(
     if warmup {
         crate::build::warmup::warmup_build_dir(&state.build_dir)?;
     }
+    let has_component_cache = state.build_dir.join(".cache").is_dir();
 
     let signature_path = match signer {
         Some(s) => {
@@ -77,6 +78,7 @@ pub fn write_build_outputs(
             .display()
             .to_string(),
         signature_path,
+        has_component_cache,
     })
 }
 

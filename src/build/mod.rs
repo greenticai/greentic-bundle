@@ -29,6 +29,11 @@ pub struct BuildResult {
     /// present iff the build ran with `--signing-key`.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub signature_path: Option<String>,
+    /// Whether the produced bundle embeds a precompiled component cache
+    /// (`.cache/v1/<engine_profile_id>/artifacts/`). `true` only when
+    /// `--warmup` ran and actually wrote cache artifacts into the build
+    /// directory; dry-run builds always report `false`.
+    pub has_component_cache: bool,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -81,6 +86,7 @@ pub fn build_workspace(
             build_dir: export_plan.build_dir,
             manifest_path: export_plan.manifest_path,
             signature_path: None,
+            has_component_cache: false,
         });
     }
     export::write_build_outputs(&state, &artifact, warmup, signing)
@@ -101,6 +107,7 @@ pub fn export_build_dir(
             build_dir: export_plan.build_dir,
             manifest_path: export_plan.manifest_path,
             signature_path: None,
+            has_component_cache: false,
         });
     }
     export::write_build_outputs(&state, output, warmup, signing)
