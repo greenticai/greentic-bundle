@@ -14,11 +14,17 @@ const WARMUP_TOOL_ENV: &str = "GREENTIC_WARMUP_TOOL";
 /// the resulting `.gtbundle` ships a warm component cache.
 ///
 /// The runner-host (`greentic-runner-host`) reads the cache at start when
-/// `GREENTIC_CACHE_DIR` points at `<bundle>/.cache`. Today only greentic-start's
-/// demo / `--bundle` path auto-adopts that directory: `adopt_bundle_cache_dir`
-/// has a single call site there. The env-serve path used by Cloud Run and K8s
-/// does not adopt it, so a warmup-baked bundle deployed that way currently gets
-/// no cold-start benefit. Do not assume this is wired end to end.
+/// `GREENTIC_CACHE_DIR` points at `<bundle>/.cache`. Both greentic-start paths
+/// adopt that directory: the demo / `--bundle` path, and — as of
+/// greenticai/greentic-start#428 — the env-serve path used by Cloud Run and
+/// K8s. Measured on Cloud Run, a warm bundle cut a scale-from-zero wake from
+/// ~24.9s to ~3.0s, with the component-compile phase going from ~22.0s to
+/// ~0.4s.
+///
+/// The cache only helps when the engine profile matches. The profile id is the
+/// directory name under `.cache/v1/`, and it covers the wasmtime version,
+/// target triple and engine config; a bundle warmed with a different toolchain
+/// than the runtime is a silent miss, not an error.
 ///
 /// The warmup tool defaults to `greentic-start` but can be overridden via the
 /// `GREENTIC_WARMUP_TOOL` environment variable (useful in CI environments
