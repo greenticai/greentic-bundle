@@ -1385,3 +1385,68 @@ fn build_without_warmup_remains_byte_stable() {
         "builds without warmup must be byte-identical"
     );
 }
+
+// ──────────────────────────────────────────────────────────────────────────
+// has_component_cache field accuracy
+// ──────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn build_without_warmup_reports_has_component_cache_false() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    seed_workspace(&root);
+
+    let artifact = root.join("no-cache.gtbundle");
+    let result =
+        greentic_bundle::build::build_workspace(&root, Some(&artifact), false, false, None)
+            .expect("build");
+    assert!(
+        !result.has_component_cache,
+        "build without warmup must report has_component_cache=false"
+    );
+    // Verify serialization includes the field.
+    let json = serde_json::to_value(&result).unwrap();
+    assert_eq!(json["has_component_cache"], serde_json::Value::Bool(false));
+}
+
+#[test]
+fn dry_run_build_reports_has_component_cache_false() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    seed_workspace(&root);
+
+    let result =
+        greentic_bundle::build::build_workspace(&root, None, true, true, None).expect("dry run");
+    assert!(
+        !result.has_component_cache,
+        "dry-run build must report has_component_cache=false even when warmup was requested"
+    );
+}
+
+#[cfg(unix)]
+#[test]
+fn build_with_warmup_reports_has_component_cache_true() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    seed_workspace(&root);
+
+    let tool = seed_fake_warmup_tool(temp.path());
+
+    // SAFETY: test-only env var manipulation; the key is specific to
+    // GREENTIC_WARMUP_TOOL and this test scenario.
+    unsafe {
+        std::env::set_var("GREENTIC_WARMUP_TOOL", tool.to_str().expect("tool utf8"));
+    }
+    let artifact = root.join("warmed.gtbundle");
+    let result = greentic_bundle::build::build_workspace(&root, Some(&artifact), false, true, None);
+    unsafe {
+        std::env::remove_var("GREENTIC_WARMUP_TOOL");
+    }
+    let result = result.expect("build with warmup");
+    assert!(
+        result.has_component_cache,
+        "build with warmup must report has_component_cache=true"
+    );
+    let json = serde_json::to_value(&result).unwrap();
+    assert_eq!(json["has_component_cache"], serde_json::Value::Bool(true));
+}
