@@ -14,9 +14,11 @@ const WARMUP_TOOL_ENV: &str = "GREENTIC_WARMUP_TOOL";
 /// the resulting `.gtbundle` ships a warm component cache.
 ///
 /// The runner-host (`greentic-runner-host`) reads the cache at start when
-/// `GREENTIC_CACHE_DIR` points at `<bundle>/.cache`. greentic-start auto-adopts
-/// that directory when the bundle ships one, so consumers of warmup-baked
-/// bundles get faster cold start without further configuration.
+/// `GREENTIC_CACHE_DIR` points at `<bundle>/.cache`. As of 2026-07, only the
+/// demo / `--bundle` path in greentic-start auto-adopts that directory
+/// (`adopt_bundle_cache_dir`). The env-serve path used by Cloud Run and K8s
+/// does not call it, so a warmup-baked bundle deployed via those paths
+/// requires additional integration to benefit from the shipped cache.
 ///
 /// The warmup tool defaults to `greentic-start` but can be overridden via the
 /// `GREENTIC_WARMUP_TOOL` environment variable (useful in CI environments
