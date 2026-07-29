@@ -585,6 +585,26 @@ fn app_pack_copy_targets(workspace: &BundleWorkspaceDefinition) -> Vec<Materiali
         .collect()
 }
 
+/// Declared app packs that did not end up on disk after materialization.
+///
+/// Returns `(reference, expected destination)` for each one.
+///
+/// `materialize_reference_into` deliberately tolerates a reference it cannot
+/// resolve, because `sync_project` also runs while a workspace is being
+/// authored — `add app-pack pack-a` legitimately names a pack that does not
+/// exist yet. The build path has no such excuse: by then every declared pack
+/// must be present, and shipping a `.gtbundle` without them produces an
+/// artifact that loads no application at all. greentic-demo 1.1.6 released
+/// five such bundles before anything noticed.
+pub fn missing_app_pack_destinations(root: &Path) -> Result<Vec<(String, PathBuf)>> {
+    let workspace = read_bundle_workspace(root)?;
+    Ok(app_pack_copy_targets(&workspace)
+        .into_iter()
+        .filter(|target| !root.join(&target.destination).exists())
+        .map(|target| (target.reference, target.destination))
+        .collect())
+}
+
 fn provider_destination_path(reference: &str) -> PathBuf {
     let provider_type = inferred_provider_type(reference);
     let provider_name = inferred_provider_filename(reference);
