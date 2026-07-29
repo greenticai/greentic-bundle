@@ -76,6 +76,7 @@ pub fn build_workspace(
     signing: Option<&signing::SigningConfig>,
 ) -> Result<BuildResult> {
     let state = plan::build_state(root)?;
+    ensure_app_packs_materialized(root)?;
     let artifact = output
         .map(|path| path.to_path_buf())
         .unwrap_or_else(|| default_artifact_path(root, &state.manifest.bundle_id));
@@ -90,6 +91,40 @@ pub fn build_workspace(
         });
     }
     export::write_build_outputs(&state, &artifact, warmup, signing)
+}
+
+/// Refuse to build a bundle that is missing an application it declares.
+///
+/// An app-pack reference that cannot be resolved is skipped during
+/// materialization rather than failing, because `sync_project` also runs while
+/// a workspace is being authored — `add app-pack pack-a` legitimately names a
+/// pack that does not exist yet. By build time that tolerance is a liability:
+/// greentic-demo 1.1.6 shipped five `.gtbundle`s holding only extension
+/// providers and no application, each from a green, exit-0 build, because a
+/// `.gtpack` had quietly stopped being published.
+///
+/// This is deliberately scoped to the build path. `doctor` and `inspect` share
+/// `plan::build_state` and must stay able to open a broken bundle in order to
+/// diagnose it.
+fn ensure_app_packs_materialized(root: &Path) -> Result<()> {
+    let missing = crate::project::missing_app_pack_destinations(root)
+        .with_context(|| format!("check materialized app packs in {}", root.display()))?;
+    if missing.is_empty() {
+        return Ok(());
+    }
+    let detail = missing
+        .iter()
+        .map(|(reference, destination)| {
+            format!("  {reference} -> {} (not found)", destination.display())
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
+    bail!(
+        "bundle declares {} app pack(s) that were not materialized:\n{detail}\n\
+         Each app pack reference must resolve to a pack that exists — check that \
+         it is published and reachable.",
+        missing.len()
+    )
 }
 
 pub fn export_build_dir(

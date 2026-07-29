@@ -524,6 +524,14 @@ export_intent: false
     )
     .expect("rewrite bundle yaml");
 
+    // `build` refuses to ship a bundle missing an application it declares, so
+    // the two app packs this fixture names have to exist on disk.
+    let packs_dir = root.join("packs");
+    fs::create_dir_all(&packs_dir).expect("create packs dir");
+    for pack in ["pack-a.gtpack", "pack-b.gtpack"] {
+        fs::write(packs_dir.join(pack), b"").expect("seed app pack");
+    }
+
     let report =
         greentic_bundle::build::build_workspace(&root, None, false, false, None).expect("build");
     let opened = greentic_bundle_reader::open_build_dir(Path::new(&report.build_dir))
@@ -1449,4 +1457,43 @@ fn build_with_warmup_reports_has_component_cache_true() {
     );
     let json = serde_json::to_value(&result).unwrap();
     assert_eq!(json["has_component_cache"], serde_json::Value::Bool(true));
+}
+
+#[test]
+fn build_refuses_bundle_missing_a_declared_app_pack() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    seed_workspace(&root);
+
+    // Drop the materialized pack while `bundle.yaml` keeps declaring it. That
+    // is exactly the state that shipped five empty greentic-demo bundles: the
+    // reference no longer resolved, materialization skipped it, and the build
+    // still produced a `.gtbundle` with no application in it.
+    fs::remove_file(root.join("packs/pack-a.gtpack")).expect("remove app pack");
+
+    let error = greentic_bundle::build::build_workspace(&root, None, false, false, None)
+        .expect_err("build must refuse a bundle missing a declared app pack");
+
+    let message = format!("{error:#}");
+    assert!(
+        message.contains("pack-a"),
+        "error must name the unresolved pack: {message}"
+    );
+    assert!(
+        message.contains("not materialized"),
+        "error must explain the failure: {message}"
+    );
+}
+
+#[test]
+fn doctor_still_opens_a_bundle_missing_a_declared_app_pack() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    seed_workspace(&root);
+    fs::remove_file(root.join("packs/pack-a.gtpack")).expect("remove app pack");
+
+    // The build gate must not spread to the diagnostic commands — refusing to
+    // open a broken bundle would leave no way to inspect what broke.
+    greentic_bundle::build::doctor_target(Some(&root), None)
+        .expect("doctor must still open a workspace missing an app pack");
 }

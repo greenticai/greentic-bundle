@@ -47,7 +47,22 @@ fn write_answers(path: &std::path::Path, body: &str) {
     fs::write(path, body).expect("write answers");
 }
 
+/// Stand up `packs/<id>.gtpack` for an app-pack reference the wizard is about
+/// to be handed.
+///
+/// The wizard accepts any string as an app-pack reference without checking that
+/// it resolves, and its create flow ends in a build. `build` now refuses to
+/// ship a bundle missing an application it declares, so a fixture that types
+/// `pack-a` has to make `pack-a` exist. Pre-creating the destination keeps the
+/// reference text in `bundle.yaml` unchanged, which the assertions rely on.
+fn seed_declared_app_pack(root: &std::path::Path, pack_id: &str) {
+    let packs_dir = root.join("packs");
+    fs::create_dir_all(&packs_dir).expect("create packs dir");
+    fs::write(packs_dir.join(format!("{pack_id}.gtpack")), b"").expect("seed app pack");
+}
+
 fn seed_workspace_with_artifact(root: &std::path::Path, artifact: &std::path::Path) {
+    seed_declared_app_pack(root, "pack-a");
     let output = run_with_stdin(
         &["wizard"],
         &format!(
@@ -95,6 +110,7 @@ fn bare_wizard_uses_back_for_embedded_root_menu() {
 fn bare_wizard_executes_create_flow_by_default() {
     let temp = TempDir::new().expect("tempdir");
     let bundle_root = temp.path().join("bundle");
+    seed_declared_app_pack(&bundle_root, "pack-a");
 
     let output = run_with_stdin(
         &["wizard"],
@@ -372,6 +388,7 @@ fn bare_wizard_create_flow_skips_provider_setup_prompts() {
     fs::create_dir_all(provider_source.parent().expect("provider parent")).expect("provider dir");
     fs::write(&provider_source, "provider-pack-bytes").expect("write provider pack");
     let bundle_root = temp.path().join("bundle");
+    seed_declared_app_pack(&bundle_root, "pack-a");
 
     let output = run_with_stdin(
         &["wizard"],
@@ -456,6 +473,7 @@ fn group_catalog_entries_for_test(entries: &[CatalogEntry]) -> Vec<(String, Opti
 fn bundled_common_extension_provider_is_not_persisted_to_remote_catalogs() {
     let temp = TempDir::new().expect("tempdir");
     let bundle_root = temp.path().join("bundle");
+    seed_declared_app_pack(&bundle_root, "pack-a");
 
     let output = run_with_stdin_and_env(
         &["wizard"],
@@ -646,6 +664,12 @@ fn wizard_update_prefills_existing_bundle_and_applies_changes() {
     let bundle_root = temp.path().join("bundle");
     let catalog_path = temp.path().join("catalog.json");
     fs::create_dir_all(&bundle_root).expect("mkdir");
+    seed_declared_app_pack(&bundle_root, "pack-a");
+    // This flow adds `pack-b` at tenant scope, so it materializes under
+    // `tenants/<tenant>/packs/` rather than the global `packs/`.
+    let tenant_packs = bundle_root.join("tenants/default/packs");
+    fs::create_dir_all(&tenant_packs).expect("create tenant packs dir");
+    fs::write(tenant_packs.join("pack-b.gtpack"), b"").expect("seed tenant app pack");
     fs::write(&catalog_path, "[]\n").expect("catalog");
     fs::write(
         bundle_root.join("bundle.yaml"),
