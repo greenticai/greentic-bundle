@@ -234,3 +234,11 @@ cargo run -- --help
 Older milestone and baseline documentation has been retired from the main README because it was too hard to follow and had drifted out of date.
 
 If you notice documentation that contradicts this README or the CLI help text, treat the CLI help and the dedicated agent guide as the current source of truth and update the stale document.
+
+## Dev builds
+
+Every Dev Publish run on `develop` creates a GitHub prerelease tagged
+`v1.2.<run-id>` carrying prebuilt `greentic-bundle-dev` archives, which is what
+`gtc install --channel dev` installs. The binary inside reports that same
+`1.2.<run-id>` from `--version`, so any dev binary can be traced back to the
+release and the CI run that built it.
