@@ -2,7 +2,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 
 use anyhow::{Context, Result, bail};
-use greentic_deploy_spec::SecretRef;
+use greentic_secrets_spec::SecretRef;
 use serde_json::Value;
 
 use super::backend::SetupBackend;

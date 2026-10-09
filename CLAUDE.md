@@ -16,7 +16,7 @@ conventions see [docs/coding-agents.md](docs/coding-agents.md).
 | `bundle-standard-core` | Shared standard-bundle types |
 | `cards2pack-core` | Adaptive Card JSON to pack conversion core |
 
-Workspace version: `1.1.0-dev.0`. Edition 2024, `rust-version = "1.91"`.
+Workspace version: `1.2.0-dev.0`. Edition 2024, `rust-version = "1.91"`.
 Toolchain pinned to 1.95.0 via `rust-toolchain.toml` (managed centrally).
 
 ## Source Layout (`src/`)
@@ -28,7 +28,7 @@ Toolchain pinned to 1.95.0 via `rust-toolchain.toml` (managed centrally).
 | `build/` | Bundle build pipeline: `plan.rs` (build plan), `manifest.rs`, `lock.rs` (pack-list lock), `signing.rs` (DSSE+Ed25519 `.gtbundle` signing), `doctor_secrets.rs` (secret-leak scanner), `export.rs`, `squashfs.rs`, `warmup.rs` |
 | `bundle_fs/` | SquashFS read/write: `backhand_writer.rs`, `native_mksquashfs_writer.rs`, `native_unsquashfs_reader.rs` — symlink-TOCTOU-hardened |
 | `catalog/` | Pack catalog resolution and indexing |
-| `cli/` | Clap CLI: `add`, `build`, `doctor`, `export`, `info/`, `init`, `inspect`, `remove`, `unbundle`, `wizard` |
+| `cli/` | Clap CLI: `access`, `add`, `build`, `doctor`, `export`, `info/`, `init`, `inspect`, `remove`, `unbundle`, `wizard` |
 | `i18n/` | Embedded i18n facade (50+ locales via `i18n-locales.json`) |
 | `project/` | Bundle project model (on-disk layout, metadata) |
 | `runtime.rs` | Global runtime flags (offline mode, refresh mode) |
@@ -50,9 +50,10 @@ bash ci/local_check.sh                                 # full local CI gate
 
 ## Key Dependencies and Invariants
 
-- **greentic-deploy-spec**: Consumed for `SecretRef` and deploy-spec types.
-  Known cyclic dependency with `greentic-deployer` (deployer depends on
-  greentic-bundle too) — plan their publishes together, not in strict tier order.
+- **greentic-secrets-spec**: Owns `SecretRef` (the `secret://` URI newtype).
+  Depend on it directly — do **not** reach `SecretRef` through
+  `greentic-deploy-spec`'s re-export: `greentic-deployer` depends on
+  `greentic-bundle`, so that route reintroduces a publish cycle.
 - **serde_yaml_gtc** (imported as `serde_yaml_bw`): Hardened YAML fork. Never
   use upstream `serde_yaml`.
 - **DSSE signing** (`build/signing.rs`): Ed25519 DSSE envelopes (in-toto
@@ -63,6 +64,14 @@ bash ci/local_check.sh                                 # full local CI gate
   plaintext leaks.
 - **SquashFS safety**: `bundle_fs/` writers validate symlink targets against
   TOCTOU races; paths are containment-checked before write.
+- **`backhand` parallel feature excluded**: The `parallel` (rayon) feature is
+  deliberately disabled via `default-features = false`. The parallel SquashFS
+  reader sizes its thread pool to host core count, ignores the container CPU
+  cgroup quota, and silently yields 0-byte extractions when throttled.
+- **No `greentic-deploy-spec` dependency**: Intentionally absent from
+  `Cargo.toml`. Adding it would reintroduce the `greentic-bundle` ↔
+  `greentic-deployer` publish cycle (`greentic-deployer` depends on
+  `greentic-bundle`). Use `greentic-secrets-spec` for `SecretRef` instead.
 - **greentic-distributor-client**: Pack fetching and cache management (features
   `dist-client`, `pack-fetch`).
 - **Answer-document env scoping**: `AnswerDocument.env_id` binds answers to an
@@ -74,6 +83,7 @@ bash ci/local_check.sh                                 # full local CI gate
 greentic-bundle --help          # top-level
 greentic-bundle wizard --help   # interactive bundle creation
 greentic-bundle build --help    # build .gtbundle from project
+greentic-bundle access --help   # access-map (.gmap) authoring
 greentic-bundle doctor --help   # diagnose bundle health
 greentic-bundle inspect --help  # inspect .gtbundle contents
 ```

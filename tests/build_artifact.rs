@@ -524,6 +524,14 @@ export_intent: false
     )
     .expect("rewrite bundle yaml");
 
+    // `build` refuses to ship a bundle missing an application it declares, so
+    // the two app packs this fixture names have to exist on disk.
+    let packs_dir = root.join("packs");
+    fs::create_dir_all(&packs_dir).expect("create packs dir");
+    for pack in ["pack-a.gtpack", "pack-b.gtpack"] {
+        fs::write(packs_dir.join(pack), b"").expect("seed app pack");
+    }
+
     let report =
         greentic_bundle::build::build_workspace(&root, None, false, false, None).expect("build");
     let opened = greentic_bundle_reader::open_build_dir(Path::new(&report.build_dir))
@@ -926,6 +934,37 @@ fn contains_bytes(haystack: &[u8], needle: &[u8]) -> bool {
         .any(|window| window == needle)
 }
 
+/// Seed a fake warmup tool script that creates the expected `.cache/v1/`
+/// structure when invoked. Returns the path to the script.
+#[cfg(unix)]
+fn seed_fake_warmup_tool(dir: &Path) -> std::path::PathBuf {
+    let tool = dir.join("fake-warmup-for-build.sh");
+    fs::write(
+        &tool,
+        r#"#!/usr/bin/env bash
+set -e
+cache_dir=""
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --cache-dir) cache_dir="$2"; shift 2 ;;
+        *) shift ;;
+    esac
+done
+if [ -z "$cache_dir" ]; then echo "no --cache-dir" >&2; exit 1; fi
+profile_dir="$cache_dir/v1/sha256_fakeprofile123/artifacts"
+mkdir -p "$profile_dir"
+printf 'cwasm-artifact-1' > "$profile_dir/sha256_abc123.cwasm"
+printf 'cwasm-artifact-2' > "$profile_dir/sha256_def456.cwasm"
+"#,
+    )
+    .expect("write fake warmup tool");
+    use std::os::unix::fs::PermissionsExt;
+    let mut perms = fs::metadata(&tool).expect("metadata").permissions();
+    perms.set_mode(0o755);
+    fs::set_permissions(&tool, perms).expect("chmod");
+    tool
+}
+
 // Phase 0 secret-leak hotfix regression test: any dev-store file or directory
 // reaching the archive boundary must abort the build with a loud error rather
 // than silently shipping. See plans/next-gen-deployment.md P0.1.
@@ -1206,4 +1245,255 @@ fn signature_path_collision_aborts_before_artifact_lands() {
     .expect_err("collision must abort");
     assert!(format!("{err:#}").contains("refusing to overwrite"));
     assert!(!artifact.exists());
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Warmup cache integration tests
+// ──────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn build_without_warmup_produces_no_cache_directory() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    seed_workspace(&root);
+
+    let artifact = root.join("no-cache.gtbundle");
+    greentic_bundle::build::build_workspace(&root, Some(&artifact), false, false, None)
+        .expect("build");
+
+    let extract_dir = root.join("extracted-no-cache");
+    greentic_bundle::bundle_fs::extract_bundle(&artifact, &extract_dir).expect("extract");
+    assert!(
+        !extract_dir.join(".cache").exists(),
+        "build without warmup must not produce a .cache directory"
+    );
+}
+
+// Verify that a `.cache/v1/` tree present in the build directory at squashfs
+// creation time survives the round-trip: write_bundle → extract → verify.
+// This is the critical invariant for warmup: the cache must be INSIDE the
+// squashfs, not a sidecar, so it is available when the bundle is mounted
+// read-only on the target host.
+#[test]
+fn cache_directory_in_build_dir_survives_squashfs_round_trip() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    seed_workspace(&root);
+
+    // Build without warmup to produce a valid build directory.
+    greentic_bundle::build::build_workspace(&root, None, false, false, None)
+        .expect("seed build dir");
+    let build_dir = root.join("state/build/demo-bundle/normalized");
+    assert!(build_dir.is_dir());
+
+    // Manually seed a cache structure identical to what greentic-start warmup
+    // would produce.
+    let profile = "sha256_fakeprofile123";
+    let artifacts_dir = build_dir.join(format!(".cache/v1/{profile}/artifacts"));
+    fs::create_dir_all(&artifacts_dir).expect("create cache artifacts dir");
+    fs::write(
+        artifacts_dir.join("sha256_abc123.cwasm"),
+        b"precompiled-component-bytes",
+    )
+    .expect("write cwasm");
+    fs::write(
+        artifacts_dir.join("sha256_def456.cwasm"),
+        b"precompiled-component-bytes-2",
+    )
+    .expect("write cwasm 2");
+
+    // Re-squash the build dir into a new artifact.
+    let artifact = root.join("with-cache.gtbundle");
+    greentic_bundle::bundle_fs::write_bundle(&build_dir, &artifact).expect("write bundle");
+
+    // Extract and verify the cache survived.
+    let extract_dir = root.join("extracted-cache");
+    greentic_bundle::bundle_fs::extract_bundle(&artifact, &extract_dir).expect("extract");
+
+    let extracted_artifacts = extract_dir.join(format!(".cache/v1/{profile}/artifacts"));
+    assert!(
+        extracted_artifacts.is_dir(),
+        ".cache/v1/<profile>/artifacts/ must exist in extracted bundle"
+    );
+    assert_eq!(
+        fs::read(extracted_artifacts.join("sha256_abc123.cwasm")).expect("read cwasm"),
+        b"precompiled-component-bytes",
+    );
+    assert_eq!(
+        fs::read(extracted_artifacts.join("sha256_def456.cwasm")).expect("read cwasm 2"),
+        b"precompiled-component-bytes-2",
+    );
+}
+
+// End-to-end: build with warmup using a fake tool, then verify the cache
+// ends up inside the .gtbundle artifact. This exercises the full pipeline:
+// plan → normalize → warmup → squashfs.
+#[cfg(unix)]
+#[test]
+fn build_with_warmup_embeds_cache_in_artifact() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    seed_workspace(&root);
+
+    let tool = seed_fake_warmup_tool(temp.path());
+
+    // SAFETY: test-only env var manipulation; the key is specific to
+    // GREENTIC_WARMUP_TOOL and this test scenario.
+    unsafe {
+        std::env::set_var("GREENTIC_WARMUP_TOOL", tool.to_str().expect("tool utf8"));
+    }
+    let artifact = root.join("warmed.gtbundle");
+    let result = greentic_bundle::build::build_workspace(&root, Some(&artifact), false, true, None);
+    unsafe {
+        std::env::remove_var("GREENTIC_WARMUP_TOOL");
+    }
+    result.expect("build with warmup");
+
+    let extract_dir = root.join("extracted-warmed");
+    greentic_bundle::bundle_fs::extract_bundle(&artifact, &extract_dir).expect("extract");
+
+    let cache_root = extract_dir.join(".cache/v1/sha256_fakeprofile123/artifacts");
+    assert!(
+        cache_root.is_dir(),
+        "warmup cache must be embedded in the artifact; got contents: {:?}",
+        fs::read_dir(extract_dir.join(".cache")).ok().map(|rd| rd
+            .filter_map(|e| e.ok())
+            .map(|e| e.path())
+            .collect::<Vec<_>>())
+    );
+    let mut entries: Vec<String> = fs::read_dir(&cache_root)
+        .expect("read cache artifacts")
+        .filter_map(|e| e.ok())
+        .map(|e| e.file_name().to_string_lossy().into_owned())
+        .collect();
+    entries.sort();
+    assert_eq!(
+        entries,
+        vec!["sha256_abc123.cwasm", "sha256_def456.cwasm"],
+        "expected 2 cwasm artifacts in the cache"
+    );
+}
+
+// Build without warmup must still produce byte-identical output when the
+// same workspace is built twice — warmup support must not introduce any
+// non-determinism into the default (warmup=false) path.
+#[test]
+fn build_without_warmup_remains_byte_stable() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    seed_workspace(&root);
+
+    let a = root.join("stable-a.gtbundle");
+    let b = root.join("stable-b.gtbundle");
+    greentic_bundle::build::build_workspace(&root, Some(&a), false, false, None).expect("build a");
+    greentic_bundle::build::build_workspace(&root, Some(&b), false, false, None).expect("build b");
+    assert_eq!(
+        fs::read(&a).expect("read a"),
+        fs::read(&b).expect("read b"),
+        "builds without warmup must be byte-identical"
+    );
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// has_component_cache field accuracy
+// ──────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn build_without_warmup_reports_has_component_cache_false() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    seed_workspace(&root);
+
+    let artifact = root.join("no-cache.gtbundle");
+    let result =
+        greentic_bundle::build::build_workspace(&root, Some(&artifact), false, false, None)
+            .expect("build");
+    assert!(
+        !result.has_component_cache,
+        "build without warmup must report has_component_cache=false"
+    );
+    // Verify serialization includes the field.
+    let json = serde_json::to_value(&result).unwrap();
+    assert_eq!(json["has_component_cache"], serde_json::Value::Bool(false));
+}
+
+#[test]
+fn dry_run_build_reports_has_component_cache_false() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    seed_workspace(&root);
+
+    let result =
+        greentic_bundle::build::build_workspace(&root, None, true, true, None).expect("dry run");
+    assert!(
+        !result.has_component_cache,
+        "dry-run build must report has_component_cache=false even when warmup was requested"
+    );
+}
+
+#[cfg(unix)]
+#[test]
+fn build_with_warmup_reports_has_component_cache_true() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    seed_workspace(&root);
+
+    let tool = seed_fake_warmup_tool(temp.path());
+
+    // SAFETY: test-only env var manipulation; the key is specific to
+    // GREENTIC_WARMUP_TOOL and this test scenario.
+    unsafe {
+        std::env::set_var("GREENTIC_WARMUP_TOOL", tool.to_str().expect("tool utf8"));
+    }
+    let artifact = root.join("warmed.gtbundle");
+    let result = greentic_bundle::build::build_workspace(&root, Some(&artifact), false, true, None);
+    unsafe {
+        std::env::remove_var("GREENTIC_WARMUP_TOOL");
+    }
+    let result = result.expect("build with warmup");
+    assert!(
+        result.has_component_cache,
+        "build with warmup must report has_component_cache=true"
+    );
+    let json = serde_json::to_value(&result).unwrap();
+    assert_eq!(json["has_component_cache"], serde_json::Value::Bool(true));
+}
+
+#[test]
+fn build_refuses_bundle_missing_a_declared_app_pack() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    seed_workspace(&root);
+
+    // Drop the materialized pack while `bundle.yaml` keeps declaring it. That
+    // is exactly the state that shipped five empty greentic-demo bundles: the
+    // reference no longer resolved, materialization skipped it, and the build
+    // still produced a `.gtbundle` with no application in it.
+    fs::remove_file(root.join("packs/pack-a.gtpack")).expect("remove app pack");
+
+    let error = greentic_bundle::build::build_workspace(&root, None, false, false, None)
+        .expect_err("build must refuse a bundle missing a declared app pack");
+
+    let message = format!("{error:#}");
+    assert!(
+        message.contains("pack-a"),
+        "error must name the unresolved pack: {message}"
+    );
+    assert!(
+        message.contains("not materialized"),
+        "error must explain the failure: {message}"
+    );
+}
+
+#[test]
+fn doctor_still_opens_a_bundle_missing_a_declared_app_pack() {
+    let temp = TempDir::new().expect("tempdir");
+    let root = temp.path().join("bundle");
+    seed_workspace(&root);
+    fs::remove_file(root.join("packs/pack-a.gtpack")).expect("remove app pack");
+
+    // The build gate must not spread to the diagnostic commands — refusing to
+    // open a broken bundle would leave no way to inspect what broke.
+    greentic_bundle::build::doctor_target(Some(&root), None)
+        .expect("doctor must still open a workspace missing an app pack");
 }

@@ -15,7 +15,9 @@ pub struct BuildArgs {
     pub dry_run: bool,
 
     /// Embed a precompiled component cache (`.cache/v1/...`) into the bundle.
-    /// Requires `greentic-start` on PATH; bigger artifact, faster cold start.
+    /// Cuts cold-start latency (~25s to ~3s on Cloud Run) at the cost of longer
+    /// build time (~20s of Cranelift compilation) and larger artifact (~2.5x).
+    /// Requires `greentic-start` on PATH.
     #[arg(long, default_value_t = false)]
     pub warmup: bool,
 
